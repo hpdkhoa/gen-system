@@ -1,0 +1,23 @@
+{
+"entities": [
+{
+"name": "User",
+"fields": [
+{ "name": "Email", "type": "string" }
+]
+},
+{
+"name": "Todo",
+"fields": [
+{ "name": "Title", "type": "string" }
+],
+"relations": [
+{
+"type": "belongsTo",
+"target": "User",
+"foreignKey": "UserID"
+}
+]
+}
+]
+}

@@ -1,0 +1,3490 @@
+<!DOCTYPE html>
+<!-- studio-v23.html — v26.5: Architecture now shows a "Runtime resolution" table — which stdlib roots attached, which were skipped/missing, and the exact reason (e.g. "JAVA_HOME not set — pass --stdlib java=<dir>"). This makes the edge-resolution % self-diagnosing rather than a mystery number. Backed by v26.5 engine work: the stdlib language is now PER ROOT (multi-language projects are finally expressible) and roots AUTO-DETECT from the languages actually present in the project. Prior v26.4: IDE-style syntax colouring for CFG code. Each statement line in a process node is now tokenised (a lightweight language-agnostic lexer covering Go / Java / Python / TS / COBOL) and each token drawn in its own coloured <tspan> — keywords, strings, numbers, comments, function calls, and types get distinct theme-aware colours (--syn-* vars, defined for both dark and light). Purely presentational; layout/positions unchanged (still pure-math, headless == browser). Prior v26.3: CFG terminating-call + guard-layout fix (os.Exit/panic/STOP RUN ends at its own End, phantom forward edge dropped; guard peels to side lane, continuation stays on spine). Prior v26.2: graph/CFG zoom range widened & shared (adaptive max from graph size, effective-scale % label, true 1:1 button). Prior v26.1: CFG multi-way layout fix. A Go switch / COBOL EVALUATE / select with 3+ arms no longer overlaps — each arm gets its own lane column (packed by measured subtree width so nested if/switch inside a case gets real room), arms rejoin at their merge back on the decision's spine, and a final per-row overlap-resolution sweep guarantees no two boxes in any depth-row collide (all languages). Prior v23.35: orientation now round-trips through the URL hash (shareable); clicking empty graph canvas clears the find filter (drag-guarded). Prior v23.34: graph-view UX overhaul — (1) orientation-aware
+     layout, default Left→Right so deep call trees grow in depth instead of
+     stretching horizontally (toggle ⇄ L→R / ⇅ T→B); compact cross-axis spacing.
+     (2) Actual-size (1:1) zoom button so you're never stuck at an unreadable
+     fit-scale on big graphs. (3) Find/locate box: highlights nodes by name,
+     dims the rest, centers the first match, shows a count. (4) Single-click a
+     call-graph node = SELECT (updates CFG + detail, keeps graph & position);
+     double-click = re-root. Prior: v23.5: Sugiyama-style call-graph layout (barycenter crossing reduction + median x-alignment -> narrower, fewer crossing edges). v23.4: CFG shows REAL source code per statement (line# + actual Go line, all statements, no condensing). v23.3: graph view overhaul — (1) arrowheads on every
+     edge showing direction (calls ↓ / called-by ↑ / unresolved), (2) taller
+     vertical layering so deep graphs read as a full column, (3) fit-to-view
+     zoom (frames the whole graph on load; reset = fit), (4) CFG redrawn as a
+     real arrowed flow chart with branch true/false labels and condensed call
+     lists instead of a flat statement dump. v23.1 base (zoom/pan + settings +
+     readable palette). Vanilla JS, no build, no CDN for layout. -->
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>gen-system · Studio v23</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+/* v23.1 — palette retuned for long (6–8h) reading sessions:
+   - dark bg shifted off pure-black toward a warm charcoal (less glare)
+   - --text-dim lifted from #5a6478 to a warm, legible tone (was failing
+     contrast against panels); --text/--text-2 warmed slightly
+   - accents desaturated a touch so they stop vibrating against dark bg
+   - a real light theme added (the v23 toggle set data-theme=light but no
+     CSS backed it). Light theme is a warm paper/sepia, not stark white.
+   - --fz-scale drives every font-size via the Settings popup (1 = default) */
+:root {
+  --fz-scale:1;
+  --bg:#12141a; --bg-1:#181b22; --bg-2:#20242e; --bg-3:#2a2f3b; --bg-hover:#333a47;
+  --border:#2c3140; --border-2:#3a4153;
+  --text:#edf0f6; --text-2:#aeb6c6; --text-dim:#8893a6;
+  --cyan:#5cd0ec; --cyan-dim:rgba(92,208,236,0.14);
+  --amber:#f0b042; --amber-dim:rgba(240,176,66,0.14);
+  --green:#5fd99a; --green-dim:rgba(95,217,154,0.14);
+  --red:#ff7a85; --red-dim:rgba(255,122,133,0.14);
+  --purple:#bd9bf2; --purple-dim:rgba(189,155,242,0.14);
+  --grey:#6a7180;
+  --shadow:0 8px 30px rgba(0,0,0,0.5);
+  --r:8px; --tr:140ms cubic-bezier(.4,0,.2,1);
+  /* v26.4 — CFG code syntax colours (dark). Tuned to the existing palette so a
+     highlighted statement reads like an editor without clashing with node fills. */
+  --syn-kw:#c586e0;      /* keywords: if/for/switch/return/func/… */
+  --syn-str:#7ec97e;     /* string + char literals */
+  --syn-num:#e0a458;     /* numeric literals */
+  --syn-com:#6a7180;     /* comments */
+  --syn-call:#5cd0ec;    /* function / method being called */
+  --syn-type:#4ec9b0;    /* types / builtins (int, error, string, …) */
+  --syn-op:#aeb6c6;      /* operators + punctuation */
+  --syn-txt:#aeb6c6;     /* plain identifiers (default) */
+}
+:root[data-theme="light"] {
+  --bg:#f4f1ea; --bg-1:#fbf9f4; --bg-2:#ece8df; --bg-3:#e1dccf; --bg-hover:#d8d2c2;
+  --border:#ddd6c7; --border-2:#c9c0ac;
+  --text:#2b2a26; --text-2:#5c5950; --text-dim:#6f6b60;
+  --cyan:#0f8aa8; --cyan-dim:rgba(15,138,168,0.12);
+  --amber:#b9740a; --amber-dim:rgba(185,116,10,0.12);
+  --green:#2c8f5b; --green-dim:rgba(44,143,91,0.12);
+  --red:#c5414c; --red-dim:rgba(197,65,76,0.12);
+  --purple:#7a4fc0; --purple-dim:rgba(122,79,192,0.12);
+  --grey:#9a958a;
+  --shadow:0 8px 30px rgba(80,70,50,0.18);
+  /* v26.4 — CFG code syntax colours (light), darker for contrast on parchment. */
+  --syn-kw:#9227b0;
+  --syn-str:#2e7d32;
+  --syn-num:#b05a00;
+  --syn-com:#8a857a;
+  --syn-call:#0f6f92;
+  --syn-type:#127d6b;
+  --syn-op:#5c5950;
+  --syn-txt:#3a382f;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html,body { height: 100%; background: var(--bg); color: var(--text); }
+body { font: calc(14px * var(--fz-scale))/1.5 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; overflow: hidden; }
+.mono { font-family: 'IBM Plex Mono', 'SF Mono', Menlo, monospace; }
+button { font: inherit; background: none; border: none; color: inherit; cursor: pointer; }
+button:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+input, textarea { font: inherit; background: var(--bg-2); border: 1px solid var(--border); color: var(--text); padding: 6px 10px; border-radius: 6px; outline: none; }
+input:focus, textarea:focus { border-color: var(--cyan); }
+a { color: var(--cyan); text-decoration: none; }
+a:hover { text-decoration: underline; }
+.row { display: flex; align-items: center; gap: 8px; }
+.col { display: flex; flex-direction: column; gap: 8px; }
+.dim { color: var(--text-2); }
+.dimmer { color: var(--text-dim); }
+.pill { display: inline-block; padding: 1px 7px; border-radius: 10px; font-size: 10px; font-weight: 500; background: var(--bg-3); color: var(--text-2); border: 1px solid var(--border); }
+.pill.db      { color: var(--cyan);   background: var(--cyan-dim);   border-color: rgba(61,214,245,0.3); }
+.pill.fs      { color: var(--amber);  background: var(--amber-dim);  border-color: rgba(245,166,35,0.3); }
+.pill.network { color: var(--red);    background: var(--red-dim);    border-color: rgba(255,95,109,0.3); }
+.pill.pure    { color: var(--green);  background: var(--green-dim);  border-color: rgba(61,255,160,0.3); }
+.pill.unknown { color: var(--purple); background: var(--purple-dim); border-color: rgba(180,142,254,0.3); }
+.kbd { font: 11px 'IBM Plex Mono', monospace; padding: 1px 5px; border: 1px solid var(--border-2); border-bottom-width: 2px; border-radius: 4px; background: var(--bg-2); color: var(--text-2); }
+
+#shell { display: grid; grid-template-columns: 240px 1fr 320px; grid-template-rows: 48px 1fr; height: 100vh; }
+#topbar { grid-column: 1/-1; display: flex; align-items: center; padding: 0 14px; background: var(--bg-1); border-bottom: 1px solid var(--border); gap: 14px; z-index: 10; }
+.logo { display:flex; align-items: center; gap: 9px; font-weight: 600; }
+.logo-mark { width: 24px; height: 24px; border-radius: 6px; background: linear-gradient(135deg, var(--cyan), var(--purple)); display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #06080c; font-weight: 700; }
+.logo-name { font-size: 14px; }
+.logo-badge { font-family: 'IBM Plex Mono', monospace; font-size: 10px; padding: 1px 6px; border-radius: 10px; background: var(--cyan-dim); color: var(--cyan); border: 1px solid rgba(61,214,245,0.3); }
+/* v25.5: self-healing activity panel */
+.heal-count { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--text-dim); margin-left: 4px; }
+.heal-clear { float: right; font-size: 10px; background: transparent; border: 1px solid var(--border); color: var(--text-dim); border-radius: 6px; padding: 1px 6px; cursor: pointer; }
+.heal-clear:hover { color: var(--text); border-color: var(--text-dim); }
+#heal-log { display: flex; flex-direction: column; gap: 4px; max-height: 320px; overflow-y: auto; }
+.heal-row { display: flex; align-items: flex-start; gap: 7px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; line-height: 1.5; padding: 3px 6px; border-radius: 6px; background: rgba(255,255,255,0.02); border-left: 2px solid var(--border); }
+.heal-row .heal-dot { width: 7px; height: 7px; border-radius: 50%; margin-top: 4px; flex: 0 0 auto; background: var(--text-dim); }
+.heal-row.start .heal-dot, .heal-row.verify .heal-dot { background: var(--cyan); }
+.heal-row.success .heal-dot { background: var(--green); }
+.heal-row.fail .heal-dot, .heal-row.exhausted .heal-dot { background: var(--red); }
+.heal-row.success { border-left-color: var(--green); }
+.heal-row.fail, .heal-row.exhausted { border-left-color: var(--red); }
+.heal-row .heal-body { min-width: 0; flex: 1; }
+.heal-row .heal-func { color: var(--cyan); }
+.heal-row .heal-meta { color: var(--text-dim); }
+.heal-row .heal-msg { color: var(--text); word-break: break-word; }
+
+.topbar-nav { display: flex; align-items: center; gap: 0; margin-left: 16px; }
+.nav-btn { padding: 6px 12px; font-size: 13px; color: var(--text-2); border-radius: 6px; transition: all var(--tr); }
+.nav-btn:hover { color: var(--text); background: var(--bg-2); }
+.nav-btn.active { color: var(--cyan); background: var(--cyan-dim); }
+.nav-btn .kbd { margin-left: 6px; }
+
+.topbar-search { flex: 1; max-width: 480px; margin: 0 16px; position: relative; }
+.search-trigger { width: 100%; padding: 7px 12px 7px 32px; background: var(--bg-2); border: 1px solid var(--border); border-radius: 6px; color: var(--text-2); text-align: left; cursor: pointer; transition: border-color var(--tr); }
+.search-trigger:hover { border-color: var(--border-2); }
+.search-trigger::before { content: '⌕'; position: absolute; left: 11px; top: 50%; transform: translateY(-50%); font-size: 14px; color: var(--text-dim); }
+.search-trigger .kbd { float: right; }
+
+.topbar-right { display: flex; align-items: center; gap: 10px; margin-left: auto; }
+/* v24 — dynamic project modal */
+.pm-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 100; display: flex; align-items: flex-start; justify-content: center; padding-top: 8vh; }
+.pm-panel { background: var(--bg-1); border: 1px solid var(--border); border-radius: 10px; width: 520px; max-width: 92vw; padding: 18px 20px; box-shadow: 0 12px 40px rgba(0,0,0,0.4); }
+.pm-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.pm-title { font-size: 15px; font-weight: 600; color: var(--text); }
+.pm-close { background: none; border: none; color: var(--text-2); font-size: 15px; cursor: pointer; }
+.pm-current { font-size: 12px; color: var(--text-2); margin-bottom: 4px; }
+.pm-current b { color: var(--cyan); }
+.pm-base { font-size: 11px; color: var(--text-dim); margin-bottom: 12px; }
+/* v25.8.2: project-root folder picker */
+.pm-picker { position: relative; margin-bottom: 12px; }
+.pm-pick-btn { width: 100%; display: flex; align-items: center; gap: 8px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font: 13px 'IBM Plex Mono', monospace; padding: 9px 12px; cursor: pointer; text-align: left; }
+.pm-pick-btn:hover { border-color: var(--border-2); }
+.pm-pick-label, #pm-pick-label { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pm-pick-empty { color: var(--text-dim); }
+.pm-pick-caret { color: var(--text-dim); font-size: 12px; }
+.pm-pick-list { display: none; position: absolute; top: calc(100% + 4px); left: 0; right: 0; max-height: 240px; overflow-y: auto; background: var(--bg-1); border: 1px solid var(--border-2); border-radius: 8px; z-index: 20; box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
+.pm-pick-list.open { display: block; }
+.pm-pick-item { display: flex; align-items: center; gap: 8px; padding: 8px 12px; cursor: pointer; font: 13px 'IBM Plex Mono', monospace; color: var(--text-2); }
+.pm-pick-item:hover { background: var(--bg-2); color: var(--text); }
+.pm-pick-item .pm-pick-tag { font-size: 10px; padding: 1px 6px; border-radius: 10px; background: var(--cyan-dim); color: var(--cyan); margin-left: auto; }
+.pm-pick-item .pm-pick-tag.plain { background: var(--bg-3); color: var(--text-dim); }
+.pm-pick-empty-row { padding: 12px; color: var(--text-dim); font-size: 12px; }
+.pm-label { display: block; font-size: 12px; color: var(--text-2); margin: 10px 0 4px; }
+.pm-hint { color: var(--text-dim); font-weight: 400; font-size: 11px; }
+.pm-input { width: 100%; box-sizing: border-box; background: var(--bg-2); border: 1px solid var(--border); border-radius: 6px; padding: 7px 9px; color: var(--text); font-family: 'IBM Plex Mono', monospace; font-size: 12px; }
+.pm-row { display: flex; gap: 10px; }
+.pm-col { flex: 1; }
+.pm-col-narrow { max-width: 130px; }
+.pm-check { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-2); margin: 12px 0 4px; }
+.pm-msg { font-size: 12px; min-height: 16px; margin: 8px 0; }
+.pm-msg.err { color: var(--red, #b1524a); }
+.pm-msg.ok { color: var(--green, #3f7d55); }
+.pm-actions { display: flex; justify-content: space-between; gap: 10px; margin-top: 10px; }
+.pm-btn { padding: 8px 16px; border-radius: 6px; font-size: 13px; cursor: pointer; border: 1px solid var(--border); }
+.pm-btn-load { background: var(--cyan-dim); color: var(--cyan); border-color: rgba(61,214,245,0.4); }
+.pm-btn-clear { background: var(--bg-2); color: var(--text-2); }
+.pm-btn[disabled] { opacity: 0.5; cursor: default; }
+.connection-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--grey); transition: background var(--tr); }
+.connection-dot.live { background: var(--green); box-shadow: 0 0 8px var(--green-dim); }
+.connection-text { font-size: 11px; color: var(--text-2); font-family: 'IBM Plex Mono', monospace; }
+.theme-btn { padding: 6px 8px; border-radius: 6px; color: var(--text-2); font-size: 13px; }
+.theme-btn:hover { background: var(--bg-2); color: var(--text); }
+
+#left { background: var(--bg-1); border-right: 1px solid var(--border); overflow: hidden; display: flex; flex-direction: column; }
+.left-section { padding: 12px 14px; border-bottom: 1px solid var(--border); }
+.left-section h4 { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-dim); margin-bottom: 8px; font-weight: 600; }
+.left-nav { display: flex; flex-direction: column; gap: 2px; }
+.left-nav-item { display: flex; align-items: center; padding: 7px 10px; border-radius: 6px; gap: 8px; font-size: 13px; color: var(--text-2); transition: all var(--tr); cursor: pointer; }
+.left-nav-item:hover { background: var(--bg-2); color: var(--text); }
+.left-nav-item.active { background: var(--cyan-dim); color: var(--cyan); }
+.left-nav-item .icon { font-family: 'IBM Plex Mono', monospace; font-size: 14px; width: 18px; text-align: center; opacity: 0.85; }
+.left-nav-item .badge { margin-left: auto; padding: 0 5px; min-width: 18px; height: 16px; border-radius: 8px; background: var(--bg-3); color: var(--text-2); font-size: 10px; font-family: 'IBM Plex Mono', monospace; display: flex; align-items: center; justify-content: center; }
+.left-nav-item.active .badge { background: var(--cyan-dim); color: var(--cyan); }
+
+.left-history { flex: 1; overflow-y: auto; padding: 12px 14px; }
+.history-empty { color: var(--text-dim); font-size: 12px; padding: 8px 0; }
+.history-item { display: block; padding: 6px 10px; border-radius: 5px; font-size: 12px; color: var(--text-2); cursor: pointer; transition: all var(--tr); }
+.history-item:hover { background: var(--bg-2); color: var(--text); }
+.history-item .meta { font-size: 10px; color: var(--text-dim); margin-top: 1px; }
+
+#center { background: var(--bg); overflow-y: auto; padding: 24px 32px; }
+.page-header { display: flex; align-items: baseline; gap: 14px; margin-bottom: 18px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+.page-title { font-size: 20px; font-weight: 600; }
+.page-subtitle { color: var(--text-2); font-size: 13px; }
+.page-actions { margin-left: auto; display: flex; gap: 8px; }
+.btn { padding: 6px 14px; border-radius: 6px; background: var(--bg-2); border: 1px solid var(--border); color: var(--text); font-size: 12px; transition: all var(--tr); }
+.btn:hover { background: var(--bg-3); border-color: var(--border-2); }
+.btn.primary { background: var(--cyan); color: #06080c; border-color: var(--cyan); font-weight: 500; }
+.btn.primary:hover { background: #5be0ff; }
+.btn.ghost { background: transparent; border-color: transparent; }
+.btn.ghost:hover { background: var(--bg-2); border-color: var(--border); }
+
+#right { background: var(--bg-1); border-left: 1px solid var(--border); overflow-y: auto; padding: 18px 18px; }
+#right .panel { margin-bottom: 18px; }
+#right h5 { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-dim); margin-bottom: 8px; font-weight: 600; }
+.right-empty { color: var(--text-dim); font-size: 12px; padding: 12px 0; text-align: center; font-style: italic; }
+
+/* v25.3 — collapsible side panels to maximise the main content body.
+   #shell columns are driven by CSS vars so the collapsed widths animate and a
+   thin re-expand rail replaces a fully-hidden panel (keeps it discoverable). */
+#shell {
+  --col-left: 240px;
+  --col-right: 320px;
+  grid-template-columns: var(--col-left) 1fr var(--col-right);
+  transition: grid-template-columns 160ms cubic-bezier(.4,0,.2,1);
+}
+#shell.left-collapsed  { --col-left: 14px; }
+#shell.right-collapsed { --col-right: 14px; }
+/* when collapsed, hide the panel's own content and show a slim clickable rail */
+#left.collapsed, #right.collapsed { padding: 0; overflow: visible; }
+#left.collapsed > *:not(.panel-rail), #right.collapsed > *:not(.panel-rail) { display: none; }
+.panel-rail {
+  display: none; position: absolute; top: 0; bottom: 0; width: 14px;
+  cursor: pointer; align-items: center; justify-content: center;
+  background: var(--bg-1); color: var(--text-dim); font-size: 11px; z-index: 5;
+  transition: background var(--tr), color var(--tr);
+}
+.panel-rail:hover { background: var(--bg-2); color: var(--text); }
+#left.collapsed .panel-rail  { display: flex; right: 0; border-right: 1px solid var(--border); }
+#right.collapsed .panel-rail { display: flex; left: 0;  border-left: 1px solid var(--border); }
+#left, #right { position: relative; }
+.panel-rail .rail-txt { writing-mode: vertical-rl; text-orientation: mixed; letter-spacing: 0.08em; text-transform: uppercase; font-size: 9px; }
+/* topbar collapse toggle buttons */
+.panel-toggle { padding: 5px 8px; border: 1px solid var(--border); border-radius: 6px; color: var(--text-2); font-size: 12px; background: transparent; cursor: pointer; transition: all var(--tr); }
+.panel-toggle:hover { background: var(--bg-2); color: var(--text); }
+.panel-toggle.off { color: var(--cyan); border-color: rgba(61,214,245,0.4); background: var(--cyan-dim); }
+
+/* v25.3 — draggable gutter between the call-graph and CFG panes. The graph
+   shell's two content columns are driven by --graph-split-cg / --graph-split-cfg
+   (fr fractions summing to 1); the 8px gutter column IS the separator, so the
+   resizable variant zeroes the COLUMN gap (the base .graph-shell 14px gap would
+   otherwise stack 14+8+14px of dead space around the gutter — the reported wide
+   empty band). Row gap is preserved for the controls/src spacing. */
+.graph-shell { --graph-split: 0.5; }
+.graph-shell.resizable {
+  grid-template-columns: minmax(0, var(--graph-split-cg, 1fr)) 8px minmax(0, var(--graph-split-cfg, 1fr));
+  column-gap: 0;
+  row-gap: 14px;
+}
+.graph-gutter { grid-column: 2 / 3; grid-row: 2 / 3; cursor: col-resize; background: transparent; position: relative; display: flex; align-items: center; justify-content: center; }
+.graph-gutter::before { content: ''; width: 2px; height: 100%; background: var(--border); transition: background var(--tr); }
+.graph-gutter:hover::before, .graph-gutter.dragging::before { background: var(--cyan); width: 3px; }
+.graph-gutter::after { content: '⋮'; position: absolute; color: var(--text-dim); font-size: 12px; background: var(--bg-1); padding: 2px 0; border-radius: 3px; }
+body.col-resizing { cursor: col-resize; user-select: none; }
+body.col-resizing iframe, body.col-resizing svg { pointer-events: none; }
+.kv { display: grid; grid-template-columns: 80px 1fr; gap: 6px 12px; font-size: 12px; margin-bottom: 6px; }
+.kv .k { color: var(--text-dim); }
+.kv .v { color: var(--text); font-family: 'IBM Plex Mono', monospace; word-break: break-all; }
+
+.card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-bottom: 24px; }
+.card { background: var(--bg-1); border: 1px solid var(--border); border-radius: var(--r); padding: 16px; transition: border-color var(--tr); }
+.card:hover { border-color: var(--border-2); }
+.card .label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-dim); margin-bottom: 8px; font-weight: 600; }
+.card .value { font-size: 28px; font-weight: 600; line-height: 1; margin-bottom: 6px; }
+.card .footnote { font-size: 12px; color: var(--text-2); }
+.card.accent .value { color: var(--cyan); }
+.card.warn .value { color: var(--amber); }
+
+.section-title { font-size: 14px; font-weight: 600; margin-bottom: 12px; }
+.bar-row { display: grid; grid-template-columns: 100px 1fr 60px; gap: 10px; align-items: center; padding: 6px 0; font-size: 13px; }
+.bar { height: 6px; background: var(--bg-2); border-radius: 3px; overflow: hidden; }
+.bar-fill { height: 100%; background: var(--cyan); border-radius: 3px; transition: width 400ms; }
+.bar-row .count { text-align: right; color: var(--text-2); font-family: 'IBM Plex Mono', monospace; font-size: 12px; }
+.bar-row .label { color: var(--text); font-weight: 500; }
+
+table.data { width: 100%; border-collapse: collapse; font-size: 13px; }
+table.data th, table.data td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--border); }
+table.data th { color: var(--text-dim); font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; }
+table.data tbody tr { cursor: pointer; transition: background var(--tr); }
+table.data tbody tr:hover { background: var(--bg-2); }
+table.data td.mono { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--text-2); }
+table.data td.kind { color: var(--text-dim); }
+
+.graph-shell { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: auto 1fr; gap: 14px; height: calc(100vh - 124px); }
+.graph-controls { grid-column: 1 / -1; display: flex; gap: 12px; align-items: center; padding: 10px 14px; background: var(--bg-1); border: 1px solid var(--border); border-radius: var(--r); flex-wrap: wrap; }
+.graph-controls label { font-size: 12px; color: var(--text-2); display: flex; align-items: center; gap: 6px; }
+.graph-controls select, .graph-controls input { font-size: 12px; padding: 4px 8px; }
+.graph-shell.resizable > .cg-pane  { grid-column: 1 / 2; grid-row: 2 / 3; }
+.graph-shell.resizable > .cfg-pane { grid-column: 3 / 4; grid-row: 2 / 3; }
+.graph-pane { background: var(--bg-1); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; display: flex; flex-direction: column; min-width: 0; }
+.graph-pane-header { padding: 10px 14px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; font-size: 12px; color: var(--text-2); }
+.graph-pane-header strong { color: var(--text); font-weight: 600; }
+.graph-body { flex: 1; overflow: auto; padding: 8px; position: relative; }
+svg.graph { width: 100%; height: 100%; display: block; }
+.graph-empty { display: flex; align-items: center; justify-content: center; height: 100%; color: var(--text-dim); font-size: 13px; text-align: center; padding: 20px; }
+/* v23.37 — back/forward nav arrows + source panel */
+.btn.nav-arrow { min-width: 30px; padding: 4px 8px; font-size: 13px; }
+.btn.nav-arrow:disabled { opacity: 0.3; cursor: default; }
+.btn.nav-arrow:disabled:hover { background: transparent; border-color: transparent; }
+.src-wrap { grid-column: 1 / -1; margin-top: 12px; background: var(--bg-1); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; }
+.src-body { max-height: 360px; overflow: auto; }
+.src-meta { padding: 8px 12px; font-size: 11px; color: var(--text-dim); font-family: 'IBM Plex Mono', monospace; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--bg-1); }
+.src-pre { margin: 0; padding: 6px 0; font-family: 'IBM Plex Mono', monospace; font-size: 12px; line-height: 1.55; }
+.src-line { display: flex; white-space: pre; }
+.src-line:hover { background: var(--bg-2); }
+.src-ln { flex: 0 0 48px; text-align: right; padding-right: 12px; color: var(--text-dim); user-select: none; }
+.src-tx { flex: 1; color: var(--text); padding-right: 12px; }
+.cg-node rect { stroke-width: 1.5; transition: filter var(--tr); }
+.cg-node rect.depth-0 { fill: var(--bg-3); stroke: var(--cyan); }
+.cg-node rect.depth-1 { fill: var(--bg-2); stroke: var(--border-2); }
+.cg-node rect.depth-2 { fill: var(--bg-2); stroke: var(--border); }
+.cg-node rect.depth-3 { fill: var(--bg-1); stroke: var(--border); }
+/* v23.34 — select / find / locate affordances */
+.cg-node.selected rect { stroke: var(--cyan); stroke-width: 2.5; }
+/* v24 — constructor/allocation node (new X): tinted + dashed to read as an
+   allocation, not a normal method call. */
+.cg-node.cg-init rect { stroke: var(--green); stroke-dasharray: 4 3; fill: color-mix(in srgb, var(--green) 8%, var(--bg-1)); }
+.cg-node.dimmed { opacity: 0.18; transition: opacity var(--tr); }
+.cg-node.match rect { stroke: var(--amber); stroke-width: 2; }
+.cg-node.locate-pulse rect { animation: locatePulse 1.4s ease-out; }
+@keyframes locatePulse {
+  0% { stroke: var(--amber); stroke-width: 5; }
+  100% { stroke: var(--amber); stroke-width: 2; }
+}
+.graph-find-wrap { display: inline-flex; align-items: center; gap: 8px; }
+.graph-find { width: 150px; height: 30px; border-radius: 6px; padding: 0 10px; font-size: 12px;
+  background: var(--bg-1); border: 1px solid var(--border); color: var(--text);
+  font-family: 'Inter', sans-serif; }
+.graph-find:focus { border-color: var(--cyan); outline: none; }
+.graph-find-count { font-size: 11px; color: var(--text-dim); font-family: 'IBM Plex Mono', monospace; min-width: 56px; }
+.cg-node:hover rect { filter: brightness(1.15); cursor: pointer; }
+.cg-node.cg-stdlib rect { stroke-dasharray: 4 3; opacity: 0.55; fill: var(--bg-1); }
+.cg-node.cg-stdlib text { fill: var(--text-dim); }
+.cg-node.cg-stdlib:hover rect { opacity: 0.9; }
+.stdlib-toggle { font-size: 12px; color: var(--text-2); display: flex; align-items: center; gap: 5px; user-select: none; cursor: pointer; }
+.cg-node text { fill: var(--text); font-size: 11px; font-family: 'IBM Plex Mono', monospace; pointer-events: none; }
+.cg-node text.sub { fill: var(--text-dim); font-size: 9px; }
+.cg-edge path { stroke: var(--border-2); stroke-width: 1.2; fill: none; }
+.cg-edge path.unresolved { stroke-dasharray: 3 3; stroke: var(--purple); }
+/* v24 — dense-graph readability: fade edges while hovering a node, and make the
+   hovered node's connected edges bold + darker so a call chain is traceable. */
+svg.graph.cg-hovering .edge-group { opacity: 0.15; transition: opacity var(--tr); }
+svg.graph.cg-hovering .edge-group.edge-hi { opacity: 1; }
+svg.graph .edge-group.edge-hi path.edge-path { stroke: var(--text-2); stroke-width: 2.4; }
+svg.graph .edge-group.edge-hi path.edge-path.up { stroke: var(--amber); }
+
+.cfg-block { padding: 8px 12px; margin: 6px 0; background: var(--bg-2); border: 1px solid var(--border); border-left: 3px solid var(--cyan); border-radius: 5px; font-size: 12px; }
+.cfg-block .block-id { font-family: 'IBM Plex Mono', monospace; color: var(--text-dim); font-size: 10px; margin-bottom: 4px; }
+.cfg-block .stmt { display: block; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--text-2); padding: 2px 0; }
+.cfg-block.entry { border-left-color: var(--green); }
+.cfg-block.exit { border-left-color: var(--red); }
+.cfg-edge { color: var(--text-dim); font-size: 11px; padding-left: 18px; font-family: 'IBM Plex Mono', monospace; }
+
+/* v23.3 — call-graph + CFG as arrowed SVG flows */
+svg.graph .edge-path { fill: none; stroke: var(--border-2); stroke-width: 1.6; }
+svg.graph .edge-path.up { stroke: var(--amber); }
+svg.graph .edge-path.loop-back { stroke: var(--amber); stroke-dasharray: 5 3; }
+svg.graph .edge-label.loop-label { fill: var(--amber); font-size: 9px; font-weight: 700; font-style: italic; }
+svg.graph .edge-path.unresolved { stroke: var(--purple); stroke-dasharray: 4 3; }
+svg.graph .edge-label { fill: var(--text-dim); font-family: 'IBM Plex Mono', monospace; font-size: 9px; }
+svg.graph .cfg-node rect { fill: var(--bg-2); stroke: var(--border-2); stroke-width: 1.4; }
+/* v23.39 flow-chart shapes */
+svg.graph .cfg-node.process rect { fill: var(--bg-2); stroke: var(--border-2); }
+svg.graph .cfg-node.start rect { fill: color-mix(in srgb, var(--green) 14%, var(--bg-2)); stroke: var(--green); stroke-width: 1.8; }
+svg.graph .cfg-node.end rect { fill: color-mix(in srgb, var(--red) 12%, var(--bg-2)); stroke: var(--red); stroke-width: 1.8; }
+svg.graph .cfg-node.decision polygon { fill: color-mix(in srgb, var(--amber) 12%, var(--bg-2)); stroke: var(--amber); stroke-width: 1.8; }
+svg.graph .cfg-node.loop-header polygon { fill: color-mix(in srgb, var(--amber) 20%, var(--bg-2)); stroke: var(--amber); stroke-width: 2; }
+/* v24 — Option C loop-limit bracket (opt-in): a soft frame around a loop. */
+svg.graph .cfg-loop-bracket rect { fill: color-mix(in srgb, var(--amber) 5%, transparent); stroke: var(--amber); stroke-width: 1; stroke-dasharray: 2 4; opacity: 0.6; }
+svg.graph .cfg-loop-bracket path.cap { fill: none; stroke: var(--amber); stroke-width: 2.4; }
+svg.graph .cfg-loop-bracket-label { fill: var(--amber); font-size: 9px; font-style: italic; font-family: 'IBM Plex Mono', monospace; }
+svg.graph .cfg-node .term-text { fill: var(--text); font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 700; letter-spacing: .04em; }
+svg.graph .cfg-node .dia-text { fill: var(--text); font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; }
+svg.graph .cfg-node .title { fill: var(--text); font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; }
+svg.graph .cfg-node .stmt { fill: var(--text-2); font-family: 'IBM Plex Mono', monospace; font-size: 10px; }
+svg.graph .cfg-node .stmt .gutter { fill: var(--text-dim); }
+/* v26.4 — IDE-style syntax colouring for CFG code tokens (theme-aware). */
+svg.graph .cfg-node .stmt .t-kw   { fill: var(--syn-kw); }
+svg.graph .cfg-node .stmt .t-str  { fill: var(--syn-str); }
+svg.graph .cfg-node .stmt .t-num  { fill: var(--syn-num); }
+svg.graph .cfg-node .stmt .t-com  { fill: var(--syn-com); font-style: italic; }
+svg.graph .cfg-node .stmt .t-call { fill: var(--syn-call); }
+svg.graph .cfg-node .stmt .t-type { fill: var(--syn-type); }
+svg.graph .cfg-node .stmt .t-op   { fill: var(--syn-op); }
+svg.graph .cfg-node .stmt .t-txt  { fill: var(--syn-txt); }
+svg.graph .edge-label.branch-yn { font-weight: 700; fill: var(--text-2); font-size: 10px; }
+svg.graph .edge-label.case-label { font-weight: 600; fill: var(--amber); font-size: 9.5px; }
+svg.graph .case-chip { fill: var(--bg-1); stroke: var(--amber); stroke-width: 0.8; opacity: 0.95; }
+svg.graph .cfg-node .more { fill: var(--text-dim); font-family: 'IBM Plex Mono', monospace; font-size: 9px; font-style: italic; }
+.root-ring rect { stroke-width: 2.4 !important; stroke: var(--cyan) !important; }
+.graph-legend { position: absolute; bottom: 10px; left: 10px; z-index: 5; display: flex; gap: 12px; background: var(--bg-1); border: 1px solid var(--border-2); border-radius: 6px; padding: 5px 10px; font-size: 10px; color: var(--text-dim); }
+.graph-legend span { display: inline-flex; align-items: center; gap: 4px; }
+.graph-legend i { width: 16px; height: 0; border-top: 2px solid currentColor; display: inline-block; }
+.cfg-legend { flex-wrap: wrap; max-width: 92%; }
+.cfg-legend i.sw-term { width: 16px; height: 10px; border: 1.6px solid var(--green); border-radius: 5px; display: inline-block; }
+.cfg-legend i.sw-proc { width: 14px; height: 11px; border: 1.6px solid var(--border-2); border-radius: 2px; display: inline-block; }
+.cfg-legend i.sw-dia { width: 12px; height: 12px; border: 1.6px solid var(--amber); display: inline-block; transform: rotate(45deg); }
+.cfg-legend i.sw-loop { width: 16px; height: 11px; border: 1.6px solid var(--amber); display: inline-block; clip-path: polygon(22% 0, 78% 0, 100% 50%, 78% 100%, 22% 100%, 0 50%); }
+
+.belief-bar { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; align-items: center; }
+.belief-filter { padding: 4px 10px; border-radius: 4px; background: var(--bg-2); border: 1px solid var(--border); font-size: 12px; color: var(--text-2); cursor: pointer; transition: all var(--tr); }
+.belief-filter:hover { color: var(--text); }
+.belief-filter.active { color: var(--cyan); background: var(--cyan-dim); border-color: var(--cyan); }
+.bulk-actions { margin-left: auto; display: flex; gap: 6px; font-size: 12px; align-items: center; }
+.bulk-actions .dim { padding: 4px 8px; }
+.belief-list { background: var(--bg-1); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; }
+.belief-row { display: grid; grid-template-columns: 22px 1fr auto; gap: 12px; padding: 12px 14px; border-bottom: 1px solid var(--border); align-items: start; transition: background var(--tr); }
+.belief-row:last-child { border-bottom: 0; }
+.belief-row:hover { background: var(--bg-2); }
+.belief-row.selected { background: var(--cyan-dim); }
+.belief-row input[type=checkbox] { margin-top: 3px; cursor: pointer; }
+.belief-body .subject { font-weight: 500; }
+.belief-body .pred { color: var(--text-2); font-size: 12px; margin-top: 2px; }
+.belief-body .meta { font-size: 11px; color: var(--text-dim); margin-top: 4px; font-family: 'IBM Plex Mono', monospace; display: flex; gap: 10px; }
+.belief-conf { height: 4px; width: 60px; background: var(--bg-3); border-radius: 2px; overflow: hidden; margin-top: 5px; }
+.belief-conf-fill { height: 100%; background: var(--green); }
+.belief-conf-fill.med { background: var(--amber); }
+.belief-conf-fill.low { background: var(--red); }
+.belief-actions { display: flex; gap: 6px; flex-shrink: 0; }
+.belief-actions button { padding: 4px 10px; font-size: 11px; border-radius: 4px; border: 1px solid var(--border); color: var(--text-2); transition: all var(--tr); }
+.belief-actions button:hover { color: var(--text); background: var(--bg-3); }
+.belief-actions .accept:hover { color: var(--green); border-color: var(--green); }
+.belief-actions .correct:hover { color: var(--amber); border-color: var(--amber); }
+.belief-actions .defer:hover { color: var(--purple); border-color: var(--purple); }
+.verified-badge { display: inline-block; font-size: 10px; padding: 1px 6px; border-radius: 8px; background: var(--green-dim); color: var(--green); margin-left: 6px; }
+
+#palette-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100; align-items: flex-start; justify-content: center; padding-top: 12vh; backdrop-filter: blur(2px); }
+#palette-overlay.open { display: flex; }
+.palette { width: 90%; max-width: 640px; background: var(--bg-1); border: 1px solid var(--border-2); border-radius: var(--r); box-shadow: var(--shadow); overflow: hidden; }
+.palette-input { width: 100%; padding: 16px 20px; font-size: 16px; background: transparent; border: none; border-bottom: 1px solid var(--border); color: var(--text); }
+.palette-input:focus { outline: none; border-color: var(--border); }
+.palette-results { max-height: 60vh; overflow-y: auto; padding: 6px 0; }
+.palette-row { padding: 9px 18px; display: grid; grid-template-columns: 70px 1fr auto; gap: 14px; align-items: center; cursor: pointer; }
+.palette-row:hover, .palette-row.focused { background: var(--bg-2); }
+.palette-row .kind { font-family: 'IBM Plex Mono', monospace; font-size: 10px; padding: 2px 7px; border-radius: 10px; background: var(--bg-3); color: var(--text-2); text-align: center; text-transform: uppercase; letter-spacing: 0.04em; }
+.palette-row .name { font-weight: 500; color: var(--text); }
+.palette-row .file { color: var(--text-dim); font-size: 11px; font-family: 'IBM Plex Mono', monospace; }
+.palette-row .effects { display: flex; gap: 4px; }
+.palette-foot { padding: 8px 18px; border-top: 1px solid var(--border); display: flex; gap: 18px; font-size: 11px; color: var(--text-dim); }
+.palette-foot .kbd { font-size: 10px; }
+
+.facets { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+.facet { padding: 4px 11px; border-radius: 14px; background: var(--bg-2); border: 1px solid var(--border); font-size: 12px; cursor: pointer; transition: all var(--tr); }
+.facet:hover { background: var(--bg-3); }
+.facet.active { background: var(--cyan); color: #06080c; border-color: var(--cyan); }
+
+.toast-stack { position: fixed; bottom: 20px; right: 20px; z-index: 90; display: flex; flex-direction: column; gap: 8px; max-width: 380px; }
+.toast { background: var(--bg-2); border: 1px solid var(--border-2); border-left: 3px solid var(--cyan); padding: 12px 16px; border-radius: 6px; box-shadow: var(--shadow); font-size: 13px; animation: slideIn 200ms ease-out; }
+.toast.warn { border-left-color: var(--amber); }
+.toast.error { border-left-color: var(--red); }
+@keyframes slideIn { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+.loader { display: flex; align-items: center; gap: 10px; padding: 24px; color: var(--text-2); font-size: 13px; justify-content: center; }
+.loader::before { content: ''; width: 14px; height: 14px; border: 2px solid var(--border-2); border-top-color: var(--cyan); border-radius: 50%; animation: spin 700ms linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* v23.1 — settings popup (display text size + theme) */
+.icon-btn { padding: 6px 8px; border-radius: 6px; color: var(--text-2); font-size: 15px; line-height: 1; }
+.icon-btn:hover { background: var(--bg-2); color: var(--text); }
+#settings-pop { display: none; position: fixed; top: 52px; right: 14px; z-index: 120; width: 280px; background: var(--bg-1); border: 1px solid var(--border-2); border-radius: var(--r); box-shadow: var(--shadow); padding: 16px; }
+#settings-pop.open { display: block; }
+#settings-pop h4 { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-dim); margin-bottom: 10px; font-weight: 600; }
+.set-group { margin-bottom: 16px; }
+.set-group:last-child { margin-bottom: 0; }
+.set-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.set-row label { font-size: 13px; color: var(--text-2); flex: 1; }
+.set-fz-preview { font-size: calc(14px * var(--fz-scale)); color: var(--text); padding: 8px 10px; background: var(--bg-2); border: 1px solid var(--border); border-radius: 6px; }
+.set-fz-controls { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+.set-fz-controls input[type=range] { flex: 1; accent-color: var(--cyan); }
+.set-fz-val { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--cyan); min-width: 40px; text-align: right; }
+.set-theme-toggle { display: flex; gap: 6px; }
+.set-theme-toggle button { flex: 1; padding: 7px 0; border: 1px solid var(--border); border-radius: 6px; font-size: 12px; color: var(--text-2); background: var(--bg-2); transition: all var(--tr); }
+.set-theme-toggle button.active { color: var(--cyan); background: var(--cyan-dim); border-color: var(--cyan); }
+.set-reset { font-size: 11px; color: var(--text-dim); margin-top: 4px; }
+.set-reset button { color: var(--cyan); text-decoration: underline; }
+
+/* v23.1 — graph zoom controls (pan/zoom inside the call-graph SVG) */
+.graph-body { position: relative; }
+.zoom-controls { position: absolute; top: 10px; right: 10px; z-index: 5; display: flex; flex-direction: column; gap: 4px; background: var(--bg-1); border: 1px solid var(--border-2); border-radius: 6px; padding: 4px; box-shadow: var(--shadow); }
+.zoom-controls button { width: 28px; height: 26px; border-radius: 4px; color: var(--text-2); font-size: 15px; line-height: 1; display: flex; align-items: center; justify-content: center; }
+.zoom-controls button:hover { background: var(--bg-3); color: var(--text); }
+.zoom-controls .zoom-level { font-family: 'IBM Plex Mono', monospace; font-size: 9px; color: var(--text-dim); text-align: center; padding: 2px 0; }
+svg.graph { cursor: grab; width: 100%; height: 100%; display: block; }
+svg.graph.panning { cursor: grabbing; }
+svg.graph .viewport { transition: none; }
+</style>
+</head>
+<body>
+<div id="shell">
+  <div id="topbar">
+    <div class="logo">
+      <div class="logo-mark">G</div>
+      <div class="logo-name">gen-system</div>
+      <span class="logo-badge mono">v26.5</span>
+    </div>
+    <button class="panel-toggle" id="toggle-left" title="Collapse / expand left panel  ( [ )">⊣</button>
+    <div class="topbar-nav">
+      <button class="nav-btn" data-route="architecture">Architecture <span class="kbd">g a</span></button>
+      <button class="nav-btn" data-route="graph">Graph <span class="kbd">g g</span></button>
+      <button class="nav-btn" data-route="beliefs">Beliefs <span class="kbd">g b</span></button>
+      <button class="nav-btn" data-route="search">Search <span class="kbd">g s</span></button>
+    </div>
+    <div class="topbar-search">
+      <button class="search-trigger" id="palette-trigger">Search symbols, files, effects… <span class="kbd">⌘ K</span></button>
+    </div>
+    <div class="topbar-right">
+      <a href="generate.html" style="font-size:12px;color:var(--text-2);text-decoration:none;padding:5px 10px;border:1px solid var(--border);border-radius:6px;margin-right:4px;">+ Build from idea</a>
+      <button class="icon-btn" id="project-btn" title="Load / switch project" style="font-size:12px;padding:5px 10px;border:1px solid var(--border);border-radius:6px;">📂 <span id="project-btn-label">Project</span></button>
+      <div class="connection-dot" id="conn-dot"></div>
+      <div class="connection-text" id="conn-text">offline</div>
+      <button class="panel-toggle" id="toggle-right" title="Collapse / expand right panel  ( ] )">⊢</button>
+      <button class="theme-btn" id="theme-btn" title="Toggle theme">◐</button>
+      <button class="icon-btn" id="settings-btn" title="Display settings">⚙</button>
+    </div>
+  </div>
+  <!-- v24: dynamic project load/switch modal -->
+  <div id="project-modal" class="pm-overlay" style="display:none;">
+    <div class="pm-panel">
+      <div class="pm-head">
+        <span class="pm-title">Load a project</span>
+        <button class="pm-close" id="pm-close">✕</button>
+      </div>
+      <div class="pm-current" id="pm-current">Currently loaded: <b>—</b></div>
+      <div class="pm-base" id="pm-base"></div>
+      <label class="pm-label">Project root <span class="pm-hint">(pick a folder inside the projects base)</span></label>
+      <div class="pm-picker" id="pm-picker">
+        <button class="pm-pick-btn" id="pm-pick-btn" type="button">
+          <span id="pm-pick-label" class="pm-pick-empty">Choose a project folder…</span>
+          <span class="pm-pick-caret">▾</span>
+        </button>
+        <div class="pm-pick-list" id="pm-pick-list"></div>
+      </div>
+      <input type="hidden" id="pm-root" value="" />
+      <div class="pm-row">
+        <div class="pm-col">
+          <label class="pm-label">Copybooks <span class="pm-hint">(COBOL only)</span></label>
+          <input class="pm-input" id="pm-copybooks" type="text" placeholder="optional: /path/to/copybooks" spellcheck="false" />
+        </div>
+      </div>
+      <div class="pm-row">
+        <div class="pm-col">
+          <label class="pm-label">Stdlib <span class="pm-hint">('go' = GOROOT/src, or a path)</span></label>
+          <input class="pm-input" id="pm-stdlib" type="text" placeholder="optional: go" spellcheck="false" />
+        </div>
+        <div class="pm-col pm-col-narrow">
+          <label class="pm-label">Stdlib lang</label>
+          <input class="pm-input" id="pm-stdlib-lang" type="text" placeholder="go / java" spellcheck="false" />
+        </div>
+      </div>
+      <label class="pm-check"><input type="checkbox" id="pm-live" /> Live watch <span class="pm-hint">(default off / static — track file changes on this project)</span></label>
+      <div class="pm-msg" id="pm-msg"></div>
+      <div class="pm-actions">
+        <button class="pm-btn pm-btn-clear" id="pm-clear">Clear project</button>
+        <button class="pm-btn pm-btn-load" id="pm-load">Load project</button>
+      </div>
+    </div>
+  </div>
+  <div id="left">
+    <div class="panel-rail" id="left-rail" title="Expand left panel"><span class="rail-txt">workspace</span></div>
+    <div class="left-section">
+      <h4>Workspace</h4>
+      <div class="left-nav" id="nav-primary">
+        <div class="left-nav-item" data-route="architecture"><span class="icon">⌂</span>Architecture <span class="badge" id="nav-badge-arch">—</span></div>
+        <div class="left-nav-item" data-route="graph"><span class="icon">◈</span>Graph view</div>
+        <div class="left-nav-item" data-route="beliefs"><span class="icon">◉</span>Beliefs <span class="badge" id="nav-badge-beliefs">—</span></div>
+        <div class="left-nav-item" data-route="search"><span class="icon">⌕</span>Search</div>
+      </div>
+    </div>
+    <div class="left-section">
+      <h4>Discover</h4>
+      <div class="left-nav">
+        <div class="left-nav-item" data-route="entries"><span class="icon">↳</span>Entry points</div>
+        <div class="left-nav-item" data-route="effects"><span class="icon">⚡</span>Effects</div>
+        <div class="left-nav-item" data-route="unknowns"><span class="icon">?</span>Unknowns</div>
+      </div>
+    </div>
+    <div class="left-history">
+      <h4 style="font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-dim);margin-bottom:8px;font-weight:600;">Recent</h4>
+      <div id="history-list" class="history-empty">No history yet — pick a symbol to start.</div>
+    </div>
+  </div>
+  <div id="center">
+    <div id="page-arch"     class="page" style="display:none;"></div>
+    <div id="page-graph"    class="page" style="display:none;"></div>
+    <div id="page-beliefs"  class="page" style="display:none;"></div>
+    <div id="page-search"   class="page" style="display:none;"></div>
+    <div id="page-entries"  class="page" style="display:none;"></div>
+    <div id="page-effects"  class="page" style="display:none;"></div>
+    <div id="page-unknowns" class="page" style="display:none;"></div>
+  </div>
+  <div id="right">
+    <div class="panel-rail" id="right-rail" title="Expand right panel"><span class="rail-txt">details</span></div>
+    <div class="panel">
+      <h5>Selected</h5>
+      <div id="right-selected" class="right-empty">Nothing selected.</div>
+    </div>
+    <div class="panel">
+      <h5>References</h5>
+      <div id="right-refs" class="right-empty">Pick a symbol to see callers.</div>
+    </div>
+    <!-- v25.5: self-healing / generation activity panel. Renders structured
+         agent events (lifecycle + repair attempts) streamed over SSE during a
+         Studio-triggered build so the human can watch the repair loop live. -->
+    <div class="panel">
+      <h5>Self-healing <span id="heal-count" class="heal-count"></span>
+        <button id="heal-clear" class="heal-clear" title="Clear activity">clear</button>
+      </h5>
+      <div id="heal-log" class="right-empty">No generation activity yet.</div>
+    </div>
+  </div>
+</div>
+<div id="palette-overlay">
+  <div class="palette" role="dialog" aria-label="Search palette">
+    <input type="text" class="palette-input" id="palette-input" placeholder="Search symbols, files, effects… (try effect:db or a name)" autocomplete="off"/>
+    <div class="palette-results" id="palette-results"></div>
+    <div class="palette-foot">
+      <span><span class="kbd">↵</span> open</span>
+      <span><span class="kbd">↑</span><span class="kbd">↓</span> navigate</span>
+      <span><span class="kbd">esc</span> close</span>
+      <span style="margin-left:auto;" id="palette-stats"></span>
+    </div>
+  </div>
+</div>
+<div class="toast-stack" id="toast-stack"></div>
+
+<!-- v23.1 settings popup: display text size + theme -->
+<div id="settings-pop">
+  <div class="set-group">
+    <h4>Display text size</h4>
+    <div class="set-fz-preview" id="set-fz-preview">The quick brown fox · 12345</div>
+    <div class="set-fz-controls">
+      <button class="icon-btn" id="fz-minus" title="Smaller">A−</button>
+      <input type="range" id="fz-range" min="0.85" max="1.6" step="0.05" value="1"/>
+      <button class="icon-btn" id="fz-plus" title="Larger">A+</button>
+      <span class="set-fz-val" id="fz-val">100%</span>
+    </div>
+    <div class="set-reset">Affects all text. <button id="fz-reset">Reset</button></div>
+  </div>
+  <div class="set-group">
+    <h4>Theme</h4>
+    <div class="set-theme-toggle">
+      <button id="theme-dark">Dark (warm)</button>
+      <button id="theme-light">Light (paper)</button>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+const state = {
+  route: 'architecture', selectedSymbolId: null, selectedFile: null,
+  arch: null, beliefs: null, effects: null,
+  beliefFilter: 'all', selectedBeliefs: new Set(),
+  paletteOpen: false, paletteFocusIdx: 0, paletteHits: [],
+  history: [], graphDepth: 2, graphDirection: 'callees', searchEffect: '',
+  includeStdlib: false, graphOrient: 'LR',
+  pendingKeys: '', pendingKeyTimer: null,
+  // v23.37: browser-style back/forward through the graph roots you visit.
+  // navStack is the ordered trail; navCursor points at the current position.
+  // Navigating to a new root truncates any forward tail (a branch), exactly
+  // like a browser. navSuppress stops a back/forward jump from re-pushing.
+  navStack: [], navCursor: -1, navSuppress: false,
+  // v23.37: source panel (collapsed by default; fetch only when open).
+  srcOpen: false, srcSymbolId: null,
+  // v25.3: collapsible side panels + draggable graph split (persisted).
+  leftCollapsed: false, rightCollapsed: false, graphSplit: 0.5,
+};
+function $(s, r) { return (r || document).querySelector(s); }
+function $$(s, r) { return Array.from((r || document).querySelectorAll(s)); }
+function el(tag, attrs, kids) {
+  const e = document.createElement(tag);
+  if (attrs) for (const k in attrs) {
+    if (k === 'class') e.className = attrs[k];
+    else if (k === 'html') e.innerHTML = attrs[k];
+    else if (k.startsWith('on')) e.addEventListener(k.slice(2), attrs[k]);
+    else e.setAttribute(k, attrs[k]);
+  }
+  if (kids) (Array.isArray(kids) ? kids : [kids]).forEach(k => { if (k != null) e.appendChild(typeof k === 'string' ? document.createTextNode(k) : k); });
+  return e;
+}
+function fmt(n) { if (n == null) return '—'; return n.toLocaleString(); }
+function clamp(s, n) { if (!s) return ''; return s.length > n ? s.slice(0, n-1) + '…' : s; }
+function fileTail(s) { if (!s) return ''; const i = s.lastIndexOf('/'); return i < 0 ? s : s.slice(i+1); }
+function pillsFor(effects) { if (!effects || !effects.length) return []; return effects.map(e => el('span', { class: 'pill ' + e }, e)); }
+async function api(path) { const r = await fetch(path); if (!r.ok) throw new Error('HTTP ' + r.status + ' on ' + path); return r.json(); }
+function toast(msg, kind) {
+  const t = el('div', { class: 'toast' + (kind ? ' ' + kind : '') }, msg);
+  $('#toast-stack').appendChild(t);
+  setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 3500);
+}
+
+function parseHash() {
+  const h = location.hash.replace(/^#\/?/, '');
+  const [route, ...rest] = h.split('/');
+  const params = {};
+  for (const seg of rest) {
+    const eq = seg.indexOf('=');
+    if (eq > 0) params[seg.slice(0, eq)] = decodeURIComponent(seg.slice(eq+1));
+  }
+  return { route: route || 'architecture', params };
+}
+function setRoute(route, params) {
+  // v23.35: graph routes always carry the current orientation so the URL is a
+  // complete, shareable description of the view (orient round-trips on reload).
+  if (route === 'graph') {
+    params = params || {};
+    if (params.orient === undefined) params.orient = state.graphOrient || 'LR';
+  }
+  let hash = '#/' + route;
+  if (params) for (const k in params) hash += '/' + k + '=' + encodeURIComponent(params[k]);
+  if (location.hash !== hash) location.hash = hash;
+  else handleRoute();
+}
+function handleRoute() {
+  const { route, params } = parseHash();
+  state.route = route;
+  $$('.page').forEach(p => p.style.display = 'none');
+  $$('.nav-btn, .left-nav-item').forEach(b => b.classList.remove('active'));
+  $$('[data-route="' + route + '"]').forEach(b => b.classList.add('active'));
+  // v23.38: the page div ids don't all equal their route name — 'architecture'
+  // maps to #page-arch. Building '#page-' + route silently missed it, so the
+  // Architecture container was never un-hidden and the tab looked blank even
+  // though its data (and the 146 badge) loaded fine. Map explicitly.
+  const pageIdFor = { architecture: 'arch' };
+  const page = $('#page-' + (pageIdFor[route] || route));
+  if (page) page.style.display = 'block';
+  switch (route) {
+    case 'architecture': renderArchitecture(); break;
+    case 'graph':        renderGraph(params); break;
+    case 'beliefs':      renderBeliefs(); break;
+    case 'search':       renderSearch(params); break;
+    case 'entries':      renderEntries(); break;
+    case 'effects':      renderEffects(); break;
+    case 'unknowns':     renderUnknowns(); break;
+    default: setRoute('architecture');
+  }
+}
+
+// v25.5: self-healing / generation activity panel. Structured agent events
+// (lifecycle + repair attempts) arrive over SSE during a Studio-triggered build
+// and are appended here so the human can watch the repair loop live.
+let _healEvents = [];
+function pushHealEvent(ev) {
+  if (!ev || typeof ev !== 'object') return;
+  // Skip pure noise: lifecycle events with no message.
+  if (ev.kind === 'lifecycle' && !ev.message) return;
+  _healEvents.push(ev);
+  if (_healEvents.length > 300) _healEvents = _healEvents.slice(-300);
+  renderHealLog();
+}
+function renderHealLog() {
+  const box = $('#heal-log');
+  if (!box) return;
+  const cnt = $('#heal-count');
+  if (cnt) {
+    const heals = _healEvents.filter(e => e.kind === 'heal').length;
+    cnt.textContent = heals ? '· ' + heals + ' repair step' + (heals === 1 ? '' : 's') : '';
+  }
+  if (!_healEvents.length) {
+    box.className = 'right-empty';
+    box.textContent = 'No generation activity yet.';
+    return;
+  }
+  box.className = '';
+  box.innerHTML = '';
+  // Newest last; auto-scroll to the bottom.
+  _healEvents.forEach(ev => {
+    const phase = (ev.phase || '').toLowerCase();
+    const isHeal = ev.kind === 'heal';
+    const kids = [];
+    kids.push(el('span', { class: 'heal-dot' }));
+    const body = [];
+    if (isHeal) {
+      if (ev.func) body.push(el('span', { class: 'heal-func' }, ev.func));
+      const meta = [];
+      if (ev.attempt) meta.push('attempt ' + ev.attempt + (ev.max ? '/' + ev.max : ''));
+      if (ev.phase) meta.push(ev.phase);
+      if (ev.strategy) meta.push(ev.strategy);
+      if (meta.length) body.push(el('span', { class: 'heal-meta' }, ' ' + meta.join(' · ')));
+      if (ev.message) body.push(el('div', { class: 'heal-msg' }, ev.message));
+    } else {
+      body.push(el('span', { class: 'heal-msg' }, ev.message || '(event)'));
+    }
+    kids.push(el('div', { class: 'heal-body' }, body));
+    box.appendChild(el('div', { class: 'heal-row ' + phase + (isHeal ? ' is-heal' : '') }, kids));
+  });
+  box.scrollTop = box.scrollHeight;
+}
+function wireHealClear() {
+  const btn = $('#heal-clear');
+  if (btn) btn.addEventListener('click', () => { _healEvents = []; renderHealLog(); });
+}
+
+function connectSSE() {
+  try {
+    const es = new EventSource('/api/events');
+    es.onopen = () => { $('#conn-dot').classList.add('live'); $('#conn-text').textContent = 'live'; };
+    es.onerror = () => { $('#conn-dot').classList.remove('live'); $('#conn-text').textContent = 'reconnecting'; };
+    ['file_changed','build','heal','snapshot'].forEach(type => {
+      es.addEventListener(type, ev => {
+        let p = {}; try { p = JSON.parse(ev.data); } catch (e) {}
+        if (type === 'file_changed') {
+          toast('Updated: ' + (p.path ? fileTail(p.path) : 'file'));
+          state.arch = null;
+          if (state.route === 'architecture') renderArchitecture();
+        } else if (type === 'heal') {
+          // v25.5: a structured self-healing step — render it in the panel.
+          pushHealEvent({
+            kind: 'heal', phase: p.phase, func: p.func, attempt: p.attempt,
+            max: p.max, strategy: p.strategy, message: p.detail,
+          });
+        }
+      });
+    });
+    // v25.5: structured agent events (lifecycle + heal) from a Studio build.
+    es.addEventListener('agent_structured', ev => {
+      let p = {}; try { p = JSON.parse(ev.data); } catch (e) {}
+      pushHealEvent(p);
+    });
+    // v24 — dynamic project load/clear: full refresh of all views.
+    ['project_loaded','project_cleared'].forEach(type => {
+      es.addEventListener(type, ev => {
+        let p = {}; try { p = JSON.parse(ev.data); } catch (e) {}
+        state.arch = null;
+        refreshProjectStatus();
+        if (type === 'project_loaded') toast('Project loaded: ' + (p.root ? fileTail(p.root) : 'project'));
+        else toast('Project cleared');
+        // re-render whatever view is active against the new project
+        if (state.route === 'architecture') renderArchitecture();
+        else if (state.route === 'graph' && typeof renderGraph === 'function') renderGraph();
+        else if (state.route === 'beliefs' && typeof renderBeliefs === 'function') renderBeliefs();
+      });
+    });
+  } catch (e) { console.warn('SSE not available:', e); }
+}
+
+async function renderArchitecture() {
+  const page = $('#page-arch');
+  if (!state.arch) {
+    page.innerHTML = '';
+    page.appendChild(el('div', { class: 'loader' }, 'Loading architecture…'));
+    try { state.arch = await api('/api/present/v23/architecture'); }
+    catch (e) { page.innerHTML = ''; page.appendChild(el('div', { class: 'right-empty' }, 'Failed: ' + e.message)); return; }
+  }
+  const a = state.arch;
+  $('#nav-badge-arch').textContent = fmt(a.total_symbols);
+  page.innerHTML = '';
+  // v23.37: distinguish a genuinely empty index from real data. The backend
+  // returns an all-zero ArchitectureResponse when no index is loaded (wrong
+  // --root, parse still warming, or a root with no source files). Rendering
+  // that silently produced a blank page of zeros with no explanation.
+  if (!a.total_symbols) {
+    page.appendChild(el('div', { class: 'page-header' }, [
+      el('div', { class: 'page-title' }, 'Architecture'),
+      el('div', { class: 'page-subtitle' }, 'Nothing parsed yet.'),
+    ]));
+    const box = el('div', { class: 'right-empty', style: 'text-align:left;max-width:640px;line-height:1.7;' });
+    box.appendChild(el('div', { style: 'font-weight:600;margin-bottom:8px;' }, 'The index is empty — 0 symbols.'));
+    box.appendChild(el('div', null, 'This usually means one of:'));
+    const ul = el('div', { style: 'margin:8px 0 8px 4px;' });
+    ['The server was started with a --root that has no source files in a supported language (Go, TS, Python, CA Gen, COBOL, Java).',
+     'The parse is still running — large trees take a moment. Hit Refresh.',
+     'A COBOL/CA Gen root without --copybooks, so files could not resolve.'].forEach(t =>
+      ul.appendChild(el('div', { style: 'margin:4px 0;' }, '• ' + t)));
+    box.appendChild(ul);
+    box.appendChild(el('div', { class: 'mono', style: 'margin-top:10px;font-size:12px;opacity:.8;' },
+      'e.g.  understand-server --root /legacy/project --copybooks /legacy/copybooks'));
+    box.appendChild(el('button', { class: 'btn', style: 'margin-top:14px;',
+      onclick: () => { state.arch = null; renderArchitecture(); } }, 'Refresh'));
+    page.appendChild(box);
+    return;
+  }
+  page.appendChild(el('div', { class: 'page-header' }, [
+    el('div', { class: 'page-title' }, 'Architecture'),
+    el('div', { class: 'page-subtitle' }, 'A one-page picture of what gen-system has parsed and understood.'),
+    el('div', { class: 'page-actions' }, [
+      el('button', { class: 'btn', onclick: () => { state.arch = null; renderArchitecture(); } }, 'Refresh'),
+    ]),
+  ]));
+  const cards = el('div', { class: 'card-grid' });
+  const resolvedPct = a.edges.total ? Math.round((a.edges.resolved / a.edges.total) * 100) : 0;
+  cards.appendChild(buildCard('Symbols indexed', fmt(a.total_symbols), fmt(a.total_files) + ' files'));
+  cards.appendChild(buildCard('Languages', (a.languages || []).length, (a.languages || []).slice(0,3).map(l => l.language).join(' · '), 'accent'));
+  cards.appendChild(buildCard('Edge resolution', resolvedPct + '%', fmt(a.edges.resolved) + ' / ' + fmt(a.edges.total) + ' resolved', resolvedPct >= 90 ? 'accent' : 'warn'));
+  cards.appendChild(buildCard('Entry points', fmt((a.entry_points || []).length), 'mains, handlers, transactions'));
+  if (a.provenance && a.provenance.stdlib_symbols > 0) {
+    cards.appendChild(buildCard('Into the runtime', fmt(a.provenance.edges_into_stdlib),
+      fmt(a.provenance.stdlib_symbols) + ' stdlib symbols resolved', 'accent'));
+  }
+  page.appendChild(cards);
+
+  // v26.5 — RUNTIME RESOLUTION. The edge-resolution % above is only meaningful
+  // if you can see WHICH runtimes were attached and which were not: an
+  // unresolved-heavy project is usually just a project whose stdlib wasn't
+  // ingested. This section renders the loader's report — what attached, what was
+  // skipped, and the exact reason — so the number diagnoses itself instead of
+  // sending the reader to guess at flags. This is the "report, don't prompt"
+  // half of the v26.5 design: detection runs automatically, and the outcome is
+  // shown after the fact (when it is actually known) rather than gated behind a
+  // confirmation dialog before it (when it can only be guessed at).
+  const sl = a.stdlib;
+  if (sl && (sl.roots || []).length) {
+    page.appendChild(el('div', { class: 'section-title', style: 'margin-top:28px;' }, [
+      document.createTextNode('Runtime resolution'),
+      el('span', { class: 'dimmer', style: 'font-weight:400;margin-left:8px;font-size:11px;' },
+        'stdlib mode: ' + (sl.mode || '—')),
+    ]));
+    const slTable = el('table', { class: 'data' });
+    slTable.appendChild(el('thead', null, el('tr', null, [
+      el('th', null, 'Language'), el('th', null, 'Root'), el('th', null, 'Status'),
+      el('th', null, 'Packages'), el('th', null, 'Symbols'),
+    ])));
+    const slBody = el('tbody');
+    (sl.roots || []).forEach(r => {
+      const attached = r.status === 'attached';
+      const where = r.path === 'cobol' ? 'built-in catalog' : (r.path || '—');
+      // A skipped/missing root's DETAIL is the actionable part (e.g. "JAVA_HOME
+      // not set — pass --stdlib java=<dir>"), so it replaces the counts rather
+      // than hiding in a tooltip.
+      const statusCell = el('span', {
+        class: 'pill ' + (attached ? 'pure' : 'unknown'),
+      }, r.status + (r.auto ? ' · auto' : ''));
+      slBody.appendChild(el('tr', null, [
+        el('td', { class: 'mono' }, r.lang || '?'),
+        el('td', { class: 'mono dimmer', style: 'max-width:340px;overflow:hidden;text-overflow:ellipsis;' }, where),
+        el('td', null, statusCell),
+        el('td', null, attached ? fmt(r.packages) : '—'),
+        el('td', null, attached ? fmt(r.symbols) : '—'),
+      ]));
+      if (!attached && r.detail) {
+        const note = el('tr', null, el('td', { colspan: '5', class: 'dimmer', style: 'padding-top:0;font-size:11px;' }, '↳ ' + r.detail));
+        slBody.appendChild(note);
+      }
+    });
+    slTable.appendChild(slBody);
+    page.appendChild(slTable);
+  }
+
+  page.appendChild(el('div', { class: 'section-title' }, 'Languages'));
+  const langWrap = el('div');
+  const langMax = (a.languages || []).reduce((m, l) => Math.max(m, l.symbols), 0);
+  (a.languages || []).forEach(l => {
+    const w = langMax ? (l.symbols / langMax * 100).toFixed(1) : 0;
+    langWrap.appendChild(el('div', { class: 'bar-row' }, [
+      el('div', { class: 'label' }, l.language),
+      el('div', { class: 'bar' }, el('div', { class: 'bar-fill', style: 'width:' + w + '%' })),
+      el('div', { class: 'count' }, fmt(l.symbols) + ' · ' + fmt(l.files) + ' files'),
+    ]));
+  });
+  page.appendChild(langWrap);
+  page.appendChild(el('div', { class: 'section-title', style: 'margin-top:28px;' }, 'Top packages'));
+  const pkgTable = el('table', { class: 'data' });
+  pkgTable.appendChild(el('thead', null, el('tr', null, [el('th',null,'Path'), el('th',null,'Symbols'), el('th',null,'Files')])));
+  const pkgBody = el('tbody');
+  (a.packages || []).slice(0, 12).forEach(p => {
+    pkgBody.appendChild(el('tr', { onclick: () => setRoute('search', { q: '', pkg: p.path }) }, [
+      el('td', { class: 'mono' }, p.path),
+      el('td', null, fmt(p.symbols)),
+      el('td', { class: 'kind' }, fmt(p.files)),
+    ]));
+  });
+  pkgTable.appendChild(pkgBody);
+  page.appendChild(pkgTable);
+  page.appendChild(el('div', { class: 'section-title', style: 'margin-top:28px;' }, 'Entry points'));
+  if (!a.entry_points || !a.entry_points.length) {
+    page.appendChild(el('div', { class: 'right-empty' }, 'None detected. Re-check the parse if this surprises you.'));
+  } else {
+    const et = el('table', { class: 'data' });
+    et.appendChild(el('thead', null, el('tr', null, [el('th',null,'Name'), el('th',null,'Kind'), el('th',null,'Language'), el('th',null,'File')])));
+    const eb = el('tbody');
+    a.entry_points.slice(0, 30).forEach(p => {
+      eb.appendChild(el('tr', { onclick: () => goToSymbol(p.symbol_id, p.file) }, [
+        el('td', null, p.name),
+        el('td', { class: 'kind' }, p.kind),
+        el('td', { class: 'kind' }, p.language),
+        el('td', { class: 'mono' }, clamp(p.file, 60)),
+      ]));
+    });
+    et.appendChild(eb);
+    page.appendChild(et);
+  }
+}
+function buildCard(label, value, footnote, cls) {
+  return el('div', { class: 'card' + (cls ? ' ' + cls : '') }, [
+    el('div', { class: 'label' }, label),
+    el('div', { class: 'value' }, String(value)),
+    el('div', { class: 'footnote' }, footnote),
+  ]);
+}
+
+async function renderGraph(params) {
+  const page = $('#page-graph');
+  page.innerHTML = '';
+  // v23.35: orientation is shareable via the URL hash. Honour ?orient= when
+  // present; otherwise keep the current session value (default LR).
+  if (params && (params.orient === 'LR' || params.orient === 'TB')) state.graphOrient = params.orient;
+  const rootId = (params && params.root) || state.selectedSymbolId;
+  page.appendChild(el('div', { class: 'page-header' }, [
+    el('div', { class: 'page-title' }, 'Graph view'),
+    el('div', { class: 'page-subtitle' }, rootId ? 'Centered on ' + clamp(rootId, 80) : 'Pick a symbol to start.'),
+  ]));
+  const shell = el('div', { class: 'graph-shell' });
+  page.appendChild(shell);
+  const ctrl = el('div', { class: 'graph-controls' }, [
+    // v23.37 — browser-style back/forward through visited roots ([ and ] keys).
+    el('button', { id: 'nav-back', class: 'btn ghost nav-arrow', title: 'Back  [', onclick: () => navBack() }, '◀'),
+    el('button', { id: 'nav-fwd', class: 'btn ghost nav-arrow', title: 'Forward  ]', onclick: () => navForward() }, '▶'),
+    el('label', null, ['Direction', (function(){
+      const s = el('select', { onchange: (e) => { state.graphDirection = e.target.value; if (rootId) setRoute('graph', { root: rootId }); } });
+      ['callees','callers','both'].forEach(d => { const o = el('option', { value: d }, d); if (d === state.graphDirection) o.selected = true; s.appendChild(o); });
+      return s;
+    })()]),
+    el('label', null, ['Depth', (function(){
+      const s = el('select', { onchange: (e) => { state.graphDepth = parseInt(e.target.value); if (rootId) setRoute('graph', { root: rootId }); } });
+      [1,2,3,4].forEach(d => { const o = el('option', { value: d }, String(d)); if (d === state.graphDepth) o.selected = true; s.appendChild(o); });
+      return s;
+    })()]),
+    el('div', { style: 'flex:1;' }),
+    (function(){
+      // v23.34 — find/locate box: highlights matching nodes, centers the first.
+      const inp = el('input', { type: 'text', class: 'graph-find', placeholder: 'Find node…',
+        oninput: (e) => { const n = locateInGraph(e.target.value); const c = $('#graph-find-count'); if (c) c.textContent = e.target.value.trim() ? (n + ' match' + (n===1?'':'es')) : ''; },
+        onkeydown: (e) => { if (e.key === 'Escape') { e.target.value=''; locateInGraph(''); $('#graph-find-count').textContent=''; } } });
+      return el('label', { class: 'graph-find-wrap', title: 'Find a node by name in the current graph' }, [inp, el('span', { id: 'graph-find-count', class: 'graph-find-count' }, '')]);
+    })(),
+    (function(){
+      // v23.34 — orientation toggle (LR keeps deep trees from stretching wide)
+      const b = el('button', { class: 'btn ghost', title: 'Toggle layout orientation',
+        onclick: () => { state.graphOrient = state.graphOrient === 'LR' ? 'TB' : 'LR'; if (rootId) setRoute('graph', { root: rootId }); } },
+        state.graphOrient === 'LR' ? '⇄ L→R' : '⇅ T→B');
+      return b;
+    })(),
+    (function(){
+      // v24 — Option C: toggle loop-limit brackets (compact hexagon by default).
+      const b = el('button', { class: 'btn ghost', title: 'Toggle loop-limit brackets around loops',
+        onclick: () => { state.cfgLoopBrackets = !state.cfgLoopBrackets; if (state.currentCFG) loadCFGInto(state.currentCFG); } },
+        state.cfgLoopBrackets ? '⟦ loops ⟧' : '⟦ loops');
+      return b;
+    })(),
+    el('label', { class: 'stdlib-toggle', title: 'Show calls that cross into the standard library / runtime' }, [
+      (function(){
+        const c = el('input', { type: 'checkbox', onchange: (e) => { state.includeStdlib = e.target.checked; if (rootId) setRoute('graph', { root: rootId }); } });
+        if (state.includeStdlib) c.checked = true;
+        return c;
+      })(),
+      document.createTextNode(' stdlib'),
+    ]),
+    el('button', { id: 'src-toggle', class: 'btn ghost', title: 'Show/hide the source of the selected symbol',
+      onclick: () => toggleSource() }, '⟨/⟩ Source ▸'),
+    el('button', { class: 'btn ghost', onclick: () => { $('#palette-trigger').click(); } }, 'Pick symbol… ⌘K'),
+  ]);
+  shell.appendChild(ctrl);
+  const left = el('div', { class: 'graph-pane cg-pane' }, [
+    el('div', { class: 'graph-pane-header' }, [
+      el('div', null, [el('strong', null, 'Call graph'), document.createTextNode(' · '), el('span', null, state.graphDirection)]),
+      el('div', { class: 'dim' }, rootId ? 'depth ' + state.graphDepth : ''),
+    ]),
+    el('div', { class: 'graph-body', id: 'cg-body' }),
+  ]);
+  const right = el('div', { class: 'graph-pane cfg-pane' }, [
+    el('div', { class: 'graph-pane-header' }, [
+      el('div', null, el('strong', null, 'CFG')),
+      el('div', { class: 'dim' }, 'control-flow of the selected function'),
+    ]),
+    el('div', { class: 'graph-body', id: 'cfg-body' }),
+  ]);
+  shell.appendChild(left);
+  // v25.3: draggable gutter between the call-graph and CFG panes.
+  const gutter = el('div', { class: 'graph-gutter', id: 'graph-gutter', title: 'Drag to resize · double-click to reset' });
+  shell.appendChild(gutter);
+  shell.appendChild(right);
+  shell.classList.add('resizable');
+  initGraphGutter(shell, gutter);
+  // v23.37 — source panel spans full width beneath the two graph panes so long
+  // lines read comfortably. Collapsed unless toggled on (state.srcOpen).
+  const srcWrap = el('div', { id: 'src-wrap', class: 'src-wrap', style: state.srcOpen ? '' : 'display:none;' }, [
+    el('div', { class: 'graph-pane-header' }, [
+      el('div', null, el('strong', null, 'Source')),
+      el('div', { class: 'dim' }, 'the actual code behind the selected symbol'),
+    ]),
+    el('div', { class: 'src-body', id: 'src-body' }, el('div', { class: 'graph-empty' }, 'Select a node to view its source.')),
+  ]);
+  page.appendChild(srcWrap);
+  // restore the toggle label to match persisted state
+  const st = $('#src-toggle'); if (st) st.textContent = state.srcOpen ? '⟨/⟩ Source ▾' : '⟨/⟩ Source ▸';
+  if (!rootId) {
+    $('#cg-body').appendChild(el('div', { class: 'graph-empty' }, 'No symbol selected. Press ⌘K to pick one.'));
+    $('#cfg-body').appendChild(el('div', { class: 'graph-empty' }, 'CFG appears once a function is selected.'));
+    return;
+  }
+  $('#cg-body').appendChild(el('div', { class: 'loader' }, 'Loading call graph…'));
+  try {
+    const cg = await api('/api/present/v23/callgraph?root=' + encodeURIComponent(rootId) + '&depth=' + state.graphDepth + '&direction=' + state.graphDirection + (state.includeStdlib ? '&include_stdlib=1' : ''));
+    $('#cg-body').innerHTML = '';
+    const svg = layoutCallgraph(cg);
+    $('#cg-body').appendChild(svg);
+    // v23.1 — zoom/pan controls layered over the call-graph pane
+    const zc = el('div', { class: 'zoom-controls' }, [
+      el('button', { title: 'Zoom in', onclick: () => svg._z && svg._z._zoomIn() }, '+'),
+      el('div', { class: 'zoom-level' }, '100%'),
+      el('button', { title: 'Zoom out', onclick: () => svg._z && svg._z._zoomOut() }, '−'),
+      el('button', { title: 'Actual size (100%)', onclick: () => svg._z && svg._z._actual(), style: 'font-size:11px;' }, '1:1'),
+      el('button', { title: 'Reset (or double-click canvas)', onclick: () => svg._z && svg._z._reset(), style: 'font-size:12px;' }, '⊡'),
+    ]);
+    $('#cg-body').appendChild(zc);
+    attachZoom(svg, $('#cg-body'));
+    // v25.9.3 — same guarantee for the call graph: open fitted + centered.
+    forceFitWhenSized(svg);
+    // v23.35: clicking (not dragging) empty canvas clears the find filter.
+    // Track press position so a pan-drag that ends over empty space doesn't
+    // count as a click.
+    let downX = 0, downY = 0;
+    svg.addEventListener('mousedown', (ev) => { downX = ev.clientX; downY = ev.clientY; });
+    svg.addEventListener('click', (ev) => {
+      if (ev.target.closest('.cg-node')) return;
+      if (Math.abs(ev.clientX - downX) > 4 || Math.abs(ev.clientY - downY) > 4) return; // was a drag
+      const fb = $('.graph-find');
+      if (fb && fb.value) {
+        fb.value = '';
+        locateInGraph('');
+        const c = $('#graph-find-count'); if (c) c.textContent = '';
+      }
+    });
+    // v23.3 — direction legend
+    const legend = el('div', { class: 'graph-legend' }, [
+      el('span', null, [el('i', { style: 'color:var(--border-2)' }), document.createTextNode('calls →')]),
+      el('span', null, [el('i', { style: 'color:var(--amber)' }), document.createTextNode('called by ↑')]),
+      el('span', null, [el('i', { style: 'color:var(--purple)' }), document.createTextNode('unresolved')]),
+      el('span', null, [el('i', { style: 'border:1px dashed var(--text-dim);background:transparent;' }), document.createTextNode('stdlib')]),
+    ]);
+    $('#cg-body').appendChild(legend);
+    if (cg.truncated) toast('Call graph truncated at 200 nodes — narrow depth or direction.', 'warn');
+  } catch (e) {
+    $('#cg-body').innerHTML = '';
+    $('#cg-body').appendChild(el('div', { class: 'graph-empty' }, 'Failed: ' + e.message));
+  }
+  await loadCFGInto(rootId);
+  selectSymbol(rootId);
+  state.lastGraphRoot = rootId;
+  state.navSuppress = false;   // v23.37: end of a back/forward jump; future visits push again
+  updateNavButtons();
+  loadSourceInto(rootId);      // v23.37: populate the source panel for the root
+}
+
+// v23.34 — load the CFG for a symbol into the CFG pane. Shared by initial
+// render and by single-click selection so clicking a node updates the flow
+// WITHOUT re-rooting the call graph.
+async function loadCFGInto(symbolId) {
+  state.currentCFG = symbolId; // v24: remember for the loop-brackets toggle re-render
+  const body = $('#cfg-body');
+  if (!body) return;
+  body.innerHTML = '';
+  body.appendChild(el('div', { class: 'loader' }, 'Loading CFG…'));
+  try {
+    const flow = await api('/api/present/flow?func=' + encodeURIComponent(symbolId));
+    body.innerHTML = '';
+    // v24: the server returns a friendly {noCFG,reason,hint,methods} payload for
+    // symbols that legitimately have no control flow (a type, field, const, var,
+    // or an external signature). Show that instead of a bare error.
+    if (flow && flow.noCFG) {
+      const box = el('div', { class: 'cfg-nocfg', style: 'padding:22px;max-width:520px;margin:0 auto;text-align:center;color:var(--text-2);' });
+      box.appendChild(el('div', { style: 'font-size:26px;margin-bottom:8px;opacity:0.5;' }, '◇'));
+      box.appendChild(el('div', { style: 'font-size:14px;color:var(--text);margin-bottom:6px;' }, (flow.name || 'This symbol') + ' — no control-flow graph'));
+      box.appendChild(el('div', { style: 'font-size:12.5px;line-height:1.5;' }, flow.reason || 'This symbol has no control flow to display.'));
+      if (flow.hint) box.appendChild(el('div', { style: 'font-size:12px;margin-top:8px;color:var(--text-dim);' }, flow.hint));
+      if (flow.methods && flow.methods.length) {
+        const list = el('div', { style: 'margin-top:14px;display:flex;flex-direction:column;gap:6px;align-items:center;' });
+        flow.methods.forEach(mth => {
+          list.appendChild(el('button', {
+            class: 'cfg-method-link',
+            style: 'font-family:IBM Plex Mono,monospace;font-size:12px;padding:5px 12px;border:1px solid var(--border);border-radius:6px;background:var(--bg-2);color:var(--cyan);cursor:pointer;',
+            onclick: () => { if (typeof loadCFGInto === 'function') loadCFGInto(mth.id); else location.hash = '#/graph/root=' + encodeURIComponent(mth.id); },
+          }, mth.name + '()'));
+        });
+        box.appendChild(el('div', { style: 'font-size:11px;margin-top:12px;color:var(--text-dim);' }, 'Methods with control flow:'));
+        box.appendChild(list);
+      }
+      body.appendChild(box);
+      return;
+    }
+    if (flow.effects && flow.effects.length) {
+      body.appendChild(el('div', { class: 'cfg-effects', style: 'padding:6px 10px;font-size:11px;color:var(--text-dim);font-family:IBM Plex Mono,monospace;' }, 'effects: ' + flow.effects.join(' · ')));
+    }
+    const cfgSvg = renderCFG(flow);
+    body.appendChild(cfgSvg);
+    const zc2 = el('div', { class: 'zoom-controls' }, [
+      el('button', { title: 'Zoom in', onclick: () => cfgSvg._z && cfgSvg._z._zoomIn() }, '+'),
+      el('div', { class: 'zoom-level' }, '100%'),
+      el('button', { title: 'Zoom out', onclick: () => cfgSvg._z && cfgSvg._z._zoomOut() }, '−'),
+      el('button', { title: 'Actual size (100%)', onclick: () => cfgSvg._z && cfgSvg._z._actual(), style: 'font-size:11px;' }, '1:1'),
+      el('button', { title: 'Fit (or double-click canvas)', onclick: () => cfgSvg._z && cfgSvg._z._fit(), style: 'font-size:12px;' }, '⊡'),
+    ]);
+    body.appendChild(zc2);
+    attachZoom(cfgSvg, body);
+    // v25.9.3 — a freshly-rendered CFG must ALWAYS open fitted and centered.
+    // Force it (a brand-new graph carries no user zoom to preserve) and keep
+    // retrying until the pane reports a real box — the pane can still be
+    // unlaid-out for several frames after a view switch, and a one-shot rAF just
+    // misses it. attachZoom's ResizeObserver is the belt; this is the braces.
+    forceFitWhenSized(cfgSvg);
+    // v23.38 — legend so the role-based block titles are self-explanatory.
+    const cfgLegend = el('div', { class: 'graph-legend cfg-legend' }, [
+      el('span', null, [el('i', { class: 'sw-term', style: 'border-color:var(--green);' }), document.createTextNode('Start / End')]),
+      el('span', null, [el('i', { class: 'sw-proc' }), document.createTextNode('Step (code)')]),
+      el('span', null, [el('i', { class: 'sw-dia', style: 'border-color:var(--amber);' }), document.createTextNode('Decision (condition)')]),
+      el('span', null, [el('i', { class: 'sw-loop', style: 'border-color:var(--amber);' }), document.createTextNode('Loop (for / while / until)')]),
+      el('span', null, [document.createTextNode('yes / no = branch taken')]),
+    ]);
+    body.appendChild(cfgLegend);
+  } catch (e) {
+    body.innerHTML = '';
+    body.appendChild(el('div', { class: 'graph-empty' }, 'No CFG available: ' + e.message));
+  }
+}
+
+// v23.37 — fetch and render the full contiguous source of a symbol into the
+// source panel, so you can read the actual code behind the selected node/CFG.
+// The panel is collapsed by default (toggle in the graph controls); we only
+// hit the endpoint when it is open, to avoid a fetch per node when unused.
+async function loadSourceInto(symbolId) {
+  const body = $('#src-body');
+  if (!body) return;
+  state.srcSymbolId = symbolId;
+  if (!state.srcOpen) return;   // panel hidden — skip the fetch until opened
+  body.innerHTML = '';
+  body.appendChild(el('div', { class: 'loader' }, 'Loading source…'));
+  try {
+    const src = await api('/api/present/source?sym=' + encodeURIComponent(symbolId));
+    body.innerHTML = '';
+    body.appendChild(el('div', { class: 'src-meta' },
+      (src.name || '(anon)') + '  ·  ' + (src.kind || '') + '  ·  ' +
+      fileTail(src.file) + ':' + src.start_line + '–' + src.end_line));
+    const pre = el('pre', { class: 'src-pre' });
+    (src.lines || []).forEach(L => {
+      const row = el('div', { class: 'src-line' }, [
+        el('span', { class: 'src-ln' }, String(L.line)),
+        el('span', { class: 'src-tx' }, L.text === '' ? ' ' : L.text),
+      ]);
+      pre.appendChild(row);
+    });
+    body.appendChild(pre);
+  } catch (e) {
+    body.innerHTML = '';
+    body.appendChild(el('div', { class: 'graph-empty' }, 'No source available: ' + e.message));
+  }
+}
+function toggleSource() {
+  state.srcOpen = !state.srcOpen;
+  const wrap = $('#src-wrap'); const btn = $('#src-toggle');
+  if (wrap) wrap.style.display = state.srcOpen ? '' : 'none';
+  if (btn) btn.textContent = state.srcOpen ? '⟨/⟩ Source ▾' : '⟨/⟩ Source ▸';
+  if (state.srcOpen && state.srcSymbolId) loadSourceInto(state.srcSymbolId);
+}
+
+// v23.34 — single-click on a call-graph node: highlight it, center it in the
+// pane (no re-root), update the CFG pane + right-hand detail. Double-click
+// re-roots (see node handler).
+function selectGraphNode(symbolId) {
+  // visual highlight
+  $$('#cg-body .cg-node').forEach(g => g.classList.toggle('selected', g.dataset.symId === symbolId));
+  centerGraphNode(symbolId, false);
+  loadCFGInto(symbolId);
+  loadSourceInto(symbolId);   // v23.37: keep the source panel in sync with selection
+  selectSymbol(symbolId);
+}
+
+// center the viewport on a node (optionally a stronger "locate" pulse).
+function centerGraphNode(symbolId, pulse) {
+  const svg = $('#cg-body svg.graph'); if (!svg || !svg._z) return;
+  const g = $$('#cg-body .cg-node').find(n => n.dataset.symId === symbolId);
+  if (!g) return;
+  const tr = (g.getAttribute('transform') || '').match(/translate\(([-\d.]+),\s*([-\d.]+)\)/);
+  if (!tr) return;
+  const nx = parseFloat(tr[1]) + 105, ny = parseFloat(tr[2]) + 32; // node center
+  svg._z._centerOn(nx, ny);
+  if (pulse) { g.classList.add('locate-pulse'); setTimeout(() => g.classList.remove('locate-pulse'), 1400); }
+}
+
+// v23.34 — find/locate: match nodes by name substring, dim the rest, center
+// the first match. Empty query clears the filter.
+function locateInGraph(query) {
+  const q = (query || '').trim().toLowerCase();
+  const nodes = $$('#cg-body .cg-node');
+  if (!q) { nodes.forEach(n => n.classList.remove('dimmed', 'match')); return 0; }
+  let first = null, count = 0;
+  nodes.forEach(n => {
+    const hit = n.dataset.name && n.dataset.name.indexOf(q) >= 0;
+    n.classList.toggle('dimmed', !hit);
+    n.classList.toggle('match', hit);
+    if (hit) { count++; if (!first) first = n; }
+  });
+  if (first) centerGraphNode(first.dataset.symId, true);
+  return count;
+}
+
+// v23.3 — shared SVG arrowhead defs. Two markers: forward (calls) and an
+// up-tinted one for caller edges.
+function makeArrowDefs(svgNS) {
+  const defs = document.createElementNS(svgNS, 'defs');
+  function marker(id, color) {
+    const m = document.createElementNS(svgNS, 'marker');
+    m.setAttribute('id', id);
+    m.setAttribute('viewBox', '0 0 10 10');
+    m.setAttribute('refX', '9'); m.setAttribute('refY', '5');
+    m.setAttribute('markerWidth', '8'); m.setAttribute('markerHeight', '8');
+    m.setAttribute('orient', 'auto-start-reverse');
+    const path = document.createElementNS(svgNS, 'path');
+    path.setAttribute('d', 'M0,0 L10,5 L0,10 z');
+    path.setAttribute('fill', color);
+    m.appendChild(path);
+    return m;
+  }
+  // v24: the forward arrow was var(--border-2) — the SAME faint tan as the edge
+  // line — so on a light background the arrowhead was nearly invisible and edges
+  // looked directionless. Use a darker ink so direction always reads.
+  defs.appendChild(marker('arrow', 'var(--text-dim)'));
+  defs.appendChild(marker('arrow-up', 'var(--amber)'));
+  defs.appendChild(marker('arrow-un', 'var(--purple)'));
+  return defs;
+}
+
+function layoutCallgraph(cg) {
+  const svgNS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(svgNS, 'svg');
+  svg.setAttribute('class', 'graph');
+  svg.appendChild(makeArrowDefs(svgNS));
+  const vp = document.createElementNS(svgNS, 'g');
+  vp.setAttribute('class', 'viewport');
+  svg.appendChild(vp);
+  if (!cg.nodes || !cg.nodes.length) {
+    const t = document.createElementNS(svgNS, 'text');
+    t.setAttribute('x', 20); t.setAttribute('y', 30);
+    t.setAttribute('fill', 'var(--text-dim)');
+    t.textContent = 'No graph data.';
+    vp.appendChild(t);
+    return svg;
+  }
+
+  const rootId = cg.root;
+  const dir = cg.direction || 'callees';
+  // v23.34: orientation. 'LR' = depth flows left→right, siblings stack
+  // vertically (keeps deep call trees from stretching horizontally — the
+  // common case). 'TB' = the classic top→bottom. Read from state.
+  const orient = (typeof state !== 'undefined' && state.graphOrient) ? state.graphOrient : 'LR';
+  const LR = orient === 'LR';
+
+  // ── Sugiyama-style layered layout (v23.5, orientation-aware v23.34) ──────
+  // Depth = the LAYER axis; siblings spread along the CROSS axis. In LR the
+  // layer axis is x and the cross axis is y; in TB it's the reverse. We keep
+  // the cross-axis slot tight so fan-out stacks compactly instead of blowing
+  // up the runaway dimension.
+  const NW = 210, NH = 64;
+  const LAYER_GAP = LR ? 150 : 104; // gap between depth layers
+  const CROSS_GAP = LR ? 22 : 46;   // gap between siblings in a layer
+  // cross-axis slot = node size on the cross axis + gap
+  const SLOT = (LR ? NH : NW) + CROSS_GAP;
+
+  const layers = {};
+  cg.nodes.forEach(n => { (layers[n.depth] = layers[n.depth] || []).push(n); });
+  const depths = Object.keys(layers).map(Number).sort((a, b) => a - b);
+
+  // adjacency by symbol id (only resolved edges between present nodes)
+  const present = new Set(cg.nodes.map(n => n.symbol_id));
+  const downAdj = {}; // node -> [neighbours in next layer]
+  const upAdj = {};   // node -> [neighbours in prev layer]
+  (cg.edges || []).forEach(e => {
+    if (!e.to || e.unresolved || !present.has(e.from) || !present.has(e.to)) return;
+    (downAdj[e.from] = downAdj[e.from] || []).push(e.to);
+    (upAdj[e.to] = upAdj[e.to] || []).push(e.from);
+  });
+
+  // order[depth] = array of node ids in left-to-right order
+  let order = depths.map(d => layers[d].map(n => n.symbol_id));
+  const indexOf = {}; // id -> position within its layer
+  function reindex() {
+    order.forEach(row => row.forEach((id, i) => { indexOf[id] = i; }));
+  }
+  reindex();
+
+  // barycenter of a node = mean position of its neighbours in the adjacent layer
+  function bary(id, adj) {
+    const ns = adj[id];
+    if (!ns || !ns.length) return indexOf[id]; // keep position if no neighbours
+    let s = 0, c = 0;
+    ns.forEach(nb => { if (indexOf[nb] !== undefined) { s += indexOf[nb]; c++; } });
+    return c ? s / c : indexOf[id];
+  }
+  // a few down+up sweeps; stable sort by barycenter
+  for (let iter = 0; iter < 4; iter++) {
+    // downward: order each layer by barycenter of parents (prev layer)
+    for (let li = 1; li < order.length; li++) {
+      const row = order[li].slice();
+      const b = {}; row.forEach(id => { b[id] = bary(id, upAdj); });
+      row.sort((x, y) => b[x] - b[y]);
+      order[li] = row; reindex();
+    }
+    // upward: order each layer by barycenter of children (next layer)
+    for (let li = order.length - 2; li >= 0; li--) {
+      const row = order[li].slice();
+      const b = {}; row.forEach(id => { b[id] = bary(id, downAdj); });
+      row.sort((x, y) => b[x] - b[y]);
+      order[li] = row; reindex();
+    }
+  }
+
+  // ── coordinate assignment ──────────────────────────────────────────────
+  // cross[id] is the position along the CROSS axis (start: ordered index *
+  // SLOT), then median-aligned so a node hugs the centre of its neighbours,
+  // pulling the cross dimension narrower.
+  const xOf = {}; // "xOf" historically; here it means CROSS-axis coordinate
+  order.forEach(row => row.forEach((id, i) => { xOf[id] = i * SLOT; }));
+  function align(adj, passes) {
+    for (let p = 0; p < passes; p++) {
+      order.forEach(row => {
+        row.forEach((id, i) => {
+          const ns = adj[id];
+          if (!ns || !ns.length) return;
+          const xs = ns.map(nb => xOf[nb]).filter(v => v !== undefined).sort((a, b) => a - b);
+          if (!xs.length) return;
+          const med = xs[Math.floor(xs.length / 2)];
+          let want = med;
+          const leftId = row[i - 1], rightId = row[i + 1];
+          if (leftId !== undefined) want = Math.max(want, xOf[leftId] + SLOT);
+          if (rightId !== undefined) want = Math.min(want, xOf[rightId] - SLOT);
+          if (isFinite(want)) xOf[id] = want;
+        });
+      });
+    }
+  }
+  align(upAdj, 2);
+  align(downAdj, 2);
+
+  // normalise cross axis so min = 0
+  let minC = Infinity, maxC = -Infinity;
+  const crossSize = LR ? NH : NW;
+  Object.values(xOf).forEach(c => { if (c < minC) minC = c; if (c + crossSize > maxC) maxC = c + crossSize; });
+  if (!isFinite(minC)) { minC = 0; maxC = crossSize; }
+  const crossExtent = Math.max(maxC - minC + CROSS_GAP * 2, crossSize + CROSS_GAP * 2);
+  const layerExtent = depths.length * ((LR ? NW : NH) + LAYER_GAP) + LAYER_GAP;
+
+  // map (layer index, cross coord) → (x, y) for the chosen orientation
+  const pos = {};
+  depths.forEach((d, di) => {
+    layers[d].forEach(n => {
+      const c = (xOf[n.symbol_id] - minC) + CROSS_GAP;
+      const layerPos = LAYER_GAP + di * ((LR ? NW : NH) + LAYER_GAP);
+      pos[n.symbol_id] = LR ? { x: layerPos, y: c } : { x: c, y: layerPos };
+    });
+  });
+
+  const width  = LR ? layerExtent : crossExtent;
+  const height = LR ? crossExtent : layerExtent;
+  svg.setAttribute('viewBox', '0 0 ' + width + ' ' + height);
+  svg.setAttribute('width', width);
+  svg.setAttribute('height', height);
+  svg.dataset.baseW = width; svg.dataset.baseH = height;
+
+  // edges first (under nodes), with arrowheads
+  (cg.edges || []).forEach(e => {
+    const a = pos[e.from], b = e.to ? pos[e.to] : null;
+    if (!a) return;
+    const g = document.createElementNS(svgNS, 'g');
+    g.setAttribute('class', 'edge-group');
+    if (e.from) g.setAttribute('data-from', e.from);
+    if (e.to) g.setAttribute('data-to', e.to);
+    const p = document.createElementNS(svgNS, 'path');
+    if (!b || e.unresolved) {
+      p.setAttribute('class', 'edge-path unresolved');
+      p.setAttribute('marker-end', 'url(#arrow-un)');
+      // dangling stub points along the layer axis
+      const x1 = LR ? a.x + NW : a.x + NW / 2;
+      const y1 = LR ? a.y + NH / 2 : a.y + NH;
+      const x2 = LR ? x1 + 36 : x1;
+      const y2 = LR ? y1 : y1 + 40;
+      p.setAttribute('d', 'M' + x1 + ',' + y1 + ' L' + x2 + ',' + y2);
+      g.appendChild(p);
+      const t = document.createElementNS(svgNS, 'text');
+      t.setAttribute('x', x2 + 6); t.setAttribute('y', y2 - 2);
+      t.setAttribute('class', 'edge-label');
+      t.textContent = '? ' + clamp(e.to_name || '', 26);
+      g.appendChild(t);
+    } else {
+      if (LR) {
+        const forward = b.x >= a.x;
+        p.setAttribute('class', 'edge-path' + (forward ? '' : ' up'));
+        p.setAttribute('marker-end', forward ? 'url(#arrow)' : 'url(#arrow-up)');
+        const x1 = forward ? a.x + NW : a.x, y1 = a.y + NH / 2;
+        const x2 = forward ? b.x : b.x + NW, y2 = b.y + NH / 2;
+        const mx = (x1 + x2) / 2;
+        p.setAttribute('d', 'M' + x1 + ',' + y1 + ' C' + mx + ',' + y1 + ' ' + mx + ',' + y2 + ' ' + x2 + ',' + y2);
+      } else {
+        const downward = b.y >= a.y;
+        p.setAttribute('class', 'edge-path' + (downward ? '' : ' up'));
+        p.setAttribute('marker-end', downward ? 'url(#arrow)' : 'url(#arrow-up)');
+        const x1 = a.x + NW / 2, y1 = downward ? a.y + NH : a.y;
+        const x2 = b.x + NW / 2, y2 = downward ? b.y : b.y + NH;
+        const my = (y1 + y2) / 2;
+        p.setAttribute('d', 'M' + x1 + ',' + y1 + ' C' + x1 + ',' + my + ' ' + x2 + ',' + my + ' ' + x2 + ',' + y2);
+      }
+      g.appendChild(p);
+    }
+    vp.appendChild(g);
+  });
+
+  // nodes
+  cg.nodes.forEach(n => {
+    const p = pos[n.symbol_id]; if (!p) return;
+    const g = document.createElementNS(svgNS, 'g');
+    const isStd = n.provenance === 'stdlib' || n.provenance === 'thirdparty';
+    g.setAttribute('class', 'cg-node' + (n.symbol_id === rootId ? ' root-ring' : '') + (isStd ? ' cg-stdlib' : '') + (n.is_init ? ' cg-init' : ''));
+    g.setAttribute('transform', 'translate(' + p.x + ',' + p.y + ')');
+    g.dataset.symId = n.symbol_id;
+    g.dataset.name = (n.name || '').toLowerCase();
+    g.style.cursor = 'pointer';
+    // v23.34: single click SELECTS (updates the CFG + side panel, keeps the
+    // current graph and your position); double click RE-ROOTS the graph on
+    // that node. A small timer disambiguates the two without a click lag that
+    // feels laggy.
+    let clickTimer = null;
+    g.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      if (clickTimer) return;
+      clickTimer = setTimeout(() => { clickTimer = null; selectGraphNode(n.symbol_id); }, 200);
+    });
+    g.addEventListener('dblclick', (ev) => {
+      ev.stopPropagation();
+      if (clickTimer) { clearTimeout(clickTimer); clickTimer = null; }
+      setRoute('graph', { root: n.symbol_id });
+    });
+    // v24: hovering a node highlights its connected edges and fades the rest —
+    // the key readability aid for a dense graph like Main.main where thin edges
+    // are otherwise hard to trace. Pure DOM class toggling; no layout change.
+    g.addEventListener('mouseenter', () => {
+      const id = n.symbol_id;
+      svg.classList.add('cg-hovering');
+      svg.querySelectorAll('g.edge-group').forEach(eg => {
+        const on = eg.getAttribute('data-from') === id || eg.getAttribute('data-to') === id;
+        eg.classList.toggle('edge-hi', on);
+      });
+    });
+    g.addEventListener('mouseleave', () => {
+      svg.classList.remove('cg-hovering');
+      svg.querySelectorAll('g.edge-group.edge-hi').forEach(eg => eg.classList.remove('edge-hi'));
+    });
+    const rect = document.createElementNS(svgNS, 'rect');
+    rect.setAttribute('width', NW); rect.setAttribute('height', NH);
+    rect.setAttribute('rx', 7); rect.setAttribute('ry', 7);
+    rect.setAttribute('class', 'depth-' + Math.min(n.depth, 3));
+    if (n.effects && n.effects.length) {
+      const dom = n.effects[0];
+      const map = { db: 'var(--cyan)', fs: 'var(--amber)', network: 'var(--red)', pure: 'var(--green)', unknown: 'var(--purple)' };
+      if (map[dom] && n.symbol_id !== rootId) rect.setAttribute('stroke', map[dom]);
+    }
+    g.appendChild(rect);
+    const t = document.createElementNS(svgNS, 'text');
+    t.setAttribute('x', 12); t.setAttribute('y', 24);
+    t.textContent = clamp(n.name || '', 24);
+    g.appendChild(t);
+    const sub = document.createElementNS(svgNS, 'text');
+    sub.setAttribute('x', 12); sub.setAttribute('y', 42);
+    sub.setAttribute('class', 'sub');
+    sub.textContent = (n.is_init ? 'allocation' : (n.kind || '')) + ' · ' + (n.language || '') + (isStd ? ' · stdlib' : '');
+    g.appendChild(sub);
+    if (n.effects && n.effects.length) {
+      const sub2 = document.createElementNS(svgNS, 'text');
+      sub2.setAttribute('x', 12); sub2.setAttribute('y', 57);
+      sub2.setAttribute('class', 'sub');
+      sub2.textContent = n.effects.join(' · ');
+      g.appendChild(sub2);
+    }
+    vp.appendChild(g);
+  });
+  return svg;
+}
+
+// v23.1 — attachZoom: pan + zoom inside the call-graph SVG.
+//   wheel        → zoom toward cursor
+//   drag (empty) → pan
+//   +/−/reset    → buttons in .zoom-controls
+//   double-click empty space → reset to fit
+// State lives on the svg element (svg._z) so it survives re-renders within
+// the same body and is read back by the zoom-control label.
+// v25.9.3 — force a freshly-rendered graph to fit + center, retrying until its
+// pane actually has a box.
+//
+// Why a retry loop rather than one requestAnimationFrame: after a view switch or
+// a pane reveal, the container can report a 0×0 (or stale) rect for several
+// frames. A single rAF fires into that window, the fit is computed against
+// nothing, and the graph is left at whatever scale it happened to have — which is
+// the "opens zoomed in and off-screen" symptom. We poll a handful of frames,
+// stop the moment we get a real fit, and give up quietly after ~1s so a genuinely
+// hidden pane never spins.
+function forceFitWhenSized(svg, tries) {
+  tries = tries == null ? 60 : tries;
+  if (!svg || !svg._z || typeof svg._z._fit !== 'function') return;
+  const ok = svg._z._fit();          // _fit clears userZoomed and returns false if unsized
+  if (ok || tries <= 0) return;
+  requestAnimationFrame(() => forceFitWhenSized(svg, tries - 1));
+}
+
+function attachZoom(svg, body) {
+  if (!svg || svg.tagName.toLowerCase() !== 'svg') return;
+  const vp = svg.querySelector('g.viewport');
+  if (!vp) return;
+  // v26.2 — WIDE zoom range for both panes (call-graph AND CFG share this
+  // controller). "Fit" resets the transform to identity and lets the viewBox map
+  // the whole graph into the pane (v25.9.4), so at scale 1 a graph that is much
+  // wider than the pane (e.g. a 16-arm switch ~7500px in a ~900px pane) is shrunk
+  // to ~12% effective and its text is unreadable. To read that text the user must
+  // be able to zoom the transform WELL past the old 4× ceiling; and to get a clean
+  // overview of a tall graph they need to go below 1×. We therefore compute the
+  // ceiling from the graph's own size so 1:1-with-source (and beyond) is always
+  // reachable no matter how large the graph is, and drop the floor for overview.
+  // maxFor(): enough transform-scale that the graph can reach ~140% of its NATURAL
+  // (source-pixel) size on screen, i.e. transform-scale = (natural/fitted)*1.4,
+  // with a generous absolute cap so a small graph can still zoom in hard.
+  const zMaxFloor = 8;      // never less than 8× even for a small graph
+  const zMaxCap   = 64;     // absolute safety cap
+  function maxFor() {
+    const rect = body.getBoundingClientRect();
+    const bw = +svg.dataset.baseW || 640, bh = +svg.dataset.baseH || 400;
+    if (rect.width < 2 || rect.height < 2) return zMaxFloor;
+    // fitScale = how much the viewBox already shrank the graph to fill the pane.
+    const fitScale = Math.min(rect.width / bw, rect.height / bh);
+    // to show the graph at 1.4× its natural pixels, transform must undo fit then
+    // overshoot: (1 / fitScale) * 1.4. Clamp into [floor, cap].
+    const want = (fitScale > 0 ? (1 / fitScale) : 1) * 1.4;
+    return Math.max(zMaxFloor, Math.min(zMaxCap, want));
+  }
+  // The floor: at transform-scale 1 the whole graph already fits (the overview),
+  // so zooming out much past that just shrinks it into a dot. Allow a little
+  // headroom below fit (0.4×) for breathing room, but no less — otherwise the
+  // label reads 0% and the graph vanishes.
+  function minFor() { return 0.4; }
+  const z = { scale: 1, tx: 0, ty: 0, min: minFor(), max: zMaxFloor };
+  z._recalcMax = () => { z.max = maxFor(); z.min = minFor(); };
+  z._recalcMax();
+  // v25.9.2 — once the user zooms/pans, stop auto-fitting on pane resize so we
+  // never yank their view. Declared here (before zoomAt) to avoid a TDZ error.
+  let userZoomed = false;
+  svg._z = z;
+  function apply() {
+    // v25.9.3 — clamp at the point of truth. Every writer *should* go through
+    // clampScale, but a single unclamped assignment anywhere (now or later) used
+    // to leak straight into the transform and the label — which is how a CFG
+    // ended up rendered at 2073% and scrolled off-screen. Enforcing it here makes
+    // that class of bug impossible rather than merely unlikely.
+    if (!(z.scale > 0) || !isFinite(z.scale)) z.scale = 1;
+    z.scale = Math.max(z.min, Math.min(z.max, z.scale));
+    if (!isFinite(z.tx)) z.tx = 0;
+    if (!isFinite(z.ty)) z.ty = 0;
+    vp.setAttribute('transform', 'translate(' + z.tx + ',' + z.ty + ') scale(' + z.scale + ')');
+    const lbl = body.querySelector('.zoom-level');
+    if (lbl) {
+      // v26.2 — show EFFECTIVE on-screen scale (transform × viewBox-fit), so 100%
+      // means "1:1 with the source" for every graph regardless of how much the
+      // viewBox pre-shrank a wide/tall one. Without this, a huge switch reads
+      // "400%" while still being unreadably small (the 400% was only the transform
+      // multiplier on top of a ~12% fit). Falls back to the raw transform scale if
+      // the pane isn't measurable yet.
+      const rect = body.getBoundingClientRect();
+      const bw = +svg.dataset.baseW || 640, bh = +svg.dataset.baseH || 400;
+      let eff = z.scale;
+      if (rect.width > 2 && rect.height > 2) {
+        const fitScale = Math.min(rect.width / bw, rect.height / bh);
+        if (fitScale > 0 && isFinite(fitScale)) eff = z.scale * fitScale;
+      }
+      lbl.textContent = Math.round(eff * 100) + '%';
+    }
+  }
+  function clampScale(s) { return Math.max(z.min, Math.min(z.max, s)); }
+  function zoomAt(factor, px, py) {
+    userZoomed = true; // v25.9.2: manual zoom → stop auto-fitting on resize
+    const ns = clampScale(z.scale * factor);
+    const k = ns / z.scale;
+    z.tx = px - k * (px - z.tx);
+    z.ty = py - k * (py - z.ty);
+    z.scale = ns;
+    apply();
+  }
+  function toSvg(clientX, clientY) {
+    const pt = svg.createSVGPoint();
+    pt.x = clientX; pt.y = clientY;
+    const m = svg.getScreenCTM();
+    if (!m) return { x: clientX, y: clientY };
+    const p = pt.matrixTransform(m.inverse());
+    return { x: p.x, y: p.y };
+  }
+  // v23.3 — fit the whole graph inside the visible pane.
+  function fitView() {
+    const rect = body.getBoundingClientRect();
+    // v25.9.2 — bail on an unsized pane; the ResizeObserver re-fits later.
+    if (rect.width < 2 || rect.height < 2) return false;
+    // v25.9.4 — THE FIT IS THE VIEWBOX. renderCFG / layoutCallgraph give the SVG a
+    // `viewBox` and CSS width/height:100%, so the browser already scales the whole
+    // graph to fill the pane AND centers it (preserveAspectRatio xMidYMid meet).
+    // attachZoom's transform is meant ONLY for subsequent user zoom/pan. The old
+    // fitView recomputed a scale from baseW/baseH as if they were pixels and
+    // applied it ON TOP of the viewBox mapping — double-scaling a small graph to
+    // 200%+ and shoving it off-screen. "Fit" is therefore just: reset to identity
+    // and let the viewBox do its job.
+    z.scale = 1; z.tx = 0; z.ty = 0;
+    z._recalcMax();
+    apply();
+    return true;
+  }
+  svg.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    const p = toSvg(e.clientX, e.clientY);
+    const factor = e.deltaY < 0 ? 1.12 : 1 / 1.12;
+    zoomAt(factor, p.x, p.y);
+  }, { passive: false });
+  let dragging = false, lastX = 0, lastY = 0;
+  svg.addEventListener('mousedown', (e) => {
+    if (e.target.closest('.cg-node')) return;
+    dragging = true; lastX = e.clientX; lastY = e.clientY;
+    userZoomed = true; // v25.9.2: manual pan → stop auto-fitting on resize
+    svg.classList.add('panning');
+  });
+  window.addEventListener('mousemove', (e) => {
+    if (!dragging) return;
+    const m = svg.getScreenCTM();
+    const k = m ? m.a : 1;
+    z.tx += (e.clientX - lastX) / k;
+    z.ty += (e.clientY - lastY) / k;
+    lastX = e.clientX; lastY = e.clientY;
+    apply();
+  });
+  window.addEventListener('mouseup', () => { dragging = false; svg.classList.remove('panning'); });
+  svg.addEventListener('dblclick', (e) => { if (!e.target.closest('.cg-node')) fitView(); });
+  // v26.2 — zoom the +/− buttons toward the CENTER OF THE VISIBLE PANE (what the
+  // user is looking at), not the center of the whole graph — on a wide switch the
+  // graph-center is off-screen, so the old math lurched the view sideways. Step is
+  // 1.35 so crossing the now-much-wider range with clicks isn't tedious.
+  function paneCenterSvg() {
+    const rect = body.getBoundingClientRect();
+    return toSvg(rect.left + rect.width / 2, rect.top + rect.height / 2);
+  }
+  z._zoomIn  = () => { const p = paneCenterSvg(); zoomAt(1.35, p.x, p.y); };
+  z._zoomOut = () => { const p = paneCenterSvg(); zoomAt(1 / 1.35, p.x, p.y); };
+  // v25.9.2 — an explicit Fit/Reset means "go back to auto": clear the manual
+  // flag so later pane resizes keep the graph fitted.
+  const refit = () => { userZoomed = false; return fitView(); };
+  z._reset   = refit;       // "reset" now means fit-to-view
+  z._fit     = refit;
+  // v23.34 / v26.2 — actual size (1:1): show the graph at its SOURCE-pixel size,
+  // centered on the current view. Because "fit" is the viewBox (scale 1 = whole
+  // graph fits the pane), true 1:1 on screen is transform-scale = 1/fitScale.
+  // This is the button that makes a huge switch legible: it jumps straight to
+  // readable text instead of the tiny fit.
+  z._actual  = () => {
+    z._recalcMax();
+    const rect = body.getBoundingClientRect();
+    const vw = rect.width, vh = rect.height;
+    const bw = +svg.dataset.baseW || 640, bh = +svg.dataset.baseH || 400;
+    let target = 1;
+    if (vw > 2 && vh > 2) {
+      const fitScale = Math.min(vw / bw, vh / bh);
+      if (fitScale > 0 && isFinite(fitScale)) target = 1 / fitScale;   // effective 100%
+    }
+    target = clampScale(target);
+    // center of what's currently visible, in svg coords
+    const cx = (vw / 2 - z.tx) / z.scale, cy = (vh / 2 - z.ty) / z.scale;
+    z.scale = target;
+    z.tx = vw / 2 - cx * z.scale; z.ty = vh / 2 - cy * z.scale;
+    userZoomed = true;
+    apply();
+  };
+  // v23.34 — center the viewport on an svg-space point at a readable scale
+  // (used by find/locate and single-click select). Bumps scale up to >=0.7 so
+  // the located node is actually legible even if the whole graph was fit tiny.
+  z._centerOn = (sx, sy) => {
+    const rect = body.getBoundingClientRect();
+    if (rect.width < 2 || rect.height < 2) return;
+    const vw = rect.width, vh = rect.height;
+    // v25.9.3 — bump a tiny graph up to a legible scale, but NEVER beyond the
+    // scale at which the whole graph still fits the pane. Previously this forced
+    // 0.9 unconditionally, so selecting a node in a large graph zoomed in and
+    // pushed everything off-screen instead of centering it.
+    if (z.scale < 0.7) {
+      const bw = +svg.dataset.baseW || 640, bh = +svg.dataset.baseH || 400;
+      const fitScale = Math.min((vw - 24) / bw, (vh - 24) / bh);
+      z.scale = clampScale(Math.min(0.9, Math.max(fitScale, z.min)));
+    }
+    z.tx = vw / 2 - sx * z.scale;
+    z.ty = vh / 2 - sy * z.scale;
+    apply();
+  };
+  // v25.9.2 — fit as soon as the pane ACTUALLY has a box.
+  //
+  // The old `requestAnimationFrame(fitView)` was a one-shot guess: when a graph
+  // pane has just been created/revealed, its height can still be 0 on the next
+  // frame, fitView bailed (or fell back to the graph's own size), and the graph
+  // was left effectively unfitted — the "no center when I pick a node" symptom.
+  //
+  // A ResizeObserver fires exactly when layout settles, and again whenever the
+  // pane is resized (gutter drag, panel collapse, window resize). We auto-fit
+  // until the user takes manual control of the zoom, then stop fighting them.
+  z._markUserZoom = () => { userZoomed = true; };
+  const tryFit = () => { if (!userZoomed) fitView(); };
+  requestAnimationFrame(tryFit);              // fast path: usually laid out already
+  if (typeof ResizeObserver !== 'undefined') {
+    // A re-render (e.g. picking another node) attaches a NEW svg to the same
+    // body. Drop the previous observer or it keeps firing against a detached
+    // graph, leaking observers and racing this one.
+    if (body._ro) { try { body._ro.disconnect(); } catch (e) {} }
+    const ro = new ResizeObserver(() => tryFit());
+    ro.observe(body);
+    body._ro = ro;
+    svg._ro = ro;
+  }
+}
+
+// v26.4 — tokenizeCode: split a single source line into coloured tokens for the
+// CFG. Deliberately lightweight and LANGUAGE-AGNOSTIC (one lexer for Go / Java /
+// Python / TS / COBOL): it recognises strings, comments, numbers, a shared
+// keyword/type set, and a function-call pattern (identifier immediately followed
+// by "("). It is not a full parser — it never needs to be, because the CFG shows
+// short single statements — but it makes a node read like an editor line. Returns
+// an array of { cls, text } where cls is one of the .t-* classes.
+const SYN_KEYWORDS = new Set([
+  // Go / general
+  'func','return','if','else','for','range','switch','case','default','break',
+  'continue','var','const','type','struct','interface','map','chan','go','defer',
+  'package','import','select','fallthrough','goto','nil','true','false','iota',
+  // Java / TS extras
+  'class','public','private','protected','static','final','void','new','extends',
+  'implements','this','super','try','catch','finally','throw','throws','instanceof',
+  'let','function','async','await','yield','export','typeof','null','undefined',
+  // Python extras
+  'def','elif','while','in','is','not','and','or','lambda','pass','with','as',
+  'raise','except','from','global','None','True','False','print',
+  // COBOL verbs / clauses (upper-cased in source)
+  'MOVE','PERFORM','UNTIL','EVALUATE','WHEN','THROUGH','THRU','CALL','USING',
+  'DISPLAY','ACCEPT','COMPUTE','ADD','SUBTRACT','MULTIPLY','DIVIDE','IF','ELSE',
+  'END-IF','END-PERFORM','END-EVALUATE','STOP','RUN','GOBACK','EXIT','SECTION',
+  'PROCEDURE','DIVISION','WORKING-STORAGE','PIC','PICTURE','VALUE','OCCURS',
+  'REDEFINES','COPY','GO','TO','FROM','BY','GIVING','SET','READ','WRITE','OPEN',
+  'CLOSE','INITIALIZE','STRING','UNSTRING','INSPECT','SEARCH','PERFORM',
+]);
+const SYN_TYPES = new Set([
+  'int','int8','int16','int32','int64','uint','uint8','uint16','uint32','uint64',
+  'float32','float64','string','bool','byte','rune','error','any','complex64',
+  'complex128','uintptr','boolean','char','double','float','long','short','Object',
+  'String','Integer','List','Map','Set','array','number','object','bigint','symbol',
+]);
+function tokenizeCode(src) {
+  const toks = [];
+  const s = src || '';
+  let i = 0;
+  const n = s.length;
+  const isIdentStart = c => /[A-Za-z_$]/.test(c);
+  const isIdent = c => /[A-Za-z0-9_$\-]/.test(c);   // '-' for COBOL identifiers
+  while (i < n) {
+    const c = s[i];
+    // whitespace — keep as plain so spacing is preserved
+    if (c === ' ' || c === '\t') { let j = i + 1; while (j < n && (s[j] === ' ' || s[j] === '\t')) j++; toks.push({ cls: 't-txt', text: s.slice(i, j) }); i = j; continue; }
+    // line comment: // …  or  # …  or  * … (COBOL col-7 handled by whole-line below)
+    if ((c === '/' && s[i + 1] === '/') || c === '#') { toks.push({ cls: 't-com', text: s.slice(i) }); break; }
+    // block comment /* … */ (single line slice)
+    if (c === '/' && s[i + 1] === '*') { const e = s.indexOf('*/', i + 2); const end = e === -1 ? n : e + 2; toks.push({ cls: 't-com', text: s.slice(i, end) }); i = end; continue; }
+    // string / char literal: " … "  ' … '  ` … `
+    if (c === '"' || c === "'" || c === '`') {
+      let j = i + 1; while (j < n) { if (s[j] === '\\') { j += 2; continue; } if (s[j] === c) { j++; break; } j++; }
+      toks.push({ cls: 't-str', text: s.slice(i, j) }); i = j; continue;
+    }
+    // number (int/float/hex)
+    if (/[0-9]/.test(c) || (c === '.' && /[0-9]/.test(s[i + 1] || ''))) {
+      let j = i + 1; while (j < n && /[0-9a-fA-FxX._]/.test(s[j])) j++;
+      toks.push({ cls: 't-num', text: s.slice(i, j) }); i = j; continue;
+    }
+    // identifier / keyword / type / call
+    if (isIdentStart(c)) {
+      let j = i + 1; while (j < n && isIdent(s[j])) j++;
+      const word = s.slice(i, j);
+      let k = j; while (k < n && (s[k] === ' ' || s[k] === '\t')) k++;
+      let cls;
+      if (SYN_KEYWORDS.has(word)) cls = 't-kw';
+      else if (SYN_TYPES.has(word)) cls = 't-type';
+      else if (s[k] === '(') cls = 't-call';   // identifier immediately calling
+      else cls = 't-txt';
+      toks.push({ cls, text: word }); i = j; continue;
+    }
+    // operators & punctuation
+    if (/[+\-*/%=<>!&|^~?:.,;(){}\[\]]/.test(c)) {
+      let j = i + 1; while (j < n && /[+\-*/%=<>!&|^~?:]/.test(s[j]) && /[+\-*/%=<>!&|^~?:]/.test(c)) j++;
+      toks.push({ cls: 't-op', text: s.slice(i, j) }); i = j; continue;
+    }
+    // anything else
+    toks.push({ cls: 't-txt', text: c }); i++;
+  }
+  return toks;
+}
+
+// v23.3 — renderCFG now draws a real top-down flow chart in SVG: each basic
+// block is a node, successor edges are arrowed, branch blocks (2+ succs) get
+// true/false (or sN) edge labels, and long runs of `call X` statements are
+// condensed so the block reads as flow rather than a dead list. Returns an SVG
+// the caller wraps with zoom controls.
+function renderCFG(flow) {
+  const svgNS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(svgNS, 'svg');
+  svg.setAttribute('class', 'graph');
+  svg.appendChild(makeArrowDefs(svgNS));
+  const vp = document.createElementNS(svgNS, 'g');
+  vp.setAttribute('class', 'viewport');
+  svg.appendChild(vp);
+
+  if (!flow.blocks || !flow.blocks.length) {
+    const t = document.createElementNS(svgNS, 'text');
+    t.setAttribute('x', 16); t.setAttribute('y', 28); t.setAttribute('fill', 'var(--text-dim)');
+    t.textContent = 'No CFG for this symbol.';
+    vp.appendChild(t);
+    svg.setAttribute('viewBox', '0 0 320 60'); svg.dataset.baseW = 320; svg.dataset.baseH = 60;
+    return svg;
+  }
+
+  // v23.39 — TRUE FLOW-CHART renderer. Each CFG block becomes a shape a reader
+  // recognises: a rounded TERMINAL (Start / End), a PROCESS box (straight-line
+  // steps), or a DECISION diamond (a block with 2+ successors). The decision's
+  // text is the real condition (BlockEntry.cond from the backend — the Go/COBOL
+  // frontends now preserve it), and the two exits are labelled yes / no. A
+  // no-ELSE IF's "no" edge routes to wherever the CFG says (the merge / End),
+  // which is exactly "skip to exit". Empty pass-through blocks (an artefact of
+  // the block model — e.g. a "then" that only forwards to a merge) are elided so
+  // the chart shows decisions and real work, not bookkeeping nodes.
+  const exits = new Set(flow.exits || []);
+  const raw = {};
+  flow.blocks.forEach(b => { raw[b.id] = b; });
+
+  function linesOf(b) {
+    if (b.lines && b.lines.length) return b.lines.map(L => ({ ln: L.line || 0, text: L.text || '' }));
+    return (b.stmts || []).map(s => ({ ln: 0, text: s }));
+  }
+  const isDecision = b => (b.succs || []).length >= 2;
+  // v26.3 — a block whose LAST real statement hard-terminates the function
+  // (os.Exit, log.Fatal*, panic, COBOL STOP RUN / GOBACK / EXIT PROGRAM, a bare
+  // Go `return` at the tail of a returning path) does not actually flow to its
+  // lexical successor — but several backend frontends still record a forward
+  // successor for it (os.Exit isn't special-cased in flow.Build). Rendering that
+  // phantom edge is what produces BOTH the "missing End" (the path is drawn
+  // continuing into the next block instead of stopping) AND a long back-/cross
+  // edge that shoots to a far node with no visible arrowhead (the reported stray
+  // diagonal). We detect the terminator here and, in the edge pass, route such a
+  // block to its own End and DROP the phantom forward edge. Purely a render
+  // correction; backend data is untouched.
+  const TERMINATOR_RE = /\b(?:os\.Exit|log\.(?:Fatal|Fatalf|Fatalln|Panic|Panicf|Panicln)|panic)\s*\(/;
+  const COBOL_TERM_RE = /\b(?:STOP\s+RUN|GOBACK|EXIT\s+PROGRAM)\b/i;
+  function isTerminatingBlock(b) {
+    const ls = linesOf(b).filter(L => (L.text || '').trim() !== '');
+    if (!ls.length) return false;
+    const last = (ls[ls.length - 1].text || '').trim();
+    return TERMINATOR_RE.test(last) || COBOL_TERM_RE.test(last);
+  }
+  // A block is "empty" (elidable) if it carries no real source lines, is not a
+  // decision, is not an exit, and has exactly one successor — i.e. a pure
+  // connector. Start is never elided.
+  // v25.2: ALSO elide an empty, non-decision, non-entry, NON-EXIT block with
+  // ZERO successors — a dangling empty JOIN (e.g. a try's `try_merge` when the
+  // try body just returns, so normal completion has nowhere to go and the block
+  // is not in exits). Previously such a block fell through to a blank process
+  // node with its own dangling End, AND its predecessor's edge routed to a
+  // SEPARATE End (leadsOnlyToExit), leaving the blank node with no inbound edge
+  // — the reported "floating blank action node + floating End". Eliding it makes
+  // the predecessor (e.g. try_body) terminate cleanly at a single End.
+  function isEmptyConnector(b) {
+    if (b.id === flow.entry || isDecision(b) || exits.has(b.id)) return false;
+    const succN = (b.succs || []).length;
+    if (succN > 1) return false;
+    const ls = linesOf(b).filter(L => (L.text || '').trim() !== '');
+    if (ls.length !== 0) return false;
+    // one successor (classic connector) OR zero successors (dangling empty join)
+    return succN === 1 || succN === 0;
+  }
+
+  // Build a display graph that skips empty connectors: for every kept block,
+  // follow each successor through any chain of empty connectors to the next
+  // KEPT block, so edges connect real nodes directly.
+  function skipToKept(id, seen) {
+    seen = seen || new Set();
+    if (seen.has(id)) return id; seen.add(id);
+    const b = raw[id];
+    if (!b) return id;
+    if (!isEmptyConnector(b)) return id;
+    const nxt = (b.succs || [])[0];
+    return nxt === undefined ? id : skipToKept(nxt, seen);
+  }
+  const kept = flow.blocks.filter(b => !isEmptyConnector(b));
+  const keptSet = new Set(kept.map(b => b.id));
+  // resolved successors for each kept block
+  const dispSucc = {};
+  kept.forEach(b => {
+    dispSucc[b.id] = (b.succs || []).map(s => skipToKept(s)).filter(s => keptSet.has(s));
+  });
+
+  // ── v23.40 display model ────────────────────────────────
+  // The previous version mapped the entry block to a bare "Start" pill, which
+  // DISCARDED that block's real statements and its branch condition (the
+  // reported "missing SUBTRACT" + "missing first IF"). Fix: every real CFG block
+  // is rendered by its CONTENT, and Start/End are SEPARATE synthetic terminals
+  // that only bracket the chart. A block that both does work AND branches is
+  // split into a process node (its statements) feeding a decision node (its
+  // condition), so nothing is lost.
+  function realLines(b) { return linesOf(b).filter(L => (L.text || '').trim() !== ''); }
+  function decisionText(b) {
+    if (b.cond && b.cond.trim()) return b.cond.trim();
+    for (const L of linesOf(b)) {
+      const m = (L.text || '').trim().match(/^(?:IF|EVALUATE|if|switch)\s+(.*?)(?:\s+THEN)?\.?$/i);
+      if (m && m[1]) return m[1];
+    }
+    return 'decision';
+  }
+  // For a decision block, its statements minus the IF/condition line are the
+  // "work" that runs before the test.
+  function workLines(b) {
+    const cond = decisionText(b);
+    return realLines(b).filter(L => {
+      const t = (L.text || '').trim();
+      if (/^(?:IF|EVALUATE|if|switch)\b/i.test(t)) return false;       // the condition line
+      if (cond && t.indexOf(cond) !== -1 && /^(?:IF|EVALUATE)/i.test(t)) return false;
+      return true;
+    });
+  }
+
+  // Build display nodes: {key, kind:'terminal'|'process'|'decision', block, lines, text}
+  // and display edges between display-node keys.
+  const dnodes = [];       // ordered
+  const dindex = {};       // key -> dnode
+  function addNode(nd) { dindex[nd.key] = nd; dnodes.push(nd); return nd.key; }
+  const dedges = [];       // {from, to, label}
+
+  // synthetic Start terminal (single). End terminals are created PER exit edge
+  // (v23.41) so a "no" path or a returning branch ends at a nearby End laid out
+  // beside/just under its source, instead of every path sweeping down to one
+  // shared End far below (the reported "why scroll down" + "points back").
+  addNode({ key: '__start__', kind: 'terminal', text: 'Start' });
+  let endSeq = 0;
+  function newEnd() { const k = '__end' + (endSeq++) + '__'; addNode({ key: k, kind: 'terminal', text: 'End' }); return k; }
+
+  // For each real block, produce a process node (if it has work) and/or a
+  // decision node (if it branches).
+  const blockEntryKey = {};   // block id -> key of first display node for that block
+  const blockExitKey = {};    // block id -> key of last display node (edges leave here)
+  kept.forEach(b => {
+    const dec = isDecision(b);
+    const work = dec ? workLines(b) : realLines(b);
+    let firstKey = null, lastKey = null;
+    if (work.length) {
+      // v24: one process node PER statement (was: a single node holding every
+      // line of the basic block, which made a straight-line function look like
+      // one giant block and truncated long lines with "…"). Each statement is
+      // its own node, chained top-to-bottom; the full text is kept (the node
+      // widens / the renderer wraps rather than eliding meaning).
+      work.forEach((L, i) => {
+        const k = 'p' + b.id + '_' + i;
+        addNode({ key: k, kind: 'process', block: b, lines: [L] });
+        if (lastKey) dedges.push({ from: lastKey, to: k });
+        else firstKey = k;
+        lastKey = k;
+      });
+    }
+    if (dec) {
+      const k = 'd' + b.id;
+      addNode({ key: k, kind: 'decision', block: b, text: decisionText(b) });
+      if (lastKey) dedges.push({ from: lastKey, to: k });   // work → decision
+      if (!firstKey) firstKey = k;
+      lastKey = k;
+    }
+    if (!firstKey && !exits.has(b.id)) {
+      const k = 'p' + b.id;
+      addNode({ key: k, kind: 'process', block: b, lines: [] });
+      firstKey = k; lastKey = k;
+    }
+    blockEntryKey[b.id] = firstKey;   // may be null for a pure-exit block
+    blockExitKey[b.id] = lastKey;
+  });
+
+  // Start → entry block's entry node
+  const startId = keptSet.has(flow.entry) ? flow.entry : (kept[0] && kept[0].id);
+  if (startId !== undefined && blockEntryKey[startId]) {
+    dedges.push({ from: '__start__', to: blockEntryKey[startId] });
+  } else {
+    dedges.push({ from: '__start__', to: newEnd() });
+  }
+
+  // A successor that is a pure-exit block (no display node) means "this path
+  // ends" — route it to its OWN End terminal.
+  // v23.46: the REAL COBOL topology (confirmed from live data) has empty "then"
+  // blocks that just forward to a merge, and the final statement living IN the
+  // exit block. So "leads only to exit" must (a) tolerate the exit block itself
+  // having content — reaching a block with NO successors is the end regardless
+  // of its lines — and (b) recognise an empty forwarding block as a skip path.
+  // We route a decision edge to a dedicated End when its target chain does no
+  // NEW work before terminating. The target that carries real work (the true
+  // path) still links to that work node.
+  function leadsOnlyToExit(startId) {
+    const seen = new Set();
+    let id = startId;
+    while (id !== undefined && id !== null && !seen.has(id)) {
+      seen.add(id);
+      const b = raw[id];
+      if (!b) return false;
+      const succs = b.succs || [];
+      const hasWork = linesOf(b).filter(L => (L.text || '').trim() !== '').length > 0;
+      const isDec = succs.length >= 2;
+      // A terminal block (no successors) ends the path — even if it has a line,
+      // that line is its own node; the path still terminates here.
+      if (succs.length === 0) return !hasWork && !isDec; // empty terminal → pure End
+      if (hasWork || isDec) return false;                // real node ahead → not a skip
+      id = succs[0];                                      // walk through empty forwarders
+    }
+    return false;
+  }
+  function targetFor(succId) {
+    const k = blockEntryKey[succId];
+    if (k && !leadsOnlyToExit(succId)) return k;
+    return newEnd();   // pure-exit / empty skip path → a dedicated nearby End
+  }
+
+  // block → block edges, mapped onto display nodes, with yes/no on decisions.
+  kept.forEach(b => {
+    const fromKey = blockExitKey[b.id];
+    const succs = dispSucc[b.id] || [];
+    const dec = isDecision(b);
+    if (fromKey) {
+      // v26.3 — a hard-terminating block (os.Exit / panic / STOP RUN / …) ends the
+      // path here regardless of any phantom forward successor the backend recorded.
+      // Route it straight to its own End and skip the misleading forward edge(s).
+      if (isTerminatingBlock(b)) {
+        dedges.push({ from: fromKey, to: newEnd() });
+        return;
+      }
+      succs.forEach((s, idx) => {
+        let lbl = '';
+        if (dec) {
+          if (succs.length === 2) {
+            lbl = idx === 0 ? 'yes' : 'no';
+          } else {
+            // multi-way (EVALUATE): use the WHEN value carried on the target
+            // block's cond; fall back to "case N".
+            const tb = raw[s];
+            lbl = (tb && tb.cond && tb.cond.trim()) ? tb.cond.trim() : ('case ' + idx);
+          }
+        }
+        dedges.push({ from: fromKey, to: targetFor(s), label: lbl });
+      });
+      // a block that itself terminates (marked exit, or no successors) → End
+      if (exits.has(b.id) || succs.length === 0) {
+        dedges.push({ from: fromKey, to: newEnd() });
+      }
+    }
+  });
+
+  // ── layout: MAIN SPINE + side lanes (v23.43) ─────────────
+  // The prior BFS row-packing scattered a decision's yes/no targets onto
+  // arbitrary x-positions, so "no" edges doubled back and their arrowheads
+  // landed beside the End box instead of on it. New model: assign each display
+  // node a (depth, lane). The MAIN flow (Start → work → the primary/yes path →
+  // End) runs straight down lane 0. A decision's SECONDARY exit (the "no" of a
+  // 2-way, or a terminating side-branch) goes to lane +1 at (near) the
+  // decision's own depth, so its End sits to the RIGHT of the diamond with a
+  // clean elbow. Multi-way (EVALUATE) keeps the spread-row treatment.
+  const depth = { '__start__': 0 };
+  const lane = { '__start__': 0 };
+  const order = ['__start__'];
+  const outEdges = {};
+  dedges.forEach(e => { (outEdges[e.from] = outEdges[e.from] || []).push(e); });
+
+  // v23.48 — LOOP awareness. A loop-header is a decision one of whose successors
+  // can reach BACK to it (a cycle / back-edge — e.g. PERFORM … UNTIL). For a
+  // loop, the BODY (the successor on the cycle) belongs in a side lane and loops
+  // back up; the EXIT (the other successor) is the MAIN flow and must stay on the
+  // spine going straight down. The previous code treated a loop-header like a
+  // plain if (body on spine, exit shunted sideways), which made the continuation
+  // "hang in the air" to the right. Detect, per decision, which successor is the
+  // body vs the exit.
+  const displaySucc = {};
+  dnodes.forEach(n => { displaySucc[n.key] = (outEdges[n.key] || []).map(e => e.to); });
+  function reaches(from, targetKey, seen) {
+    seen = seen || new Set();
+    if (from === targetKey) return true;
+    if (seen.has(from)) return false;
+    seen.add(from);
+    for (const s of (displaySucc[from] || [])) {
+      if (reaches(s, targetKey, seen)) return true;
+    }
+    return false;
+  }
+  // For each key, note {bodyKey, exitKey} if it's a loop-header.
+  const loopInfo = {};
+  dnodes.forEach(n => {
+    const es = outEdges[n.key] || [];
+    if (n.kind !== 'decision' || es.length !== 2) return;
+    const [a, b] = es.map(e => e.to);
+    // a successor is the "body" if it can loop back to this header
+    const aBack = reaches(a, n.key);
+    const bBack = reaches(b, n.key);
+    if (aBack && !bBack) loopInfo[n.key] = { body: a, exit: b };
+    else if (bBack && !aBack) loopInfo[n.key] = { body: b, exit: a };
+    // if both or neither loop back, treat as a normal if (no loopInfo)
+  });
+
+  // v26.1 — MULTI-WAY awareness (Go switch / COBOL EVALUATE / select). A decision
+  // with 3+ forward successors is a fan-out: the previous layout gave every arm
+  // (and its whole subtree) the SAME (depth,lane) as the decision, so all N case
+  // bodies collapsed onto ONE point and rendered stacked on top of each other
+  // (the reported overlap). A multi-way decision must instead spread its arms
+  // into PARALLEL COLUMNS — each arm gets its own lane, laid out as a vertical
+  // column, exactly like a human reads a switch. This is language-agnostic: it
+  // keys only on "decision with >=3 non-back-edge successors", so Go switch,
+  // COBOL EVALUATE and select all get the same treatment with no per-language code.
+  //
+  // multiInfo[key] = { arms:[armKey…], merge:mergeKey|null }.
+  //   arms  — the immediate successor display nodes, one per case (in edge order).
+  //   merge — the single node where the arms reconverge (the switch's join). It is
+  //           NOT an arm; it returns to the decision's own lane below the columns
+  //           so the spine continues straight (otherwise it would inherit some
+  //           arm's lane and drift sideways).
+  const multiInfo = {};
+  dnodes.forEach(n => {
+    if (n.kind !== 'decision') return;
+    const es = outEdges[n.key] || [];
+    if (es.length < 3) return;               // 2-way handled by loop/twoWay logic
+    if (loopInfo[n.key]) return;             // a loop-header is never a fan-out
+    const targets = es.map(e => e.to);
+    const inDeg = {};
+    targets.forEach(t => { inDeg[t] = (inDeg[t] || 0) + 1; });
+    // Arms are the distinct direct successors. A DIRECT merge is a target hit by
+    // >1 arm edge. But the common case (switch/EVALUATE with a tail after the
+    // block) is that arms CONVERGE further down at a shared descendant — the
+    // reconvergence join — which must return to the decision's own lane so the
+    // spine continues straight (else it drifts into whichever arm reached it
+    // first). Detect that join as the shallowest display node reachable from 2+
+    // distinct arms without passing back through the decision.
+    const arms = targets.filter((t, i) => targets.indexOf(t) === i && inDeg[t] === 1);
+    let merge = targets.find(t => inDeg[t] > 1) || null;
+    if (!merge && arms.length >= 2) {
+      // BFS each arm, record reach-depth of every node; the join is a node reached
+      // by >=2 arms at minimal max-depth. Stop crossing the decision itself.
+      const reachCount = {};      // nodeKey -> set of arm indices that reach it
+      const reachDepth = {};      // nodeKey -> min BFS depth across arms
+      arms.forEach((armKey, ai) => {
+        const seen = new Set([armKey]);
+        let frontier = [[armKey, 0]];
+        while (frontier.length) {
+          const [cur, dd] = frontier.shift();
+          if (cur === n.key) continue;
+          (reachCount[cur] = reachCount[cur] || new Set()).add(ai);
+          if (reachDepth[cur] === undefined || dd < reachDepth[cur]) reachDepth[cur] = dd;
+          (displaySucc[cur] || []).forEach(s => {
+            if (!seen.has(s)) { seen.add(s); frontier.push([s, dd + 1]); }
+          });
+        }
+      });
+      let best = null, bestDepth = Infinity;
+      Object.keys(reachCount).forEach(k => {
+        if (reachCount[k].size >= 2 && arms.indexOf(k) === -1) {
+          if (reachDepth[k] < bestDepth) { bestDepth = reachDepth[k]; best = k; }
+        }
+      });
+      merge = best;
+    }
+    multiInfo[n.key] = { arms, merge };
+  });
+
+  // v26.1 — per-arm lane packing for multi-way fan-outs. An arm may contain its
+  // OWN inner if/else or nested switch, so its subtree can occupy several lanes.
+  // Giving arms consecutive single lanes therefore let a wide arm bleed into its
+  // neighbour (adjacent case columns overlapped). Instead we (1) collect each
+  // arm's subtree, (2) lay each subtree out LOCALLY to learn how many lanes it
+  // spans (its [minLane,maxLane] about 0), then (3) pack the arms left→right,
+  // giving each a lane BASE so its span never intersects the next arm's span.
+  // The result is fully general: nested decisions inside a case get real room.
+  //
+  // armBaseLane[armKey] = the lane offset (relative to the decision) applied to
+  //   the whole arm subtree. armSubtreeLane[armKey][node] = that node's LOCAL lane
+  //   within the arm (0 = arm's own column). Final lane = decisionLane + base + local.
+  const armBaseLane = {};
+  const localLaneOf = {};   // nodeKey -> local lane inside its arm subtree
+  const armOfNode = {};     // nodeKey -> armKey it belongs to (for base lookup)
+  const multiArmRoots = new Set();
+
+  // collect the subtree of an arm: all nodes reachable from it WITHOUT going
+  // through the owning decision or any sibling arm root or the merge.
+  function collectArmSubtree(armKey, decisionKey, stopSet) {
+    const nodes = [];
+    const seen = new Set();
+    const stack = [armKey];
+    while (stack.length) {
+      const cur = stack.pop();
+      if (seen.has(cur) || stopSet.has(cur) || cur === decisionKey) continue;
+      seen.add(cur); nodes.push(cur);
+      (displaySucc[cur] || []).forEach(s => { if (!seen.has(s)) stack.push(s); });
+    }
+    return { nodes, seen };
+  }
+
+  // local layout of an arm subtree → local lanes (mirrors the main BFS rules but
+  // rooted at the arm, lane 0). Returns {minLane,maxLane,local,depthSpan}.
+  function layoutArm(armKey, subtreeSet) {
+    const ll = { [armKey]: 0 };
+    const ld = { [armKey]: 0 };
+    const seen = new Set([armKey]);
+    const qq = [armKey];
+    while (qq.length) {
+      const k = qq.shift();
+      const es = (outEdges[k] || []).filter(e => subtreeSet.has(e.to));
+      const fromNode = dindex[k];
+      const twoWay = fromNode && fromNode.kind === 'decision' &&
+        (outEdges[k] || []).length === 2 &&
+        (outEdges[k] || []).some(e => e.label === 'yes') &&
+        (outEdges[k] || []).some(e => e.label === 'no');
+      const li2 = loopInfo[k];
+      const mi2 = multiInfo[k];
+      es.forEach(e => {
+        const t = e.to;
+        let tl, td = (ld[k] || 0) + 1;
+        if (mi2 && mi2.arms.indexOf(t) !== -1) {
+          // nested multi-way inside this arm — spread its arms too (simple spread;
+          // deep nesting is rare, and each still gets a distinct local lane).
+          const idx = mi2.arms.indexOf(t);
+          tl = (ll[k] || 0) + (idx - Math.floor(mi2.arms.length / 2));
+        } else if (li2) {
+          tl = (t === li2.exit) ? (ll[k] || 0) : (ll[k] || 0) + 1;
+        } else if (twoWay && e.label === 'no') {
+          tl = (ll[k] || 0) + 1; td = ld[k] || 0;
+        } else {
+          tl = ll[k] || 0;
+        }
+        if (ll[t] === undefined) ll[t] = tl;
+        if (ld[t] === undefined) ld[t] = td;
+        if (!seen.has(t)) { seen.add(t); qq.push(t); }
+      });
+    }
+    let mn = 0, mx = 0, dmax = 0;
+    Object.values(ll).forEach(v => { if (v < mn) mn = v; if (v > mx) mx = v; });
+    Object.values(ld).forEach(v => { if (v > dmax) dmax = v; });
+    return { minLane: mn, maxLane: mx, local: ll, depthSpan: dmax };
+  }
+
+  // Precompute arm packing for every multi-way decision.
+  const mergeOfDecision = {};   // mergeKey -> decisionKey (force merge onto spine)
+  const armMaxDepthBelow = {};  // decisionKey -> deepest relative depth in any arm
+  Object.keys(multiInfo).forEach(decKey => {
+    const mi = multiInfo[decKey];
+    const arms = mi.arms;
+    const stopSet = new Set(arms.filter(a => a !== undefined));
+    if (mi.merge) { stopSet.add(mi.merge); mergeOfDecision[mi.merge] = decKey; }
+    // measure each arm subtree
+    let deepest = 1;
+    const spans = arms.map(armKey => {
+      const sib = new Set(stopSet); sib.delete(armKey);   // don't stop at self
+      const { seen } = collectArmSubtree(armKey, decKey, sib);
+      const { minLane, maxLane, local, depthSpan } = layoutArm(armKey, seen);
+      Object.entries(local).forEach(([nk, lv]) => {
+        // only claim a node for this arm if not already claimed (disjoint in practice)
+        if (armOfNode[nk] === undefined) { localLaneOf[nk] = lv; armOfNode[nk] = armKey; }
+      });
+      seen.forEach(nk => multiArmRoots.add(nk));
+      if (depthSpan + 1 > deepest) deepest = depthSpan + 1;
+      return { armKey, minLane, maxLane, width: maxLane - minLane + 1 };
+    });
+    armMaxDepthBelow[decKey] = deepest;
+    // pack arms left→right, centered about the decision lane. Each arm occupies
+    // [base+min, base+max]; the next arm starts one lane past the previous max.
+    const totalWidth = spans.reduce((a, s) => a + s.width, 0) + (spans.length - 1) * 1;
+    let cursor = -Math.floor(totalWidth / 2);
+    spans.forEach(s => {
+      // base places this arm's local 0 so that its local-min sits at `cursor`.
+      const base = cursor - s.minLane;
+      armBaseLane[s.armKey] = base;
+      cursor += s.width + 1;   // +1 lane gutter between arm columns
+    });
+  });
+
+  // v26.3 — for a two-way decision, decide which branch is the MAIN continuation
+  // and keep it on the spine; the other peels into the side lane. Normally "yes"
+  // (then) is the spine and "no" peels off. But the very common guard pattern —
+  // `if bad { print; os.Exit }` / `if err != nil { return }` — has the THEN branch
+  // dead-end quickly while the "no"/fall-through carries the real work. We measure
+  // how many nodes each branch runs before it terminates WITHOUT branching again
+  // (deadEndLen: a finite count if the branch is a straight run to an End, or
+  // Infinity if it branches/loops/is long). When the THEN side is a short dead-end
+  // and the NO side runs longer (or branches), we swap so NO stays on the spine
+  // and the short guard peels to the side lane — matching how the code reads.
+  function deadEndLen(startKey) {
+    let cur = startKey, hops = 0;
+    const seen = new Set();
+    while (cur !== undefined && !seen.has(cur) && hops < 400) {
+      seen.add(cur);
+      const nd = dindex[cur];
+      if (nd && nd.kind === 'terminal') return hops;         // reached End → this many hops
+      if (nd && nd.kind === 'decision') return Infinity;     // branches again → not a simple dead-end
+      const outs = displaySucc[cur] || [];
+      if (outs.length === 0) return hops;                    // nowhere to go → ends here
+      if (outs.length > 1) return Infinity;
+      cur = outs[0]; hops++;
+    }
+    return Infinity;
+  }
+  const spineNoOf = {};   // decisionKey -> true if its "no" branch should be the spine
+  dnodes.forEach(n => {
+    if (n.kind !== 'decision') return;
+    const es = outEdges[n.key] || [];
+    const isTwo = es.length === 2 && es.some(e => e.label === 'yes') && es.some(e => e.label === 'no');
+    if (!isTwo || loopInfo[n.key]) return;
+    const yesE = es.find(e => e.label === 'yes'), noE = es.find(e => e.label === 'no');
+    if (!yesE || !noE) return;
+    const yLen = deadEndLen(yesE.to), nLen = deadEndLen(noE.to);
+    // swap only when THEN is a genuine dead-end AND it is shorter than the NO path
+    // (a strictly longer or branching NO side is the true continuation). Ties and
+    // the plain if/else (both reach a shared merge, both finite & equal-ish) keep
+    // the default yes-on-spine so nothing else shifts.
+    if (yLen !== Infinity && nLen > yLen) spineNoOf[n.key] = true;
+  });
+
+  const visited = new Set(['__start__']);
+  const q = ['__start__'];
+  while (q.length) {
+    const k = q.shift();
+    const es = outEdges[k] || [];
+    const fromNode = dindex[k];
+    const twoWay = fromNode && fromNode.kind === 'decision' &&
+      es.length === 2 && es.some(e => e.label === 'yes') && es.some(e => e.label === 'no');
+    const li = loopInfo[k];
+    const mi = multiInfo[k];
+    const swapNo = spineNoOf[k];    // v26.3: "no" is the spine, "yes" peels off
+    es.forEach((e) => {
+      const t = e.to;
+      let tLane, tDepth;
+      if (mergeOfDecision[t] !== undefined) {
+        // reconvergence join of a multi-way switch/EVALUATE: pin it to the
+        // DECISION's lane (back on the spine) and BELOW the deepest arm, so the
+        // flow visibly rejoins one column instead of trailing off a random arm.
+        const decKey = mergeOfDecision[t];
+        tLane = lane[decKey] || 0;
+        tDepth = (depth[decKey] || 0) + (armMaxDepthBelow[decKey] || 1) + 1;
+      } else if (mi && mi.arms.indexOf(t) !== -1) {
+        // multi-way arm ROOT: lane = decisionLane + this arm's packed base.
+        tLane = (lane[k] || 0) + (armBaseLane[t] || 0);
+        tDepth = (depth[k] || 0) + 1;
+      } else if (armOfNode[t] !== undefined && t !== (mi && mi.merge)) {
+        // a node INSIDE some arm subtree: lane = decisionLane(of that arm's owner,
+        // already baked into the arm root's lane) — we reconstruct it as the arm
+        // root's lane + (localLane[t] - localLane[armRoot]). Simpler: arm root lane
+        // is known once placed; use armRoot lane + local offset.
+        const armKey = armOfNode[t];
+        const armRootLane = lane[armKey];
+        if (armRootLane !== undefined) {
+          tLane = armRootLane + ((localLaneOf[t] || 0) - (localLaneOf[armKey] || 0));
+        } else {
+          tLane = lane[k] || 0;   // arm root not placed yet; fall back (rare)
+        }
+        tDepth = (depth[k] || 0) + 1;
+      } else if (li) {
+        // loop-header: exit stays on the spine (below), body goes to a side lane
+        if (t === li.exit) { tLane = lane[k] || 0; tDepth = (depth[k] || 0) + 1; }
+        else { tLane = (lane[k] || 0) + 1; tDepth = (depth[k] || 0) + 1; } // body beside/below
+      } else if (twoWay && swapNo && e.label === 'yes') {
+        // guard pattern: THEN dead-ends → peel it to the side lane.
+        tLane = (lane[k] || 0) + 1; tDepth = depth[k];
+      } else if (twoWay && swapNo && e.label === 'no') {
+        // …and the "no" continuation stays on the spine going straight down.
+        tLane = lane[k] || 0; tDepth = (depth[k] || 0) + 1;
+      } else if (twoWay && e.label === 'no') {
+        tLane = (lane[k] || 0) + 1; tDepth = depth[k]; // if's "no" beside the diamond
+      } else {
+        tLane = lane[k] || 0; tDepth = (depth[k] || 0) + 1;
+      }
+      if (depth[t] === undefined) depth[t] = tDepth;
+      if (lane[t] === undefined) lane[t] = tLane;
+      if (!visited.has(t)) { visited.add(t); order.push(t); q.push(t); }
+    });
+  }
+  // any unreached node → append at the bottom of the spine
+  let maxDepth = 0; Object.values(depth).forEach(d => { if (d > maxDepth) maxDepth = d; });
+  dnodes.forEach(n => { if (depth[n.key] === undefined) { maxDepth++; depth[n.key] = maxDepth; lane[n.key] = 0; } });
+
+  // sizes
+  const PADTOP2 = 24, GY = 60;
+  const PW = 300, TW = 120, DW = 280, DH = 84;
+  const LANEGAP = 60;   // horizontal gap between the spine and a side lane
+  function dsize(n) {
+    if (n.kind === 'terminal') return { w: TW, h: 38 };
+    if (n.kind === 'decision') return { w: DW, h: DH };
+    const c = Math.max((n.lines || []).length, 1);
+    const longest = Math.max(6, ...(n.lines || []).map(L => (L.text || '').length + 6));
+    return { w: Math.min(Math.max(PW, longest * 7), 720), h: 24 + c * 15 + 8 };
+  }
+  const dsz = {}; dnodes.forEach(n => dsz[n.key] = dsize(n));
+
+  // group by depth for vertical rows; each depth row height = tallest node there
+  const rowsByDepth = {};
+  dnodes.forEach(n => { (rowsByDepth[depth[n.key]] = rowsByDepth[depth[n.key]] || []).push(n); });
+  const depthKeys = Object.keys(rowsByDepth).map(Number).sort((a, b) => a - b);
+  const rowH = {}; depthKeys.forEach(d => rowH[d] = Math.max(...rowsByDepth[d].map(n => dsz[n.key].h)));
+  const rowY = {}; let acc = PADTOP2; depthKeys.forEach(d => { rowY[d] = acc + rowH[d] / 2; acc += rowH[d] + GY; });
+  const dTotalH = acc + 10;
+
+  // horizontal: LANE-COLUMN model (v26.1). Every node sits in a column keyed by
+  // its (now possibly NEGATIVE) lane. Each lane column is as wide as its widest
+  // member, and adjacent columns are separated by LANEGAP. Lane 0 is the spine.
+  // This replaces the old "spine + right-only offset" placement, which (a) could
+  // not represent lanes left of the spine and (b) collapsed every node sharing a
+  // (depth,lane) cell onto ONE x — the multi-way switch overlap. With one lane
+  // per arm, a switch now renders as parallel vertical columns; a plain function
+  // (all lane 0) is byte-identical to before (single centered spine).
+  const widestNode = Math.max(PW, DW, ...dnodes.map(n => dsz[n.key].w));
+  const lanesUsed = Array.from(new Set(dnodes.map(n => lane[n.key] || 0))).sort((a, b) => a - b);
+  // width of each lane column = widest node assigned to that lane.
+  const laneW = {};
+  lanesUsed.forEach(L => {
+    const members = dnodes.filter(n => (lane[n.key] || 0) === L);
+    laneW[L] = Math.max(TW, ...members.map(n => dsz[n.key].w));
+  });
+  // assign each lane a center-x, left→right in lane order, gap between columns.
+  const laneCenterX = {};
+  let cursor = 60;   // left margin
+  lanesUsed.forEach(L => {
+    laneCenterX[L] = cursor + laneW[L] / 2;
+    cursor += laneW[L] + LANEGAP;
+  });
+  const dTotalW0 = cursor + 20;
+
+  const DC = {};
+  dnodes.forEach(n => {
+    const L = lane[n.key] || 0;
+    const d = depth[n.key];
+    if (d === undefined || laneCenterX[L] === undefined) return;
+    DC[n.key] = { x: laneCenterX[L], y: rowY[d] };
+  });
+  // v26.1 — PER-ROW OVERLAP RESOLUTION (final safety net, language-agnostic).
+  // The lane-column model prevents most overlaps, but two nodes in DIFFERENT
+  // branches can still land in adjacent/near columns whose actual box widths (a
+  // wide 300px process step beside another) exceed the column pitch, or an
+  // unrelated spine node (e.g. a top-level if's then-branch) can sit at the same
+  // depth as a switch arm. Rather than special-case each, we GUARANTEE no two
+  // boxes in the same depth-row overlap: sort the row by x, then sweep left→right
+  // pushing any node that would collide with its left neighbour rightwards by the
+  // exact overlap + a gap. This preserves left→right order and only ever adds
+  // space, so a clean single-spine function is untouched (nothing overlaps, so
+  // nothing moves). MINGAP is the minimum air between two boxes.
+  const MINGAP = 26;
+  depthKeys.forEach(d => {
+    const row = rowsByDepth[d].filter(n => DC[n.key]).slice()
+      .sort((a, b) => DC[a.key].x - DC[b.key].x);
+    for (let i = 1; i < row.length; i++) {
+      const prev = row[i - 1], cur = row[i];
+      const prevRight = DC[prev.key].x + dsz[prev.key].w / 2;
+      const curLeft = DC[cur.key].x - dsz[cur.key].w / 2;
+      const need = prevRight + MINGAP - curLeft;
+      if (need > 0) DC[cur.key].x += need;   // push this node (and only it) right
+    }
+  });
+  let dTotalW = Math.max(dTotalW0, 420);
+  // ensure every node fits
+  dnodes.forEach(n => { const c = DC[n.key]; if (c) dTotalW = Math.max(dTotalW, c.x + dsz[n.key].w / 2 + 40); });
+
+  svg.setAttribute('viewBox', '0 0 ' + dTotalW + ' ' + dTotalH);
+  svg.setAttribute('width', dTotalW); svg.setAttribute('height', dTotalH);
+  svg.dataset.baseW = dTotalW; svg.dataset.baseH = dTotalH;
+
+  // edges
+  dedges.forEach(e => {
+    const A = DC[e.from], B = DC[e.to]; if (!A || !B) return;
+    const na = dindex[e.from], nb = dindex[e.to];
+    const sa = dsz[e.from], sb = dsz[e.to];
+    const g = document.createElementNS(svgNS, 'g');
+    const p = document.createElementNS(svgNS, 'path');
+    const yn = e.label === 'yes' || e.label === 'no';
+    const multiway = na && na.kind === 'decision' && e.label && !yn;
+    const sideways = Math.abs(B.y - A.y) < 8;   // target on ~same row (side lane)
+
+    let ax, ay, tx, ty, d;
+    // v23.50 — a loop BACK-EDGE (body → loop-header) must not aim at the header
+    // diamond's TOP vertex: that's where the incoming edge from above already
+    // lands, so the back-arrow was drawn on top of it and looked missing. Route
+    // the back-edge into the header's SIDE vertex (the side the body sits on)
+    // with its own elbow, so the return arrow is clearly visible.
+    const targetIsLoopHeader = nb && nb.kind === 'decision' && loopInfo[e.to] && loopInfo[e.to].body === e.from;
+    if (targetIsLoopHeader) {
+      const bodyOnRight = A.x >= B.x;
+      // leave the body from its top, go up, enter the diamond's right/left vertex
+      ax = A.x; ay = A.y - sa.h / 2;
+      tx = B.x + (bodyOnRight ? sb.w / 2 : -sb.w / 2);
+      ty = B.y;
+      const midX = bodyOnRight ? Math.max(ax, tx) + 40 : Math.min(ax, tx) - 40;
+      d = 'M' + ax + ',' + ay +
+          ' C' + midX + ',' + ay + ' ' + midX + ',' + ty + ' ' + tx + ',' + ty;
+      p.setAttribute('class', 'edge-path up loop-back');
+      p.setAttribute('marker-end', 'url(#arrow-up)');
+      p.setAttribute('d', d);
+      g.appendChild(p);
+      // "loop" label near the back-edge midpoint
+      const lab = document.createElementNS(svgNS, 'text');
+      lab.setAttribute('class', 'edge-label loop-label');
+      lab.setAttribute('x', midX + (bodyOnRight ? 4 : -4));
+      lab.setAttribute('y', (ay + ty) / 2);
+      lab.setAttribute('text-anchor', bodyOnRight ? 'start' : 'end');
+      lab.textContent = 'loop';
+      g.appendChild(lab);
+      vp.appendChild(g);
+      return;
+    }
+
+    if (na && na.kind === 'decision' && yn) {
+      // leave from the diamond's left(yes)/right(no) point
+      ax = A.x + (e.label === 'yes' ? -sa.w / 2 : sa.w / 2);
+      ay = A.y;
+    } else {
+      ax = A.x; ay = A.y + sa.h / 2;
+    }
+
+    if (sideways) {
+      // horizontal into the target's LEFT edge (side-lane End sits to the right)
+      tx = B.x - sb.w / 2; ty = B.y;
+      const mx = (ax + tx) / 2;
+      d = 'M' + ax + ',' + ay + ' C' + mx + ',' + ay + ' ' + mx + ',' + ty + ' ' + tx + ',' + ty;
+      p.setAttribute('marker-end', 'url(#arrow)');
+    } else {
+      // vertical into the target's TOP
+      tx = B.x; ty = B.y - sb.h / 2;
+      const my = (ay + ty) / 2;
+      const up = B.y < A.y;
+      p.setAttribute('marker-end', up ? 'url(#arrow-up)' : 'url(#arrow)');
+      p.setAttribute('class', 'edge-path' + (up ? ' up' : ''));
+      d = 'M' + ax + ',' + ay + ' C' + ax + ',' + my + ' ' + tx + ',' + my + ' ' + tx + ',' + ty;
+    }
+    if (!p.getAttribute('class')) p.setAttribute('class', 'edge-path');
+    p.setAttribute('d', d);
+    g.appendChild(p);
+
+    if (e.label) {
+      let lx, ly, anchor;
+      if (yn) {
+        // v25.4 — yes/no labels must not collide when guards chain horizontally
+        // (a Go multi-`if` pattern: decision A's "no" hops sideways to decision B
+        // on the same row, so A's right-tip "no" and B's left-tip "yes" landed at
+        // the same x+y and merged into "noyes"). Fix: (1) put "yes" ABOVE the row
+        // and "no" BELOW it so they never share a text line even at equal x; and
+        // (2) for a sideways "no" that targets another DECISION, anchor the label
+        // at the SOURCE diamond's tip (not the hop midpoint, which sits under the
+        // next diamond) so it stays with its own decision.
+        const yesAbove = (e.label === 'yes') ? -8 : 12;
+        if (sideways) {
+          const toDecision = nb && nb.kind === 'decision';
+          if (toDecision) { lx = ax + (e.label === 'yes' ? -6 : 6); anchor = e.label === 'yes' ? 'end' : 'start'; }
+          else { lx = (ax + tx) / 2; anchor = 'middle'; }
+          ly = ay + yesAbove;
+        } else {
+          lx = ax + (e.label === 'yes' ? -6 : 6); ly = ay + yesAbove; anchor = e.label === 'yes' ? 'end' : 'start';
+        }
+      } else { lx = tx; ly = ty - 7; anchor = 'middle'; }
+      const txt = clamp(e.label, 18);
+      if (multiway) {
+        const bg = document.createElementNS(svgNS, 'rect');
+        const w = txt.length * 6.2 + 8, h = 14;
+        bg.setAttribute('x', lx - w / 2); bg.setAttribute('y', ly - 11);
+        bg.setAttribute('width', w); bg.setAttribute('height', h);
+        bg.setAttribute('rx', 3); bg.setAttribute('class', 'case-chip');
+        g.appendChild(bg);
+      }
+      const lab = document.createElementNS(svgNS, 'text');
+      lab.setAttribute('class', 'edge-label' + (yn ? ' branch-yn' : ' case-label'));
+      lab.setAttribute('x', lx); lab.setAttribute('y', ly);
+      lab.setAttribute('text-anchor', anchor);
+      lab.textContent = txt;
+      g.appendChild(lab);
+    }
+    vp.appendChild(g);
+  });
+
+  // v24 — Option C: optional loop-limit BRACKETS. When state.cfgLoopBrackets is
+  // on, each loop draws a bracket enclosing its header hexagon + body node, with
+  // a small "loop" cap label — the classic flowchart loop-limit frame. Drawn
+  // BEHIND the nodes (additive) so the compact hexagon layout is unchanged when
+  // off. Nested/sibling loops each get their own bracket from their own loopInfo.
+  if (state.cfgLoopBrackets) {
+    Object.keys(loopInfo).forEach(hk => {
+      const li = loopInfo[hk];
+      const hc = DC[hk], bc = DC[li.body];
+      if (!hc || !bc) return;
+      const hs = dsz[hk], bs = dsz[li.body];
+      // bounding box of header + body, padded
+      const pad = 16;
+      const minX = Math.min(hc.x - hs.w / 2, bc.x - bs.w / 2) - pad;
+      const maxX = Math.max(hc.x + hs.w / 2, bc.x + bs.w / 2) + pad;
+      const minY = Math.min(hc.y - hs.h / 2, bc.y - bs.h / 2) - pad;
+      const maxY = Math.max(hc.y + hs.h / 2, bc.y + bs.h / 2) + pad;
+      const g = document.createElementNS(svgNS, 'g');
+      g.setAttribute('class', 'cfg-loop-bracket');
+      const r = document.createElementNS(svgNS, 'rect');
+      r.setAttribute('x', minX); r.setAttribute('y', minY);
+      r.setAttribute('width', maxX - minX); r.setAttribute('height', maxY - minY);
+      r.setAttribute('rx', 10); r.setAttribute('ry', 10);
+      g.appendChild(r);
+      // corner caps (top-left + bottom-right) to read as a bracket, not a plain box
+      const cap = 14;
+      const tl = document.createElementNS(svgNS, 'path');
+      tl.setAttribute('class', 'cap');
+      tl.setAttribute('d', 'M' + (minX + cap) + ',' + minY + ' L' + minX + ',' + minY + ' L' + minX + ',' + (minY + cap));
+      g.appendChild(tl);
+      const br = document.createElementNS(svgNS, 'path');
+      br.setAttribute('class', 'cap');
+      br.setAttribute('d', 'M' + (maxX - cap) + ',' + maxY + ' L' + maxX + ',' + maxY + ' L' + maxX + ',' + (maxY - cap));
+      g.appendChild(br);
+      const lab = document.createElementNS(svgNS, 'text');
+      lab.setAttribute('class', 'cfg-loop-bracket-label');
+      lab.setAttribute('x', minX + 6); lab.setAttribute('y', minY + 13);
+      lab.textContent = 'loop';
+      g.appendChild(lab);
+      vp.appendChild(g);
+    });
+  }
+
+  // nodes
+  dnodes.forEach(n => {
+    const c = DC[n.key]; if (!c) return;
+    const s = dsz[n.key];
+    const g = document.createElementNS(svgNS, 'g');
+    const cls = n.kind === 'terminal' ? (n.text === 'Start' ? 'start' : 'end') : n.kind;
+    g.setAttribute('class', 'cfg-node ' + cls);
+    g.setAttribute('transform', 'translate(' + (c.x - s.w / 2) + ',' + (c.y - s.h / 2) + ')');
+
+    if (n.kind === 'decision') {
+      // v23.50 — a loop-header renders as a HEXAGON (the standard flowchart
+      // Preparation / loop symbol), so a loop is instantly distinguishable from
+      // a one-time if/EVALUATE decision (which stay diamonds). loopInfo, computed
+      // in the layout pass, identifies loop-headers precisely by their back-edge.
+      const isLoopHeader = !!(n.block && loopInfo[n.key]);
+      if (isLoopHeader) {
+        g.setAttribute('class', 'cfg-node loop-header');
+        const cut = Math.min(22, s.w / 4);
+        const hex = document.createElementNS(svgNS, 'polygon');
+        hex.setAttribute('points',
+          cut + ',0 ' + (s.w - cut) + ',0 ' + s.w + ',' + (s.h / 2) + ' ' +
+          (s.w - cut) + ',' + s.h + ' ' + cut + ',' + s.h + ' 0,' + (s.h / 2));
+        g.appendChild(hex);
+        const t = document.createElementNS(svgNS, 'text');
+        t.setAttribute('class', 'dia-text'); t.setAttribute('x', s.w / 2); t.setAttribute('y', s.h / 2 + 4);
+        t.setAttribute('text-anchor', 'middle');
+        t.textContent = clamp(n.text, 44);
+        g.appendChild(t);
+      } else {
+        const dia = document.createElementNS(svgNS, 'polygon');
+        dia.setAttribute('points', (s.w / 2) + ',0 ' + s.w + ',' + (s.h / 2) + ' ' + (s.w / 2) + ',' + s.h + ' 0,' + (s.h / 2));
+        g.appendChild(dia);
+        const t = document.createElementNS(svgNS, 'text');
+        t.setAttribute('class', 'dia-text'); t.setAttribute('x', s.w / 2); t.setAttribute('y', s.h / 2 + 4);
+        t.setAttribute('text-anchor', 'middle');
+        t.textContent = clamp(n.text, 40);
+        g.appendChild(t);
+      }
+    } else if (n.kind === 'terminal') {
+      const rect = document.createElementNS(svgNS, 'rect');
+      rect.setAttribute('width', s.w); rect.setAttribute('height', s.h);
+      rect.setAttribute('rx', s.h / 2); rect.setAttribute('ry', s.h / 2);
+      g.appendChild(rect);
+      const t = document.createElementNS(svgNS, 'text');
+      t.setAttribute('class', 'term-text'); t.setAttribute('x', s.w / 2); t.setAttribute('y', s.h / 2 + 4);
+      t.setAttribute('text-anchor', 'middle');
+      t.textContent = n.text;
+      g.appendChild(t);
+    } else {
+      const rect = document.createElementNS(svgNS, 'rect');
+      rect.setAttribute('width', s.w); rect.setAttribute('height', s.h);
+      rect.setAttribute('rx', 5); rect.setAttribute('ry', 5);
+      g.appendChild(rect);
+      let i = 0;
+      (n.lines || []).forEach(L => {
+        const t = document.createElementNS(svgNS, 'text');
+        t.setAttribute('class', 'stmt'); t.setAttribute('x', 12); t.setAttribute('y', 19 + i * 15);
+        t.setAttribute('xml:space', 'preserve');   // v26.4: keep token spacing
+        if (L.ln) {
+          const g1 = document.createElementNS(svgNS, 'tspan');
+          g1.setAttribute('class', 'gutter'); // v23.41: smaller/dimmer, clearly metadata not code
+          g1.setAttribute('fill', 'var(--text-dim)');
+          g1.setAttribute('font-size', '8');
+          g1.textContent = 'L' + L.ln + '  ';
+          t.appendChild(g1);
+        }
+        const codeText = clamp(L.text || '', 92);
+        // v26.4 — colour each token like an editor line. clamp() may have added a
+        // trailing ellipsis; tokenize the (possibly truncated) text and emit a
+        // coloured <tspan> per token. Falls back to one plain span if tokenizing
+        // yields nothing (blank line).
+        const toks = tokenizeCode(codeText);
+        if (toks.length) {
+          toks.forEach(tk => {
+            const sp = document.createElementNS(svgNS, 'tspan');
+            sp.setAttribute('class', tk.cls);
+            sp.textContent = tk.text;
+            t.appendChild(sp);
+          });
+        } else {
+          const g2 = document.createElementNS(svgNS, 'tspan');
+          g2.textContent = codeText;
+          t.appendChild(g2);
+        }
+        g.appendChild(t); i++;
+      });
+    }
+    vp.appendChild(g);
+  });
+
+  return svg;
+}
+
+async function renderBeliefs() {
+  const page = $('#page-beliefs');
+  page.innerHTML = '';
+  page.appendChild(el('div', { class: 'page-header' }, [
+    el('div', { class: 'page-title' }, 'Belief inbox'),
+    el('div', { class: 'page-subtitle' }, 'Every inference exposed for review before the system acts.'),
+    el('div', { class: 'page-actions' }, [
+      el('button', { class: 'btn', onclick: () => { state.beliefs = null; renderBeliefs(); } }, 'Refresh'),
+    ]),
+  ]));
+  if (!state.beliefs) {
+    page.appendChild(el('div', { class: 'loader' }, 'Loading beliefs…'));
+    try { state.beliefs = await api('/api/present/beliefs'); }
+    catch (e) { page.appendChild(el('div', { class: 'right-empty' }, 'Failed: ' + e.message)); return; }
+  }
+  const data = state.beliefs;
+  $('#nav-badge-beliefs').textContent = fmt(data.pending_review);
+  const filters = ['all','pending','verified','low'];
+  const bar = el('div', { class: 'belief-bar' });
+  filters.forEach(f => {
+    bar.appendChild(el('button', {
+      class: 'belief-filter' + (state.beliefFilter === f ? ' active' : ''),
+      onclick: () => { state.beliefFilter = f; renderBeliefs(); },
+    }, f));
+  });
+  const selN = state.selectedBeliefs.size;
+  const bulk = el('div', { class: 'bulk-actions' }, [
+    el('span', { class: 'dim' }, selN + ' selected'),
+    el('button', { class: 'btn', disabled: !selN ? 'disabled' : null, onclick: () => bulkAct('accept') }, 'Accept all'),
+    el('button', { class: 'btn', disabled: !selN ? 'disabled' : null, onclick: () => bulkAct('defer') }, 'Defer all'),
+  ]);
+  bar.appendChild(bulk);
+  page.appendChild(bar);
+  let rows = (data.beliefs || []).slice();
+  if (state.beliefFilter === 'pending') rows = rows.filter(b => !b.human_verified);
+  else if (state.beliefFilter === 'verified') rows = rows.filter(b => b.human_verified);
+  else if (state.beliefFilter === 'low') rows = rows.filter(b => b.confidence < 0.7);
+  rows.sort((a, b) => a.confidence - b.confidence);
+  const list = el('div', { class: 'belief-list' });
+  if (!rows.length) {
+    list.appendChild(el('div', { class: 'right-empty' }, 'No beliefs match this filter.'));
+  } else {
+    rows.forEach(b => list.appendChild(beliefRow(b)));
+  }
+  page.appendChild(list);
+}
+function beliefRow(b) {
+  const conf = b.confidence;
+  const confCls = conf >= 0.9 ? '' : (conf >= 0.7 ? ' med' : ' low');
+  return el('div', { class: 'belief-row' + (state.selectedBeliefs.has(b.id) ? ' selected' : '') }, [
+    el('input', { type: 'checkbox', checked: state.selectedBeliefs.has(b.id) ? 'checked' : null,
+      onchange: (e) => { if (e.target.checked) state.selectedBeliefs.add(b.id); else state.selectedBeliefs.delete(b.id); renderBeliefs(); } }),
+    el('div', { class: 'belief-body' }, [
+      el('div', { class: 'subject' }, [b.subject, b.human_verified ? el('span', { class: 'verified-badge' }, 'verified') : null]),
+      el('div', { class: 'pred' }, b.predicate + ' = ' + b.object + (b.corrected_to ? ' (corrected → ' + b.corrected_to + ')' : '')),
+      el('div', { class: 'belief-conf' }, el('div', { class: 'belief-conf-fill' + confCls, style: 'width:' + (conf * 100).toFixed(0) + '%' })),
+      el('div', { class: 'meta' }, [
+        el('span', null, b.kind),
+        el('span', null, 'confidence ' + (conf * 100).toFixed(0) + '%'),
+      ]),
+    ]),
+    el('div', { class: 'belief-actions' }, [
+      el('button', { class: 'accept', onclick: () => actBelief(b, 'accept') }, 'Accept'),
+      el('button', { class: 'correct', onclick: () => actBelief(b, 'correct') }, 'Correct'),
+      el('button', { class: 'defer',  onclick: () => actBelief(b, 'defer')  }, 'Defer'),
+    ]),
+  ]);
+}
+async function actBelief(b, action) {
+  if (action === 'accept') {
+    try {
+      await fetch('/api/present/beliefs/correct', { method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ belief_id: b.id, corrected_to: b.object, human_note: 'accepted via Studio v23' }) });
+      toast('Accepted: ' + b.subject);
+      state.beliefs = null;
+      renderBeliefs();
+    } catch (e) { toast('Accept failed: ' + e.message, 'error'); }
+  } else if (action === 'correct') {
+    const v = prompt('Correct "' + b.predicate + '" for ' + b.subject + '\nCurrent: ' + b.object + '\nNew value:');
+    if (v == null || v.trim() === '') return;
+    try {
+      await fetch('/api/present/beliefs/correct', { method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ belief_id: b.id, corrected_to: v.trim(), human_note: 'corrected via Studio v23' }) });
+      toast('Corrected: ' + b.subject + ' → ' + v.trim());
+      state.beliefs = null;
+      renderBeliefs();
+    } catch (e) { toast('Correct failed: ' + e.message, 'error'); }
+  } else if (action === 'defer') {
+    toast('Deferred (local only): ' + b.subject);
+  }
+}
+async function bulkAct(action) {
+  const ids = Array.from(state.selectedBeliefs);
+  for (const id of ids) {
+    const b = (state.beliefs.beliefs || []).find(x => x.id === id);
+    if (b) await actBelief(b, action);
+  }
+  state.selectedBeliefs.clear();
+}
+
+async function renderSearch(params) {
+  const page = $('#page-search');
+  const q = (params && params.q != null) ? params.q : '';
+  const effect = (params && params.effect) || state.searchEffect || '';
+  page.innerHTML = '';
+  page.appendChild(el('div', { class: 'page-header' }, [
+    el('div', { class: 'page-title' }, 'Search'),
+    el('div', { class: 'page-subtitle' }, 'Symbols, files, effects. Try effect:db or just a name.'),
+  ]));
+  const input = el('input', { type: 'text', value: q, placeholder: 'Type to search…', style: 'flex:1; padding:10px 14px; font-size:14px;', autofocus: true });
+  const facets = el('div', { class: 'facets' });
+  ['', 'db', 'fs', 'network', 'pure'].forEach(f => {
+    facets.appendChild(el('button', {
+      class: 'facet' + (effect === f ? ' active' : ''),
+      onclick: () => { state.searchEffect = f; setRoute('search', { q: input.value, effect: f }); }
+    }, f === '' ? 'all effects' : f));
+  });
+  const results = el('div', { class: 'col' });
+  let debounce = null;
+  input.addEventListener('input', () => { clearTimeout(debounce); debounce = setTimeout(() => doSearch(input.value, effect, results), 150); });
+  page.appendChild(el('div', { class: 'row', style: 'margin-bottom: 14px;' }, input));
+  page.appendChild(facets);
+  page.appendChild(results);
+  if (q || effect) doSearch(q, effect, results);
+  else results.appendChild(el('div', { class: 'right-empty' }, 'Start typing to search.'));
+}
+async function doSearch(q, effect, into) {
+  into.innerHTML = '';
+  into.appendChild(el('div', { class: 'loader' }, 'Searching…'));
+  try {
+    const url = '/api/present/v23/search?q=' + encodeURIComponent(q) + (effect ? '&effect=' + encodeURIComponent(effect) : '') + '&limit=200';
+    const r = await api(url);
+    into.innerHTML = '';
+    if (!r.hits || !r.hits.length) { into.appendChild(el('div', { class: 'right-empty' }, 'No matches.')); return; }
+    into.appendChild(el('div', { class: 'dim', style: 'margin-bottom: 8px;' }, fmt(r.total) + ' match' + (r.total === 1 ? '' : 'es') + (r.hits.length < r.total ? ' (showing ' + r.hits.length + ')' : '')));
+    const tbl = el('table', { class: 'data' });
+    tbl.appendChild(el('thead', null, el('tr', null, [el('th',null,'Name'), el('th',null,'Kind'), el('th',null,'Effects'), el('th',null,'File:Line')])));
+    const tb = el('tbody');
+    r.hits.forEach(h => {
+      tb.appendChild(el('tr', { onclick: () => goToSymbol(h.symbol_id, h.file) }, [
+        el('td', null, h.name),
+        el('td', { class: 'kind' }, h.kind + ' · ' + h.language),
+        el('td', null, pillsFor(h.effects)),
+        el('td', { class: 'mono' }, fileTail(h.file) + ':' + h.line),
+      ]));
+    });
+    tbl.appendChild(tb);
+    into.appendChild(tbl);
+  } catch (e) {
+    into.innerHTML = '';
+    into.appendChild(el('div', { class: 'right-empty' }, 'Failed: ' + e.message));
+  }
+}
+
+async function renderEntries() {
+  const page = $('#page-entries');
+  page.innerHTML = '';
+  if (!state.arch) { try { state.arch = await api('/api/present/v23/architecture'); } catch (e) {} }
+  page.appendChild(el('div', { class: 'page-header' }, [
+    el('div', { class: 'page-title' }, 'Entry points'),
+    el('div', { class: 'page-subtitle' }, 'Mains, HTTP handlers, and CICS/COBOL transactions detected by gen-system.'),
+  ]));
+  const entries = (state.arch && state.arch.entry_points) || [];
+  if (!entries.length) { page.appendChild(el('div', { class: 'right-empty' }, 'No entry points detected.')); return; }
+  const tbl = el('table', { class: 'data' });
+  tbl.appendChild(el('thead', null, el('tr', null, [el('th',null,'Name'), el('th',null,'Kind'), el('th',null,'Language'), el('th',null,'File')])));
+  const tb = el('tbody');
+  entries.forEach(e => {
+    tb.appendChild(el('tr', { onclick: () => goToSymbol(e.symbol_id, e.file) }, [
+      el('td', null, e.name),
+      el('td', { class: 'kind' }, e.kind),
+      el('td', { class: 'kind' }, e.language),
+      el('td', { class: 'mono' }, clamp(e.file, 80)),
+    ]));
+  });
+  tbl.appendChild(tb);
+  page.appendChild(tbl);
+}
+async function renderEffects() {
+  const page = $('#page-effects');
+  page.innerHTML = '';
+  page.appendChild(el('div', { class: 'page-header' }, [
+    el('div', { class: 'page-title' }, 'Effects'),
+    el('div', { class: 'page-subtitle' }, 'Every function grouped by inferred side-effect.'),
+  ]));
+  if (!state.effects) {
+    page.appendChild(el('div', { class: 'loader' }, 'Loading effects…'));
+    try { state.effects = await api('/api/present/v23/effects'); }
+    catch (e) { page.appendChild(el('div', { class: 'right-empty' }, 'Failed: ' + e.message)); return; }
+  }
+  const data = state.effects;
+  if (!data.total) { page.appendChild(el('div', { class: 'right-empty' }, 'No effects inferred yet.')); return; }
+  ['db','fs','network','pure','unknown'].forEach(k => {
+    const items = data.by_effect[k] || [];
+    if (!items.length) return;
+    page.appendChild(el('div', { class: 'section-title', style: 'margin-top:18px;' }, [
+      el('span', { class: 'pill ' + k }, k),
+      el('span', { class: 'dim', style: 'margin-left:8px; font-weight:normal;' }, fmt(items.length) + ' functions'),
+    ]));
+    const tbl = el('table', { class: 'data' });
+    tbl.appendChild(el('thead', null, el('tr', null, [el('th',null,'Name'), el('th',null,'Language'), el('th',null,'File:Line')])));
+    const tb = el('tbody');
+    items.slice(0, 50).forEach(en => {
+      tb.appendChild(el('tr', { onclick: () => goToSymbol(en.symbol_id, en.file) }, [
+        el('td', null, en.name),
+        el('td', { class: 'kind' }, en.language),
+        el('td', { class: 'mono' }, fileTail(en.file) + ':' + en.line),
+      ]));
+    });
+    tbl.appendChild(tb);
+    page.appendChild(tbl);
+    if (items.length > 50) page.appendChild(el('div', { class: 'dim', style: 'padding:8px 12px; font-size:11px;' }, '… ' + fmt(items.length - 50) + ' more'));
+  });
+}
+async function renderUnknowns() {
+  const page = $('#page-unknowns');
+  page.innerHTML = '';
+  if (!state.arch) { try { state.arch = await api('/api/present/v23/architecture'); } catch (e) {} }
+  page.appendChild(el('div', { class: 'page-header' }, [
+    el('div', { class: 'page-title' }, 'Unknowns'),
+    el('div', { class: 'page-subtitle' }, 'Constructs the parser could not model. Human review queue.'),
+  ]));
+  const ug = (state.arch && state.arch.unknowns) || [];
+  if (!ug.length) { page.appendChild(el('div', { class: 'right-empty' }, 'No unknowns recorded at the architecture level. Open a specific file via Search to see file-level unknowns.')); return; }
+  ug.forEach(u => {
+    page.appendChild(el('div', { class: 'kv' }, [
+      el('div', { class: 'k' }, u.language), el('div', { class: 'v' }, fmt(u.count) + ' unknown nodes'),
+    ]));
+  });
+}
+
+function pushHistory(symbolId) {
+  if (!symbolId) return;
+  state.history = [symbolId, ...state.history.filter(x => x !== symbolId)].slice(0, 20);
+  renderHistory();
+  // v23.37: also drive the linear back/forward trail. A normal visit truncates
+  // the forward tail and appends; a back/forward jump (navSuppress) does not.
+  if (!state.navSuppress) {
+    if (state.navStack[state.navCursor] !== symbolId) {
+      state.navStack = state.navStack.slice(0, state.navCursor + 1);
+      state.navStack.push(symbolId);
+      state.navCursor = state.navStack.length - 1;
+    }
+  }
+  updateNavButtons();
+}
+// v23.37: linear back/forward through visited graph roots.
+function navGo(cursor) {
+  if (cursor < 0 || cursor >= state.navStack.length) return;
+  state.navCursor = cursor;
+  const id = state.navStack[cursor];
+  state.navSuppress = true;          // don't let this jump re-push onto the trail
+  setRoute('graph', { root: id });
+  // navSuppress is cleared after render in renderGraph's tail.
+}
+function navBack()    { if (state.navCursor > 0) navGo(state.navCursor - 1); }
+function navForward() { if (state.navCursor < state.navStack.length - 1) navGo(state.navCursor + 1); }
+function updateNavButtons() {
+  const b = $('#nav-back'), f = $('#nav-fwd');
+  if (b) b.disabled = !(state.navCursor > 0);
+  if (f) f.disabled = !(state.navCursor < state.navStack.length - 1);
+}
+function renderHistory() {
+  const el2 = $('#history-list');
+  if (!state.history.length) { el2.className = 'history-empty'; el2.textContent = 'No history yet — pick a symbol to start.'; return; }
+  el2.className = '';
+  el2.innerHTML = '';
+  state.history.forEach(id => {
+    const tail = id.includes('#') ? id.split('#')[1] : id;
+    const file = id.includes('#') ? id.split('#')[0] : '';
+    el2.appendChild(el('div', { class: 'history-item', onclick: () => setRoute('graph', { root: id }) }, [
+      el('div', null, clamp(tail, 28)),
+      el('div', { class: 'meta' }, clamp(fileTail(file), 32)),
+    ]));
+  });
+}
+async function selectSymbol(symbolId) {
+  state.selectedSymbolId = symbolId;
+  pushHistory(symbolId);
+  const right = $('#right-selected');
+  right.className = '';
+  right.innerHTML = '';
+  if (!symbolId) { right.className = 'right-empty'; right.textContent = 'Nothing selected.'; return; }
+  const parts = symbolId.split('#');
+  const file = parts[0] || '';
+  const kindAndName = parts[1] || '';
+  right.appendChild(el('div', { class: 'kv' }, [
+    el('div', { class: 'k' }, 'ID'),    el('div', { class: 'v' }, clamp(symbolId, 80)),
+    el('div', { class: 'k' }, 'File'),  el('div', { class: 'v' }, fileTail(file)),
+    el('div', { class: 'k' }, 'Kind'),  el('div', { class: 'v' }, kindAndName.split(':')[0]),
+    el('div', { class: 'k' }, 'Name'),  el('div', { class: 'v' }, kindAndName.split(':').slice(1).join(':')),
+  ]));
+  right.appendChild(el('button', { class: 'btn', style: 'margin-top:10px;', onclick: () => setRoute('graph', { root: symbolId }) }, 'Open in graph'));
+}
+function goToSymbol(symbolId, file) {
+  state.selectedFile = file;
+  setRoute('graph', { root: symbolId });
+}
+
+function openPalette() {
+  state.paletteOpen = true;
+  $('#palette-overlay').classList.add('open');
+  $('#palette-input').value = '';
+  $('#palette-results').innerHTML = '';
+  $('#palette-input').focus();
+  paletteSearch('');
+}
+function closePalette() {
+  state.paletteOpen = false;
+  $('#palette-overlay').classList.remove('open');
+}
+let paletteDebounce = null;
+async function paletteSearch(q) {
+  clearTimeout(paletteDebounce);
+  paletteDebounce = setTimeout(async () => {
+    let effect = ''; let realQ = q;
+    if (/^effect:/i.test(q)) { effect = q.replace(/^effect:/i,'').trim().toLowerCase(); realQ = ''; }
+    try {
+      const r = await api('/api/present/v23/search?q=' + encodeURIComponent(realQ) + (effect ? '&effect=' + encodeURIComponent(effect) : '') + '&limit=30');
+      state.paletteHits = r.hits || [];
+      state.paletteFocusIdx = 0;
+      renderPalette();
+      $('#palette-stats').textContent = fmt(r.total) + ' total';
+    } catch (e) {
+      state.paletteHits = [];
+      renderPalette();
+      $('#palette-stats').textContent = 'error';
+    }
+  }, 120);
+}
+function renderPalette() {
+  const r = $('#palette-results');
+  r.innerHTML = '';
+  if (!state.paletteHits.length) {
+    r.appendChild(el('div', { class: 'right-empty', style: 'padding:18px;' }, 'No matches. Try a different query, or effect:db.'));
+    return;
+  }
+  state.paletteHits.forEach((h, i) => {
+    r.appendChild(el('div', {
+      class: 'palette-row' + (i === state.paletteFocusIdx ? ' focused' : ''),
+      onclick: () => { closePalette(); goToSymbol(h.symbol_id, h.file); },
+    }, [
+      el('div', { class: 'kind' }, h.kind),
+      el('div', null, [el('div', { class: 'name' }, h.name), el('div', { class: 'file' }, clamp(h.file, 60) + ':' + h.line)]),
+      el('div', { class: 'effects' }, pillsFor(h.effects)),
+    ]));
+  });
+}
+
+function setTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  localStorage.setItem('genv23-theme', t);
+  syncSettingsUI();
+}
+(function initTheme() { const t = localStorage.getItem('genv23-theme') || 'dark'; setTheme(t); })();
+
+// ── v25.3 — collapsible side panels ───────────────────────────────────────
+// Collapse #left / #right to a thin re-expand rail so the main content body
+// (Architecture, Graph, CFG, …) can use the full width. State persists.
+function applyPanels() {
+  const shell = $('#shell');
+  const L = $('#left'), R = $('#right');
+  shell.classList.toggle('left-collapsed', state.leftCollapsed);
+  shell.classList.toggle('right-collapsed', state.rightCollapsed);
+  if (L) L.classList.toggle('collapsed', state.leftCollapsed);
+  if (R) R.classList.toggle('collapsed', state.rightCollapsed);
+  const tl = $('#toggle-left'), tr = $('#toggle-right');
+  if (tl) { tl.classList.toggle('off', state.leftCollapsed); tl.textContent = state.leftCollapsed ? '⊢' : '⊣'; }
+  if (tr) { tr.classList.toggle('off', state.rightCollapsed); tr.textContent = state.rightCollapsed ? '⊣' : '⊢'; }
+}
+function setLeftCollapsed(v) {
+  state.leftCollapsed = v; localStorage.setItem('genv23-left-collapsed', v ? '1' : '0'); applyPanels();
+}
+function setRightCollapsed(v) {
+  state.rightCollapsed = v; localStorage.setItem('genv23-right-collapsed', v ? '1' : '0'); applyPanels();
+}
+function toggleLeft()  { setLeftCollapsed(!state.leftCollapsed); }
+function toggleRight() { setRightCollapsed(!state.rightCollapsed); }
+(function initPanels() {
+  state.leftCollapsed  = localStorage.getItem('genv23-left-collapsed')  === '1';
+  state.rightCollapsed = localStorage.getItem('genv23-right-collapsed') === '1';
+  const sp = parseFloat(localStorage.getItem('genv23-graph-split'));
+  if (!isNaN(sp) && sp > 0.15 && sp < 0.85) state.graphSplit = sp;
+  // wire once DOM exists
+  const wire = () => {
+    const tl = $('#toggle-left'), tr = $('#toggle-right');
+    const lr = $('#left-rail'), rr = $('#right-rail');
+    if (tl) tl.addEventListener('click', toggleLeft);
+    if (tr) tr.addEventListener('click', toggleRight);
+    if (lr) lr.addEventListener('click', () => setLeftCollapsed(false));
+    if (rr) rr.addEventListener('click', () => setRightCollapsed(false));
+    wireHealClear(); // v25.5
+    applyPanels();
+  };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wire);
+  else wire();
+})();
+
+// ── v25.3 — draggable split between the call-graph and CFG panes ──────────
+// Applies the persisted ratio to the graph shell and installs a drag handler on
+// the gutter. Called by renderGraph after it builds the shell.
+function applyGraphSplit(shell) {
+  if (!shell) return;
+  const f = Math.min(0.85, Math.max(0.15, state.graphSplit || 0.5));
+  shell.style.setProperty('--graph-split-cg', f.toFixed(4) + 'fr');
+  shell.style.setProperty('--graph-split-cfg', (1 - f).toFixed(4) + 'fr');
+}
+function initGraphGutter(shell, gutter) {
+  if (!shell || !gutter) return;
+  applyGraphSplit(shell);
+  let dragging = false;
+  const onMove = (e) => {
+    if (!dragging) return;
+    const rect = shell.getBoundingClientRect();
+    const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+    let f = x / rect.width;
+    f = Math.min(0.85, Math.max(0.15, f));
+    state.graphSplit = f;
+    applyGraphSplit(shell);
+    e.preventDefault();
+  };
+  const stop = () => {
+    if (!dragging) return;
+    dragging = false;
+    gutter.classList.remove('dragging');
+    document.body.classList.remove('col-resizing');
+    localStorage.setItem('genv23-graph-split', String(state.graphSplit));
+    window.removeEventListener('mousemove', onMove);
+    window.removeEventListener('touchmove', onMove);
+    window.removeEventListener('mouseup', stop);
+    window.removeEventListener('touchend', stop);
+  };
+  const start = (e) => {
+    dragging = true;
+    gutter.classList.add('dragging');
+    document.body.classList.add('col-resizing');
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('touchmove', onMove, { passive: false });
+    window.addEventListener('mouseup', stop);
+    window.addEventListener('touchend', stop);
+    e.preventDefault();
+  };
+  gutter.addEventListener('mousedown', start);
+  gutter.addEventListener('touchstart', start, { passive: false });
+  // double-click resets to 50/50
+  gutter.addEventListener('dblclick', () => {
+    state.graphSplit = 0.5; applyGraphSplit(shell);
+    localStorage.setItem('genv23-graph-split', '0.5');
+  });
+}
+
+// v23.1 — display text scale, persisted, drives --fz-scale on :root
+function setFontScale(s) {
+  s = Math.max(0.85, Math.min(1.6, Math.round(s * 100) / 100));
+  document.documentElement.style.setProperty('--fz-scale', String(s));
+  localStorage.setItem('genv23-fzscale', String(s));
+  syncSettingsUI();
+}
+(function initFontScale() {
+  const s = parseFloat(localStorage.getItem('genv23-fzscale') || '1') || 1;
+  document.documentElement.style.setProperty('--fz-scale', String(s));
+})();
+function curFontScale() {
+  return parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--fz-scale')) || 1;
+}
+function syncSettingsUI() {
+  const s = curFontScale();
+  const range = $('#fz-range'), val = $('#fz-val');
+  if (range) range.value = String(s);
+  if (val) val.textContent = Math.round(s * 100) + '%';
+  const theme = document.documentElement.getAttribute('data-theme');
+  const d = $('#theme-dark'), l = $('#theme-light');
+  if (d) d.classList.toggle('active', theme === 'dark');
+  if (l) l.classList.toggle('active', theme === 'light');
+}
+function toggleSettings(force) {
+  const pop = $('#settings-pop');
+  const open = force != null ? force : !pop.classList.contains('open');
+  pop.classList.toggle('open', open);
+  if (open) syncSettingsUI();
+}
+$('#settings-btn').addEventListener('click', (e) => { e.stopPropagation(); toggleSettings(); });
+document.addEventListener('click', (e) => {
+  const pop = $('#settings-pop');
+  if (pop.classList.contains('open') && !pop.contains(e.target) && e.target.id !== 'settings-btn') toggleSettings(false);
+});
+$('#fz-range').addEventListener('input', (e) => setFontScale(parseFloat(e.target.value)));
+$('#fz-plus').addEventListener('click', () => setFontScale(curFontScale() + 0.05));
+$('#fz-minus').addEventListener('click', () => setFontScale(curFontScale() - 0.05));
+$('#fz-reset').addEventListener('click', () => setFontScale(1));
+$('#theme-dark').addEventListener('click', () => setTheme('dark'));
+$('#theme-light').addEventListener('click', () => setTheme('light'));
+
+// ─── v24: dynamic project load/switch ─────────────────────────
+async function apiPost(path, body) {
+  const r = await fetch(path, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body || {}),
+  });
+  const text = await r.text();
+  if (!r.ok) throw new Error(text || ('HTTP ' + r.status));
+  try { return JSON.parse(text); } catch (e) { return {}; }
+}
+async function refreshProjectStatus() {
+  try {
+    const cur = await api('/api/project/current');
+    const lbl = cur.loaded ? fileTail(cur.root) : 'Project';
+    const btnLabel = document.getElementById('project-btn-label');
+    if (btnLabel) btnLabel.textContent = lbl;
+    const curEl = document.getElementById('pm-current');
+    if (curEl) curEl.innerHTML = 'Currently loaded: <b>' + (cur.loaded ? cur.root : 'nothing') + '</b>' + (cur.loaded && cur.live ? ' · live' : cur.loaded ? ' · static' : '');
+  } catch (e) { /* endpoint may be absent on older servers */ }
+  try {
+    const base = await api('/api/project/base');
+    const baseEl = document.getElementById('pm-base');
+    if (baseEl) baseEl.textContent = base.base ? ('Projects base: ' + base.base) : '';
+  } catch (e) {}
+}
+function openProjectModal(open) {
+  const m = document.getElementById('project-modal');
+  if (!m) return;
+  m.style.display = open ? 'flex' : 'none';
+  if (open) { refreshProjectStatus(); loadProjectDirs(); const msg = document.getElementById('pm-msg'); if (msg) { msg.textContent = ''; msg.className = 'pm-msg'; } }
+}
+
+// v25.8.2: populate the project-root folder picker from /api/project/list.
+async function loadProjectDirs() {
+  const list = document.getElementById('pm-pick-list');
+  if (!list) return;
+  list.innerHTML = '<div class="pm-pick-empty-row">Loading folders…</div>';
+  try {
+    const data = await api('/api/project/list');
+    if (!data.enabled) {
+      list.innerHTML = '<div class="pm-pick-empty-row">No projects base configured (start gen-server with --projects-base).</div>';
+      return;
+    }
+    const dirs = data.dirs || [];
+    if (!dirs.length) {
+      list.innerHTML = '<div class="pm-pick-empty-row">No folders inside the projects base.</div>';
+      return;
+    }
+    list.innerHTML = '';
+    dirs.forEach(d => {
+      const item = document.createElement('div');
+      item.className = 'pm-pick-item';
+      const tag = d.is_source
+        ? '<span class="pm-pick-tag">source</span>'
+        : '<span class="pm-pick-tag plain">folder</span>';
+      item.innerHTML = '<span>' + d.name + '</span>' + tag;
+      item.onclick = () => selectProjectDir(d);
+      list.appendChild(item);
+    });
+  } catch (e) {
+    list.innerHTML = '<div class="pm-pick-empty-row">Could not list folders: ' + e.message + '</div>';
+  }
+}
+function selectProjectDir(d) {
+  const hidden = document.getElementById('pm-root');
+  const label = document.getElementById('pm-pick-label');
+  if (hidden) hidden.value = d.path;
+  if (label) { label.textContent = d.name; label.className = ''; }
+  document.getElementById('pm-pick-list').classList.remove('open');
+}
+function toggleProjectPicker() {
+  const list = document.getElementById('pm-pick-list');
+  if (list) list.classList.toggle('open');
+}
+(function wireProjectModal() {
+  const btn = document.getElementById('project-btn');
+  if (!btn) return;
+  btn.addEventListener('click', () => openProjectModal(true));
+  const pickBtn = document.getElementById('pm-pick-btn');
+  if (pickBtn) pickBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleProjectPicker(); });
+  const close = document.getElementById('pm-close');
+  if (close) close.addEventListener('click', () => openProjectModal(false));
+  const overlay = document.getElementById('project-modal');
+  if (overlay) overlay.addEventListener('click', (e) => { if (e.target === overlay) openProjectModal(false); });
+
+  const setMsg = (text, kind) => { const m = document.getElementById('pm-msg'); if (m) { m.textContent = text; m.className = 'pm-msg' + (kind ? ' ' + kind : ''); } };
+  const setBusy = (busy) => { ['pm-load','pm-clear'].forEach(id => { const b = document.getElementById(id); if (b) b.disabled = busy; }); };
+
+  const loadBtn = document.getElementById('pm-load');
+  if (loadBtn) loadBtn.addEventListener('click', async () => {
+    const root = (document.getElementById('pm-root') || {}).value || '';
+    if (!root.trim()) { setMsg('Enter a project root path.', 'err'); return; }
+    const body = {
+      root: root.trim(),
+      copybooks: ((document.getElementById('pm-copybooks') || {}).value || '').trim(),
+      stdlib: ((document.getElementById('pm-stdlib') || {}).value || '').trim(),
+      stdlibLang: ((document.getElementById('pm-stdlib-lang') || {}).value || '').trim(),
+      live: !!(document.getElementById('pm-live') || {}).checked,
+    };
+    setBusy(true); setMsg('Loading…');
+    try {
+      const res = await apiPost('/api/project/load', body);
+      setMsg('Loaded ' + (res.root || root) + (res.live ? ' (live)' : ' (static)'), 'ok');
+      // SSE project_loaded will refresh the views; also refresh status now.
+      refreshProjectStatus();
+      setTimeout(() => openProjectModal(false), 700);
+    } catch (e) {
+      setMsg('Load failed: ' + e.message, 'err');
+    } finally { setBusy(false); }
+  });
+
+  const clearBtn = document.getElementById('pm-clear');
+  if (clearBtn) clearBtn.addEventListener('click', async () => {
+    setBusy(true); setMsg('Clearing…');
+    try {
+      await apiPost('/api/project/clear', {});
+      setMsg('Project cleared.', 'ok');
+      refreshProjectStatus();
+    } catch (e) {
+      setMsg('Clear failed: ' + e.message, 'err');
+    } finally { setBusy(false); }
+  });
+
+  // initial status on load
+  refreshProjectStatus();
+})();
+
+window.addEventListener('keydown', (e) => {
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); openPalette(); return; }
+  if (state.paletteOpen) {
+    if (e.key === 'Escape') { closePalette(); return; }
+    if (e.key === 'ArrowDown') { e.preventDefault(); state.paletteFocusIdx = Math.min(state.paletteHits.length - 1, state.paletteFocusIdx + 1); renderPalette(); return; }
+    if (e.key === 'ArrowUp') { e.preventDefault(); state.paletteFocusIdx = Math.max(0, state.paletteFocusIdx - 1); renderPalette(); return; }
+    if (e.key === 'Enter') {
+      const h = state.paletteHits[state.paletteFocusIdx];
+      if (h) { closePalette(); goToSymbol(h.symbol_id, h.file); }
+      return;
+    }
+    return;
+  }
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  if (state.pendingKeys === 'g') {
+    state.pendingKeys = '';
+    clearTimeout(state.pendingKeyTimer);
+    if (e.key === 'a') { setRoute('architecture'); e.preventDefault(); return; }
+    if (e.key === 'g') { setRoute('graph');        e.preventDefault(); return; }
+    if (e.key === 'b') { setRoute('beliefs');      e.preventDefault(); return; }
+    if (e.key === 's') { setRoute('search');       e.preventDefault(); return; }
+    return;
+  }
+  if (e.key === 'g') {
+    state.pendingKeys = 'g';
+    clearTimeout(state.pendingKeyTimer);
+    state.pendingKeyTimer = setTimeout(() => { state.pendingKeys = ''; }, 700);
+    return;
+  }
+  // v25.3: Shift+[ / Shift+] collapse the left / right panels (plain [ ] stay
+  // browser-style graph nav). '\\' collapses BOTH for a full-width content body.
+  if (e.key === '{') { toggleLeft();  e.preventDefault(); return; }
+  if (e.key === '}') { toggleRight(); e.preventDefault(); return; }
+  if (e.key === '\\') {
+    const both = !(state.leftCollapsed && state.rightCollapsed);
+    setLeftCollapsed(both); setRightCollapsed(both); e.preventDefault(); return;
+  }
+  if (e.key === '[') { navBack(); return; }
+  if (e.key === ']') { navForward(); return; }
+});
+
+$('#palette-trigger').addEventListener('click', openPalette);
+$('#palette-input').addEventListener('input', (e) => paletteSearch(e.target.value));
+$('#palette-overlay').addEventListener('click', (e) => { if (e.target.id === 'palette-overlay') closePalette(); });
+$$('.nav-btn, .left-nav-item').forEach(b => { b.addEventListener('click', () => { const r = b.dataset.route; if (r) setRoute(r); }); });
+$('#theme-btn').addEventListener('click', () => {
+  const cur = document.documentElement.getAttribute('data-theme');
+  setTheme(cur === 'dark' ? 'light' : 'dark');
+});
+
+window.addEventListener('hashchange', handleRoute);
+handleRoute();
+connectSSE();
+</script>
+</body>
+</html>

@@ -1,0 +1,1 @@
+Generate full CRUD Go + React code for schema.

@@ -1,0 +1,191 @@
+{
+  "schema": "genbench/v1",
+  "started_at": "2026-01-01T00:00:00Z",
+  "finished_at": "2026-01-01T00:00:00Z",
+  "host": {
+    "os": "linux",
+    "arch": "amd64",
+    "num_cpu": 0,
+    "go_version": "frozen",
+    "git_commit": ""
+  },
+  "model": {
+    "name": "n/a (parser-path baseline)",
+    "endpoint": "n/a"
+  },
+  "project_root": "meyfa/CobolCraft@c6f34f90ecdff94c3171c2b67334f9a5dc6acffb",
+  "suites": [
+    {
+      "name": "parse_throughput",
+      "cases": [
+        {
+          "name": "files_found",
+          "pass": true,
+          "got": "268",
+          "want": ">0"
+        },
+        {
+          "name": "parse_errors_zero",
+          "pass": true,
+          "got": "0",
+          "want": "0"
+        }
+      ],
+      "metrics": [
+        {
+          "name": "files_per_sec_cobol",
+          "value": 0.0,
+          "unit": "files/s (env-dependent; excluded from regression)",
+          "higher_is_better": true
+        },
+        {
+          "name": "kb_per_sec_cobol",
+          "value": 0.0,
+          "unit": "kB/s (env-dependent; excluded from regression)",
+          "higher_is_better": true
+        },
+        {
+          "name": "files_total_cobol",
+          "value": 268,
+          "unit": "files",
+          "higher_is_better": true
+        },
+        {
+          "name": "files_per_sec_overall",
+          "value": 0.0,
+          "unit": "files/s (env-dependent; excluded from regression)",
+          "higher_is_better": true
+        },
+        {
+          "name": "kb_per_sec_overall",
+          "value": 0.0,
+          "unit": "kB/s (env-dependent; excluded from regression)",
+          "higher_is_better": true
+        },
+        {
+          "name": "parse_errors",
+          "value": 0,
+          "unit": "errors"
+        }
+      ],
+      "duration_ns": 0,
+      "notes": "languages: 1, files: 268, bytes: 1101321"
+    },
+    {
+      "name": "resolution_recall",
+      "cases": [
+        {
+          "name": "internal_recall_at_least_90%",
+          "pass": true,
+          "got": "100.00% (302/302 internal calls resolved)",
+          "want": ">=90.00%"
+        },
+        {
+          "name": "internal_recall_cobol_at_least_85%",
+          "pass": true,
+          "got": "100.00% (302/302)",
+          "want": ">=85%"
+        },
+        {
+          "name": "symbols_have_definedin",
+          "pass": true,
+          "got": "0 symbols with empty DefinedIn",
+          "want": "0"
+        }
+      ],
+      "metrics": [
+        {
+          "name": "resolution_recall_internal",
+          "value": 1,
+          "unit": "ratio",
+          "higher_is_better": true
+        },
+        {
+          "name": "resolution_recall_overall",
+          "value": 0.28410159924741296,
+          "unit": "ratio",
+          "higher_is_better": true
+        },
+        {
+          "name": "external_call_ratio",
+          "value": 0.715898400752587,
+          "unit": "ratio"
+        },
+        {
+          "name": "call_edges_total",
+          "value": 1063,
+          "unit": "edges",
+          "higher_is_better": true
+        },
+        {
+          "name": "call_edges_internal",
+          "value": 302,
+          "unit": "edges",
+          "higher_is_better": true
+        },
+        {
+          "name": "call_edges_resolved",
+          "value": 302,
+          "unit": "edges",
+          "higher_is_better": true
+        },
+        {
+          "name": "call_edges_external",
+          "value": 761,
+          "unit": "edges"
+        },
+        {
+          "name": "recall_internal_cobol",
+          "value": 1,
+          "unit": "ratio",
+          "higher_is_better": true
+        }
+      ],
+      "duration_ns": 0,
+      "notes": "symbols=6345 total=1063 internal=302 resolved=302 external=761"
+    },
+    {
+      "name": "cfg_correctness",
+      "cases": [
+        {
+          "name": "rule1_entry_in_range",
+          "pass": true,
+          "got": "330 ok, 0 bad",
+          "want": "all ok"
+        },
+        {
+          "name": "rule2_exits_in_range",
+          "pass": true,
+          "got": "330 ok, 0 bad",
+          "want": "all ok"
+        },
+        {
+          "name": "rule3_no_orphan_blocks",
+          "pass": true,
+          "got": "330 ok, 0 bad",
+          "want": "all ok"
+        },
+        {
+          "name": "rule4_successors_in_range",
+          "pass": true,
+          "got": "330 ok, 0 bad",
+          "want": "all ok"
+        }
+      ],
+      "metrics": [
+        {
+          "name": "cfgs_total",
+          "value": 330,
+          "unit": "cfgs",
+          "higher_is_better": true
+        },
+        {
+          "name": "cfgs_with_issue",
+          "value": 0,
+          "unit": "cfgs"
+        }
+      ],
+      "duration_ns": 0
+    }
+  ]
+}

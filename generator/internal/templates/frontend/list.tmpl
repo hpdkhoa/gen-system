@@ -1,0 +1,16 @@
+import { useEffect, useState } from "react";
+
+export default function {{.Name}}List() {
+const [data, setData] = useState([]);
+
+useEffect(() => {
+fetch("/{{.Lower}}")
+.then(res => res.json())
+.then(setData);
+}, []);
+
+return ( <div> <h1>{{.Name}} List</h1>
+{data.map((i, idx) => ( <pre key={idx}>{JSON.stringify(i)}</pre>
+))} </div>
+);
+}

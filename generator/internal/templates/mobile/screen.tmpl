@@ -1,0 +1,18 @@
+import React, { useEffect, useState } from "react";
+import { ScrollView, Text, Button } from "react-native";
+
+export default function {{.Name}}Screen() {
+
+const [data, setData] = useState([]);
+
+useEffect(() => {
+fetch("http://10.0.2.2:28080/{{.Lower}}")
+.then(res => res.json())
+.then(setData);
+}, []);
+
+return ( <ScrollView> <Text>{{.Name}}</Text>
+{data.map((i, idx) => ( <Text key={idx}>{JSON.stringify(i)}</Text>
+))} </ScrollView>
+);
+}

@@ -1,0 +1,18 @@
+{
+"entities": [
+{
+"name": "Todo",
+"fields": [
+{ "name": "Title", "type": "string" },
+{ "name": "Done", "type": "bool" }
+]
+},
+{
+"name": "User",
+"fields": [
+{ "name": "Email", "type": "string" },
+{ "name": "Active", "type": "bool" }
+]
+}
+]
+}

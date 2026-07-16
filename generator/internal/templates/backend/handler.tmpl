@@ -1,0 +1,16 @@
+package handler
+
+import (
+"encoding/json"
+"net/http"
+"app/internal/service"
+)
+
+func GetAll{{.Name}}(w http.ResponseWriter, r *http.Request) {
+data, err := service.GetAll{{.Name}}()
+if err != nil {
+http.Error(w, err.Error(), 500)
+return
+}
+json.NewEncoder(w).Encode(data)
+}
