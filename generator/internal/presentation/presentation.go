@@ -45,6 +45,7 @@ import (
 	"sync"
 
 	"gen-system/generator/internal/ast"
+	"gen-system/generator/internal/belief"
 	"gen-system/generator/internal/flow"
 	"gen-system/generator/internal/symbols"
 )
@@ -114,51 +115,39 @@ type DataFlowIssueView struct {
 	Line    int    `json:"line"`
 }
 
-// BeliefKind classifies the type of architectural belief.
-type BeliefKind string
-
-const (
-	BeliefLayer     BeliefKind = "layer"      // "I believe X is in layer Y"
-	BeliefOwnership BeliefKind = "ownership"  // "I believe entity X owns table Y"
-	BeliefContract  BeliefKind = "contract"   // "I believe function X has effect Y"
-	BeliefDependency BeliefKind = "dependency" // "I believe X depends on Y"
+// The belief store now lives in internal/belief so both the Understand track and
+// the Generate track can share it (presentation may not import internal/context,
+// and the generator may not import presentation, so a leaf package was required).
+// These aliases keep presentation's existing references (Belief, BeliefKind,
+// BeliefCorrection, BeliefLayer, …) working unchanged while the definitions live
+// in one place. Session 1 is a pure relocation — behavior is preserved.
+type (
+	BeliefKind       = belief.Kind
+	Belief           = belief.Belief
+	BeliefCorrection = belief.Correction
 )
 
-// Belief is one architectural belief held by the system.
-type Belief struct {
-	ID         string     `json:"id"`
-	Kind       BeliefKind `json:"kind"`
-	Subject    string     `json:"subject"`    // e.g. "CreateUser"
-	Predicate  string     `json:"predicate"`  // e.g. "has_layer"
-	Object     string     `json:"object"`     // e.g. "handler"
-	Confidence float64    `json:"confidence"` // 0.0 – 1.0
-	// HumanVerified is true if a human confirmed or corrected this.
-	HumanVerified bool   `json:"human_verified"`
-	CorrectedTo   string `json:"corrected_to,omitempty"`
-}
+const (
+	BeliefLayer      = belief.KindLayer
+	BeliefOwnership  = belief.KindOwnership
+	BeliefContract   = belief.KindContract
+	BeliefDependency = belief.KindDependency
+)
 
-// BeliefViewResponse is returned by GET /api/present/beliefs.
+// BeliefViewResponse is returned by GET /api/present/beliefs. It stays a
+// presentation-layer DTO (the view shape), distinct from the stored belief model.
 type BeliefViewResponse struct {
-	Beliefs            []Belief `json:"beliefs"`
-	ArchSummary        string   `json:"arch_summary"`
-	PendingReview      int      `json:"pending_review"`
-	TotalBeliefs       int      `json:"total_beliefs"`
+	Beliefs       []Belief             `json:"beliefs"`
+	ArchSummary   string               `json:"arch_summary"`
+	PendingReview int                  `json:"pending_review"`
+	TotalBeliefs  int                  `json:"total_beliefs"`
+	Warnings      []belief.StaleWarning `json:"warnings,omitempty"` // v26.8 staleness
+	StaleCount    int                  `json:"stale_count"`
+	Summaries     []Belief             `json:"summaries,omitempty"` // v26.16 scope roll-ups
 }
 
-// BeliefCorrection is the payload for POST /api/present/beliefs/correct.
-type BeliefCorrection struct {
-	BeliefID    string `json:"belief_id"`
-	CorrectedTo string `json:"corrected_to"`
-	HumanNote   string `json:"human_note,omitempty"`
-}
-
-// DiffEntry is one changed understanding.
-type DiffEntry struct {
-	Kind    string `json:"kind"`    // "added", "removed", "changed"
-	Subject string `json:"subject"` // symbol name or file
-	Before  string `json:"before,omitempty"`
-	After   string `json:"after,omitempty"`
-}
+// DiffEntry is one changed understanding (defined in internal/belief).
+type DiffEntry = belief.DiffEntry
 
 // DiffViewResponse is returned by GET /api/present/diff.
 type DiffViewResponse struct {
@@ -181,7 +170,7 @@ type Server struct {
 	mu      sync.RWMutex           // guards cfgs and efx
 	cfgs    map[string]flow.CFGSet // filePath → CFGSet
 	efx     map[string]*flow.FuncEffects
-	beliefs *BeliefStore
+	beliefs *belief.Store
 	broker  SSEPublisher // may be nil; set via SetBroker
 
 	// v20: project root for the read-only file browser (/api/present/files)
@@ -204,19 +193,21 @@ type Server struct {
 
 // StdlibRootView is one root's outcome as rendered by the Understand UI.
 type StdlibRootView struct {
-	Lang     string `json:"lang"`
-	Path     string `json:"path"`
-	Status   string `json:"status"` // attached | skipped | missing
-	Detail   string `json:"detail"`
-	Packages int    `json:"packages"`
-	Symbols  int    `json:"symbols"`
-	Auto     bool   `json:"auto"`
+	Lang          string         `json:"lang"`
+	Path          string         `json:"path"`
+	Status        string         `json:"status"` // attached | skipped | missing
+	Detail        string         `json:"detail"`
+	Packages      int            `json:"packages"`
+	Symbols       int            `json:"symbols"`
+	Auto          bool           `json:"auto"`
+	LangBreakdown map[string]int `json:"lang_breakdown,omitempty"` // v26.6
 }
 
 // StdlibReportView is the whole stdlib outcome for the loaded project.
 type StdlibReportView struct {
-	Mode  string           `json:"mode"` // auto | explicit | auto+explicit | none
-	Roots []StdlibRootView `json:"roots"`
+	Mode     string           `json:"mode"` // auto | explicit | auto+explicit | none
+	Roots    []StdlibRootView `json:"roots"`
+	Warnings []string         `json:"warnings,omitempty"` // v26.6 mixed-language-root, etc.
 }
 
 // SetStdlibReport records the stdlib outcome for the Architecture page. Safe to
@@ -241,11 +232,27 @@ func New(idx *symbols.Index) *Server {
 		idx:     idx,
 		cfgs:    make(map[string]flow.CFGSet),
 		efx:     make(map[string]*flow.FuncEffects),
-		beliefs: newBeliefStore(),
+		// root is not known at New() time; SetRoot rebinds the store to
+		// <root>/.gen once the project root is set. Until then it uses the
+		// legacy CWD-relative path so an unconfigured caller still works.
+		beliefs: belief.NewStore(""),
 	}
 }
 
-// SetRoot records the project root used by the file-browser endpoint and
+// BeliefStore returns the live belief store so a GENERATION-SIDE caller can inject
+// the optional enrich tier (v26.22). presentation itself must never import
+// internal/enrich — it is a core Understand package and enrich pulls in the model
+// (archtest enforces this) — so the wiring is inverted: gen-server, which legitimately
+// links both halves, calls this and injects. understand-server simply never calls it,
+// and the enterprise binary stays model-free.
+//
+// Returns nil before SetRoot has bound a project. Callers should re-inject after
+// SetRoot/ReplaceContext, since those rebind the store.
+func (s *Server) BeliefStore() *belief.Store {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	return s.beliefs
+}
 // (optionally) the copybook search path for on-demand COBOL parsing.
 // v20: called by gen-server after construction. Safe to pass "" for either.
 // v20.3: browseRoot widens the file browser's reach; pass "" to default it
@@ -259,6 +266,12 @@ func (s *Server) SetRoot(root, copybookPath, browseRoot string) {
 		s.root = root
 	}
 	s.copybookPath = copybookPath
+	// Rebind the belief store to <root>/.gen so corrections belong to THIS
+	// project rather than the process working directory (the old CWD-relative
+	// path meant corrections for project A reappeared while viewing project B).
+	if s.root != "" {
+		s.beliefs = belief.NewStore(s.root)
+	}
 	if browseRoot == "" {
 		s.browseRoot = s.root
 	} else if abs, err := filepath.Abs(browseRoot); err == nil {
@@ -310,7 +323,7 @@ func (s *Server) ReplaceContext(idx *symbols.Index, cfgs map[string]flow.CFGSet,
 	s.mu.Unlock()
 	// Rebuild beliefs from the new index outside the lock; rebuildFromIndex takes
 	// its own synchronization and reads a fresh efx copy.
-	s.beliefs.rebuildFromIndex(s.index(), s.safeEfxCopy())
+	s.beliefs.RebuildFromIndex(s.index(), s.safeEfxCopy())
 }
 
 // OnFileChanged is the hook called by the file watcher after it has
@@ -338,7 +351,7 @@ func (s *Server) OnFileChanged(path string, cfgSet flow.CFGSet, effects map[stri
 	s.mu.Unlock()
 
 	// Rebuild beliefs from the (now-updated) index.
-	s.beliefs.rebuildFromIndex(s.index(), s.safeEfxCopy())
+	s.beliefs.RebuildFromIndex(s.index(), s.safeEfxCopy())
 
 	if s.broker != nil {
 		s.broker.Publish("file_changed", map[string]interface{}{
@@ -845,7 +858,7 @@ func (s *Server) handleSource(w http.ResponseWriter, r *http.Request) {
 // ─── Belief View ──────────────────────────────────────────────
 
 func (s *Server) handleBeliefs(w http.ResponseWriter, r *http.Request) {
-	s.beliefs.rebuildFromIndex(s.index(), s.safeEfxCopy())
+	s.beliefs.RebuildFromIndex(s.index(), s.safeEfxCopy())
 	beliefs := s.beliefs.All()
 	pending := 0
 	for _, b := range beliefs {
@@ -853,11 +866,15 @@ func (s *Server) handleBeliefs(w http.ResponseWriter, r *http.Request) {
 			pending++
 		}
 	}
+	warnings := s.beliefs.Warnings()
 	resp := BeliefViewResponse{
 		Beliefs:       beliefs,
 		ArchSummary:   s.buildArchSummary(),
 		PendingReview: pending,
 		TotalBeliefs:  len(beliefs),
+		Warnings:      warnings,
+		StaleCount:    len(warnings),
+		Summaries:     s.beliefs.Summaries(),
 	}
 	writeJSON(w, resp)
 }
@@ -890,185 +907,6 @@ func (s *Server) handleDiff(w http.ResponseWriter, r *http.Request) {
 		Now:     s.beliefs.CurrentChecksum(),
 	}
 	writeJSON(w, resp)
-}
-
-// ─── BeliefStore ──────────────────────────────────────────────
-
-// BeliefStore persists and manages architectural beliefs.
-type BeliefStore struct {
-	beliefs     map[string]*Belief // belief ID → Belief
-	corrections map[string]BeliefCorrection
-	diskPath    string
-	checksum    string
-}
-
-func newBeliefStore() *BeliefStore {
-	bs := &BeliefStore{
-		beliefs:     make(map[string]*Belief),
-		corrections: make(map[string]BeliefCorrection),
-		diskPath:    ".gen/beliefs.json",
-	}
-	bs.load()
-	return bs
-}
-
-func (bs *BeliefStore) rebuildFromIndex(idx *symbols.Index, efx map[string]*flow.FuncEffects) {
-	allSyms := idx.AllSymbols()
-
-	for _, sym := range allSyms {
-		// Layer belief
-		if sym.Layer != "" {
-			id := "layer:" + sym.ID
-			b := &Belief{
-				ID:         id,
-				Kind:       BeliefLayer,
-				Subject:    sym.QualName,
-				Predicate:  "has_layer",
-				Object:     sym.Layer,
-				Confidence: 0.85,
-			}
-			if c, ok := bs.corrections[id]; ok {
-				b.CorrectedTo = c.CorrectedTo
-				b.HumanVerified = true
-			}
-			bs.beliefs[id] = b
-		}
-
-		// Effect belief
-		if e, ok := efx[sym.ID]; ok {
-			for eff := range e.Effects {
-				id := "effect:" + sym.ID + ":" + string(eff)
-				b := &Belief{
-					ID:         id,
-					Kind:       BeliefContract,
-					Subject:    sym.QualName,
-					Predicate:  "has_effect",
-					Object:     string(eff),
-					Confidence: 0.75,
-				}
-				if c, ok2 := bs.corrections[id]; ok2 {
-					b.CorrectedTo = c.CorrectedTo
-					b.HumanVerified = true
-				}
-				bs.beliefs[id] = b
-			}
-		}
-	}
-
-	// Dependency beliefs from call edges
-	for _, edge := range idx.AllCallEdges() {
-		if edge.CalleeID == "" {
-			continue
-		}
-		id := "dep:" + edge.CallerID + "->" + edge.CalleeID
-		b := &Belief{
-			ID:         id,
-			Kind:       BeliefDependency,
-			Subject:    edge.CallerID,
-			Predicate:  "calls",
-			Object:     edge.CalleeID,
-			Confidence: 0.95,
-		}
-		if c, ok := bs.corrections[id]; ok {
-			b.CorrectedTo = c.CorrectedTo
-			b.HumanVerified = true
-		}
-		bs.beliefs[id] = b
-	}
-
-	bs.computeChecksum()
-	bs.save()
-}
-
-func (bs *BeliefStore) All() []Belief {
-	out := make([]Belief, 0, len(bs.beliefs))
-	for _, b := range bs.beliefs {
-		out = append(out, *b)
-	}
-	sort.Slice(out, func(i, j int) bool {
-		return out[i].ID < out[j].ID
-	})
-	return out
-}
-
-func (bs *BeliefStore) Correct(c BeliefCorrection) error {
-	if _, ok := bs.beliefs[c.BeliefID]; !ok {
-		return fmt.Errorf("belief %q not found", c.BeliefID)
-	}
-	bs.corrections[c.BeliefID] = c
-	bs.beliefs[c.BeliefID].CorrectedTo = c.CorrectedTo
-	bs.beliefs[c.BeliefID].HumanVerified = true
-	bs.save()
-	return nil
-}
-
-func (bs *BeliefStore) DiffSince(prevChecksum string) []DiffEntry {
-	if prevChecksum == bs.checksum {
-		return nil
-	}
-	// Simple diff: report all unverified beliefs as "changed"
-	var changes []DiffEntry
-	for _, b := range bs.beliefs {
-		if !b.HumanVerified {
-			changes = append(changes, DiffEntry{
-				Kind:    "changed",
-				Subject: b.Subject,
-				After:   b.Object,
-			})
-		}
-	}
-	return changes
-}
-
-func (bs *BeliefStore) CurrentChecksum() string { return bs.checksum }
-
-func (bs *BeliefStore) computeChecksum() {
-	keys := make([]string, 0, len(bs.beliefs))
-	for k := range bs.beliefs {
-		keys = append(keys, k)
-	}
-	sort.Strings(keys)
-	var sb strings.Builder
-	for _, k := range keys {
-		sb.WriteString(k)
-		sb.WriteString(bs.beliefs[k].Object)
-	}
-	bs.checksum = fmt.Sprintf("%x", len(bs.beliefs)) + sb.String()[:min2(len(sb.String()), 16)]
-}
-
-type persistedBeliefs struct {
-	Beliefs     map[string]*Belief              `json:"beliefs"`
-	Corrections map[string]BeliefCorrection     `json:"corrections"`
-}
-
-func (bs *BeliefStore) save() {
-	pb := persistedBeliefs{Beliefs: bs.beliefs, Corrections: bs.corrections}
-	data, err := json.MarshalIndent(pb, "", "  ")
-	if err != nil {
-		return
-	}
-	_ = os.MkdirAll(filepath.Dir(bs.diskPath), 0755)
-	_ = os.WriteFile(bs.diskPath, data, 0644)
-}
-
-func (bs *BeliefStore) load() {
-	data, err := os.ReadFile(bs.diskPath)
-	if os.IsNotExist(err) {
-		return
-	}
-	if err != nil {
-		return
-	}
-	var pb persistedBeliefs
-	if err := json.Unmarshal(data, &pb); err != nil {
-		return
-	}
-	if pb.Beliefs != nil {
-		bs.beliefs = pb.Beliefs
-	}
-	if pb.Corrections != nil {
-		bs.corrections = pb.Corrections
-	}
 }
 
 // ─── Arch Summary ─────────────────────────────────────────────
@@ -1133,13 +971,6 @@ func trimRaw(s string, max int) string {
 		return s[:max] + "…"
 	}
 	return s
-}
-
-func min2(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
 }
 
 // LoadEffects bulk-loads a symbolID→FuncEffects map (e.g. from Context.Effects).

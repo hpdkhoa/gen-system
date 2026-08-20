@@ -358,6 +358,13 @@ func LoadContextWithOpts(root string, opts LoadContextOpts) Context {
 		// Per-root outcomes from the loader, appended to any "could not even
 		// locate a tree" entries the detector already recorded.
 		report.Roots = append(report.Roots, sp.roots...)
+		// v26.6: warn about a root that physically contains more than one
+		// language. One root maps the project's imports with ONE convention
+		// against ONE directory, so a mixed tree resolves only the language that
+		// matches — the rest silently miss. Give the exact split-into-per-root
+		// fix. Detected roots are single-language by construction, so this only
+		// ever fires on an explicit --stdlib path.
+		report.Warnings = append(report.Warnings, mixedLanguageWarnings(sp.roots)...)
 		trace.Info(stdlibCtx, "stdlib ingest complete",
 			"roots", len(roots),
 			"pkgs", sp.pkgsIngested,

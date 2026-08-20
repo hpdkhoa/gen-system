@@ -15,12 +15,15 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 	"time"
 
 	"gen-system/generator/internal/api"
 	"gen-system/generator/internal/api/sse"
+	"gen-system/generator/internal/belief"
 	agentctx "gen-system/generator/internal/context"
+	"gen-system/generator/internal/enrich"
 	"gen-system/generator/internal/handlers"
 	"gen-system/generator/internal/presentation"
 	"gen-system/generator/internal/services"
@@ -42,6 +45,10 @@ func main() {
 		"directory holding the Studio UI (studio-v23.html). Default: <binary-dir>/web, else ./web. v23.44: pin this so the UI is served from a known place regardless of launch dir.")
 	projectsBase := flag.String("projects-base", "",
 		"v24: directory under which the Studio may dynamically load projects (/api/project/load). Default: parent of --root. Loads outside this tree are rejected.")
+	enrichInline := flag.Bool("enrich-inline", false,
+		"v26.22: enrich beliefs with the local model DURING each rebuild, instead of out-of-band via gen-enrich. "+
+			"Costs a model call per routine on every re-parse, so it suits small projects and demos; prefer gen-enrich for real codebases. "+
+			"A missing/unreachable model is not an error — the parser and human belief tiers carry on.")
 	watchLive := flag.Bool("watch", false,
 		"v24: start the file watcher live at boot (default STATIC: no live watching until switched on per-project in the Studio).")
 	flag.Parse()
@@ -80,6 +87,14 @@ func main() {
 	presServer.SetBroker(broker)
 	presServer.SetRoot(*root, *copybooks, *browseRoot)
 	presServer.SetStdlibReport(stdlibReportView(ctx.StdlibReport))
+
+	// v26.22: optional INLINE enrichment. gen-server is the generation-side binary,
+	// so it may legitimately link internal/enrich; presentation may not (archtest
+	// forbids it), which is why the wiring is inverted — we reach into the store and
+	// inject rather than presentation importing the model. Off by default: enrichment
+	// costs a model call per routine on every rebuild, so the out-of-band gen-enrich
+	// producer remains the recommended path for anything but a small project.
+	attachEnricher(presServer, ctx.Index, *enrichInline)
 
 	// v24: re-pointable watcher manager. Default is STATIC (no live watching)
 	// unless --watch is passed; the Studio can switch a loaded project to live
@@ -126,6 +141,10 @@ func main() {
 			// the report too, or Architecture would keep describing the previous
 			// project's runtimes.
 			ps.SetStdlibReport(stdlibReportView(newCtx.StdlibReport))
+			// v26.22: ReplaceContext rebinds the belief store to the new project, so
+			// the enricher must be re-attached or inline enrichment silently stops
+			// after the first project swap.
+			attachEnricher(ps, newCtx.Index, *enrichInline)
 			// re-bind the watcher to the new index at its (already updated) live state
 			wm.rebind(newCtx.Index)
 		}
@@ -264,17 +283,95 @@ func (m *watchManager) repoint(root string, live bool, idx *symbols.Index) {
 // layer's DTO. Kept in the binary (which imports both) so presentation stays
 // free of any dependency on internal/context.
 func stdlibReportView(r agentctx.StdlibReport) presentation.StdlibReportView {
-	out := presentation.StdlibReportView{Mode: r.Mode}
+	out := presentation.StdlibReportView{Mode: r.Mode, Warnings: r.Warnings}
 	for _, rt := range r.Roots {
 		out.Roots = append(out.Roots, presentation.StdlibRootView{
-			Lang:     rt.Lang,
-			Path:     rt.Path,
-			Status:   string(rt.Status),
-			Detail:   rt.Detail,
-			Packages: rt.Packages,
-			Symbols:  rt.Symbols,
-			Auto:     rt.Auto,
+			Lang:          rt.Lang,
+			Path:          rt.Path,
+			Status:        string(rt.Status),
+			Detail:        rt.Detail,
+			Packages:      rt.Packages,
+			Symbols:       rt.Symbols,
+			Auto:          rt.Auto,
+			LangBreakdown: rt.LangBreakdown,
 		})
 	}
 	return out
+}
+
+// attachEnricher injects the optional enrich tier into the presentation server's
+// belief store (v26.22).
+//
+// The dependency direction matters: internal/presentation is a CORE Understand
+// package and archtest forbids it from importing internal/enrich (which pulls in the
+// model). So presentation exposes its store and the GENERATION-side binary — this one
+// — does the injection. understand-server never calls this, and therefore never links
+// enrich at all.
+//
+// Must be re-called after any operation that rebinds the store (SetRoot at boot,
+// ReplaceContext on project swap), or inline enrichment silently stops.
+func attachEnricher(ps *presentation.Server, idx *symbols.Index, on bool) {
+	if !on {
+		return
+	}
+	store := ps.BeliefStore()
+	if store == nil {
+		return
+	}
+	if !enrich.Available() {
+		fmt.Println("⚠ --enrich-inline: local model not reachable — belief enrichment is OFF.")
+		fmt.Println("  The parser and human belief tiers work without it; start Ollama and restart to enable.")
+		return
+	}
+	store.SetEnricher(enrich.New())
+	store.SetBodyProvider(bodyProviderFor(idx))
+	fmt.Println("✓ --enrich-inline: model descriptions will be generated during each rebuild.")
+}
+
+// bodyProviderFor returns a BodyProvider that reads a routine's source on demand,
+// preferring exact byte offsets and falling back to line slicing for the frontends
+// that record only line numbers (Java/COBOL/TS/Python — see v26.20). Results are
+// cached per file for the life of the closure.
+func bodyProviderFor(idx *symbols.Index) belief.BodyProvider {
+	var mu sync.Mutex
+	files := map[string][]byte{}
+	return func(symbolID string) string {
+		sym, ok := idx.ByID(symbolID)
+		if !ok || sym == nil || sym.DefinedIn == "" {
+			return ""
+		}
+		mu.Lock()
+		src, ok := files[sym.DefinedIn]
+		if !ok {
+			b, err := os.ReadFile(sym.DefinedIn)
+			if err != nil {
+				b = nil
+			}
+			src, files[sym.DefinedIn] = b, b
+		}
+		mu.Unlock()
+		if src == nil {
+			return ""
+		}
+		st, en := sym.Span.Start.Offset, sym.Span.End.Offset
+		if en > st && st >= 0 && en <= len(src) {
+			return string(src[st:en])
+		}
+		// Line-based fallback.
+		sl, el := sym.Span.Start.Line, sym.Span.End.Line
+		if sl <= 0 {
+			return ""
+		}
+		lines := strings.Split(string(src), "\n")
+		if sl > len(lines) {
+			return ""
+		}
+		if el <= 0 || el < sl {
+			el = sl + 60
+		}
+		if el > len(lines) {
+			el = len(lines)
+		}
+		return strings.Join(lines[sl-1:el], "\n")
+	}
 }

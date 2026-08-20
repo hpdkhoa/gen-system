@@ -52,6 +52,11 @@ const stdlibMaxFileSize = 64 * 1024
 func (ctx *Context) loadStdlibRoots(roots []StdlibRoot, cobolFE *genast.CobolFrontend) stdlibProgress {
 	var p stdlibProgress
 
+	// v26.6: the currently-walked root's language breakdown. ingestFile is shared
+	// across roots, so the loop points this at the active root's map before
+	// walking. Nil between roots (synthetic roots don't walk files).
+	var curLangs map[string]int
+
 	// ingestFile parses one file and adds it. Shared by scoped and full walks.
 	ingestFile := func(path string, size int64) {
 		ext := strings.ToLower(filepath.Ext(path))
@@ -61,6 +66,14 @@ func (ctx *Context) loadStdlibRoots(roots []StdlibRoot, cobolFE *genast.CobolFro
 		if isTestSourcePath(path) {
 			p.filesSkipped++
 			return
+		}
+		// v26.6: record the language family SEEN (before size/parse gating), so the
+		// mixed-language-root warning reflects the tree's real contents even if some
+		// files are later skipped for size.
+		if curLangs != nil {
+			if fam := langFamilyForExt(ext); fam != "" {
+				curLangs[fam]++
+			}
 		}
 		p.filesSeen++
 		if size > stdlibMaxFileSize {
@@ -134,6 +147,7 @@ func (ctx *Context) loadStdlibRoots(roots []StdlibRoot, cobolFE *genast.CobolFro
 		// the exact provenance machinery; the only difference is the symbol
 		// source is a built-in list, not files on disk.
 		if root.Synthetic {
+			curLangs = nil // synthetic roots walk no files
 			n := ctx.loadSyntheticCatalog(root)
 			p.filesParsed += n // count catalog "modules" as parsed units
 			p.pkgsIngested++
@@ -143,6 +157,10 @@ func (ctx *Context) loadStdlibRoots(roots []StdlibRoot, cobolFE *genast.CobolFro
 			p.roots = append(p.roots, rr)
 			continue
 		}
+
+		// v26.6: collect this root's language breakdown as it is walked.
+		curLangs = map[string]int{}
+		rr.LangBreakdown = curLangs
 
 		// Resolve symlinks on the root. Debian/Ubuntu's Go packaging ships
 		// GOROOT/src as a symlink, and filepath.Walk does NOT follow a

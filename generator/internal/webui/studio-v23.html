@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- studio-v23.html — v26.5: Architecture now shows a "Runtime resolution" table — which stdlib roots attached, which were skipped/missing, and the exact reason (e.g. "JAVA_HOME not set — pass --stdlib java=<dir>"). This makes the edge-resolution % self-diagnosing rather than a mystery number. Backed by v26.5 engine work: the stdlib language is now PER ROOT (multi-language projects are finally expressible) and roots AUTO-DETECT from the languages actually present in the project. Prior v26.4: IDE-style syntax colouring for CFG code. Each statement line in a process node is now tokenised (a lightweight language-agnostic lexer covering Go / Java / Python / TS / COBOL) and each token drawn in its own coloured <tspan> — keywords, strings, numbers, comments, function calls, and types get distinct theme-aware colours (--syn-* vars, defined for both dark and light). Purely presentational; layout/positions unchanged (still pure-math, headless == browser). Prior v26.3: CFG terminating-call + guard-layout fix (os.Exit/panic/STOP RUN ends at its own End, phantom forward edge dropped; guard peels to side lane, continuation stays on spine). Prior v26.2: graph/CFG zoom range widened & shared (adaptive max from graph size, effective-scale % label, true 1:1 button). Prior v26.1: CFG multi-way layout fix. A Go switch / COBOL EVALUATE / select with 3+ arms no longer overlaps — each arm gets its own lane column (packed by measured subtree width so nested if/switch inside a case gets real room), arms rejoin at their merge back on the decision's spine, and a final per-row overlap-resolution sweep guarantees no two boxes in any depth-row collide (all languages). Prior v23.35: orientation now round-trips through the URL hash (shareable); clicking empty graph canvas clears the find filter (drag-guarded). Prior v23.34: graph-view UX overhaul — (1) orientation-aware
+<!-- studio-v23.html — v26.6: (1) mixed-language stdlib-root WARNING — Architecture flags a single --stdlib root that physically contains more than one language (it cannot be import-scoped correctly), with an amber callout carrying the exact per-language split command and a "mixed" badge + per-language file breakdown on the row. (2) Python CFG is now FAITHFUL and EXPRESSION-LEVEL: the frontend emits nested then/else/merge + loop back-edges + try/except/finally (was flattened), plus short-circuit and/or, ternary if-expr, comprehension for+if filters, and match/case as a multi-way fan-out (v26.1 lane-column layout, for free). Prior v26.5: Architecture "Runtime resolution" table — which stdlib roots attached, which were skipped/missing, and the exact reason (e.g. "JAVA_HOME not set — pass --stdlib java=<dir>"). This makes the edge-resolution % self-diagnosing rather than a mystery number. Backed by v26.5 engine work: the stdlib language is now PER ROOT (multi-language projects are finally expressible) and roots AUTO-DETECT from the languages actually present in the project. Prior v26.4: IDE-style syntax colouring for CFG code. Each statement line in a process node is now tokenised (a lightweight language-agnostic lexer covering Go / Java / Python / TS / COBOL) and each token drawn in its own coloured <tspan> — keywords, strings, numbers, comments, function calls, and types get distinct theme-aware colours (--syn-* vars, defined for both dark and light). Purely presentational; layout/positions unchanged (still pure-math, headless == browser). Prior v26.3: CFG terminating-call + guard-layout fix (os.Exit/panic/STOP RUN ends at its own End, phantom forward edge dropped; guard peels to side lane, continuation stays on spine). Prior v26.2: graph/CFG zoom range widened & shared (adaptive max from graph size, effective-scale % label, true 1:1 button). Prior v26.1: CFG multi-way layout fix. A Go switch / COBOL EVALUATE / select with 3+ arms no longer overlaps — each arm gets its own lane column (packed by measured subtree width so nested if/switch inside a case gets real room), arms rejoin at their merge back on the decision's spine, and a final per-row overlap-resolution sweep guarantees no two boxes in any depth-row collide (all languages). Prior v23.35: orientation now round-trips through the URL hash (shareable); clicking empty graph canvas clears the find filter (drag-guarded). Prior v23.34: graph-view UX overhaul — (1) orientation-aware
      layout, default Left→Right so deep call trees grow in depth instead of
      stretching horizontally (toggle ⇄ L→R / ⇅ T→B); compact cross-axis spacing.
      (2) Actual-size (1:1) zoom button so you're never stuck at an unreadable
@@ -94,6 +94,12 @@ a:hover { text-decoration: underline; }
 .pill.network { color: var(--red);    background: var(--red-dim);    border-color: rgba(255,95,109,0.3); }
 .pill.pure    { color: var(--green);  background: var(--green-dim);  border-color: rgba(61,255,160,0.3); }
 .pill.unknown { color: var(--purple); background: var(--purple-dim); border-color: rgba(180,142,254,0.3); }
+/* v26.6 — mixed-language stdlib root warning + inline badge */
+.stdlib-warn { display: flex; gap: 8px; align-items: flex-start; margin: 10px 0; padding: 10px 12px; border-radius: 8px;
+  background: var(--amber-dim); border: 1px solid var(--amber); color: var(--text); font-size: 12px; line-height: 1.5; }
+.stdlib-warn-icon { color: var(--amber); font-size: 14px; line-height: 1.4; flex-shrink: 0; }
+.mixed-badge { display: inline-block; margin-left: 6px; padding: 0 6px; border-radius: 8px; font-size: 9px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.04em; color: var(--amber); background: var(--amber-dim); border: 1px solid var(--amber); vertical-align: middle; }
 .kbd { font: 11px 'IBM Plex Mono', monospace; padding: 1px 5px; border: 1px solid var(--border-2); border-bottom-width: 2px; border-radius: 4px; background: var(--bg-2); color: var(--text-2); }
 
 #shell { display: grid; grid-template-columns: 240px 1fr 320px; grid-template-rows: 48px 1fr; height: 100vh; }
@@ -427,6 +433,55 @@ svg.graph .cfg-node .more { fill: var(--text-dim); font-family: 'IBM Plex Mono',
 .belief-actions .accept:hover { color: var(--green); border-color: var(--green); }
 .belief-actions .correct:hover { color: var(--amber); border-color: var(--amber); }
 .belief-actions .defer:hover { color: var(--purple); border-color: var(--purple); }
+/* v26.12 — three-eval belief UI: source tags, behavioral kinds, staleness */
+.belief-subject-head { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--cyan); padding: 10px 14px 4px; background: var(--bg-2); border-bottom: 1px solid var(--border); }
+.belief-claim { display: flex; gap: 8px; align-items: baseline; }
+.belief-text { font-size: 13px; color: var(--text); }
+.belief-was { font-size: 11px; color: var(--text-dim); margin-top: 3px; font-style: italic; }
+.belief-kind { font-family: 'IBM Plex Mono', monospace; font-size: 10px; padding: 1px 6px; border-radius: 3px; background: var(--bg-3); color: var(--text-2); text-transform: uppercase; letter-spacing: 0.03em; flex-shrink: 0; }
+.belief-kind-action { color: var(--cyan); }
+.belief-kind-inputs { color: var(--purple); }
+.belief-kind-calls { color: var(--text-2); }
+.belief-kind-computation { color: var(--green); }
+.belief-kind-precondition { color: var(--amber); }
+.belief-kind-data-change { color: var(--red); }
+.belief-kind-effect { color: var(--text-dim); }
+.belief-src { font-family: 'IBM Plex Mono', monospace; font-size: 10px; padding: 1px 6px; border-radius: 3px; border: 1px solid var(--border); cursor: help; }
+.belief-src-parser { color: var(--text-2); }
+.belief-src-enrich { color: var(--purple); border-color: rgba(167,139,250,0.4); }
+.belief-src-human { color: var(--green); border-color: rgba(52,211,153,0.4); }
+.belief-row.is-stale { border-left: 2px solid var(--amber); }
+.belief-stale-inline { display: flex; gap: 8px; align-items: center; margin-top: 4px; font-size: 11px; color: var(--amber); }
+.belief-stale-inline .stale-badge { background: rgba(245,158,11,0.15); border: 1px solid rgba(245,158,11,0.4); border-radius: 3px; padding: 1px 6px; }
+.belief-stale-inline .mini { font-size: 10px; padding: 1px 8px; border-radius: 3px; border: 1px solid var(--amber); color: var(--amber); background: transparent; cursor: pointer; }
+.belief-stale-summary { background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.35); border-radius: var(--r); padding: 12px 14px; margin-bottom: 14px; }
+.belief-stale-summary .stale-head { color: var(--amber); font-size: 13px; margin-bottom: 8px; }
+.belief-stale-summary .stale-item { display: flex; gap: 14px; font-size: 12px; padding: 3px 0; flex-wrap: wrap; }
+.belief-stale-summary .stale-subj { font-family: 'IBM Plex Mono', monospace; color: var(--text); min-width: 160px; }
+.belief-stale-summary .stale-said { color: var(--green); }
+.belief-stale-summary .stale-now { color: var(--text-2); }
+/* v26.13 — enrich validation badges */
+.belief-valid { display: flex; gap: 8px; align-items: center; margin-top: 4px; font-size: 11px; }
+.belief-valid .valid-badge { border-radius: 3px; padding: 1px 6px; font-family: 'IBM Plex Mono', monospace; }
+.belief-valid-contradicts { color: var(--red); }
+.belief-valid-contradicts .valid-badge { background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.4); }
+.belief-valid-needs-human { color: var(--amber); }
+.belief-valid-needs-human .valid-badge { background: rgba(245,158,11,0.12); border: 1px solid rgba(245,158,11,0.35); }
+.belief-valid-consistent { color: var(--green); }
+.belief-valid-consistent .valid-badge { background: rgba(52,211,153,0.10); border: 1px solid rgba(52,211,153,0.3); }
+.belief-valid .valid-note { color: var(--text-dim); }
+/* v26.16 — scope summaries panel */
+.belief-summaries { background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--r); padding: 12px 14px; margin-bottom: 14px; }
+.belief-summaries .summaries-head { font-size: 12px; color: var(--cyan); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; }
+.summaries-restale { font-size: 12px; color: var(--amber); background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.3); border-radius: 4px; padding: 6px 10px; margin-bottom: 10px; font-family: 'IBM Plex Mono', monospace; }
+.summary-item { padding: 8px 0; border-top: 1px solid var(--border); }
+.summary-item:first-of-type { border-top: none; }
+.summary-item.is-stale { border-left: 2px solid var(--amber); padding-left: 10px; }
+.summary-scope { display: flex; gap: 8px; align-items: center; margin-bottom: 4px; }
+.summary-scope .scope-tag { font-family: 'IBM Plex Mono', monospace; font-size: 10px; padding: 1px 6px; border-radius: 3px; background: var(--bg-3); color: var(--purple); text-transform: uppercase; }
+.summary-scope .scope-name { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--text); }
+.summary-scope .summary-stale { font-size: 10px; color: var(--amber); border: 1px solid rgba(245,158,11,0.4); border-radius: 3px; padding: 1px 6px; }
+.summary-text { font-size: 13px; color: var(--text-2); line-height: 1.5; }
 .verified-badge { display: inline-block; font-size: 10px; padding: 1px 6px; border-radius: 8px; background: var(--green-dim); color: var(--green); margin-left: 6px; }
 
 #palette-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100; align-items: flex-start; justify-content: center; padding-top: 12vh; backdrop-filter: blur(2px); }
@@ -496,7 +551,7 @@ svg.graph .viewport { transition: none; }
     <div class="logo">
       <div class="logo-mark">G</div>
       <div class="logo-name">gen-system</div>
-      <span class="logo-badge mono">v26.5</span>
+      <span class="logo-badge mono">v26.23</span>
     </div>
     <button class="panel-toggle" id="toggle-left" title="Collapse / expand left panel  ( [ )">⊣</button>
     <div class="topbar-nav">
@@ -904,41 +959,71 @@ async function renderArchitecture() {
   // shown after the fact (when it is actually known) rather than gated behind a
   // confirmation dialog before it (when it can only be guessed at).
   const sl = a.stdlib;
-  if (sl && (sl.roots || []).length) {
+  if (sl && ((sl.roots || []).length || (sl.warnings || []).length)) {
     page.appendChild(el('div', { class: 'section-title', style: 'margin-top:28px;' }, [
       document.createTextNode('Runtime resolution'),
       el('span', { class: 'dimmer', style: 'font-weight:400;margin-left:8px;font-size:11px;' },
         'stdlib mode: ' + (sl.mode || '—')),
     ]));
-    const slTable = el('table', { class: 'data' });
-    slTable.appendChild(el('thead', null, el('tr', null, [
-      el('th', null, 'Language'), el('th', null, 'Root'), el('th', null, 'Status'),
-      el('th', null, 'Packages'), el('th', null, 'Symbols'),
-    ])));
-    const slBody = el('tbody');
-    (sl.roots || []).forEach(r => {
-      const attached = r.status === 'attached';
-      const where = r.path === 'cobol' ? 'built-in catalog' : (r.path || '—');
-      // A skipped/missing root's DETAIL is the actionable part (e.g. "JAVA_HOME
-      // not set — pass --stdlib java=<dir>"), so it replaces the counts rather
-      // than hiding in a tooltip.
-      const statusCell = el('span', {
-        class: 'pill ' + (attached ? 'pure' : 'unknown'),
-      }, r.status + (r.auto ? ' · auto' : ''));
-      slBody.appendChild(el('tr', null, [
-        el('td', { class: 'mono' }, r.lang || '?'),
-        el('td', { class: 'mono dimmer', style: 'max-width:340px;overflow:hidden;text-overflow:ellipsis;' }, where),
-        el('td', null, statusCell),
-        el('td', null, attached ? fmt(r.packages) : '—'),
-        el('td', null, attached ? fmt(r.symbols) : '—'),
+
+    // v26.6 — WARNINGS callout (chiefly the mixed-language-root case). Shown
+    // ABOVE the table because it is the actionable thing: a single --stdlib path
+    // that holds more than one language only resolves one of them, and the
+    // warning already carries the exact per-root command to fix it.
+    (sl.warnings || []).forEach(w => {
+      page.appendChild(el('div', { class: 'stdlib-warn' }, [
+        el('span', { class: 'stdlib-warn-icon' }, '⚠'),
+        el('span', null, w),
       ]));
-      if (!attached && r.detail) {
-        const note = el('tr', null, el('td', { colspan: '5', class: 'dimmer', style: 'padding-top:0;font-size:11px;' }, '↳ ' + r.detail));
-        slBody.appendChild(note);
-      }
     });
-    slTable.appendChild(slBody);
-    page.appendChild(slTable);
+
+    if ((sl.roots || []).length) {
+      const slTable = el('table', { class: 'data' });
+      slTable.appendChild(el('thead', null, el('tr', null, [
+        el('th', null, 'Language'), el('th', null, 'Root'), el('th', null, 'Status'),
+        el('th', null, 'Packages'), el('th', null, 'Symbols'),
+      ])));
+      const slBody = el('tbody');
+      (sl.roots || []).forEach(r => {
+        const attached = r.status === 'attached';
+        const where = r.path === 'cobol' ? 'built-in catalog' : (r.path || '—');
+        // A single root that saw more than one language is flagged inline so the
+        // reader sees WHICH row the warning above refers to.
+        const bd = r.lang_breakdown || {};
+        const bdLangs = Object.keys(bd);
+        const mixed = bdLangs.length > 1;
+        const langCell = el('td', { class: 'mono' }, [
+          document.createTextNode(r.lang || '?'),
+          mixed ? el('span', { class: 'mixed-badge', title: 'this root contains multiple languages' }, 'mixed') : null,
+        ]);
+        const statusCell = el('span', {
+          class: 'pill ' + (attached ? 'pure' : 'unknown'),
+        }, r.status + (r.auto ? ' · auto' : ''));
+        slBody.appendChild(el('tr', null, [
+          langCell,
+          el('td', { class: 'mono dimmer', style: 'max-width:340px;overflow:hidden;text-overflow:ellipsis;' }, where),
+          el('td', null, statusCell),
+          el('td', null, attached ? fmt(r.packages) : '—'),
+          el('td', null, attached ? fmt(r.symbols) : '—'),
+        ]));
+        // per-root language breakdown line (only interesting when >1 language)
+        if (mixed) {
+          const parts = bdLangs
+            .sort((x, y) => bd[y] - bd[x])
+            .map(l => l + ' (' + fmt(bd[l]) + ')')
+            .join('  ·  ');
+          slBody.appendChild(el('tr', null,
+            el('td', { colspan: '5', class: 'dimmer', style: 'padding-top:0;font-size:11px;' },
+              '↳ files seen: ' + parts)));
+        }
+        if (!attached && r.detail) {
+          slBody.appendChild(el('tr', null,
+            el('td', { colspan: '5', class: 'dimmer', style: 'padding-top:0;font-size:11px;' }, '↳ ' + r.detail)));
+        }
+      });
+      slTable.appendChild(slBody);
+      page.appendChild(slTable);
+    }
   }
 
   page.appendChild(el('div', { class: 'section-title' }, 'Languages'));
@@ -2816,7 +2901,7 @@ async function renderBeliefs() {
   page.innerHTML = '';
   page.appendChild(el('div', { class: 'page-header' }, [
     el('div', { class: 'page-title' }, 'Belief inbox'),
-    el('div', { class: 'page-subtitle' }, 'Every inference exposed for review before the system acts.'),
+    el('div', { class: 'page-subtitle' }, 'What the system understands about your code, in plain terms — review, verify, correct.'),
     el('div', { class: 'page-actions' }, [
       el('button', { class: 'btn', onclick: () => { state.beliefs = null; renderBeliefs(); } }, 'Refresh'),
     ]),
@@ -2828,7 +2913,53 @@ async function renderBeliefs() {
   }
   const data = state.beliefs;
   $('#nav-badge-beliefs').textContent = fmt(data.pending_review);
-  const filters = ['all','pending','verified','low'];
+
+  // Staleness summary: corrections the source has since moved under (v26.12).
+  const warnings = data.warnings || [];
+  if (warnings.length) {
+    const box = el('div', { class: 'belief-stale-summary' }, [
+      el('div', { class: 'stale-head' }, '⚠ ' + warnings.length + ' correction' + (warnings.length > 1 ? 's are' : ' is') + ' out of date — the code changed since a human corrected these'),
+    ]);
+    warnings.forEach(w => {
+      box.appendChild(el('div', { class: 'stale-item' }, [
+        el('span', { class: 'stale-subj' }, w.subject),
+        el('span', { class: 'stale-said' }, 'you said: ' + w.human_value),
+        el('span', { class: 'stale-now' }, 'source now: ' + w.source_now),
+      ]));
+    });
+    page.appendChild(box);
+  }
+
+  // Scope summaries (v26.16): rolled-up service/module/project descriptions.
+  const summaries = data.summaries || [];
+  if (summaries.length) {
+    const nStale = summaries.filter(s => s.stale).length;
+    const panel = el('div', { class: 'belief-summaries' }, [
+      el('div', { class: 'summaries-head' }, 'Summaries'),
+    ]);
+    // v26.23: a stale SUMMARY is not a stale human correction — it means a member
+    // changed, so the roll-up needs regenerating. Say that plainly instead of
+    // listing it under the corrections warning with nothing to compare.
+    if (nStale) {
+      panel.appendChild(el('div', { class: 'summaries-restale' },
+        '⚠ ' + nStale + ' summar' + (nStale > 1 ? 'ies are' : 'y is') +
+        ' out of date — a member changed. Re-run: gen-enrich --root <project> --summarize'));
+    }
+    summaries.forEach(s => {
+      panel.appendChild(el('div', { class: 'summary-item' + (s.stale ? ' is-stale' : '') }, [
+        el('div', { class: 'summary-scope' }, [
+          el('span', { class: 'scope-tag' }, s.scope || 'scope'),
+          el('span', { class: 'scope-name' }, s.subject),
+          s.stale ? el('span', { class: 'summary-stale' }, 'out of date') : null,
+        ]),
+        el('div', { class: 'summary-text' }, s.corrected_to || s.object),
+      ]));
+    });
+    page.appendChild(panel);
+  }
+
+  // Filters by eval source + review state.
+  const filters = ['all','pending','verified','parser','enrich','human','stale'];
   const bar = el('div', { class: 'belief-bar' });
   filters.forEach(f => {
     bar.appendChild(el('button', {
@@ -2837,69 +2968,132 @@ async function renderBeliefs() {
     }, f));
   });
   const selN = state.selectedBeliefs.size;
-  const bulk = el('div', { class: 'bulk-actions' }, [
+  bar.appendChild(el('div', { class: 'bulk-actions' }, [
     el('span', { class: 'dim' }, selN + ' selected'),
-    el('button', { class: 'btn', disabled: !selN ? 'disabled' : null, onclick: () => bulkAct('accept') }, 'Accept all'),
-    el('button', { class: 'btn', disabled: !selN ? 'disabled' : null, onclick: () => bulkAct('defer') }, 'Defer all'),
-  ]);
-  bar.appendChild(bulk);
+    el('button', { class: 'btn', disabled: !selN ? 'disabled' : null, onclick: () => bulkAct('accept') }, 'Verify all'),
+  ]));
   page.appendChild(bar);
-  let rows = (data.beliefs || []).slice();
-  if (state.beliefFilter === 'pending') rows = rows.filter(b => !b.human_verified);
-  else if (state.beliefFilter === 'verified') rows = rows.filter(b => b.human_verified);
-  else if (state.beliefFilter === 'low') rows = rows.filter(b => b.confidence < 0.7);
-  rows.sort((a, b) => a.confidence - b.confidence);
+
+  let rows = (data.beliefs || []).slice().filter(b => b.kind !== 'summary');
+  const f = state.beliefFilter;
+  if (f === 'pending') rows = rows.filter(b => !b.human_verified);
+  else if (f === 'verified') rows = rows.filter(b => b.human_verified);
+  else if (f === 'stale') rows = rows.filter(b => b.stale);
+  else if (f === 'parser' || f === 'enrich' || f === 'human') rows = rows.filter(b => (b.source || 'parser') === f);
+
+  // Group by subject (routine) so a human reads all claims about one routine together.
+  const bySubj = {};
+  rows.forEach(b => { (bySubj[b.subject] = bySubj[b.subject] || []).push(b); });
+  const subjects = Object.keys(bySubj).sort();
+
   const list = el('div', { class: 'belief-list' });
-  if (!rows.length) {
+  if (!subjects.length) {
     list.appendChild(el('div', { class: 'right-empty' }, 'No beliefs match this filter.'));
   } else {
-    rows.forEach(b => list.appendChild(beliefRow(b)));
+    subjects.forEach(subj => {
+      list.appendChild(el('div', { class: 'belief-subject-head' }, subj));
+      bySubj[subj].sort((a,b) => kindOrder(a.kind) - kindOrder(b.kind));
+      bySubj[subj].forEach(b => list.appendChild(beliefRow(b)));
+    });
   }
   page.appendChild(list);
 }
+
+// kindOrder gives a stable, readable ordering: action first, then inputs, calls,
+// computation, precondition, data-change, effect.
+function kindOrder(k) {
+  const order = ['action','inputs','calls','computation','precondition','data-change','effect'];
+  const i = order.indexOf(k);
+  return i < 0 ? 99 : i;
+}
+
+// srcTag renders the eval-source badge (parser / enrich / human).
+function srcTag(src) {
+  const s = src || 'parser';
+  return el('span', { class: 'belief-src belief-src-' + s, title: srcTitle(s) }, s);
+}
+function srcTitle(s) {
+  if (s === 'parser') return 'Derived deterministically by the offline parser';
+  if (s === 'enrich') return 'Described by the local model — verify it';
+  if (s === 'human') return 'Verified or corrected by a person';
+  return s;
+}
+// v26.13 — validation of enrich beliefs against parser facts.
+function validLabel(v) {
+  if (v === 'contradicts') return '✗ contradicts the code';
+  if (v === 'needs-human') return '? needs human check';
+  if (v === 'consistent') return '✓ consistent with facts';
+  return v;
+}
+
 function beliefRow(b) {
-  const conf = b.confidence;
-  const confCls = conf >= 0.9 ? '' : (conf >= 0.7 ? ' med' : ' low');
-  return el('div', { class: 'belief-row' + (state.selectedBeliefs.has(b.id) ? ' selected' : '') }, [
+  const claim = b.corrected_to || b.object;
+  const bodyKids = [
+    el('div', { class: 'belief-claim' }, [
+      el('span', { class: 'belief-kind belief-kind-' + b.kind }, b.kind),
+      el('span', { class: 'belief-text' }, claim),
+    ]),
+  ];
+  if (b.corrected_to && b.corrected_to !== b.object) {
+    bodyKids.push(el('div', { class: 'belief-was' }, 'parser saw: ' + b.object));
+  }
+  // Staleness: show the human value AND the new source value side by side.
+  if (b.stale && b.source_now) {
+    bodyKids.push(el('div', { class: 'belief-stale-inline' }, [
+      el('span', { class: 'stale-badge' }, 'out of date'),
+      el('span', null, 'source now: ' + b.source_now),
+      el('button', { class: 'mini', onclick: () => actBelief(b, 'correct') }, 'reconcile'),
+    ]));
+  }
+  // Validation of enrich (model) beliefs against parser facts (v26.13).
+  if (b.source === 'enrich' && b.validated) {
+    bodyKids.push(el('div', { class: 'belief-valid belief-valid-' + b.validated }, [
+      el('span', { class: 'valid-badge' }, validLabel(b.validated)),
+      b.validation_note ? el('span', { class: 'valid-note' }, b.validation_note) : null,
+    ]));
+  }
+  bodyKids.push(el('div', { class: 'meta' }, [ srcTag(b.source), b.human_verified ? el('span', { class: 'verified-badge' }, 'verified') : null ]));
+
+  return el('div', { class: 'belief-row' + (state.selectedBeliefs.has(b.id) ? ' selected' : '') + (b.stale ? ' is-stale' : '') }, [
     el('input', { type: 'checkbox', checked: state.selectedBeliefs.has(b.id) ? 'checked' : null,
       onchange: (e) => { if (e.target.checked) state.selectedBeliefs.add(b.id); else state.selectedBeliefs.delete(b.id); renderBeliefs(); } }),
-    el('div', { class: 'belief-body' }, [
-      el('div', { class: 'subject' }, [b.subject, b.human_verified ? el('span', { class: 'verified-badge' }, 'verified') : null]),
-      el('div', { class: 'pred' }, b.predicate + ' = ' + b.object + (b.corrected_to ? ' (corrected → ' + b.corrected_to + ')' : '')),
-      el('div', { class: 'belief-conf' }, el('div', { class: 'belief-conf-fill' + confCls, style: 'width:' + (conf * 100).toFixed(0) + '%' })),
-      el('div', { class: 'meta' }, [
-        el('span', null, b.kind),
-        el('span', null, 'confidence ' + (conf * 100).toFixed(0) + '%'),
-      ]),
-    ]),
+    el('div', { class: 'belief-body' }, bodyKids),
     el('div', { class: 'belief-actions' }, [
-      el('button', { class: 'accept', onclick: () => actBelief(b, 'accept') }, 'Accept'),
+      el('button', { class: 'accept', onclick: () => actBelief(b, 'accept') }, 'Verify'),
       el('button', { class: 'correct', onclick: () => actBelief(b, 'correct') }, 'Correct'),
-      el('button', { class: 'defer',  onclick: () => actBelief(b, 'defer')  }, 'Defer'),
     ]),
   ]);
 }
 async function actBelief(b, action) {
+  // A verify/correct flips the belief's source to 'human'. If the user is filtering
+  // by 'enrich' (or 'parser', or 'pending'), the row therefore LEAVES the current
+  // view the moment it succeeds — which reads exactly like "the button did nothing"
+  // (v26.23). So say where it went, and offer a jump to the filter that shows it.
+  const leavesView = ['enrich', 'parser', 'pending'].includes(state.beliefFilter);
+  const jump = () => { state.beliefFilter = 'verified'; state.beliefs = null; renderBeliefs(); };
   if (action === 'accept') {
     try {
-      await fetch('/api/present/beliefs/correct', { method: 'POST', headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({ belief_id: b.id, corrected_to: b.object, human_note: 'accepted via Studio v23' }) });
-      toast('Accepted: ' + b.subject);
+      const r = await fetch('/api/present/beliefs/correct', { method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ belief_id: b.id, corrected_to: (b.corrected_to || b.object), human_note: 'verified via Studio' }) });
+      if (!r.ok) throw new Error(await r.text() || ('HTTP ' + r.status));
+      toast(leavesView ? 'Verified: ' + b.subject + ' — now under "verified"' : 'Verified: ' + b.subject);
       state.beliefs = null;
       renderBeliefs();
-    } catch (e) { toast('Accept failed: ' + e.message, 'error'); }
+      if (leavesView) jump();
+    } catch (e) { toast('Verify failed: ' + e.message, 'error'); }
   } else if (action === 'correct') {
-    const v = prompt('Correct "' + b.predicate + '" for ' + b.subject + '\nCurrent: ' + b.object + '\nNew value:');
+    const cur = b.corrected_to || b.object;
+    const v = prompt('Correct this belief for ' + b.subject + '\n(' + b.kind + ')\n\nCurrent: ' + cur + '\nNew value:', cur);
     if (v == null || v.trim() === '') return;
     try {
-      await fetch('/api/present/beliefs/correct', { method: 'POST', headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({ belief_id: b.id, corrected_to: v.trim(), human_note: 'corrected via Studio v23' }) });
-      toast('Corrected: ' + b.subject + ' → ' + v.trim());
+      const r = await fetch('/api/present/beliefs/correct', { method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ belief_id: b.id, corrected_to: v.trim(), human_note: 'corrected via Studio' }) });
+      if (!r.ok) throw new Error(await r.text() || ('HTTP ' + r.status));
+      toast(leavesView ? 'Corrected: ' + b.subject + ' — now under "verified"' : 'Corrected: ' + b.subject + ' → ' + v.trim());
       state.beliefs = null;
       renderBeliefs();
+      if (leavesView) jump();
     } catch (e) { toast('Correct failed: ' + e.message, 'error'); }
-  } else if (action === 'defer') {
-    toast('Deferred (local only): ' + b.subject);
   }
 }
 async function bulkAct(action) {

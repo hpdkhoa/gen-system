@@ -660,7 +660,10 @@ func inferNodeEffects(id string, children []*ast.Node, lang ast.Language) *FuncE
 // regress an EVALUATE whose only arm is WHEN OTHER. v25.9.
 func isMultiWayBranch(n *ast.Node) bool {
 	switch n.Name {
-	case "EVALUATE", "switch", "type-switch", "select":
+	case "EVALUATE", "switch", "type-switch", "select", "match":
+		// v26.6: Python 3.10 match/case fans out like a switch/EVALUATE — a parent
+		// branch whose Children are per-case NodeBranch arms. Recognising it here
+		// gives match the same multi-way lane-column layout (v26.1) for free.
 	default:
 		return false
 	}
@@ -680,6 +683,8 @@ func multiWayLabel(n *ast.Node) string {
 		return "EVALUATE " + n.RawSource
 	case "switch":
 		return "switch " + n.RawSource
+	case "match":
+		return "match " + n.RawSource // v26.6: Python match subject
 	default:
 		return n.Name
 	}

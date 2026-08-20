@@ -109,16 +109,17 @@ func main() {
 // internal/context — the understand-server boundary test walks those imports and
 // the air-gapped posture depends on the view layer staying loader-free.
 func stdlibReportView(r agentctx.StdlibReport) presentation.StdlibReportView {
-	out := presentation.StdlibReportView{Mode: r.Mode}
+	out := presentation.StdlibReportView{Mode: r.Mode, Warnings: r.Warnings}
 	for _, rt := range r.Roots {
 		out.Roots = append(out.Roots, presentation.StdlibRootView{
-			Lang:     rt.Lang,
-			Path:     rt.Path,
-			Status:   string(rt.Status),
-			Detail:   rt.Detail,
-			Packages: rt.Packages,
-			Symbols:  rt.Symbols,
-			Auto:     rt.Auto,
+			Lang:          rt.Lang,
+			Path:          rt.Path,
+			Status:        string(rt.Status),
+			Detail:        rt.Detail,
+			Packages:      rt.Packages,
+			Symbols:       rt.Symbols,
+			Auto:          rt.Auto,
+			LangBreakdown: rt.LangBreakdown,
 		})
 	}
 	return out

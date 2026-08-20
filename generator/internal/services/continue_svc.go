@@ -23,6 +23,7 @@ import (
 	"time"
 
 	"gen-system/generator/internal/agent"
+	"gen-system/generator/internal/belief"
 	gencontext "gen-system/generator/internal/context"
 	"gen-system/generator/internal/planner_v2"
 )
@@ -98,6 +99,14 @@ func (s *BuildService) runContinue(job *BuildJob, idea, target string, autoAppro
 	ctx := gencontext.LoadContext(target)
 	existing := planner_v2.SummarizeExisting(&ctx)
 	existingSum := planner_v2.RenderExistingSummary(existing)
+
+	// Steer the delta with human belief corrections for this project (session 5):
+	// a person's corrections to the machine's understanding are appended to the
+	// "what exists" context so the planner honors them. No-op when absent.
+	if cc := belief.BuildCorrectionContext(ctx.Root, ctx.Index, ctx.Effects); cc != "" {
+		existingSum += "\n\n" + cc
+		emit("cyan", "Applied human belief corrections to the plan context")
+	}
 
 	existingEntities := planner_v2.RecoverEntitiesFromModels(ctx.Root)
 	if len(existingEntities) == 0 {

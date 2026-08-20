@@ -70,7 +70,7 @@ echo "→ Mode: $MODE"
 
 if [[ $DO_CLEAN -eq 1 ]]; then
   echo "→ Cleaning old binaries…"
-  rm -f gen gen-server understand-server genbench bench
+  rm -f gen gen-server understand-server gen-enrich genbench bench
 fi
 
 echo "→ Resolving modules…"
@@ -89,7 +89,9 @@ else
   go build -o understand-server ./generator/cmd/understand-server
   echo "→ Building gen (CLI)…"
   go build -o gen ./generator/cmd/gen
-  BUILT+=(gen gen-server understand-server)
+  echo "→ Building gen-enrich (belief enrichment producer, generation-side)…"
+  go build -o gen-enrich ./generator/cmd/gen-enrich
+  BUILT+=(gen gen-server understand-server gen-enrich)
 fi
 
 if [[ $DO_BENCH -eq 1 ]]; then

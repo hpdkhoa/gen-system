@@ -22,6 +22,7 @@ import (
 	"strings"
 
 	"gen-system/generator/internal/agent"
+	"gen-system/generator/internal/belief"
 	"gen-system/generator/internal/compiler"
 	"gen-system/generator/internal/context"
 	planner_v2 "gen-system/generator/internal/planner_v2"
@@ -80,6 +81,15 @@ func ContinueFromInput(path, idea string) {
 	existingState := planner_v2.SummarizeExisting(&ctx)
 	existingSummary := planner_v2.RenderExistingSummary(existingState)
 	fmt.Printf("   existing entities: %d\n", len(existingState.EntityOrder))
+
+	// Steer the delta with any human belief corrections for this project. A person
+	// who corrected the machine's understanding in the Understand UI has their
+	// corrections appended to the "what exists" block, so the planner honors them
+	// (session 5). Empty when the project has no corrections — no-op then.
+	if cc := belief.BuildCorrectionContext(ctx.Root, ctx.Index, ctx.Effects); cc != "" {
+		existingSummary += "\n\n" + cc
+		fmt.Println("   applied human belief corrections to the plan context")
+	}
 
 	// The authoritative existing entity set comes from the TARGET codebase's
 	// own model structs (the deterministic inverse of what the generator wrote).

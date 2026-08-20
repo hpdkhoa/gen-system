@@ -32,6 +32,7 @@ import (
 // shared core, used by both products.
 var generationPackages = []string{
 	"generator/internal/ai",         // Ollama client — the model. Must never ship.
+	"generator/internal/enrich",     // LLM belief enrichment — imports ai (v26.22).
 	"generator/internal/engine",     // code generators.
 	"generator/internal/agent",      // the generation task loop.
 	"generator/internal/planner",    // goal → plan.

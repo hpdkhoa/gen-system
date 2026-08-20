@@ -59,6 +59,25 @@ const (
 	StdlibSpecNone = "none" // ingest nothing (explicit opt-out)
 )
 
+// langFamilyForExt maps a source-file extension to a coarse language family used
+// for the mixed-language-root warning. Returns "" for extensions we don't ingest.
+// Kept next to isStdlibSourceFile's extension set so the two stay in lockstep.
+func langFamilyForExt(ext string) string {
+	switch strings.ToLower(ext) {
+	case ".go":
+		return "go"
+	case ".py", ".pyw":
+		return "python"
+	case ".ts", ".tsx":
+		return "typescript"
+	case ".java":
+		return "java"
+	case ".cob", ".cbl", ".cpy", ".cobol":
+		return "cobol"
+	}
+	return ""
+}
+
 // StdlibRootStatus is the outcome of one root in the report.
 type StdlibRootStatus string
 
@@ -78,12 +97,26 @@ type StdlibRootReport struct {
 	Packages int              `json:"packages"`
 	Symbols  int              `json:"symbols"`
 	Auto     bool             `json:"auto"` // true when this root came from detection, not an explicit flag
+
+	// v26.6: LangBreakdown counts the source files SEEN under this root by
+	// language (keyed by extension family: "go", "python", "java", …). It is how
+	// the mixed-language-root warning is detected: a single root that carries a
+	// blank Lang label yet contains more than one language cannot be import-scoped
+	// correctly, because one root maps imports with ONE convention against ONE
+	// directory. Empty for synthetic roots.
+	LangBreakdown map[string]int `json:"lang_breakdown,omitempty"`
 }
 
 // StdlibReport is the whole stdlib outcome for one LoadContext.
 type StdlibReport struct {
-	Mode  string             `json:"mode"` // "auto" | "explicit" | "none"
+	Mode  string             `json:"mode"` // "auto" | "explicit" | "auto+explicit" | "none"
 	Roots []StdlibRootReport `json:"roots"`
+
+	// v26.6: boot-time warnings that are not tied to a single root's status —
+	// chiefly the mixed-language-root case (one unlabeled --stdlib path that
+	// physically contains more than one language). Printed by the CLIs and shown
+	// as a callout on the Architecture page. Advisory, never fatal.
+	Warnings []string `json:"warnings,omitempty"`
 }
 
 // Attached reports whether any root actually contributed symbols.
@@ -318,30 +351,91 @@ func DetectStdlibRoots(idx *symbols.Index) ([]StdlibRoot, StdlibReport) {
 	return roots, rep
 }
 
-// FormatStdlibReport renders the report as the lines a CLI should print. Kept
-// here (not in each binary) so gen-server, understand-server and genbench cannot
+// mixedLanguageWarnings inspects each walked root's language breakdown and warns
+// when a SINGLE root contains more than one language. Such a root cannot be
+// import-scoped correctly: the loader maps the project's import paths to
+// subdirectories with one convention (dots→slashes) against one directory, so a
+// tree holding, say, Java and Python resolves only the language whose layout
+// matches and silently misses the other. The fix is always the same — split it
+// into one labelled root per language — so the warning says exactly that.
+//
+// Detected (auto) roots are single-language by construction (each comes from one
+// language's detector), so in practice this only fires on an explicit --stdlib
+// path the user pointed at a mixed directory.
+func mixedLanguageWarnings(roots []StdlibRootReport) []string {
+	var out []string
+	for _, r := range roots {
+		if len(r.LangBreakdown) < 2 {
+			continue
+		}
+		// Deterministic "lang(count)" list, biggest first then alphabetical.
+		type lc struct {
+			lang string
+			n    int
+		}
+		items := make([]lc, 0, len(r.LangBreakdown))
+		for l, n := range r.LangBreakdown {
+			items = append(items, lc{l, n})
+		}
+		sort.Slice(items, func(i, j int) bool {
+			if items[i].n != items[j].n {
+				return items[i].n > items[j].n
+			}
+			return items[i].lang < items[j].lang
+		})
+		parts := make([]string, 0, len(items))
+		langsOnly := make([]string, 0, len(items))
+		for _, it := range items {
+			parts = append(parts, it.lang+" ("+itoa(it.n)+" files)")
+			langsOnly = append(langsOnly, it.lang)
+		}
+		// Suggest the per-root form: lang=<path> for each language found.
+		suggest := make([]string, 0, len(langsOnly))
+		for _, l := range langsOnly {
+			suggest = append(suggest, l+"="+r.Path)
+		}
+		where := r.Path
+		if r.Lang != "" {
+			where += " (labelled " + r.Lang + ")"
+		}
+		out = append(out, "stdlib root "+where+" contains multiple languages — "+
+			strings.Join(parts, ", ")+". A single root is import-scoped with one "+
+			"convention, so only one language resolves. Split it into per-language "+
+			"roots, e.g. --stdlib "+strings.Join(suggest, ",")+
+			" (point each at the actual tree for that language).")
+	}
+	return out
+}
+
+// FormatStdlibReport renders the report as the lines a CLI should print. Kept// here (not in each binary) so gen-server, understand-server and genbench cannot
 // drift in how they describe the same outcome.
 func FormatStdlibReport(rep StdlibReport) []string {
+	var lines []string
 	if len(rep.Roots) == 0 {
-		return []string{"   Stdlib: none (" + rep.Mode + ")"}
-	}
-	lines := []string{"   Stdlib (" + rep.Mode + "):"}
-	for _, r := range rep.Roots {
-		lang := r.Lang
-		if lang == "" {
-			lang = "?"
-		}
-		switch r.Status {
-		case StdlibAttached:
-			where := r.Path
-			if where == "cobol" {
-				where = "<built-in catalog>"
+		lines = []string{"   Stdlib: none (" + rep.Mode + ")"}
+	} else {
+		lines = []string{"   Stdlib (" + rep.Mode + "):"}
+		for _, r := range rep.Roots {
+			lang := r.Lang
+			if lang == "" {
+				lang = "?"
 			}
-			lines = append(lines, "     "+pad(lang, 8)+pad(where, 40)+
-				" "+itoa(r.Packages)+" pkgs  "+itoa(r.Symbols)+" syms  ✓")
-		default:
-			lines = append(lines, "     "+pad(lang, 8)+pad("— "+string(r.Status), 40)+" "+r.Detail)
+			switch r.Status {
+			case StdlibAttached:
+				where := r.Path
+				if where == "cobol" {
+					where = "<built-in catalog>"
+				}
+				lines = append(lines, "     "+pad(lang, 8)+pad(where, 40)+
+					" "+itoa(r.Packages)+" pkgs  "+itoa(r.Symbols)+" syms  ✓")
+			default:
+				lines = append(lines, "     "+pad(lang, 8)+pad("— "+string(r.Status), 40)+" "+r.Detail)
+			}
 		}
+	}
+	// v26.6: mixed-language-root (and any other) warnings, always shown.
+	for _, w := range rep.Warnings {
+		lines = append(lines, "   ⚠ "+w)
 	}
 	return lines
 }

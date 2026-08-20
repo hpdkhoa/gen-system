@@ -270,3 +270,99 @@ func TestBuildStructuralCFG_Empty(t *testing.T) {
 		t.Error("should have at least entry block")
 	}
 }
+
+// ─── v26.6: Python nested + expression-level CFG ──────────────
+// These build the unified IR the Python frontend now emits (nested
+// NodeBranch{Children,Else} / NodeLoop{Children} / multi-way match) and assert
+// the structural CFG builder produces a faithful graph — a real two-arm branch
+// with a merge, a loop with a back-edge, and a match fan-out — rather than the
+// old flattened single-line stub.
+
+func pyFunc(children ...*ast.Node) *ast.Node {
+	return &ast.Node{Kind: ast.NodeFunction, Name: "f", Language: ast.LangPython, Children: children}
+}
+
+func countKind(cfg *CFG, want string) int {
+	n := 0
+	for _, b := range cfg.Blocks {
+		if b != nil && b.Cond != "" && want == "decision" {
+			n++
+		}
+	}
+	return n
+}
+
+func TestPythonCFG_IfElseHasTwoArmsAndMerge_v266(t *testing.T) {
+	// if c: a() else: b()  → decision block with two successors that reconverge.
+	fn := pyFunc(&ast.Node{
+		Kind: ast.NodeBranch, Name: "if", Language: ast.LangPython, RawSource: "c",
+		Children: []*ast.Node{{Kind: ast.NodeCall, Callee: "a", Language: ast.LangPython}},
+		Else:     []*ast.Node{{Kind: ast.NodeCall, Callee: "b", Language: ast.LangPython}},
+	})
+	cfg := buildStructuralCFG("f", fn)
+	if cfg == nil || len(cfg.Blocks) < 4 {
+		t.Fatalf("if/else should produce a multi-block CFG, got %d blocks", len(cfg.Blocks))
+	}
+	// the entry (or a block) must carry the condition text as a decision.
+	if countKind(cfg, "decision") == 0 {
+		t.Errorf("if/else produced no decision block (condition not surfaced)")
+	}
+	// a decision block must have two distinct successors (the two arms).
+	twoArm := false
+	for _, b := range cfg.Blocks {
+		if b.Cond != "" && len(b.Succs) >= 2 {
+			twoArm = true
+		}
+	}
+	if !twoArm {
+		t.Errorf("decision block does not fan out to two arms — branch was flattened")
+	}
+}
+
+func TestPythonCFG_LoopHasBackEdge_v266(t *testing.T) {
+	// while c: work()  → a header that a body block loops back to.
+	fn := pyFunc(&ast.Node{
+		Kind: ast.NodeLoop, Name: "while", Language: ast.LangPython, RawSource: "c",
+		Children: []*ast.Node{{Kind: ast.NodeCall, Callee: "work", Language: ast.LangPython}},
+	})
+	cfg := buildStructuralCFG("f", fn)
+	if cfg == nil || len(cfg.Blocks) < 2 {
+		t.Fatalf("loop should produce multiple blocks, got %d", len(cfg.Blocks))
+	}
+	// some block must point BACK to an earlier block id (the back-edge).
+	back := false
+	for i, b := range cfg.Blocks {
+		for _, s := range b.Succs {
+			if s <= i {
+				back = true
+			}
+		}
+	}
+	if !back {
+		t.Errorf("loop produced no back-edge — body not wired to header")
+	}
+}
+
+func TestPythonCFG_MatchFansOut_v266(t *testing.T) {
+	// match cmd: case "a": / case "b": / case _:  → multi-way fan-out.
+	arm := func(pat, callee string) *ast.Node {
+		return &ast.Node{Kind: ast.NodeBranch, Name: "case", Language: ast.LangPython, RawSource: pat,
+			Children: []*ast.Node{{Kind: ast.NodeCall, Callee: callee, Language: ast.LangPython}}}
+	}
+	m := &ast.Node{Kind: ast.NodeBranch, Name: "match", Language: ast.LangPython, RawSource: "cmd",
+		Children: []*ast.Node{arm("'a'", "onA"), arm("'b'", "onB"), arm("_", "onDefault")}}
+	if !isMultiWayBranch(m) {
+		t.Fatalf("Python match must be recognised as a multi-way branch")
+	}
+	cfg := buildStructuralCFG("f", pyFunc(m))
+	// the decision must fan out to (at least) the three case arms.
+	maxSucc := 0
+	for _, b := range cfg.Blocks {
+		if len(b.Succs) > maxSucc {
+			maxSucc = len(b.Succs)
+		}
+	}
+	if maxSucc < 3 {
+		t.Errorf("match did not fan out to 3 arms; max successors = %d", maxSucc)
+	}
+}

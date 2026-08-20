@@ -392,24 +392,9 @@ func TestRegisterRoutes_AllEndpoints(t *testing.T) {
 	}
 }
 
-// ─── BeliefStore ──────────────────────────────────────────────
-
-func TestBeliefStore_CorrectUnknown(t *testing.T) {
-	bs := newBeliefStore()
-	err := bs.Correct(BeliefCorrection{BeliefID: "nonexistent", CorrectedTo: "x"})
-	if err == nil {
-		t.Error("correcting nonexistent belief should return error")
-	}
-}
-
-func TestBeliefStore_DiffSameChecksum(t *testing.T) {
-	bs := newBeliefStore()
-	bs.checksum = "test123"
-	changes := bs.DiffSince("test123")
-	if len(changes) != 0 {
-		t.Errorf("diff with same checksum should be empty, got %d", len(changes))
-	}
-}
+// BeliefStore unit tests moved to internal/belief/belief_test.go along with the
+// store itself (session 1 relocation). The HTTP-surface tests above still cover
+// the /api/present/beliefs endpoints end-to-end.
 
 // ─── New / AddFlowData ────────────────────────────────────────
 
