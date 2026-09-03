@@ -56,6 +56,9 @@ SUBCOMMANDS
   genpipe       End-to-end Generate pipeline: idea → plan → generate → heal →
                 verify; reports ops_total/ops_stubbed/repairs/heals/go_test_pass
                 (v26.24, WP1). GEN_LOGIC=ollama for live model, replay otherwise.
+  localize      Localization recall on any repo: are the files a gold patch touched
+                inside the call graph neighbourhood of seed identifiers? Needs
+                --seeds-file and --gold-file; see bench/swebench/ (v26.31).
   determinism   Same prompt N times, diff outputs (temp=0 seed=42 must be stable)
   all           Run every suite and write one JSON
   regression    Diff a new JSON against an older JSON or the committed baseline
@@ -124,6 +127,8 @@ func main() {
 		cmdStream(args)
 	case "genpipe":
 		cmdGenPipe(args)
+	case "localize":
+		cmdLocalize(args)
 	case "determinism":
 		cmdDeterminism(args)
 	case "all":
@@ -458,6 +463,37 @@ func loadIdeas(path string) []string {
 		return nil
 	}
 	return doc.GenerateIdeas
+}
+
+// ─── subcommand: localize (v26.31) ───────────────────────────────────
+// Localization recall on an arbitrary repository. NOT a solve rate: see
+// bench/swebench/README.md for the boundary. Seeds and gold files come from
+// files so a 500 task driver never hits argv limits.
+
+func cmdLocalize(args []string) {
+	fs := flag.NewFlagSet("localize", flag.ExitOnError)
+	seedsFile := fs.String("seeds-file", "", "file with one seed identifier per line (required)")
+	goldFile := fs.String("gold-file", "", "file with one gold file path per line, relative to --root (required)")
+	hops := fs.Int("hops", 2, "maximum call graph hops from the seeds")
+	cf := parseCommon(fs, args)
+	if *seedsFile == "" || *goldFile == "" {
+		fmt.Fprintln(os.Stderr, "localize: --seeds-file and --gold-file are required")
+		os.Exit(2)
+	}
+	seeds, err := bench.ReadLines(*seedsFile)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "localize: seeds:", err)
+		os.Exit(2)
+	}
+	gold, err := bench.ReadLines(*goldFile)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "localize: gold:", err)
+		os.Exit(2)
+	}
+	abs, _ := filepath.Abs(cf.root)
+	r := newRun(cf.model, cf.host, abs)
+	r.Suites = []bench.Suite{bench.LocalizationRecall(abs, seeds, gold, *hops)}
+	finish(r, cf.out)
 }
 
 // ─── subcommand: determinism ─────────────────────────────────────────

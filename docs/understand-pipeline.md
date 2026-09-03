@@ -117,6 +117,12 @@ to the human by `Module.UnknownNodes()` (`unified_ir.go:246`) and rendered in th
 `body_not_parsed` is load-bearing rather than cosmetic: the CFG builder matches that exact string
 to decide when a body is opaque (`flow/cfg_ts_py.go:59`).
 
+This policy has outside support. A 2026 review of 87 graph based vulnerability studies
+(Information 17(8):730) lists graph construction errors as a main reason reported results do not
+hold up. It also asks for uncertainty aware graph construction. An unknown node that carries its
+reason is the honest form of that. The graph records what it could not model, instead of guessing
+a structure that looks plausible.
+
 ## Symbol IDs
 
 ```go

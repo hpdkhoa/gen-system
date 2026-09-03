@@ -44,6 +44,15 @@ comes from `genbench genpipe` (v26.24): stub rate, op-repair attempts, heal
 attempts, go-test pass over 5 frozen ideas, per quant. `quant_sweep.sh` at the
 repo root is superseded by `bench/run-quant-sweep.sh`.
 
+## SWE-bench Verified, localization only
+
+`bench/swebench/run_swebench_localize.sh` measures whether the Understand graph reaches the
+files a gold patch touched, from seed identifiers in the issue text, on all 500 SWE-bench
+Verified tasks. That is the file recovery line of DeepDiscovery (arXiv 2606.22906). It is
+not a solve rate. gen-system has no issue to patch pipeline, so the 78.6 percent solve rate
+in that paper is not comparable to anything this produces. The folder README states the
+boundary in full and every result prints it.
+
 ## Provenance
 
 Every table `summarise.py` writes carries `_provenance` (date, gen-system

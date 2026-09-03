@@ -22,6 +22,12 @@
 # that carries them is what dates the run. Ignoring them would make
 # `git add results/` silently do nothing, which is the opposite of the point.
 
+# SWE-bench: the clones are huge and re-creatable; tasks.jsonl is public data
+# that bench/swebench/fetch_tasks.py re-fetches and verifies against the
+# committed tasks.sha256. Everything else under results/ is evidence.
+results/*/swebench/repos/
+bench/swebench/tasks.jsonl
+
 # Generated applications produced by `gen idea` / `gen apply`
 /generated-app/
 /output/

@@ -155,6 +155,8 @@ generation package, so the read only half cannot acquire a model dependency by a
 
 ## Neighbours and prior art
 
+The pieces exist elsewhere. Here is where, and how this differs.
+
 - **Reliable Graph-RAG for Codebases** (arXiv 2601.08773, January 2026) benchmarked deterministic
   AST derived graphs against LLM built graphs and vector search on Java repositories. It found the
   AST graphs give more reliable and cheaper grounding. That is the finding gen-system is built on.
@@ -162,9 +164,32 @@ generation package, so the read only half cannot acquire a model dependency by a
   rather than Tree-sitter on one. And it goes past retrieval into correctable beliefs, grounded
   generation, and verification of the output from outside. The idea arrived independently, and
   the execution went further.
-- Morph: typed refactoring plans with a test gate and rollback. Python only, temperature 0.1,
+- **PRAXIS** (arXiv 2608.19784, August 2026) stores knowledge the model extracted on a code
+  dependency graph and surfaces it during generation. That is the same move as gen-system's
+  generation half. The difference is the trust model. PRAXIS accumulates what the model derived.
+  gen-system checks every model derived claim against parser facts, marks contradictions, and
+  lets only human verified beliefs steer. PRAXIS has no verification tier after generation.
+- **Shift-Left High-Level Synthesis Verification** (arXiv 2606.17128, June 2026) verifies hardware
+  designs in two tiers. First static structural alignment, then dynamic behavioral equivalence
+  with symbolic execution. It beats AST only baselines. That is the same two tier shape as
+  gen-system's verify step, in another field, with a stronger dynamic tier. The lesson is the
+  same. The graph alone is not enough. Behavior has to be checked.
+- **From Fragments to Paths** (arXiv 2606.22906, June 2026) recovers task level context over
+  repository structure for large industrial codebases. It reports 78.6 percent on SWE-bench
+  Verified. That is the retrieval half, done at scale and measured end to end. gen-system has no
+  SWE-bench number and does not claim one. Its differentiator is what happens after retrieval.
+- **Externalization in LLM Agents** (arXiv 2604.08224, April 2026) is a review. It argues that
+  agent capability is moving out of the weights and into memory, skills, protocols, and the
+  harness. gen-system is an instance of that. The belief store is external memory. The graph is an
+  external world model. The compile gate and the verify pass are harness engineering. One thing
+  the review does not stress: the harness here is built to share none of the model's assumptions.
+- **Morph**: typed refactoring plans with a test gate and rollback. Python only, temperature 0.1,
   cloud first.
-- Aider, Continue, Cody: local model capable assistants with a different goal, interactive editing.
+- **Aider, Continue, Cody**: local model capable assistants with a different goal, interactive
+  editing.
+
+None of these have determinism as a hard contract, a single consumer GPU as the target, or COBOL
+and CA Gen frontends.
 
 There is no head to head benchmark against any of these. A fair one needs the same model, the same
 hardware, and the same task set on both sides, and that has not been run. The Understand

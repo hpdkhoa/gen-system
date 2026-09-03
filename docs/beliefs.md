@@ -203,6 +203,19 @@ service scope and does not set `Parent`. The module and project cascade is imple
 but unreachable from the shipping CLI. Do not describe it as a working feature until a
 `SummarizeModules` exists.
 
+## Outside support for this design
+
+A 2026 review of 87 graph based vulnerability studies (Information 17(8):730) reports that graph
+methods work best when structure is represented faithfully and explicitly. It also reports that
+published results are weakened by graph construction errors, incomplete repository context, and
+weak explanation protocols. It asks for verifiable explanations as a minimum requirement.
+
+A belief with a `consistent`, `contradicts`, or `needs-human` status, carrying the parser
+observation it was checked against, is a verifiable explanation in that sense. The parser tier is
+the faithful structure. The gating is what turns a model's claim into something a person can
+check. That review is about vulnerability detection, not code generation. The overlap is in the
+design principle, not the task.
+
 ## Reading it yourself
 
 ```bash
