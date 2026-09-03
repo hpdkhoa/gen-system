@@ -237,6 +237,7 @@ func sanitizeOperations(idea string, e schema.Entity, all []schema.Entity, ops [
 					fixed.Subpath = op.Subpath
 				}
 				ok, buildErr = operationCompiles(e, n, fixed)
+				recordRepairAttempt(ok) // WP1: count every repair round-trip
 				if ok {
 					op = fixed
 					fmt.Printf("     [logic] %s.%s repaired ✓\n", e.Name, name)
@@ -249,6 +250,7 @@ func sanitizeOperations(idea string, e schema.Entity, all []schema.Entity, ops [
 			op.Body = fmt.Sprintf("return nil, errors.New(%q)", "not implemented: "+name)
 			op.Helpers = nil
 		}
+		recordOpOutcome(!ok) // WP1: emitted op, stubbed or real
 		out = append(out, op)
 	}
 	return out

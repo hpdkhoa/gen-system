@@ -1,0 +1,36 @@
+{
+  "Entities": [
+    {
+      "Name": "User",
+      "Fields": [
+        {
+          "Name": "Name",
+          "Type": "string",
+          "IsPrimary": false,
+          "IsForeign": false,
+          "RefEntity": ""
+        }
+      ]
+    },
+    {
+      "Name": "Post",
+      "Fields": [
+        {
+          "Name": "Title",
+          "Type": "string",
+          "IsPrimary": false,
+          "IsForeign": false,
+          "RefEntity": ""
+        },
+        {
+          "Name": "userID",
+          "Type": "int",
+          "IsPrimary": false,
+          "IsForeign": false,
+          "RefEntity": ""
+        }
+      ]
+    }
+  ],
+  "Relations": null
+}

@@ -1,0 +1,54 @@
+{
+  "_readme": "Frozen benchmark task set (WP0). Commit this file BEFORE the first measured run; the git timestamp is the proof the tasks were not tuned to the results. generate_ideas feeds `genbench genpipe --ideas bench/tasks.json` (5 ideas, one full idea→plan→generate→heal→verify pipeline each). understand_targets are public repos pinned to a commit for the Understand benchmark (parse / resolution / cfg suites). Do not edit between runs of the same study.",
+  "frozen_date": "2026-08-27",
+
+  "generate_ideas": [
+    "A small library lending service: members borrow and return books, librarians add books and see overdue loans",
+    "An inventory service for a hardware store: products with stock counts, suppliers, and purchase orders that restock products",
+    "A gym membership service: members, plans and checkins; staff can freeze or cancel memberships",
+    "A support ticket tracker: customers open tickets, agents reply to tickets and close them, tags for triage",
+    "An event registration service: events with capacity, attendees register and cancel, a waitlist promotes automatically"
+  ],
+
+  "understand_targets": [
+    {
+      "name": "cobolcraft",
+      "url": "https://github.com/meyfa/CobolCraft",
+      "commit": "c6f34f90ecdff94c3171c2b67334f9a5dc6acffb",
+      "language": "cobol",
+      "copybooks": "auto",
+      "note": "same pinned corpus as the frozen baseline (generator/internal/bench/baselines/)"
+    },
+    {
+      "name": "gorilla-mux",
+      "url": "https://github.com/gorilla/mux",
+      "commit": "db9d1d0073d27a0a2d9a8c1bc52aa0af4374d265",
+      "language": "go",
+      "note": "pinned 2024-06-19, small HTTP router"
+    },
+    {
+      "name": "go-chi",
+      "url": "https://github.com/go-chi/chi",
+      "commit": "36611d24579aaca3250ed9732e17e085c5026334",
+      "language": "go",
+      "note": "pinned 2026-08-27, mid-size HTTP router"
+    },
+    {
+      "name": "spf13-cobra",
+      "url": "https://github.com/spf13/cobra",
+      "commit": "adbc8813901bba65827259daa8e22ff94ec1f30e",
+      "language": "go",
+      "note": "pinned 2026-07-11, CLI framework"
+    }
+  ],
+
+  "models": {
+    "production_plan": "qwen3:14b",
+    "production_code": "qwen2.5-coder:14b",
+    "quant_study": {
+      "Q4_K_M": "deepseek-coder-v2:16b-lite-instruct-q4_K_M",
+      "Q5_K_M": "deepseek-coder-v2:16b-lite-instruct-q5_K_M",
+      "Q8_0": "deepseek-coder-v2:16b-lite-instruct-q8_0"
+    }
+  }
+}

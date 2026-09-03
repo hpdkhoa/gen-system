@@ -1188,7 +1188,7 @@ func (p *javaParser) collectParenCallsWithText() ([]*Node, string) {
 			depth--
 			p.advance()
 			if depth == 0 {
-				return calls, strings.TrimSpace(strings.Join(sb, " "))
+				return calls, joinCondTokens(sb)
 			}
 			sb = append(sb, ")")
 			continue
@@ -1197,7 +1197,7 @@ func (p *javaParser) collectParenCallsWithText() ([]*Node, string) {
 		sb = append(sb, p.cur().text)
 		p.advance()
 	}
-	return calls, strings.TrimSpace(strings.Join(sb, " "))
+	return calls, joinCondTokens(sb)
 }
 
 // harvestCallAt: if the current position is an identifier (or `new Type`)

@@ -133,12 +133,12 @@ func tsLoopCond(toks []tsToken, kw int) string {
 		case tsRParen:
 			depth--
 			if depth == 0 {
-				return strings.TrimSpace(strings.Join(parts, " "))
+				return joinCondTokens(parts)
 			}
 		}
 		parts = append(parts, toks[i].text)
 	}
-	return strings.TrimSpace(strings.Join(parts, " "))
+	return joinCondTokens(parts)
 }
 
 type tsLexer struct {

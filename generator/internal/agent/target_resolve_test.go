@@ -58,7 +58,17 @@ func TestTargetFileFor_MatchesGeneratorConventions(t *testing.T) {
 
 	// Case-insensitive fallback: an entity name in a different case still finds
 	// the real file on disk.
-	if got := targetFileFor("CUSTOMER", "generate_handler", root); filepath.Base(got) != "Customer_handler.go" {
+	//
+	// v26.25: this assertion only means anything on a case-SENSITIVE filesystem.
+	// On Windows and on macOS's default volume, os.Stat("CUSTOMER_handler.go")
+	// succeeds against the file created as "Customer_handler.go", so
+	// targetFileFor returns the requested spelling without ever reaching the
+	// fallback scan. That is correct behaviour and still a valid path to the
+	// same file, so the old unconditional check reported a failure that did not
+	// exist. Detect the filesystem and assert accordingly.
+	if _, err := os.Stat(filepath.Join(root, "backend/internal/handler/CUSTOMER_handler.go")); err == nil {
+		t.Log("case-insensitive filesystem: OS resolves the name, fallback scan not exercised")
+	} else if got := targetFileFor("CUSTOMER", "generate_handler", root); filepath.Base(got) != "Customer_handler.go" {
 		t.Errorf("case-insensitive fallback failed: %q", got)
 	}
 

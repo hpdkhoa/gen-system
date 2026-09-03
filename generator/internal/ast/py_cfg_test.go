@@ -56,7 +56,12 @@ def check(x):
 	}
 }
 
-func TestPyFrontend_BodyWithTry_EmitsBranch(t *testing.T) {
+// v26.25: renamed from _EmitsBranch. This test predated NodeTry: v25.1 made
+// try/except its own kind (Children = try body, Else = handler), which the
+// structural CFG builder recognises explicitly (flow/cfg_ts_py.go). Asserting
+// NodeBranch here was asserting the OLD contract against a frontend that had
+// correctly moved to the new one.
+func TestPyFrontend_BodyWithTry_EmitsTry(t *testing.T) {
 	src := `
 def safe_parse(s):
     try:
@@ -66,9 +71,9 @@ def safe_parse(s):
 `
 	m := pyParse(t, src)
 	fn := pyFuncNode(t, m, "safe_parse")
-	count := countKindInChildren(fn, NodeBranch)
+	count := countKindInChildren(fn, NodeTry)
 	if count == 0 {
-		t.Error("expected NodeBranch for Python function with 'try'")
+		t.Error("expected NodeTry for Python function with 'try'")
 	}
 }
 

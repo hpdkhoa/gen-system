@@ -46,6 +46,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"sync"
 
@@ -178,9 +179,22 @@ func (idx *Index) ResolveAll() {
 }
 
 // resolveCallEdges links CalleeName → CalleeID where possible.
+//
+// v26.26: this used to call a second resolver, resolveByName, which ranged over
+// the symbol map in its randomized order and had no provenance tier preference
+// at all. That made the BuildFromModules path (used by cmd/bench) both
+// non-deterministic AND willing to let a stdlib symbol capture a project call —
+// the exact defect the v23.32 note below describes as fixed, fixed in only one
+// of the two paths. There is now a single resolution rule in this package.
+// Takes the write lock because it mutates callEdges; no caller holds it.
 func (idx *Index) resolveCallEdges() {
+	idx.mu.Lock()
+	defer idx.mu.Unlock()
 	for i, edge := range idx.callEdges {
-		callee := idx.resolveByName(edge.CalleeName)
+		if edge.CalleeID != "" {
+			continue
+		}
+		callee := idx.resolveByNameLocked(edge.CalleeName)
 		if callee != nil {
 			idx.callEdges[i].CalleeID = callee.ID
 		}
@@ -327,9 +341,9 @@ func (idx *Index) UpdateFile(filePath string, m *ast.Module) {
 	}
 }
 
-// resolveByNameLocked is the lock-held variant of resolveByName,
-// resolveByNameLocked is the lock-held variant of resolveByName, used during
-// UpdateFile's re-resolution sweep and ResolveAll.
+// resolveByNameLocked is the single global name-resolution rule in this package.
+// The caller must hold the lock. Used by ResolveAll, resolveCallEdges, and
+// UpdateFile's re-resolution sweep.
 //
 // v23.32: provenance-aware tie-break. Once a stdlib is ingested, an exported
 // stdlib symbol can share a bare name with a project symbol (Write, String,
@@ -338,22 +352,40 @@ func (idx *Index) UpdateFile(filePath string, m *ast.Module) {
 // making project resolution non-deterministic. So we PREFER a project-tier
 // match: a project (non-external) exported symbol wins outright; only if no
 // project symbol of that name exists do we fall to a stdlib/thirdparty one.
-// Within a tier the first exported match wins (unexported is the last resort),
-// preserving the prior behaviour when no stdlib is present.
+// Within a tier the first exported match wins (unexported is the last resort).
+// v26.25: "first" is taken from candidates sorted by SymbolID, not from map
+// order, so the winner is a function of the input alone.
 func (idx *Index) resolveByNameLocked(name string) *Symbol {
 	if dot := strings.LastIndex(name, "."); dot >= 0 {
 		name = name[dot+1:]
 	}
+	// v26.25 (determinism fix): collect every candidate first, then choose.
+	// The prior version ranged over idx.allSymbols and took the first match in
+	// each tier. idx.allSymbols is a map, so Go randomizes that order: when two
+	// symbols in the SAME tier shared a bare name, which one won varied between
+	// runs on identical input. That is a direct breach of the determinism
+	// contract the rest of the system is built on, and it silently produced a
+	// different call graph run to run. Candidates are now sorted by their unique,
+	// stable SymbolID before the tier preference is applied, so the winner is a
+	// function of the input alone. Tier order is unchanged.
+	var candidates []*Symbol
+	for _, s := range idx.allSymbols {
+		if s.Name == name {
+			candidates = append(candidates, s)
+		}
+	}
+	if len(candidates) == 0 {
+		return nil
+	}
+	sort.Slice(candidates, func(i, j int) bool { return candidates[i].ID < candidates[j].ID })
+
 	var (
 		projectExported  *Symbol
 		projectAny       *Symbol
 		externalExported *Symbol
 		externalAny      *Symbol
 	)
-	for _, s := range idx.allSymbols {
-		if s.Name != name {
-			continue
-		}
+	for _, s := range candidates {
 		if s.Provenance.IsExternal() {
 			if s.Exported && externalExported == nil {
 				externalExported = s
@@ -361,16 +393,16 @@ func (idx *Index) resolveByNameLocked(name string) *Symbol {
 			if externalAny == nil {
 				externalAny = s
 			}
-		} else {
-			if s.Exported {
-				// A project exported match is the best possible result; the
-				// prior code returned the first exported symbol immediately,
-				// so doing the same here keeps non-stdlib runs identical.
-				return s
+			continue
+		}
+		if s.Exported {
+			if projectExported == nil {
+				projectExported = s
 			}
-			if projectAny == nil {
-				projectAny = s
-			}
+			continue
+		}
+		if projectAny == nil {
+			projectAny = s
 		}
 	}
 	switch {
@@ -405,26 +437,14 @@ func (idx *Index) ByName(name string) []*Symbol {
 			out = append(out, s)
 		}
 	}
+	// v26.26: sort before returning. allSymbols is a map, so without this the
+	// slice order is randomized per call, and several callers treat it as
+	// ordered — context.go's buildEntityUsage/buildArchSummary walk it to build
+	// the derived views that are supposed to be deterministic. Returning an
+	// arbitrary order from a public accessor is a determinism hazard handed to
+	// every caller; SymbolID is unique and stable, so sorting on it is total.
+	sort.Slice(out, func(i, j int) bool { return out[i].ID < out[j].ID })
 	return out
-}
-
-// resolveByName finds the best match for a name globally.
-// Exported symbols win over unexported.
-func (idx *Index) resolveByName(name string) *Symbol {
-	// Strip receiver: "t.CreateUser" → look for "CreateUser"
-	if dot := strings.LastIndex(name, "."); dot >= 0 {
-		name = name[dot+1:]
-	}
-	candidates := idx.ByName(name)
-	if len(candidates) == 0 {
-		return nil
-	}
-	for _, c := range candidates {
-		if c.Exported {
-			return c
-		}
-	}
-	return candidates[0]
 }
 
 // Resolve resolves a name in the context of a specific file.

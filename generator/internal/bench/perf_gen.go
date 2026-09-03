@@ -19,6 +19,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -45,10 +47,42 @@ type ollamaReq struct {
 	Keep    interface{}     `json:"keep_alive,omitempty"`
 }
 
+// ollamaOpts mirrors ai.OllamaOptions: deterministic pins plus the optional
+// GPU/context knobs. Duplicated here on purpose — the bench deliberately does
+// not import internal/ai (see the file header) but MUST send the same options
+// the production door sends, or the offload curve would measure a different
+// request shape than the one users get. v26.24 (WP2).
 type ollamaOpts struct {
 	Temperature float64 `json:"temperature"`
 	Seed        int     `json:"seed"`
 	TopP        float64 `json:"top_p"`
+	NumGPU      *int    `json:"num_gpu,omitempty"`   // OLLAMA_NUM_GPU
+	NumCtx      *int    `json:"num_ctx,omitempty"`   // OLLAMA_NUM_CTX
+	NumBatch    *int    `json:"num_batch,omitempty"` // OLLAMA_NUM_BATCH
+}
+
+// benchEnvInt reads an integer env var; nil when unset or unparseable.
+func benchEnvInt(key string) *int {
+	s := strings.TrimSpace(os.Getenv(key))
+	if s == "" {
+		return nil
+	}
+	n, err := strconv.Atoi(s)
+	if err != nil {
+		return nil
+	}
+	return &n
+}
+
+// benchOpts returns the deterministic pins plus any env-set GPU/context knobs —
+// the exact options production's requestOptions() would send.
+func benchOpts() *ollamaOpts {
+	return &ollamaOpts{
+		Temperature: 0.0, Seed: 42, TopP: 1.0,
+		NumGPU:   benchEnvInt("OLLAMA_NUM_GPU"),
+		NumCtx:   benchEnvInt("OLLAMA_NUM_CTX"),
+		NumBatch: benchEnvInt("OLLAMA_NUM_BATCH"),
+	}
 }
 
 type ollamaResp struct {
@@ -67,10 +101,10 @@ func ollamaGenerate(host, model, prompt string, timeoutSec int) (*ollamaTimings,
 		host = defaultOllamaHost
 	}
 	body, _ := json.Marshal(ollamaReq{
-		Model:  model,
-		Prompt: prompt,
-		Stream: false,
-		Options: &ollamaOpts{Temperature: 0.0, Seed: 42, TopP: 1.0},
+		Model:   model,
+		Prompt:  prompt,
+		Stream:  false,
+		Options: benchOpts(), // v26.24: same knobs as production (env-driven)
 	})
 	cli := &http.Client{Timeout: time.Duration(timeoutSec) * time.Second}
 	resp, err := cli.Post(host+"/api/generate", "application/json", bytes.NewReader(body))

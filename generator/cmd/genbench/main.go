@@ -23,6 +23,7 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"os"
@@ -51,6 +52,10 @@ SUBCOMMANDS
   loadctx       LoadContext end-to-end latency (plain / copybook / warm / skill)
   incremental   Watcher: file-change → event → index update latency
   gen           LLM generation latency (tokens/sec, eval ms)
+  stream        TTFT + total latency, stream on vs off, same prompt (v26.24)
+  genpipe       End-to-end Generate pipeline: idea → plan → generate → heal →
+                verify; reports ops_total/ops_stubbed/repairs/heals/go_test_pass
+                (v26.24, WP1). GEN_LOGIC=ollama for live model, replay otherwise.
   determinism   Same prompt N times, diff outputs (temp=0 seed=42 must be stable)
   all           Run every suite and write one JSON
   regression    Diff a new JSON against an older JSON or the committed baseline
@@ -115,6 +120,10 @@ func main() {
 		cmdIncremental(args)
 	case "gen":
 		cmdGen(args)
+	case "stream":
+		cmdStream(args)
+	case "genpipe":
+		cmdGenPipe(args)
 	case "determinism":
 		cmdDeterminism(args)
 	case "all":
@@ -404,6 +413,53 @@ func cmdGen(args []string) {
 	finish(r, cf.out)
 }
 
+// ─── subcommand: stream (v26.24, WP2) ────────────────────────────────
+
+func cmdStream(args []string) {
+	fs := flag.NewFlagSet("stream", flag.ExitOnError)
+	cf := parseCommon(fs, args)
+	r := newRun(cf.model, cf.host, cf.root)
+	r.Suites = []bench.Suite{bench.StreamingLatency(cf.host, cf.model, cf.runs)}
+	finish(r, cf.out)
+}
+
+// ─── subcommand: genpipe (v26.24, WP1) ───────────────────────────────
+// End-to-end Generate pipeline benchmark. Ideas come from --ideas (a JSON file
+// with a "generate_ideas" array, e.g. bench/tasks.json) or the built-in frozen
+// set. The suite uses the production entry points; GEN_LOGIC / OLLAMA_MODEL_*
+// select the provider and models exactly as they do for `gen idea`.
+
+func cmdGenPipe(args []string) {
+	fs := flag.NewFlagSet("genpipe", flag.ExitOnError)
+	ideasPath := fs.String("ideas", "", "JSON file with a generate_ideas array (default: built-in frozen set)")
+	cf := parseCommon(fs, args)
+	ideas := loadIdeas(*ideasPath)
+	r := newRun(cf.model, cf.host, cf.root)
+	r.Suites = []bench.Suite{bench.GenPipeline(ideas)}
+	finish(r, cf.out)
+}
+
+// loadIdeas reads {"generate_ideas": ["...", ...]} from path; empty path or a
+// missing/invalid file falls back to the built-in set (loudly).
+func loadIdeas(path string) []string {
+	if path == "" {
+		return nil // GenPipeline falls back to bench.BuiltinGenIdeas
+	}
+	raw, err := os.ReadFile(path)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "genpipe: cannot read --ideas %s (%v); using built-in set\n", path, err)
+		return nil
+	}
+	var doc struct {
+		GenerateIdeas []string `json:"generate_ideas"`
+	}
+	if err := json.Unmarshal(raw, &doc); err != nil || len(doc.GenerateIdeas) == 0 {
+		fmt.Fprintf(os.Stderr, "genpipe: %s has no generate_ideas array; using built-in set\n", path)
+		return nil
+	}
+	return doc.GenerateIdeas
+}
+
 // ─── subcommand: determinism ─────────────────────────────────────────
 
 func cmdDeterminism(args []string) {
@@ -439,6 +495,11 @@ func cmdAll(args []string) {
 		r.Suites = append(r.Suites, bench.OllamaDoctor(cf.host, cf.model))
 		r.Suites = append(r.Suites, bench.GenerationLatency(cf.host, cf.model, cf.runs))
 		r.Suites = append(r.Suites, bench.DeterminismCheck(cf.host, cf.model, cf.runs))
+		// v26.24 (WP1/WP2): the end-to-end pipeline + streaming suites join
+		// `all` on the AI side only, so offline `all --skip-ai` runs (and the
+		// frozen baselines diffed against them) are byte-identical to before.
+		r.Suites = append(r.Suites, bench.StreamingLatency(cf.host, cf.model, cf.runs))
+		r.Suites = append(r.Suites, bench.GenPipeline(nil))
 	}
 	finish(r, cf.out)
 }

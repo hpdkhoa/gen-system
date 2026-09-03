@@ -29,7 +29,11 @@ func parseJava(t *testing.T, src string) *Module {
 // matching kind and (optional) name.
 func findNode(nodes []*Node, kind NodeKind, name string) *Node {
 	for _, n := range nodes {
-		if n.Kind == kind && (name == "" || n.Name == name) {
+		// A NodeCall carries the invoked identifier in Callee, not Name (Name is
+		// empty for calls). Matching only on Name meant every lookup for a call
+		// silently found nothing, which made the golden-IR assertions below fail
+		// against a frontend that was in fact emitting the correct tree.
+		if n.Kind == kind && (name == "" || n.Name == name || n.Callee == name) {
 			return n
 		}
 		if got := findNode(n.Children, kind, name); got != nil {

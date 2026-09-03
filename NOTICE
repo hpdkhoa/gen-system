@@ -1,0 +1,18 @@
+gen-system
+Copyright 2026 Khoa Hoang
+
+This product includes software developed by Khoa Hoang.
+
+Licensed under the Apache License, Version 2.0. See the LICENSE file for the
+full terms.
+
+Third-party dependencies:
+
+  github.com/lib/pq — PostgreSQL driver for Go.
+  Copyright (c) 2011-2013, 'pq' Contributors. Licensed under the MIT License.
+  This is the module's only external Go dependency.
+
+Benchmark corpora are not vendored in this repository. The COBOL baseline is
+measured against CobolCraft (https://github.com/meyfa/CobolCraft), MIT licensed,
+Copyright (c) 2024-2025 Fabian Meyer, fetched on demand at a pinned commit by
+generator/internal/bench/baselines/freeze-cobol-baseline.sh.
