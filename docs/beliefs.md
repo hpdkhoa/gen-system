@@ -3,11 +3,11 @@
 A belief is one statement the system holds about one routine. Beliefs come from three places,
 they are not equal, and the difference is the whole point of the design.
 
-- **parser** — derived from the offline parse. Deterministic. Rebuilt from scratch on every load
+- **parser.** Derived from the offline parse. Deterministic. Rebuilt from scratch on every load
   and never persisted.
-- **enrich** — proposed by a local model. Persisted, and checked against what the parser observed
+- **enrich.** Proposed by a local model. Persisted, and checked against what the parser observed
   before it is allowed anywhere near generation.
-- **human** — you corrected it. Persisted. This is the only source that steers generation.
+- **human.** You corrected it. Persisted. This is the only source that steers generation.
 
 Source: `generator/internal/belief` (`belief.go`, `validate.go`, `summarize.go`). The package
 imports only `ast`, `flow`, and `symbols`, so both halves of the system can depend on it.
@@ -79,7 +79,7 @@ stored, by `validateEnrich` (`validate.go:58`). Three rules:
 ```go
 case KindComputation, KindPrecondition:
     b.Validated = "needs-human"
-    b.ValidationNote = "semantic claim — verify against the source by hand"
+    b.ValidationNote = "semantic claim: verify against the source by hand"
 ```
 
 A claim about what a computation *means* cannot be checked mechanically, so it is never marked
@@ -96,8 +96,8 @@ if assertsPurity(text) && (f.hasDBWrite || f.hasFSWrite) {
 }
 ```
 
-So if the model says "persists the order to the database" about a routine with no db or fs effect,
-that claim is marked `contradicts` and carries the reason. The parser is the oracle. The model does
+Say the model claims "persists the order to the database" about a routine with no db or fs effect.
+That claim is marked `contradicts` and carries the reason. The parser is the oracle. The model does
 not get to overrule it.
 
 The persistence detector (`validate.go:96`) is deliberately conservative. It vetoes on
@@ -135,7 +135,7 @@ for id, b := range bs.beliefs {
 }
 ```
 
-Only human-verified beliefs steer. Every parser belief and every enrich belief, contradicting or
+Only human verified beliefs steer. Every parser belief and every enrich belief, contradicting or
 not, is excluded structurally rather than by a rule that could be forgotten. The model's own
 proposals cannot reach the generator unless a person adopted them.
 
@@ -150,8 +150,8 @@ POST /api/present/beliefs/correct
 ```
 
 `Correct` (`belief.go:937`) records your value, flips `Source` to `human`, sets `HumanVerified`,
-and stores `DerivedAt` — a snapshot of what the machine derived at the moment you disagreed with
-it. That snapshot is the entire staleness mechanism.
+and stores `DerivedAt`. That is a snapshot of what the machine derived at the moment you
+disagreed with it, and it is the entire staleness mechanism.
 
 From now on your sentence is what the planner sees, under a header that tells the model these were
 reviewed by a person and are authoritative.

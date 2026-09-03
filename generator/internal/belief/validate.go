@@ -60,7 +60,7 @@ func validateEnrich(b *Belief, f parserFacts) {
 	case KindComputation, KindPrecondition:
 		// Semantic — not mechanically checkable. A human is the only validator.
 		b.Validated = "needs-human"
-		b.ValidationNote = "semantic claim — verify against the source by hand"
+		b.ValidationNote = "semantic claim: verify against the source by hand"
 		return
 	}
 

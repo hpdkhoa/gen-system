@@ -1,4 +1,4 @@
-# bench/ — the measurement campaign (WP0–WP4)
+# bench: the measurement campaign (WP0 to WP4)
 
 Everything here exists so that every number in the portfolio traces to a
 commit, a date, a task set, and n runs with a range. Nothing in the writeups
@@ -17,7 +17,7 @@ existed. `run-all.sh` refuses to run on a dirty tree.
 
 Models needed in ollama: `qwen3:14b`, `qwen2.5-coder:14b`, and the three
 quant-study tags (`ollama pull deepseek-coder-v2:16b-lite-instruct-q4_K_M`
-etc. — see tasks.json).
+and so on. See tasks.json).
 
 ## The whole campaign
 
@@ -38,8 +38,8 @@ Or piecewise (each writes raw JSON to `results/<date>/raw/`):
 
 ## What changed vs the old quant_sweep.sh (repo root)
 
-The old sweep's quality axis was compile-pass over the generation gates —
-always 100 % because the stub path guarantees a green build. The new headline
+The old sweep's quality axis was compile pass over the generation gates. That was always 100
+percent, because the stub path guarantees a green build. The new headline
 comes from `genbench genpipe` (v26.24): stub rate, op-repair attempts, heal
 attempts, go-test pass over 5 frozen ideas, per quant. `quant_sweep.sh` at the
 repo root is superseded by `bench/run-quant-sweep.sh`.
@@ -49,4 +49,4 @@ repo root is superseded by `bench/run-quant-sweep.sh`.
 Every table `summarise.py` writes carries `_provenance` (date, gen-system
 commit, task set, GPU) and per-row `n` plus min/max where the raw data has
 them. A config with no raw data gets no row. If a value is null, the harness
-did not measure it — that is the intended behaviour, not a bug to paper over.
+did not measure it. That is intended behaviour, not a bug to paper over.

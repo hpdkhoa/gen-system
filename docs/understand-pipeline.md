@@ -39,7 +39,7 @@ callee *name* as written and leaves `CalleeID` empty for later.
 
 **10. Language-agnostic import graph.** `collectModuleImports` (`context.go:755`).
 
-**11. Build the control-flow graph.** `flow.Build` (`flow/flow.go:65`).
+**11. Build the control flow graph.** `flow.Build` (`flow/flow.go:65`).
 
 **12. Infer effects.** `flow.InferEffects` (`flow/flow.go:564`).
 
@@ -68,8 +68,8 @@ duplicate registration.
 | TypeScript | `.ts .tsx` | `ast/ts_frontend.go` |
 | Python | `.py .pyw` | `ast/py_frontend.go` |
 
-Five are pure Go with no external toolchain. **Python is the exception:** it shells out to
-`python3` with an embedded analysis script, and when the interpreter is absent it emits a single
+Five are pure Go with no external toolchain. **Python is the exception.** It shells out to
+`python3` with an embedded analysis script. When the interpreter is absent it emits a single
 unknown node with the reason `python_runtime_unavailable` (`py_frontend.go:447`) rather than
 failing the parse. If you are quoting offline or air-gapped behaviour, that is the one asterisk.
 
@@ -144,15 +144,15 @@ prefers, in order:
 3. an exported external symbol (standard library or third party)
 4. any external symbol
 
-Unresolved edges are counted rather than guessed at. Two counters exist for different purposes:
-`runUnderstandVerify` (`agent/verify_understand.go:111`) reports resolution over project-tier
-callers during generation, and `ResolutionRecall` (`bench/resolution.go:43`) splits the population
-into internal and external so the benchmark can report an honest internal recall alongside the
-overall number.
+Unresolved edges are counted rather than guessed at. Two counters exist for different purposes.
+`runUnderstandVerify` (`agent/verify_understand.go:111`) reports resolution over project tier
+callers during generation. `ResolutionRecall` (`bench/resolution.go:43`) splits the population into
+internal and external, so the benchmark can report an honest internal recall next to the overall
+number.
 
 **A determinism bug lived here, and it is worth knowing what it was.** Until v26.25 this function
-ranged over `idx.allSymbols` directly and kept the first match in each tier. `allSymbols` is a map,
-and Go randomizes map iteration, so when two symbols in the *same* tier shared a bare name, the
+ranged over `idx.allSymbols` directly and kept the first match in each tier. `allSymbols` is a map
+and Go randomizes map iteration. So when two symbols in the *same* tier shared a bare name, the
 winner varied between runs on identical input. The call graph varied with it. Everything else in
 the Understand half is deterministic by construction, which is exactly why this was easy to miss:
 nothing downstream was random, so nothing downstream looked wrong.
@@ -162,9 +162,9 @@ applies the tier preference. Tier order is unchanged.
 
 **Then the same bug turned out to have a second home.** `resolveByNameLocked` was not the only
 resolver. A second one, `resolveByName`, sat next to it and was reached from
-`resolveCallEdges`, which is how `BuildFromModules` resolves an index — the path `cmd/bench` uses.
-It read the symbol map through `ByName` in the same randomized order, and it had **no provenance
-tier at all**, so a standard-library symbol could capture a project call there. That is precisely
+`resolveCallEdges`, which is how `BuildFromModules` resolves an index. That is the path `cmd/bench` uses.
+It read the symbol map through `ByName` in the same randomized order. It also had **no provenance
+tier at all**, so a standard library symbol could capture a project call there. That is precisely
 the defect the v23.32 comment above describes as fixed. It had been fixed in one of the two paths.
 
 The first round of tests did not catch it because they went through `ResolveAll`, which uses the
@@ -205,9 +205,9 @@ that index-based block lookup stays valid. Note that pruning is called **only** 
 (`flow.go:140`).
 
 Dead code is reported separately by `AnalyzeDataFlow` (`flow.go:504`), which flags any non-entry
-block with no predecessors. Two honest caveats: it is not part of `LoadContext` at all, its only
-caller being the `/api/present/flow` handler; and because Go CFGs are already pruned, it can only
-fire on the structural languages. The `DataFlowIssue` doc comment mentions `use_before_def` and
+block with no predecessors. Two honest caveats. It is not part of `LoadContext` at all. Its only caller is the
+`/api/present/flow` handler. And because Go CFGs are already pruned, it can only fire on the
+structural languages. The `DataFlowIssue` doc comment mentions `use_before_def` and
 `unread_var` kinds; no analysis produces them.
 
 ## Effect inference

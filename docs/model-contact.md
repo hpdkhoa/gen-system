@@ -38,7 +38,7 @@ responses.
 ## Runtime knobs
 
 Read from the environment, sent only when set, so a machine that sets none of them produces
-byte-identical requests to the pre-v26.24 client:
+byte identical requests to the pre-v26.24 client:
 
 | Variable | Effect |
 |---|---|
@@ -63,10 +63,10 @@ of 30 to 90 seconds can land in the middle of a run on top of generation time.
 - plan: `OLLAMA_MODEL_PLAN`, then `OLLAMA_MODEL`, then `qwen3:14b`
 - code: `OLLAMA_MODEL_CODE`, then `OLLAMA_MODEL`, then `qwen2.5-coder:14b`
 
-**There is no scheduler.** "Sequential scheduling with keep-alive" means Ollama's own keep-alive,
+**There is no scheduler.** "Sequential scheduling with keep alive" means Ollama's own keep alive,
 these two roles, and measurement of what swapping costs. No scheduling code exists in this
 repository. `gen doctor` checks that a second load is much faster than the first, which is how you
-confirm keep-alive is actually working rather than assuming it.
+confirm keep alive is actually working rather than assuming it.
 
 ## Schema-constrained calls
 
@@ -94,12 +94,12 @@ Rewriters exist only for Go and Python. Every other language returns
 `ErrRewriterNotImplemented`, so the heal loop cannot mutate source it is unable to parse back and
 verify. A language without a rewriter fails loudly instead of being edited blindly.
 
-## What happens to a model-written operation
+## What happens to a model written operation
 
 1. The model proposes operations for an entity under the schema above.
-2. Each body is assembled into a realistic service package in a temp directory and **compiled
-   alone** with `go build`, against the real store interface and a stand-in model struct carrying
-   the same fields the generated model gets (`engine/service_logic.go`).
+2. Each body is assembled into a realistic service package in a temp directory, then **compiled
+   alone** with `go build`. It builds against the real store interface and a stand in model struct
+   carrying the same fields the generated model gets (`engine/service_logic.go`).
 3. If it fails, the build error goes back to the model, up to `maxRepairAttempts`, which is **2**.
 4. If it still fails, the body is replaced with `return nil, errors.New("not implemented: <Name>")`
    and the outcome is counted.
@@ -139,14 +139,14 @@ The default logic provider is a replay fixture table (`ai.ReplayProvider`), so t
 generation pipeline runs offline and deterministically with no Ollama present. The live model is
 opt-in through `GEN_LOGIC=ollama`.
 
-This is what makes the pipeline testable: the offline `gen_pipeline` benchmark exercises plan,
-generate, compile gate, heal, and Understand-verify end to end without a GPU, and its unit test
-asserts that nothing gets stubbed, because the fixtures compile as written.
+This is what makes the pipeline testable. The offline `gen_pipeline` benchmark exercises plan,
+generate, compile gate, heal, and Understand verify end to end without a GPU. Its unit test asserts
+that nothing gets stubbed, because the fixtures compile as written.
 
 The planner degrades differently and it is worth knowing. Its entity step has no deterministic
-fallback, so with no reachable model it returns zero entities. The benchmark handles that by
-falling back to a fixed schema and **counting it** in a `planner_fallbacks` metric that appears in
-the output, so an offline run can never be mistaken for a measured one.
+fallback, so with no reachable model it returns zero entities. The benchmark falls back to a fixed
+schema and **counts it** in a `planner_fallbacks` metric that appears in the output. An offline run
+can never be mistaken for a measured one.
 
 ## The full picture
 
