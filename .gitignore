@@ -1,0 +1,40 @@
+# Build artifacts and caches
+.gen/
+*.exe
+# Compiled binaries at the repo root. NOTE: the `bench` binary is deliberately
+# NOT listed — bench/ is a tracked source directory (the measurement drivers),
+# and a bare `/bench` rule would hide all of them. Build binaries into /tmp or
+# results/<date>/ instead, which the drivers already do.
+/gen
+/gen-server
+/genbench
+/understand-server
+/gen-enrich
+
+# Local environment. gen-system.env.example is the tracked template;
+# a real .env holds machine-specific paths and DB credentials.
+.env
+.env.*
+!gen-system.env.example
+
+# NOT ignored on purpose: results/. The raw JSON and the .vram sidecars under
+# results/<date>/ are the evidence a published number rests on, and the commit
+# that carries them is what dates the run. Ignoring them would make
+# `git add results/` silently do nothing, which is the opposite of the point.
+
+# Generated applications produced by `gen idea` / `gen apply`
+/generated-app/
+/output/
+
+# Toolchains
+node_modules/
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Editors and OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
