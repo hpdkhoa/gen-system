@@ -1,0 +1,59 @@
+{
+  "schema": "genbench/v1",
+  "started_at": "2026-09-04T18:31:14.485188334+07:00",
+  "finished_at": "2026-09-04T18:31:36.636413906+07:00",
+  "host": {
+    "os": "linux",
+    "arch": "amd64",
+    "num_cpu": 16,
+    "go_version": "go1.25.0"
+  },
+  "model": {
+    "name": "qwen3:14b",
+    "endpoint": "http://localhost:11434"
+  },
+  "project_root": ".",
+  "suites": [
+    {
+      "name": "ollama_doctor",
+      "cases": [
+        {
+          "name": "ollama_reachable",
+          "pass": true,
+          "got": "http://localhost:11434",
+          "want": "200 OK"
+        },
+        {
+          "name": "model_present",
+          "pass": true,
+          "got": "model=qwen3:14b present=true",
+          "want": "qwen3:14b present"
+        },
+        {
+          "name": "model_stays_resident_between_calls",
+          "pass": true,
+          "got": "first_load=3282ms second_load=98ms",
+          "want": "second_load \u003c\u003c first_load (set OLLAMA_KEEP_ALIVE=-1 if not)"
+        }
+      ],
+      "metrics": [
+        {
+          "name": "model_size_mb",
+          "value": 8846.472325325012,
+          "unit": "MB"
+        },
+        {
+          "name": "first_load_ms",
+          "value": 3282.196745,
+          "unit": "ms"
+        },
+        {
+          "name": "second_load_ms",
+          "value": 98.398308,
+          "unit": "ms"
+        }
+      ],
+      "duration_ns": 22151220073
+    }
+  ]
+}

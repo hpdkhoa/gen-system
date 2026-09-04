@@ -1,0 +1,257 @@
+{
+  "quantization_sweep": {
+    "_columns": [
+      "quant",
+      "tokens_per_sec",
+      "vram_gb",
+      "stub_rate_pct",
+      "op_repair_attempts",
+      "heal_attempts",
+      "go_test_pass",
+      "n",
+      "tok_s_min",
+      "tok_s_max"
+    ],
+    "_provenance": {
+      "date": "2026-09-04",
+      "gen_system_commit": "8040c5370805b0ed6e60539344bbf119b5fedaf8",
+      "task_set": "bench/tasks.json (frozen 2026-08-27)",
+      "gpu": "NVIDIA GeForce RTX 4060 Ti, 16380 MiB, 595.71.05"
+    },
+    "rows": [
+      [
+        "Q4_K_M",
+        122.9,
+        11.5,
+        98.7,
+        47.0,
+        0.0,
+        5.0,
+        3,
+        117.6,
+        125.6
+      ],
+      [
+        "Q5_K_M",
+        113.7,
+        12.8,
+        82.3,
+        40.3,
+        0.0,
+        5.0,
+        3,
+        112.3,
+        114.5
+      ],
+      [
+        "Q8_0",
+        39.9,
+        15.3,
+        74.1,
+        44.7,
+        0.0,
+        5.0,
+        3,
+        39.0,
+        41.3
+      ],
+      [
+        "production",
+        30.7,
+        9.6,
+        44.4,
+        2.7,
+        0.0,
+        5.0,
+        3,
+        30.7,
+        30.8
+      ]
+    ]
+  },
+  "offload_curve": {
+    "_columns": [
+      "gpu_layers",
+      "tokens_per_sec",
+      "vram_gb",
+      "n",
+      "tok_s_min",
+      "tok_s_max"
+    ],
+    "_provenance": {
+      "date": "2026-09-04",
+      "gen_system_commit": "8040c5370805b0ed6e60539344bbf119b5fedaf8",
+      "task_set": "bench/tasks.json (frozen 2026-08-27)",
+      "gpu": "NVIDIA GeForce RTX 4060 Ti, 16380 MiB, 595.71.05"
+    },
+    "rows": [
+      [
+        "20",
+        7.8,
+        4.7,
+        3,
+        null,
+        null
+      ],
+      [
+        "30",
+        10.1,
+        6.4,
+        3,
+        null,
+        null
+      ],
+      [
+        "40",
+        14.3,
+        8.0,
+        3,
+        null,
+        null
+      ],
+      [
+        "default",
+        30.8,
+        9.5,
+        3,
+        null,
+        null
+      ]
+    ]
+  },
+  "streaming": {
+    "_columns": [
+      "config",
+      "ttft_ms",
+      "total_latency_s",
+      "n",
+      "ttft_min",
+      "ttft_max"
+    ],
+    "_provenance": {
+      "date": "2026-09-04",
+      "gen_system_commit": "8040c5370805b0ed6e60539344bbf119b5fedaf8",
+      "task_set": "bench/tasks.json (frozen 2026-08-27)",
+      "gpu": "NVIDIA GeForce RTX 4060 Ti, 16380 MiB, 595.71.05"
+    },
+    "rows": [
+      [
+        "stream off (buffered)",
+        1889.7,
+        1.89,
+        3,
+        1884.3,
+        1899.8
+      ],
+      [
+        "stream on (NDJSON)",
+        132.5,
+        1.9,
+        3,
+        125.7,
+        145.4
+      ]
+    ]
+  },
+  "two_model_strategies": {
+    "_columns": [
+      "strategy",
+      "reload_cost_s",
+      "tokens_per_sec",
+      "stub_rate_pct",
+      "heal_attempts",
+      "go_test_pass",
+      "n"
+    ],
+    "_provenance": {
+      "date": "2026-09-04",
+      "gen_system_commit": "8040c5370805b0ed6e60539344bbf119b5fedaf8",
+      "task_set": "bench/tasks.json (frozen 2026-08-27)",
+      "gpu": "NVIDIA GeForce RTX 4060 Ti, 16380 MiB, 595.71.05"
+    },
+    "rows": [
+      [
+        "A-sequential-keepalive",
+        1.97,
+        30.7,
+        44.4,
+        0.0,
+        5.0,
+        3
+      ],
+      [
+        "B-both-resident",
+        2.1,
+        30.8,
+        0.0,
+        0.0,
+        5.0,
+        3
+      ],
+      [
+        "C-single-shared",
+        2.07,
+        30.7,
+        8.3,
+        0.0,
+        5.0,
+        3
+      ]
+    ]
+  },
+  "understand_public_repos": {
+    "_columns": [
+      "repo",
+      "files",
+      "parse_errors",
+      "internal_recall_pct",
+      "call_edges_internal",
+      "cfgs_total",
+      "cfgs_with_issue"
+    ],
+    "_provenance": {
+      "date": "2026-09-04",
+      "gen_system_commit": "8040c5370805b0ed6e60539344bbf119b5fedaf8",
+      "task_set": "bench/tasks.json (frozen 2026-08-27)",
+      "gpu": "NVIDIA GeForce RTX 4060 Ti, 16380 MiB, 595.71.05"
+    },
+    "rows": [
+      [
+        "cobolcraft",
+        268,
+        0,
+        100,
+        298,
+        330,
+        0
+      ],
+      [
+        "go-chi",
+        84,
+        0,
+        100,
+        1414,
+        411,
+        0
+      ],
+      [
+        "gorilla-mux",
+        17,
+        0,
+        100,
+        288,
+        158,
+        0
+      ],
+      [
+        "spf13-cobra",
+        36,
+        0,
+        100,
+        1001,
+        403,
+        0
+      ]
+    ]
+  }
+}

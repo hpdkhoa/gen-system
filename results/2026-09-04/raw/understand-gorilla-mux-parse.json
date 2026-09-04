@@ -1,0 +1,74 @@
+{
+  "schema": "genbench/v1",
+  "started_at": "2026-09-04T14:57:17.427348176+07:00",
+  "finished_at": "2026-09-04T14:57:17.439141322+07:00",
+  "host": {
+    "os": "linux",
+    "arch": "amd64",
+    "num_cpu": 16,
+    "go_version": "go1.25.0"
+  },
+  "model": {
+    "name": "qwen2.5-coder:14b",
+    "endpoint": "http://localhost:11434"
+  },
+  "project_root": "/home/kai-hoang/Project/git/gen-system/results/2026-09-04/corpus/gorilla-mux",
+  "suites": [
+    {
+      "name": "parse_throughput",
+      "cases": [
+        {
+          "name": "files_found",
+          "pass": true,
+          "got": "17",
+          "want": "\u003e0"
+        },
+        {
+          "name": "parse_errors_zero",
+          "pass": true,
+          "got": "0",
+          "want": "0"
+        }
+      ],
+      "metrics": [
+        {
+          "name": "files_per_sec_go",
+          "value": 1564.013269088575,
+          "unit": "files/s",
+          "higher_is_better": true
+        },
+        {
+          "name": "kb_per_sec_go",
+          "value": 20157.424921843038,
+          "unit": "kB/s",
+          "higher_is_better": true
+        },
+        {
+          "name": "files_total_go",
+          "value": 17,
+          "unit": "files",
+          "higher_is_better": true
+        },
+        {
+          "name": "files_per_sec_overall",
+          "value": 1563.1619013676102,
+          "unit": "files/s",
+          "higher_is_better": true
+        },
+        {
+          "name": "kb_per_sec_overall",
+          "value": 20146.45226498941,
+          "unit": "kB/s",
+          "higher_is_better": true
+        },
+        {
+          "name": "parse_errors",
+          "value": 0,
+          "unit": "errors"
+        }
+      ],
+      "duration_ns": 11790936,
+      "notes": "languages: 1, files: 17, bytes: 224359"
+    }
+  ]
+}
