@@ -1,5 +1,6 @@
 # Build artifacts and caches
 .gen/
+/generator/internal/context/.gen
 *.exe
 # Compiled binaries at the repo root. NOTE: the `bench` binary is deliberately
 # NOT listed — bench/ is a tracked source directory (the measurement drivers),
