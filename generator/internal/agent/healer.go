@@ -193,6 +193,7 @@ func FixTask(task planner.Task, ctx agentctx.Context, rootPath string) error {
 			ErrHint:      classification.Hint,
 			Strategy:     string(classification.Strategy),
 			ExistingCode: existingCode,
+			StyleRules:   stylePromptBlock(), // v26.33: empty when no profile is active
 		}
 
 		// Attempt 2+: add architecture summary + RAG framework docs (Phase 2.2)

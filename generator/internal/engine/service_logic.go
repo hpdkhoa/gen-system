@@ -251,9 +251,64 @@ func sanitizeOperations(idea string, e schema.Entity, all []schema.Entity, ops [
 			op.Helpers = nil
 		}
 		recordOpOutcome(!ok) // WP1: emitted op, stubbed or real
+
+		// v26.33 style gate. Only a body that COMPILES is checked: style is a
+		// second, separate gate that can never turn logic into a stub. A
+		// violation is sent back to the model the way a build error is, with
+		// the rules named, under its own cap (StyleMaxRepairs, at most 2). A
+		// repaired body is accepted only if it still compiles; otherwise the
+		// compiling, off-style body is kept and the violation stays recorded.
+		if ok && StyleGate != nil {
+			if findings := StyleGate(name, op.Body, op.Helpers); findings != "" {
+				recordStyleViolation()
+				fmt.Printf("     [style] %s.%s compiles but breaks team rules:\n%s", e.Name, name, indent(findings))
+				if canRepair {
+					for attempt := 1; attempt <= StyleMaxRepairs; attempt++ {
+						fmt.Printf("     [style] %s.%s style repair attempt %d/%d…\n", e.Name, name, attempt, StyleMaxRepairs)
+						fixed, rerr := repairer.RepairOperation(idea, e, all, op,
+							"STYLE VIOLATIONS (the code compiles; keep the behaviour, fix the style):\n"+findings)
+						if rerr != nil {
+							break
+						}
+						fixed.Name, fixed.HTTPMethod, fixed.Subpath = name, op.HTTPMethod, op.Subpath
+						compiles, _ := operationCompiles(e, n, fixed)
+						clean := compiles && StyleGate(name, fixed.Body, fixed.Helpers) == ""
+						recordStyleRepair(clean)
+						if clean {
+							op = fixed
+							fmt.Printf("     [style] %s.%s repaired ✓\n", e.Name, name)
+							break
+						}
+						if compiles {
+							op = fixed // closer, still off style; feed it into the next attempt
+							findings = StyleGate(name, fixed.Body, fixed.Helpers)
+						}
+					}
+				}
+			}
+		}
 		out = append(out, op)
 	}
 	return out
+}
+
+// StyleGate (v26.33) checks one compiled operation body against the team
+// style profile and returns the rendered findings, or "" when clean. Set by
+// the agent when a profile is active in gate or autofix mode; nil means the
+// gate is off and this file behaves exactly as v26.32. Package-level seam,
+// like the LogicStats counters.
+var StyleGate func(name, body string, helpers []string) string
+
+// StyleMaxRepairs caps op-level style repairs. The agent sets it from the
+// profile; it is never allowed above maxRepairAttempts.
+var StyleMaxRepairs = 1
+
+func indent(s string) string {
+	var b strings.Builder
+	for _, line := range strings.Split(strings.TrimRight(s, "\n"), "\n") {
+		b.WriteString("         " + line + "\n")
+	}
+	return b.String()
 }
 
 // standInModelStruct emits a `model_<Struct>` type for the compile gate that

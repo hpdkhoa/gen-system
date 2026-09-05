@@ -1,6 +1,5 @@
 # Build artifacts and caches
 .gen/
-/generator/internal/context/.gen
 *.exe
 # Compiled binaries at the repo root. NOTE: the `bench` binary is deliberately
 # NOT listed — bench/ is a tracked source directory (the measurement drivers),
@@ -28,6 +27,16 @@
 # committed tasks.sha256. Everything else under results/ is evidence.
 results/*/swebench/repos/
 bench/swebench/tasks.jsonl
+
+# v26.32: two things `git add results/` picked up on the 2026-09-04 box that
+# are not evidence. The genbench binary lib.sh builds into results/<date>/
+# (14 MB, rebuilt by every driver), and the corpus clones run-understand.sh
+# makes for the pinned public repos (each has its own .git, so git turns it
+# into a submodule gitlink and .gitmodules starts pointing at meyfa/CobolCraft).
+# The pinned commits live in bench/tasks.json; the clones are re-creatable.
+results/*/genbench
+results/*/genbench.exe
+results/*/corpus/
 
 # Generated applications produced by `gen idea` / `gen apply`
 /generated-app/

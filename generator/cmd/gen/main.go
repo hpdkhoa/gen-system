@@ -108,6 +108,12 @@ func main() {
 	case "report":
 		cli.WriteReport(os.Args[2:])
 
+	// gen style print | derive <repo> [--out f] | check <root> [--profile f] [--json]
+	//   → v26.33: team style profiles. A profile is used on a run with
+	//     --style <file> [--style-mode off|report|gate|autofix].
+	case "style":
+		cli.Style(os.Args[2:])
+
 	default:
 		fmt.Println("Unknown command:", os.Args[1])
 		printUsage()
@@ -151,6 +157,9 @@ func printUsage() {
 	fmt.Println("                               Write versioned .skill context file")
 	fmt.Println("  report --in <genbench.json> [--in ...] [--skill f] [--out report.html]")
 	fmt.Println("                               Render a standalone HTML validation report")
+	fmt.Println("  style print | derive <repo> [--out f] | check <root> [--profile f] [--json]")
+	fmt.Println("                               Team style profiles (v26.33). On a run:")
+	fmt.Println("                               --style gen-style.json [--style-mode off|report|gate|autofix]")
 	fmt.Println("")
 	fmt.Println("Utilities:")
 	fmt.Println("  deps <path> <profile>        Write dependency files (stable | latest)")

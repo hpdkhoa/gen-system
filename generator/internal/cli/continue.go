@@ -142,6 +142,7 @@ func ContinueFromInput(path, idea string) {
 	// v25.5: activate the JSONL agent trace if --heal-log was passed.
 	defer SetupHealLog()()
 	SetupVerifyUnderstand() // v25.5 step 2: Understand-validates-Generate mode
+	SetupStyle()            // v26.33: team style profile (--style / GEN_STYLE)
 	if err := agent.RunFromPlan(result.Plan, writeDir); err != nil {
 		fmt.Println("❌ Continuation failed:", err)
 		return

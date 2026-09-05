@@ -117,7 +117,21 @@ If the idea implies no extra operations, return {"operations": []}.`,
 		e.Name, e.Name, e.Name, // CRITICAL block (SUBJECT is / record / NO operation)
 		hint,                   // v23.24 positive op-binding hint
 		e.Name,                 // signature %sService
-	)
+	) + styleAddendum(e.Name, bindings[e.Name])
+}
+
+// StyleAddendum (v26.33) returns extra prompt text for one entity: the team
+// style rules and reference code, when a style profile is active. Set by the
+// agent (SetStyle); nil means byte-identical prompts to v26.32. The hints are
+// the operation phrases bound to the entity, so exemplar retrieval can pick
+// team functions with matching verbs. Package-level seam, like SetLogicRun.
+var StyleAddendum func(entity string, hints []string) string
+
+func styleAddendum(entity string, hints []string) string {
+	if StyleAddendum == nil {
+		return ""
+	}
+	return StyleAddendum(entity, hints)
 }
 
 // BuildRepairPrompt asks the model to FIX one operation whose body failed to
@@ -169,5 +183,5 @@ Return ONLY this JSON (one operation, the fixed one):
 		strings.TrimSpace(op.Body),
 		strings.TrimSpace(buildErr),
 		op.Name, op.HTTPMethod, op.Subpath, op.Doc,
-	)
+	) + styleAddendum(e.Name, []string{op.Name})
 }

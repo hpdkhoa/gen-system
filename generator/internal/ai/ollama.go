@@ -53,11 +53,25 @@ func ollamaURL() string {
 	return host + "/api/generate"
 }
 
-// keepAlive returns the OLLAMA_KEEP_ALIVE value (e.g. "30m") or "" if unset, in
-// which case Ollama's own default applies. Kept as a string because Ollama
-// accepts durations or seconds.
-func keepAlive() string {
-	return strings.TrimSpace(os.Getenv("OLLAMA_KEEP_ALIVE"))
+// keepAlive returns the OLLAMA_KEEP_ALIVE value for the request body, or nil
+// when unset (Ollama's own default applies).
+//
+// v26.32: a bare integer such as "-1" (keep forever) or "0" (unload at once)
+// is sent as a JSON NUMBER. Ollama parses keep_alive strings with
+// time.ParseDuration, which rejects "-1" ("missing unit"), so the whole
+// request came back HTTP 400. The 2026-09-04 campaign hit exactly this:
+// strategy B set OLLAMA_KEEP_ALIVE=-1, every model call failed, the planner
+// fell back for all five ideas, and the row measured nothing. Durations such
+// as "30m" are still sent as strings.
+func keepAlive() any {
+	v := strings.TrimSpace(os.Getenv("OLLAMA_KEEP_ALIVE"))
+	if v == "" {
+		return nil
+	}
+	if n, err := strconv.Atoi(v); err == nil {
+		return n
+	}
+	return v
 }
 
 type OllamaRequest struct {
@@ -66,7 +80,7 @@ type OllamaRequest struct {
 	Stream    bool            `json:"stream"`
 	Options   *OllamaOptions  `json:"options,omitempty"`
 	Format    json.RawMessage `json:"format,omitempty"`     // v23.1 round 3: constrain output
-	KeepAlive string          `json:"keep_alive,omitempty"` // v23.21: keep model warm
+	KeepAlive any             `json:"keep_alive,omitempty"` // v23.21: keep model warm; v26.32: number or duration string
 }
 
 // OllamaOptions — deterministic guardrails, plus optional GPU/context knobs.
@@ -137,9 +151,20 @@ func streamEnabled() bool {
 // since the last ResetUsage. genbench snapshots it around a pipeline run to
 // report prompt_tokens / eval_tokens per benchmark task.
 type Usage struct {
-	Requests     int
+	Requests     int // completed requests (a response with token counts)
 	PromptTokens int
 	EvalTokens   int
+	Errors       int // v26.32: failed attempts (transport, HTTP status, model error)
+}
+
+// recordRequestError counts one failed attempt. genbench reads it so a run in
+// which every call failed cannot pass as "measured": zero requests with
+// non-zero errors is the signature of a dead door, and the 2026-09-04
+// strategy B rows had exactly that shape with nothing recording it.
+func recordRequestError() {
+	usageMu.Lock()
+	usage.Errors++
+	usageMu.Unlock()
 }
 
 var (
@@ -197,6 +222,7 @@ func askWithRetryFmt(ctx context.Context, prompt, model string, format json.RawM
 		if err == nil {
 			return resp, nil
 		}
+		recordRequestError()
 		lastErr = err
 		time.Sleep(time.Duration(500*(i+1)) * time.Millisecond)
 	}

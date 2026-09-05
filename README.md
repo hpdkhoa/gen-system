@@ -44,6 +44,7 @@ prove it.
 | Output acceptance | A diff, you decide | Per operation compile gate, then vet, build and test |
 | Reproducibility | Best effort | Hard contract: temperature 0, seed 42, determinism suite |
 | Hardware target | Whatever you have | One 16 GB consumer GPU, on purpose |
+| Team conventions | A system prompt, unchecked | A style profile: rules go into the prompt, and the same rules are checked on the output by the parser, not by a model |
 
 One clarification, because the first draft of this README got it wrong: the flowcharts are
 rendered **for you**, not fed to the model. Nothing today uses a rendered flowchart as retrieval
@@ -90,6 +91,24 @@ Generate a new service:
 gen idea --out ./generated-app "a library lending service with members, books and loans"
 ```
 
+## Team style profiles
+
+A team's conventions can be given to the generator as a file, and checked on the way out.
+
+```bash
+gen style derive ~/code/team-repo --out gen-style.json   # measure an existing repo, with evidence per rule
+gen style print > gen-style.json                          # or start from the default and edit
+gen idea --style gen-style.json --style-mode gate "A support ticket tracker..."
+gen style check ./generated-app/backend --profile gen-style.json
+```
+
+The profile covers naming, folder layout, required and banned patterns, size limits, error
+wrapping, loop style, and imports. The rules go into every prompt the coder model sees. After
+generation, the same rules are checked over the generated tree through the Understand index, with
+no model involved. An operation body that compiles but breaks a rule is sent back to the model
+with the rule named, under its own repair cap. Style never turns logic into a stub; only the
+compile gate does that. `docs/style-gate.md` has the rule list, the modes, and the limits.
+
 ## Benchmarks
 
 The harness, the frozen task set, and the drivers are in `bench/`. The task set is committed
@@ -99,7 +118,13 @@ before any run, so it cannot be tuned to the results.
 ./bench/freeze-env.sh           # record commit, GPU, driver, model list
 ./bench/run-all.sh              # the full campaign
 python3 bench/summarise.py --results results/<date>
+python3 bench/attest.py --results results/<date>   # manifest and attestation for the campaign
 ```
+
+Every campaign ends with an attestation. `results/<date>/ATTESTATION.md` says what ran, on which
+commit and machine. It says which runs were dropped as not measured and why, and what did not run.
+`MANIFEST.sha256` lists every raw file with its SHA-256. Those two files are the certificate a
+published number rests on.
 
 **Numbers are not reproduced in this README.** They live in `benchmarks/results/measured.json` in
 the portfolio repo, each row carrying the date, the commit, the task set, n, and a range. A README

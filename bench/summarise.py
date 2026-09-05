@@ -7,12 +7,12 @@ Reads results/<date>/raw/*.json (+ .vram sidecars, MiB peaks) written by the
 bench/run-*.sh drivers, aggregates the n runs per config (mean / min / max),
 and writes rows into the portfolio's measured.json:
 
-  gen_system.quantization_sweep   [quant, tokens_per_sec, vram_gb, stub_rate_pct,
+  gen_system.quantization_sweep   [quant, tokens_per_sec, vram_gb, ops_total, stub_rate_pct,
                                    op_repair_attempts, heal_attempts, go_test_pass,
                                    n, tok_s_min, tok_s_max]
   gen_system.offload_curve        [gpu_layers, tokens_per_sec, vram_gb, n, tok_s_min, tok_s_max]
   gen_system.streaming            [config, ttft_ms, total_latency_s, n, ttft_min, ttft_max]
-  gen_system.two_model_strategies [strategy, reload_cost_s, tokens_per_sec, stub_rate_pct,
+  gen_system.two_model_strategies [strategy, reload_cost_s, tokens_per_sec, ops_total, stub_rate_pct,
                                    heal_attempts, go_test_pass, n]
   gen_system.understand_public_repos [repo, files, parse_errors, internal_recall_pct,
                                       call_edges_internal, cfgs_total, cfgs_with_issue]
@@ -83,6 +83,23 @@ def r1(v):
     return None if v is None else round(v, 1)
 
 
+def pipeline_measured(gp):
+    """v26.32: a gen_pipeline suite that never completed a model request did
+    not measure generation quality, whatever build and test say (the fallback
+    schema builds green). Such a run is dropped from the quality columns and
+    counted in the invalid column instead of averaging in as 0 percent stubs.
+    Rule: ops_total == 0 AND model_requests == 0 (works for raw files written
+    before ideas_no_model_contact existed). Raw files carrying the newer
+    ideas_no_model_contact metric are dropped when any idea had no contact."""
+    if gp is None:
+        return False
+    if (metric(gp, "ideas_no_model_contact") or 0) > 0:
+        return False
+    if (metric(gp, "ops_total") or 0) == 0 and (metric(gp, "model_requests") or 0) == 0:
+        return False
+    return True
+
+
 # ───────────────────────────── table builders ────────────────────────────────
 
 def quant_rows(raw):
@@ -96,12 +113,19 @@ def quant_rows(raw):
             v = vram_gb(p)
             if v:
                 vrams.append(v)
-        stubs, repairs, heals, gtp, n_pipe = [], [], [], [], 0
+        stubs, repairs, heals, gtp, ops, n_pipe, invalid = [], [], [], [], [], 0, 0
         for p, run in load_runs(raw, rf"quant-{re.escape(label)}-genpipe-run\d+\.json"):
             gp = suite(run, "gen_pipeline")
             if not gp:
                 continue
+            if not pipeline_measured(gp):
+                invalid += 1
+                v = vram_gb(p)
+                if v:
+                    vrams.append(v)
+                continue
             n_pipe += 1
+            ops.append(metric(gp, "ops_total"))
             stubs.append(metric(gp, "stub_rate_pct"))
             repairs.append(metric(gp, "op_repair_attempts"))
             heals.append(metric(gp, "heal_attempts_total"))
@@ -113,8 +137,8 @@ def quant_rows(raw):
             continue
         tok_mean, tok_min, tok_max = agg(toks)
         rows.append([label, tok_mean, max(vrams) if vrams else None,
-                     agg(stubs)[0], agg(repairs)[0], agg(heals)[0], agg(gtp)[0],
-                     max(len(toks), n_pipe), tok_min, tok_max])
+                     agg(ops)[0], agg(stubs)[0], agg(repairs)[0], agg(heals)[0], agg(gtp)[0],
+                     max(len(toks), n_pipe), tok_min, tok_max, invalid])
     return rows
 
 
@@ -170,13 +194,18 @@ def strategy_rows(raw):
                      for m in [re.match(r"strategy-(.+)-genpipe-run\d+\.json", p.name)] if m})
     rows = []
     for label in labels:
-        stubs, heals, gtp, toks = [], [], [], []
+        stubs, heals, gtp, toks, ops = [], [], [], [], []
         n = 0
+        invalid = 0
         for p, run in load_runs(raw, rf"strategy-{re.escape(label)}-genpipe-run\d+\.json"):
             gp = suite(run, "gen_pipeline")
             if not gp:
                 continue
+            if not pipeline_measured(gp):
+                invalid += 1
+                continue
             n += 1
+            ops.append(metric(gp, "ops_total"))
             stubs.append(metric(gp, "stub_rate_pct"))
             heals.append(metric(gp, "heal_attempts_total"))
             gtp.append(metric(gp, "go_test_pass"))
@@ -188,10 +217,10 @@ def strategy_rows(raw):
             first, second = metric(d, "first_load_ms"), metric(d, "second_load_ms")
             if first is not None:
                 reload_s = round((first - (second or 0)) / 1000, 2)
-        if n == 0 and not toks:
+        if n == 0 and not toks and invalid == 0:
             continue
-        rows.append([label, reload_s, agg(toks)[0], agg(stubs)[0],
-                     agg(heals)[0], agg(gtp)[0], n])
+        rows.append([label, reload_s, agg(toks)[0], agg(ops)[0], agg(stubs)[0],
+                     agg(heals)[0], agg(gtp)[0], n, invalid])
     return rows
 
 
@@ -225,8 +254,8 @@ def understand_rows(raw):
 
 TABLES = [
     ("quantization_sweep",
-     ["quant", "tokens_per_sec", "vram_gb", "stub_rate_pct", "op_repair_attempts",
-      "heal_attempts", "go_test_pass", "n", "tok_s_min", "tok_s_max"],
+     ["quant", "tokens_per_sec", "vram_gb", "ops_total", "stub_rate_pct", "op_repair_attempts",
+      "heal_attempts", "go_test_pass", "n", "tok_s_min", "tok_s_max", "runs_not_measured"],
      quant_rows),
     ("offload_curve",
      ["gpu_layers", "tokens_per_sec", "vram_gb", "n", "tok_s_min", "tok_s_max"],
@@ -235,8 +264,8 @@ TABLES = [
      ["config", "ttft_ms", "total_latency_s", "n", "ttft_min", "ttft_max"],
      streaming_rows),
     ("two_model_strategies",
-     ["strategy", "reload_cost_s", "tokens_per_sec", "stub_rate_pct",
-      "heal_attempts", "go_test_pass", "n"],
+     ["strategy", "reload_cost_s", "tokens_per_sec", "ops_total", "stub_rate_pct",
+      "heal_attempts", "go_test_pass", "n", "runs_not_measured"],
      strategy_rows),
     ("understand_public_repos",
      ["repo", "files", "parse_errors", "internal_recall_pct",

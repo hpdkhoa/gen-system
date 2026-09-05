@@ -21,6 +21,14 @@ type LogicStats struct {
 	OpsStubbed      int // of those, how many degraded to a `not implemented` stub
 	RepairAttempts  int // op-level model repair round-trips (maxRepairAttempts cap)
 	RepairSuccesses int // repair attempts whose result then compiled
+
+	// v26.33: the style gate, separate from the compile gate. An operation
+	// that compiles but breaks a team rule is a violation; a style repair
+	// round-trip is counted like a compile repair; a success is a repaired
+	// body that both compiles and is clean. Style never stubs.
+	StyleViolations     int
+	StyleRepairAttempts int
+	StyleRepairSuccess  int
 }
 
 var (
@@ -56,6 +64,21 @@ func recordRepairAttempt(success bool) {
 	logicStats.RepairAttempts++
 	if success {
 		logicStats.RepairSuccesses++
+	}
+	logicStatsMu.Unlock()
+}
+
+func recordStyleViolation() {
+	logicStatsMu.Lock()
+	logicStats.StyleViolations++
+	logicStatsMu.Unlock()
+}
+
+func recordStyleRepair(success bool) {
+	logicStatsMu.Lock()
+	logicStats.StyleRepairAttempts++
+	if success {
+		logicStats.StyleRepairSuccess++
 	}
 	logicStatsMu.Unlock()
 }

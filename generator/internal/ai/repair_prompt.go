@@ -33,6 +33,10 @@ type RepairCtx struct {
 	// Attempt 3: related file content
 	// key = relative file path, value = file content
 	RelatedFiles map[string]string // nil/empty = omit from prompt
+
+	// v26.33: team style rules (style.PromptBlock) when a profile is active,
+	// so a repaired body is not repaired into a style violation. Empty = omit.
+	StyleRules string
 }
 
 // BuildRepairPrompt constructs the AI repair prompt from a RepairCtx.
@@ -77,6 +81,11 @@ func BuildRepairPrompt(ctx RepairCtx) string {
 				filesAdded++
 			}
 		}
+	}
+
+	if ctx.StyleRules != "" {
+		b.WriteString("\n# TEAM STYLE RULES (the fixed body must follow these too):\n")
+		b.WriteString(ctx.StyleRules)
 	}
 
 	b.WriteString("\nSTRICT RULES:\n")

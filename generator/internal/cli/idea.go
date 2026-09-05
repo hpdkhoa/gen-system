@@ -69,6 +69,7 @@ func IdeaFromInput(input string, useV2 bool, outDir string) {
 	// v25.5: activate the JSONL agent trace if --heal-log was passed.
 	defer SetupHealLog()()
 	SetupVerifyUnderstand() // v25.5 step 2: Understand-validates-Generate mode
+	SetupStyle()            // v26.33: team style profile (--style / GEN_STYLE)
 
 	if err := agent.RunFromPlan(plan, outDir); err != nil {
 		fmt.Println("\n❌ Agent run completed with errors:", err)

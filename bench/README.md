@@ -34,7 +34,9 @@ Or piecewise (each writes raw JSON to `results/<date>/raw/`):
 | `run-offload.sh` | offload_curve (tok/s + VRAM vs OLLAMA_NUM_GPU) | ~30 min |
 | `run-quant-sweep.sh` | quantization_sweep (genpipe 5 ideas + tok/s, n=3 per quant + production) | hours |
 | `run-strategies.sh` | two_model_strategies (A sequential+keepalive, B both resident, C single shared, n=3) | hours |
+| `swebench/run_swebench_localize.sh` | swebench_verified_localization (recall, not a solve rate; see below). `run-all.sh` runs it with `SWEBENCH_LIMIT` tasks (default 60, `0` = all 500, `skip` = leave out) | minutes for 60 tasks, hours for 500 |
 | `summarise.py` | measured.rows.json → measured.json (with `--measured`) | seconds |
+| `attest.py` | MANIFEST.sha256 + ATTESTATION.md: what ran, what did not, what was dropped (v26.32) | seconds |
 
 ## What changed vs the old quant_sweep.sh (repo root)
 
@@ -59,3 +61,22 @@ Every table `summarise.py` writes carries `_provenance` (date, gen-system
 commit, task set, GPU) and per-row `n` plus min/max where the raw data has
 them. A config with no raw data gets no row. If a value is null, the harness
 did not measure it. That is intended behaviour, not a bug to paper over.
+
+**Runs that measured nothing are dropped, not averaged (v26.32).** A `genpipe` run in
+live mode that completed zero model requests carries build and test results from the
+offline fallback schema, which say nothing about the model. `summarise.py` leaves such
+runs out of the quality columns and counts them in `runs_not_measured`. `genpipe` itself
+marks every such idea as a failed case with `NOT MEASURED` in the note. The 2026-09-04
+campaign found this the hard way: strategy B set `OLLAMA_KEEP_ALIVE=-1`, the door sent
+it as the string "-1", Ollama rejected every request, and the row would have read as a
+0 percent stub rate. The door now sends bare integers as numbers.
+
+## Attestation
+
+`bench/attest.py --results results/<date>` writes two files. `MANIFEST.sha256` lists every
+raw file with its hash. `ATTESTATION.md` states the environment, the task set hash, which
+driver produced how many raw files, the runs dropped as not measured, and the row count of
+every table. It carries the SWE-bench section with its boundary next to the number. It ends
+with the standing caveats: `go_test_pass` is 5 of 5 by construction, `heal_attempts` is 0
+because the op gate stubs first, and pinned sampling still varies across runs. `run-all.sh`
+runs it last. Commit both files with the results.

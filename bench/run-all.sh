@@ -8,7 +8,8 @@
 #   3. offload     (WP2)
 #   4. quant sweep (WP1, n=3 — the long one)
 #   5. strategies  (WP3, n=3)
-#   6. summarise   (WP4 — rows with provenance)
+#   6. swebench    (localization recall, SWEBENCH_LIMIT tasks; v26.33)
+#   7. summarise   (WP4 — rows with provenance) + attest
 #
 # Set MEASURED=/path/to/my-portfolio/benchmarks/results/measured.json to merge
 # rows directly; omit it to review results/<date>/measured.rows.json first.
@@ -34,9 +35,22 @@ fi
 "${HERE}/run-quant-sweep.sh"
 "${HERE}/run-strategies.sh"
 
+# v26.33: SWE-bench Verified localization recall (NOT a solve rate; see
+# bench/swebench/README.md). SWEBENCH_LIMIT tasks, default 60; 0 = all 500
+# (hours). SWEBENCH_LIMIT=skip leaves it out.
+SWEBENCH_LIMIT="${SWEBENCH_LIMIT:-60}"
+if [ "${SWEBENCH_LIMIT}" != "skip" ]; then
+  "${HERE}/swebench/run_swebench_localize.sh" --limit "${SWEBENCH_LIMIT}"
+fi
+
 python3 "${HERE}/summarise.py" --results "${RESULTS}" ${MEASURED:+--measured "${MEASURED}"}
+if [ "${SWEBENCH_LIMIT}" != "skip" ]; then
+  python3 "${HERE}/swebench/summarise_swebench.py" --results "${RESULTS}" ${MEASURED:+--measured "${MEASURED}"}
+fi
+python3 "${HERE}/attest.py" --results "${RESULTS}"   # v26.32: manifest + attestation
 
 echo
 echo "Campaign complete. Raw: ${RAW}"
+echo "Attestation: ${RESULTS}/ATTESTATION.md (what ran, what did not, what was dropped)"
 echo "Rows: ${RESULTS}/measured.rows.json"
 echo "Commit the results directory, then run the portfolio's tools/fill_portfolio.py."

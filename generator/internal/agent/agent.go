@@ -22,6 +22,7 @@ import (
 	agentctx "gen-system/generator/internal/context"
 	"gen-system/generator/internal/planner"
 	"gen-system/generator/internal/safety"
+	"gen-system/generator/internal/style"
 )
 
 const maxValidationRounds = 3
@@ -61,6 +62,8 @@ func RunFromPlan(plan planner.Plan, rootPath string) error {
 	// never leaks into this one.
 	verifyHalted = false
 	LastVerifyReport = VerifyReport{}
+	styleHalted = false
+	LastStyleReport = style.Report{}
 
 	// Phase 4-B: configure business-logic generation for this run. The idea text
 	// comes from the plan goal; the provider is chosen by GEN_LOGIC (replay by
@@ -181,6 +184,11 @@ func RunFromPlan(plan planner.Plan, rootPath string) error {
 		} else {
 			LastVerifyReport = rep
 		}
+
+		// v26.33: the team style gate, after the structural one. Same
+		// contract: report to the human always; halt only in gate mode on
+		// error findings; never modify in report mode.
+		LastStyleReport, styleHalted = runStyleStage(backendPath, rootPath, ctx)
 	}
 
 	// ── PHASE 5: OPTIONAL FRONTEND / DOCKER GATES ─────────────────

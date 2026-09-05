@@ -1,111 +1,141 @@
-# PUBLISH — the whole path from here to a public repo
+# PUBLISH: from the v26.33 zip to a public repo, with a fresh campaign
 
-One document, in order. Everything before Stage 4 is reversible. Nothing is
-public until Stage 5, and Stage 4 is the gate that decides whether you publish
-at all.
+One document, in order, written for a rerun. Everything before Stage 5 is reversible. Nothing
+is public until Stage 6, and Stage 5 is the gate that decides whether you publish at all.
 
-Companion docs, all in the repo after Stage 0: `bench/README.md` (what each
-driver measures), `docs/` (three engineering docs), `README.md` (the public
-front page), `out/README.md` (move/execute detail).
+Where things are: `bench/README.md` (what each driver measures), `bench/swebench/README.md`
+(the SWE-bench boundary), `docs/` (four engineering docs, including `style-gate.md`),
+`README.md` (the public front page), `out/README.md` (move and execute detail),
+`out/RESULTS-REVIEW.md` (what the 2026-09-04 upload got wrong and why).
+
+What changed since the last runbook, in one list:
+
+- Strategy B in the 2026-09-04 campaign measured nothing. A keep alive encoding bug made every
+  request fail. The door, the pipeline and the aggregator are fixed. B must be rerun.
+- SWE-bench never ran. The driver had a line ending bug in the task list. Fixed, and the step is
+  now inside `run-all.sh`.
+- `bench/attest.py` writes the certificate for a campaign. `run-all.sh` runs it last.
+- `results/` no longer picks up the genbench binary or the corpus clones.
+- Team style profiles exist (v26.33). Nothing measures them yet by default; Stage 4 has an
+  optional run.
 
 ---
 
-## Stage 0 — Put the files where they belong · 15 min
+## Stage 0. Put the files where they belong (15 min)
 
 ```bash
 cd ~/code/gen-system
-unzip -o /path/to/out/gen-system-main-v26.26.zip -d /tmp/gs
+unzip -o /path/to/out/gen-system-main-v26.33.zip -d /tmp/gs
 cp -r /tmp/gs/gen-system-main/. .
 git status                       # review; nothing should surprise you
 ```
 
+The zip does not carry `results/`, `bench/env.json` or `bench/swebench/tasks.jsonl`. Your results
+stay yours, the environment is frozen again in Stage 2, and the task list is re-fetched and
+checked against the committed `tasks.sha256`.
+
 ```bash
 P=~/code/my-portfolio
-C=/path/to/out/changes/my-portfolio
-cp $C/tools/fill_portfolio.py                          $P/tools/
-cp $C/benchmarks/README.md                             $P/benchmarks/
-cp $C/writeups/01-hieuluat-retrieval-optimization.md   $P/writeups/
-cp $C/writeups/02-gen-system-inference-optimization.md $P/writeups/
-cp $C/writeups/03-reproducible-benchmarking.md         $P/writeups/
-cp $C/projects/gen-system/README.md                    $P/projects/gen-system/
+cp -r /path/to/out/changes/my-portfolio/. $P/
 ```
+
+That copies writeups 02 and 03 (markdown and regenerated html), the gen-system project page, and
+`tools/fill_portfolio.py`, which now renders the SWE-bench tables. `measured.json` is deliberately
+not in `changes/`, so your filled rows cannot be overwritten.
+
+```bash
+cp /path/to/out/changes/gen-system/results-2026-09-04/* ~/code/gen-system/results/2026-09-04/
+```
+
+That adds the attestation, the manifest and the corrected `measured.rows.json` to the campaign
+you already ran.
 
 ```bash
 mkdir -p ~/code/gen-system-refbuild && cd ~/code/gen-system-refbuild
-unzip /path/to/out/refbuild.zip      # BESIDE the repo, never inside it
+unzip -o /path/to/out/refbuild.zip     # BESIDE the repo, never inside it
 ```
-
-Never unzip anything over the portfolio. The portfolio zips carry an empty
-`measured.json` and would erase your filled rows.
 
 ---
 
-## Stage 1 — Make the repo safe to publish · 30 min
+## Stage 1. Make the repo safe to publish (30 min)
 
-This stage exists because publishing is not undoable. Three things in the tree
-you would not want to ship:
+Publishing is not undoable. Five things in the tree must not ship.
 
-**1817 cache files.** Five `.gen/` directories hold AST caches and one belief
-store left over from test runs. The new `.gitignore` (in the v26.26 zip)
-excludes them. If any were already committed, drop them from the index:
+**The cache directories.** `.gitignore` excludes `.gen/`. If any were committed earlier:
 
 ```bash
 cd ~/code/gen-system
 git rm -r --cached .gen generator/internal/*/.gen 2>/dev/null || true
-git status --short | head
 ```
 
-**`guide/GEN_SYSTEM_CAPABILITY_AND_VC_ANALYSIS.md`.** A fundraising-readiness
-document: market position, competitive assessment, and whether to take this to
-YC or Antler, written deliberately critically. That is internal strategy. In a
-public repo it becomes a list of your product's weaknesses in your own words,
-quotable out of context, dated June 2026. **Recommendation: keep it out of the
-public tree.** The honest-limits material you *do* want public is already in
-`README.md` under Limitations.
+**The genbench binary and the corpus clones inside `results/`.** `git add results/` on
+2026-09-04 picked up the 14 MB binary and turned the CobolCraft clone into a submodule. Both are
+ignored now; the index still holds them:
+
+```bash
+git rm --cached -r results/2026-09-04/corpus results/2026-09-04/genbench 2>/dev/null || true
+git rm --cached .gitmodules 2>/dev/null || true; rm -f .gitmodules
+```
+
+**`PUBLISH.md` in the repo root.** It is this internal runbook. It does not belong in the tree:
+
+```bash
+git rm --cached PUBLISH.md 2>/dev/null || true; rm -f PUBLISH.md
+```
+
+**`guide/GEN_SYSTEM_CAPABILITY_AND_VC_ANALYSIS.md`.** Internal strategy, written deliberately
+critically. In a public repo it becomes a list of the product's weaknesses in your own words.
+Keep it out. The honest limits you want public are already in `README.md` under Limitations.
 
 ```bash
 git rm --cached guide/GEN_SYSTEM_CAPABILITY_AND_VC_ANALYSIS.md 2>/dev/null || true
 echo 'guide/GEN_SYSTEM_CAPABILITY_AND_VC_ANALYSIS.md' >> .gitignore
 ```
 
-Read the other four `guide/*.md` yourself before publishing. They were written
-as internal manuals and are probably fine, but I have only listed them.
+Read the other `guide/*.md` yourself before publishing. They were internal manuals.
 
-**`results/` is deliberately NOT ignored.** The raw JSON is the evidence a
-published number rests on, and the commit carrying it dates the run.
-
-One placeholder is still open:
+**One placeholder.**
 
 ```bash
 grep -n 'TODO repo url' README.md      # fill in the real clone URL
 ```
 
+`results/` itself is deliberately not ignored. The raw JSON is the evidence a published number
+rests on, and the commit that carries it dates the run.
+
+```bash
+git status --short | head -40    # nothing under results/ should be a binary or a clone
+```
+
 ---
 
-## Stage 2 — Verify, freeze, commit · 30 min
+## Stage 2. Verify, freeze, commit (30 min)
 
 ```bash
 cd ~/code/gen-system
 go build ./... && go test ./...
 ```
 
-Expected: **25 packages ok, 0 failures.** That is the verified state on Windows;
-Linux should match. A failure here is new drift, worth understanding before you
-spend hours measuring.
+Expected: **26 packages ok, 0 failures.** That is the verified state on Windows at v26.33
+(25 packages plus the new style package). A failure on Linux is new drift; understand it before
+spending hours measuring.
 
 ```bash
 ./bench/freeze-env.sh            # writes bench/env.json: commit, GPU, driver, models
-git add .gitignore bench/ docs/ generator/ LICENSE NOTICE README.md
-git commit -m "bench: WP1/WP2 instrumentation, frozen task set, docs, Apache-2.0"
+git add -A
+git commit -m "v26.33: keep alive fix, not measured runs, attestation, SWE-bench in run-all, style profiles"
+./bench/freeze-env.sh            # again, now that the tree is clean, so working_tree_dirty is false
+git add bench/env.json && git commit -m "bench: freeze environment at a clean tree"
 ```
 
-**Commit before you measure.** `run-all.sh` refuses a dirty tree, and the commit
-timestamp is the proof the task set was fixed before the results existed. That
-proof is the entire argument of writeup 03.
+The double freeze is on purpose. The 2026-09-04 environment file says `working_tree_dirty: true`,
+and the attestation had to print that. This time the file must say false. `run-all.sh` refuses a
+dirty tree, and the commit order is the proof the task set was fixed before the results existed.
+That proof is the whole argument of writeup 03.
 
 ---
 
-## Stage 3 — Run the campaign · most of a day
+## Stage 3. Run the campaign (most of a day)
 
 ```bash
 ollama pull qwen3:14b
@@ -113,11 +143,19 @@ ollama pull qwen2.5-coder:14b
 ollama pull deepseek-coder-v2:16b-lite-instruct-q4_K_M
 ollama pull deepseek-coder-v2:16b-lite-instruct-q5_K_M
 ollama pull deepseek-coder-v2:16b-lite-instruct-q8_0
+```
 
+One command runs everything, in dependency order, and ends with the summaries and the attestation:
+
+```bash
 MEASURED=~/code/my-portfolio/benchmarks/results/measured.json ./bench/run-all.sh
 ```
 
-Or piecewise, fastest feedback first:
+`run-all.sh` now includes the SWE-bench step. `SWEBENCH_LIMIT` picks how many of the 500
+Verified tasks it takes: 60 by default (minutes), `0` for all 500 (hours, and 12 repository
+clones on disk), `skip` to leave it out.
+
+Or piecewise, fastest feedback first. Every driver writes raw JSON into `results/<date>/raw/`.
 
 | Command | Fills | Rough time |
 |---|---|---|
@@ -125,45 +163,93 @@ Or piecewise, fastest feedback first:
 | `./bench/run-stream.sh` | TTFT, stream on vs off | minutes |
 | `./bench/run-offload.sh` | tok/s and VRAM vs `OLLAMA_NUM_GPU` | ~30 min |
 | `./bench/run-quant-sweep.sh` | Q4/Q5/Q8 plus the production pair, n=3 | hours |
-| `./bench/run-strategies.sh` | strategies A, B, C on the frozen task set | hours |
-| `python3 bench/summarise.py --results results/<date> --measured $MEASURED` | every table | seconds |
+| `./bench/run-strategies.sh` | strategies A, B, C on the frozen task set. **B must be rerun; the 2026-09-04 B rows measured nothing** | hours |
+| `./bench/swebench/run_swebench_localize.sh --limit 60` | localization recall on SWE-bench Verified. Not a solve rate; see its README | minutes for 60, hours for all 500 |
+| `python3 bench/summarise.py --results results/<date> --measured $MEASURED` | every gen-system table | seconds |
+| `python3 bench/swebench/summarise_swebench.py --results results/<date> --measured $MEASURED` | the three SWE-bench tables | seconds |
+| `python3 bench/attest.py --results results/<date>` | `MANIFEST.sha256` and `ATTESTATION.md`, the certificate | seconds |
 
-Start with `run-understand.sh`. No GPU, and it exercises the parser path end to
-end, so a broken setup shows up in minutes instead of after the sweep.
+Start with `run-understand.sh`. No GPU, and it exercises the parser path end to end, so a broken
+setup shows up in minutes instead of after the sweep.
+
+**If you only rerun what is missing.** The 2026-09-04 campaign already has understand, stream,
+offload and the quant sweep. A results directory is dated, so a partial rerun on a new day makes
+a new directory with only the new drivers. That is fine for the strategies and SWE-bench tables,
+because `summarise.py` replaces one table at a time in `measured.json`. Run these, in this order:
 
 ```bash
-git add results/ && git commit -m "bench: <date> campaign raw results"
+./bench/run-strategies.sh
+./bench/swebench/run_swebench_localize.sh --limit 60
+python3 bench/summarise.py --results results/$(date +%F) --measured $MEASURED
+python3 bench/swebench/summarise_swebench.py --results results/$(date +%F) --measured $MEASURED
+python3 bench/attest.py --results results/$(date +%F)
+```
+
+The quant sweep and offload rows in `measured.json` keep their 2026-09-04 provenance. The
+attestation for the new directory will list the drivers that did not run that day. That is true,
+and it is what a reader should see. If you would rather
+have one directory with everything at one commit, run `run-all.sh` and accept the day.
+
+Then commit the evidence:
+
+```bash
+git add results/ && git commit -m "bench: <date> campaign raw results, summaries, attestation"
+git log --format='%h %ad %s' --date=short -- bench/tasks.json results/   # tasks.json must come first
 ```
 
 ---
 
-## Stage 4 — GATE: is this publishable? · 1 hour
+## Stage 4. Optional: measure the style gate (1 hour, GPU)
 
-Do not skip to Stage 5. Every line is from PLAN.md's Definition of Done.
+Nothing in the portfolio quotes a style number, and nothing has to. If you want one run on
+record so a reader can see the feature produce metrics:
+
+```bash
+cd ~/code/gen-system
+gen style print > bench/gen-style.json        # the default profile; edit if you like, then commit it
+git add bench/gen-style.json && git commit -m "bench: default style profile for the gate run"
+GEN_LOGIC=ollama OLLAMA_MODEL_PLAN=qwen3:14b OLLAMA_MODEL_CODE=qwen2.5-coder:14b \
+  results/$(date +%F)/genbench genpipe --ideas bench/tasks.json --model qwen2.5-coder:14b \
+  --style bench/gen-style.json --style-mode gate \
+  --out results/$(date +%F)/raw/style-gate-genpipe-run1.json
+```
+
+The raw JSON carries `ops_style_violations`, `ops_style_repair_attempts`, `ops_style_repaired`,
+`style_findings`, `style_errors`, `style_clean_ideas`. `summarise.py` does not build a table
+for them yet; if the numbers are worth a paragraph, write the paragraph from the raw file and
+cite it. Do not add a table without an aggregator behind it.
+
+---
+
+## Stage 5. GATE: is this publishable? (1 hour)
+
+Do not skip to Stage 6. Every line is from PLAN.md's Definition of Done, plus three added since.
 
 ```bash
 cd ~/code/my-portfolio
 python3 tools/fill_portfolio.py --gen-system ~/code/gen-system --hieuluat ~/code/hieuluat
-python3 tools/fill_portfolio.py --check          # must list nothing unfilled
+python3 tools/fill_portfolio.py --check          # must list nothing unfilled that you care about
+python3 tools/regen_writeup_html.py              # the html twins carry the tables only after this
 ```
 
 | # | Gate | How to check |
 |---|---|---|
-| 1 | Writeup 02 tables have rows, n and range, or say future work | Open §6; tables inject between the `measured:gen` markers |
-| 2 | **At least one metric differs across quants** | Compare `stub_rate_pct` and `op_repair_attempts` across Q4/Q5/Q8 |
-| 3 | At least one honest loss reported | Already true twice: writeup 01 §6 (rerank), writeup 02 §4 (broken metric) |
+| 1 | Writeup 02 tables have rows, n and range, or say future work | Open section 6; tables inject between the `measured:gen` markers |
+| 2 | **At least one metric differs across quants** | Passed on 2026-09-04: stub rate near 99, 82, 74 and 44 percent across Q4, Q5, Q8 and production, n=3. Check again after any rerun. |
+| 3 | At least one honest loss reported | True twice: writeup 01 section 6 (rerank), writeup 02 section 4 (broken metric); now a third time in section 6 (strategy B) |
 | 4 | No template text | `grep -rn '_readme\|WebAssembly-free\|Replace every' ~/code/my-portfolio` returns nothing |
-| 5 | CV, story, README, portfolio, reference agree | All done except the CV — Stage 6 |
+| 5 | CV, story, README, portfolio, reference agree | All done except the CV. See Stage 7 |
 | 6 | Reference 100% annotated | In refbuild: `extract.py` then `check.py` must exit 0 |
+| 7 | **No row rests on a run that measured nothing** | `grep -n 'runs not measured' writeups/02-*.md`; every value in that column must be 0 |
+| 8 | **The attestation exists and matches** | `results/<date>/ATTESTATION.md` and `MANIFEST.sha256` are committed; `sha256sum -c results/<date>/MANIFEST.sha256` from inside `results/<date>/` passes |
+| 9 | **SWE-bench is labelled** | The SWE-bench tables in writeup 02 carry "not a solve rate" in their caption, and the text never puts the recall next to the DeepDiscovery solve rate |
 
-**Gate 2 is the one that matters.** If stub rate and repair counts are identical
-across every quant, the new metric still is not measuring anything and you are
-back where P1 started. Stop and tell me if that happens — it is a real finding,
-not a formality, and it changes what writeup 02 should say.
+Gates 7 to 9 are the ones added since the last runbook. A row with a null quality cell and a
+non zero not measured count has not been measured. It must not be described as measured.
 
 ---
 
-## Stage 5 — Publish · 1 hour
+## Stage 6. Publish (1 hour)
 
 Repo first, then portfolio, then the post that links to both.
 
@@ -174,33 +260,36 @@ git remote add origin <your repo url>
 git push -u origin main
 ```
 
-Flip it public in GitHub settings. On the public page, confirm `LICENSE` renders
-as Apache-2.0 and no `.gen/` directory appears.
+Flip it public in GitHub settings. On the public page, confirm `LICENSE` renders as Apache-2.0,
+no `.gen/` directory appears, no `PUBLISH.md` appears, and `results/<date>/` holds JSON and the
+two attestation files only.
+
+Do not delete the writeup `.html` files. `index.html` links to them. They are rebuilt from the
+`.md` sources by `tools/regen_writeup_html.py`, which ran in Stage 5.
 
 ```bash
 cd ~/code/my-portfolio
-rm writeups/*.html                  # .md files changed; twins are stale, GitHub renders .md
 git add -A && git commit -m "portfolio: measured results, corrected claims" && git push
 ```
 
-**The launch post** is `out/changes/drafts/drafts-launch-story.md`. The voice is
-final. Three things need your hand:
+**The launch post** is `out/changes/drafts/drafts-launch-story.md`. The voice is final. Three
+things need your hand:
 
-- swap the placeholder repo link for the real one
-- check the swap-cost figure in "The 16 GB problem" against what the run actually
-  produced, or cut the number and link the table instead
-- the determinism paragraph is written as a confession. Read it once more and
-  decide you are happy standing behind it. It is the strongest paragraph in the
-  piece, and it is about a bug you shipped.
+- Swap the placeholder repo link for the real one.
+- Check the swap cost figure in "The 16 GB problem" against the strategies table from the rerun.
+  If it does not match, cut the number and link the table instead.
+- The determinism paragraph is written as a confession. Read it once more and decide you are
+  happy standing behind it. It is the strongest paragraph in the piece, and it is about a bug you
+  shipped.
 
 ---
 
-## Stage 6 — The four things only you can decide
+## Stage 7. The four things only you can decide
 
 | Decision | Where | Recommendation |
 |---|---|---|
-| **The CV** | Not in this directory | Three corrections: flowcharts are rendered for human review, not fed to the model; the stub path exists and the repair caps are 2 (operation) and 3 (task); "sequential scheduling with keep-alive" is Ollama keep-alive plus two roles plus measurement, not a scheduler. Gate 5 fails until this is done. |
-| **The reranker** | writeup 01 §6, `[TODO]` | Drop it. 384 ms for zero measured gain, and say you removed it. That reads better than leaving it on. |
+| **The CV** | Not in this directory | Three corrections: flowcharts are rendered for human review, not fed to the model; the stub path exists and the repair caps are 2 (operation) and 3 (task); "sequential scheduling with keep alive" is Ollama keep alive plus two roles plus measurement, not a scheduler. Gate 5 fails until this is done. |
+| **The reranker** | writeup 01 section 6, `[TODO]` | Drop it. 384 ms for zero measured gain, and say you removed it. That reads better than leaving it on. |
 | **The VC analysis doc** | `guide/` | Keep it out of the public tree (Stage 1). |
 | **Repo URL** | `README.md` quickstart | Only you know it. |
 
@@ -212,11 +301,13 @@ final. Three things need your hand:
 cd ~/code/gen-system
 go build ./... && go test ./...
 ./bench/freeze-env.sh && git add -A && git commit -m "bench: freeze environment and task set"
-./bench/run-understand.sh
-python3 bench/summarise.py --results results/$(date +%F)
+./bench/run-strategies.sh                                  # the one table that is wrong today
+./bench/swebench/run_swebench_localize.sh --limit 60       # the one table that is missing today
+python3 bench/summarise.py --results results/$(date +%F) --measured $MEASURED
+python3 bench/swebench/summarise_swebench.py --results results/$(date +%F) --measured $MEASURED
+python3 bench/attest.py --results results/$(date +%F)
 ```
 
-That produces the Understand table: four public repos at pinned commits,
-including 30k lines of third-party COBOL. It is the most defensible artifact in
-the set, because anyone can re-run it and get your number. The GPU sweeps can
-follow later.
+The strategies run is the long part. Skip it if the hour is real, and run SWE-bench alone: it
+needs no GPU, it is the table that is absent, and its attestation says plainly that nothing else
+ran that day.

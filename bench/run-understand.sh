@@ -23,6 +23,7 @@ for t in json.load(open(sys.argv[1]))["understand_targets"]:
 PY
 
 while IFS=$'\t' read -r name url commit lang; do
+  name="${name//$'\r'/}"; url="${url//$'\r'/}"; commit="${commit//$'\r'/}"; lang="${lang//$'\r'/}"  # v26.32: CRLF safe
   echo "════ understand: ${name} (${lang}) @ ${commit} ════"
   dest="${CORPUS_DIR}/${name}"
   if [ ! -d "${dest}" ]; then

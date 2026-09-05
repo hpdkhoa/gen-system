@@ -101,9 +101,21 @@ func GenPipeline(ideas []string) Suite {
 		buildsPassed, testsPassed int
 		promptTokens, evalTokens  int
 		modelRequests             int
+		modelErrors               int
+		noContactIdeas            int
 		plannerFallbacks          int
 		wallTotal                 time.Duration
+		// v26.33 style gate counters (zero unless a profile is active)
+		styleViolations, styleRepairs, styleRepairOK int
+		styleFindings, styleErrors, styleClean        int
 	)
+	// v26.32: in live mode an idea that produced zero completed model
+	// requests was not measured, whatever the build says. The 2026-09-04
+	// strategy B rows were exactly this (OLLAMA_KEEP_ALIVE=-1 made every
+	// call fail with HTTP 400, the planner fell back, and build+test were
+	// green on the fallback schema). Such an idea is now a failed case, and
+	// the suite reports it so the aggregator can drop the run.
+	liveMode := strings.EqualFold(os.Getenv("GEN_LOGIC"), "ollama")
 
 	for i, idea := range ideas {
 		dir, err := os.MkdirTemp("", "genbench-pipe-*")
@@ -151,6 +163,17 @@ func GenPipeline(ideas []string) Suite {
 		opsStubbed += ls.OpsStubbed
 		repairAttempts += ls.RepairAttempts
 		repairOK += ls.RepairSuccesses
+		styleViolations += ls.StyleViolations
+		styleRepairs += ls.StyleRepairAttempts
+		styleRepairOK += ls.StyleRepairSuccess
+		if agent.StyleActive() {
+			sr := agent.LastStyleReport
+			styleFindings += len(sr.Findings)
+			styleErrors += sr.Errors()
+			if sr.Errors() == 0 {
+				styleClean++
+			}
+		}
 		ideaEntities := 0
 		if planErr == nil {
 			ideaEntities = len(plan.Entities)
@@ -166,8 +189,10 @@ func GenPipeline(ideas []string) Suite {
 		promptTokens += u.PromptTokens
 		evalTokens += u.EvalTokens
 		modelRequests += u.Requests
+		modelErrors += u.Errors
+		noContact := liveMode && u.Requests == 0
 
-		pass := planErr == nil && runErr == nil && buildOK && testOK
+		pass := planErr == nil && runErr == nil && buildOK && testOK && !noContact
 		got := fmt.Sprintf(
 			"ops=%d stubbed=%d repairs=%d/%d heals=%d/%d entities=%d findings=%d build=%v test=%v wall=%.0fs",
 			ls.OpsTotal, ls.OpsStubbed, ls.RepairSuccesses, ls.RepairAttempts,
@@ -181,6 +206,11 @@ func GenPipeline(ideas []string) Suite {
 		}
 		if planFellBack {
 			note = strings.TrimSpace(note + " [planner offline fallback: fixed Order/Product schema]")
+		}
+		if noContact {
+			noContactIdeas++
+			note = strings.TrimSpace(note + fmt.Sprintf(
+				" [NOT MEASURED: live mode but 0 completed model requests, %d failed attempts]", u.Errors))
 		}
 		s.Cases = append(s.Cases, Case{
 			Name: ideaCaseName(i, idea), Pass: pass,
@@ -213,7 +243,25 @@ func GenPipeline(ideas []string) Suite {
 		Metric{Name: "prompt_tokens", Value: float64(promptTokens), Unit: "tokens"},
 		Metric{Name: "eval_tokens", Value: float64(evalTokens), Unit: "tokens"},
 		Metric{Name: "model_requests", Value: float64(modelRequests), Unit: "requests"},
+		Metric{Name: "model_errors", Value: float64(modelErrors), Unit: "attempts"},
+		Metric{Name: "ideas_no_model_contact", Value: float64(noContactIdeas), Unit: "ideas"},
 	)
+	if liveMode {
+		s.Metrics = append(s.Metrics, Metric{Name: "live_mode", Value: 1, Unit: "flag"})
+	}
+	// v26.33: the style gate, when a profile is active. Op level counters
+	// come from the engine; tree level counts from the agent's last report
+	// per idea, summed here.
+	if agent.StyleActive() {
+		s.Metrics = append(s.Metrics,
+			Metric{Name: "ops_style_violations", Value: float64(styleViolations), Unit: "ops"},
+			Metric{Name: "ops_style_repair_attempts", Value: float64(styleRepairs), Unit: "attempts"},
+			Metric{Name: "ops_style_repaired", Value: float64(styleRepairOK), Unit: "ops", HigherIsBetter: true},
+			Metric{Name: "style_findings", Value: float64(styleFindings), Unit: "findings"},
+			Metric{Name: "style_errors", Value: float64(styleErrors), Unit: "findings"},
+			Metric{Name: "style_clean_ideas", Value: float64(styleClean), Unit: "ideas", HigherIsBetter: true},
+		)
+	}
 	s.Duration = time.Since(t0)
 	return s
 }

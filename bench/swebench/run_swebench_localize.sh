@@ -59,6 +59,9 @@ echo "tasks selected: $(wc -l < "${SB}/tasklist.tsv")"
 
 # One clone per repository; checkouts move between task commits.
 while IFS=$'\t' read -r instance repo commit; do
+  # v26.32: strip a trailing CR. Python on Windows writes CRLF into the TSV
+  # and the commit hash then carries a CR that git rejects.
+  instance="${instance//$'\r'/}"; repo="${repo//$'\r'/}"; commit="${commit//$'\r'/}"
   rdir="${SB}/repos/${repo//\//__}"
   if [ ! -d "${rdir}/.git" ]; then
     echo "──── cloning ${repo} ────"

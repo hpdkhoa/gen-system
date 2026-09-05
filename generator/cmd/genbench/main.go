@@ -32,7 +32,9 @@ import (
 	"strings"
 	"time"
 
+	"gen-system/generator/internal/agent"
 	"gen-system/generator/internal/bench"
+	"gen-system/generator/internal/style"
 	agentctx "gen-system/generator/internal/context"
 )
 
@@ -59,6 +61,10 @@ SUBCOMMANDS
   localize      Localization recall on any repo: are the files a gold patch touched
                 inside the call graph neighbourhood of seed identifiers? Needs
                 --seeds-file and --gold-file; see bench/swebench/ (v26.31).
+  stylecheck    Team style gate on a Go tree: findings per rule, errors, warnings
+                (v26.33). --profile <gen-style.json>, default the built-in profile.
+                genpipe also takes --style and --style-mode to run the gate
+                inside the pipeline and report ops_style_* metrics.
   determinism   Same prompt N times, diff outputs (temp=0 seed=42 must be stable)
   all           Run every suite and write one JSON
   regression    Diff a new JSON against an older JSON or the committed baseline
@@ -129,6 +135,8 @@ func main() {
 		cmdGenPipe(args)
 	case "localize":
 		cmdLocalize(args)
+	case "stylecheck":
+		cmdStyleCheck(args)
 	case "determinism":
 		cmdDeterminism(args)
 	case "all":
@@ -437,10 +445,43 @@ func cmdStream(args []string) {
 func cmdGenPipe(args []string) {
 	fs := flag.NewFlagSet("genpipe", flag.ExitOnError)
 	ideasPath := fs.String("ideas", "", "JSON file with a generate_ideas array (default: built-in frozen set)")
+	stylePath := fs.String("style", os.Getenv("GEN_STYLE"), "v26.33: team style profile (gen-style.json); also GEN_STYLE")
+	styleMode := fs.String("style-mode", os.Getenv("GEN_STYLE_MODE"), "v26.33: off|report|gate|autofix; empty = the profile's own mode; also GEN_STYLE_MODE")
 	cf := parseCommon(fs, args)
 	ideas := loadIdeas(*ideasPath)
+	if *stylePath != "" {
+		p, err := style.Load(*stylePath)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "genpipe: --style:", err)
+			os.Exit(2)
+		}
+		agent.SetStyle(p, style.Mode(*styleMode))
+		defer agent.SetStyle(nil, "")
+	}
 	r := newRun(cf.model, cf.host, cf.root)
 	r.Suites = []bench.Suite{bench.GenPipeline(ideas)}
+	finish(r, cf.out)
+}
+
+// ─── subcommand: stylecheck (v26.33) ─────────────────────────────────
+// The team style gate on an existing Go tree. Deterministic, no model.
+
+func cmdStyleCheck(args []string) {
+	fs := flag.NewFlagSet("stylecheck", flag.ExitOnError)
+	profilePath := fs.String("profile", "", "gen-style.json (default: the built-in default profile)")
+	cf := parseCommon(fs, args)
+	p := style.Default()
+	if *profilePath != "" {
+		loaded, err := style.Load(*profilePath)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "stylecheck: --profile:", err)
+			os.Exit(2)
+		}
+		p = loaded
+	}
+	abs, _ := filepath.Abs(cf.root)
+	r := newRun(cf.model, cf.host, abs)
+	r.Suites = []bench.Suite{bench.StyleGate(abs, p)}
 	finish(r, cf.out)
 }
 
