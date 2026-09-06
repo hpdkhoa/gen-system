@@ -148,7 +148,7 @@ ollama pull deepseek-coder-v2:16b-lite-instruct-q8_0
 One command runs everything, in dependency order, and ends with the summaries and the attestation:
 
 ```bash
-MEASURED=~/code/my-portfolio/benchmarks/results/measured.json ./bench/run-all.sh
+MEASURED=/home/kai-hoang/Project/git/my-portfolio/benchmarks/results/measured.json ./bench/run-all.sh
 ```
 
 `run-all.sh` now includes the SWE-bench step. `SWEBENCH_LIMIT` picks how many of the 500
@@ -157,17 +157,17 @@ clones on disk), `skip` to leave it out.
 
 Or piecewise, fastest feedback first. Every driver writes raw JSON into `results/<date>/raw/`.
 
-| Command | Fills | Rough time |
-|---|---|---|
-| `./bench/run-understand.sh` | 4 pinned public repos + CobolCraft baseline verify | minutes, no GPU |
-| `./bench/run-stream.sh` | TTFT, stream on vs off | minutes |
-| `./bench/run-offload.sh` | tok/s and VRAM vs `OLLAMA_NUM_GPU` | ~30 min |
-| `./bench/run-quant-sweep.sh` | Q4/Q5/Q8 plus the production pair, n=3 | hours |
-| `./bench/run-strategies.sh` | strategies A, B, C on the frozen task set. **B must be rerun; the 2026-09-04 B rows measured nothing** | hours |
-| `./bench/swebench/run_swebench_localize.sh --limit 60` | localization recall on SWE-bench Verified. Not a solve rate; see its README | minutes for 60, hours for all 500 |
-| `python3 bench/summarise.py --results results/<date> --measured $MEASURED` | every gen-system table | seconds |
-| `python3 bench/swebench/summarise_swebench.py --results results/<date> --measured $MEASURED` | the three SWE-bench tables | seconds |
-| `python3 bench/attest.py --results results/<date>` | `MANIFEST.sha256` and `ATTESTATION.md`, the certificate | seconds |
+| Command                                                                                      | Fills                                                                                                  | Rough time                        |
+|----------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------|-----------------------------------|
+| `./bench/run-understand.sh`                                                                  | 4 pinned public repos + CobolCraft baseline verify                                                     | minutes, no GPU                   |
+| `./bench/run-stream.sh`                                                                      | TTFT, stream on vs off                                                                                 | minutes                           |
+| `./bench/run-offload.sh`                                                                     | tok/s and VRAM vs `OLLAMA_NUM_GPU`                                                                     | ~30 min                           |
+| `./bench/run-quant-sweep.sh`                                                                 | Q4/Q5/Q8 plus the production pair, n=3                                                                 | hours                             |
+| `./bench/run-strategies.sh`                                                                  | strategies A, B, C on the frozen task set. **B must be rerun; the 2026-09-04 B rows measured nothing** | hours                             |
+| `./bench/swebench/run_swebench_localize.sh --limit 60`                                       | localization recall on SWE-bench Verified. Not a solve rate; see its README                            | minutes for 60, hours for all 500 |
+| `python3 bench/summarise.py --results results/<date> --measured $MEASURED`                   | every gen-system table                                                                                 | seconds                           |
+| `python3 bench/swebench/summarise_swebench.py --results results/<date> --measured $MEASURED` | the three SWE-bench tables                                                                             | seconds                           |
+| `python3 bench/attest.py --results results/<date>`                                           | `MANIFEST.sha256` and `ATTESTATION.md`, the certificate                                                | seconds                           |
 
 Start with `run-understand.sh`. No GPU, and it exercises the parser path end to end, so a broken
 setup shows up in minutes instead of after the sweep.
@@ -227,22 +227,22 @@ Do not skip to Stage 6. Every line is from PLAN.md's Definition of Done, plus th
 
 ```bash
 cd ~/code/my-portfolio
-python3 tools/fill_portfolio.py --gen-system ~/code/gen-system --hieuluat ~/code/hieuluat
+python3 tools/fill_portfolio.py --gen-system /home/kai-hoang/Project/git/gen-system --hieuluat ~/code/hieuluat
 python3 tools/fill_portfolio.py --check          # must list nothing unfilled that you care about
 python3 tools/regen_writeup_html.py              # the html twins carry the tables only after this
 ```
 
-| # | Gate | How to check |
-|---|---|---|
-| 1 | Writeup 02 tables have rows, n and range, or say future work | Open section 6; tables inject between the `measured:gen` markers |
-| 2 | **At least one metric differs across quants** | Passed on 2026-09-04: stub rate near 99, 82, 74 and 44 percent across Q4, Q5, Q8 and production, n=3. Check again after any rerun. |
-| 3 | At least one honest loss reported | True twice: writeup 01 section 6 (rerank), writeup 02 section 4 (broken metric); now a third time in section 6 (strategy B) |
-| 4 | No template text | `grep -rn '_readme\|WebAssembly-free\|Replace every' ~/code/my-portfolio` returns nothing |
-| 5 | CV, story, README, portfolio, reference agree | All done except the CV. See Stage 7 |
-| 6 | Reference 100% annotated | In refbuild: `extract.py` then `check.py` must exit 0 |
-| 7 | **No row rests on a run that measured nothing** | `grep -n 'runs not measured' writeups/02-*.md`; every value in that column must be 0 |
-| 8 | **The attestation exists and matches** | `results/<date>/ATTESTATION.md` and `MANIFEST.sha256` are committed; `sha256sum -c results/<date>/MANIFEST.sha256` from inside `results/<date>/` passes |
-| 9 | **SWE-bench is labelled** | The SWE-bench tables in writeup 02 carry "not a solve rate" in their caption, and the text never puts the recall next to the DeepDiscovery solve rate |
+| # | Gate                                                         | How to check                                                                                                                                            |
+|---|--------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 1 | Writeup 02 tables have rows, n and range, or say future work | Open section 6; tables inject between the `measured:gen` markers                                                                                        |
+| 2 | **At least one metric differs across quants**                | Passed on 2026-09-04: stub rate near 99, 82, 74 and 44 percent across Q4, Q5, Q8 and production, n=3. Check again after any rerun.                      |
+| 3 | At least one honest loss reported                            | True twice: writeup 01 section 6 (rerank), writeup 02 section 4 (broken metric); now a third time in section 6 (strategy B)                             |
+| 4 | No template text                                             | `grep -rn '_readme\|WebAssembly-free\|Replace every' ~/code/my-portfolio` returns nothing                                                               |
+| 5 | CV, story, README, portfolio, reference agree                | All done except the CV. See Stage 7                                                                                                                     |
+| 6 | Reference 100% annotated                                     | In refbuild: `extract.py` then `check.py` must exit 0                                                                                                   |
+| 7 | **No row rests on a run that measured nothing**              | `grep -n 'runs not measured' writeups/02-*.md`; every value in that column must be 0                                                                    |
+| 8 | **The attestation exists and matches**                       | `results/<date>/ATTESTATION.md` and `MANIFEST.sha256` are committed; `sha256sum -c results/<date>/MANIFEST.sha256` from inside `results/<date>/` passes |
+| 9 | **SWE-bench is labelled**                                    | The SWE-bench tables in writeup 02 carry "not a solve rate" in their caption, and the text never puts the recall next to the DeepDiscovery solve rate   |
 
 Gates 7 to 9 are the ones added since the last runbook. A row with a null quality cell and a
 non zero not measured count has not been measured. It must not be described as measured.
@@ -286,12 +286,12 @@ things need your hand:
 
 ## Stage 7. The four things only you can decide
 
-| Decision | Where | Recommendation |
-|---|---|---|
-| **The CV** | Not in this directory | Three corrections: flowcharts are rendered for human review, not fed to the model; the stub path exists and the repair caps are 2 (operation) and 3 (task); "sequential scheduling with keep alive" is Ollama keep alive plus two roles plus measurement, not a scheduler. Gate 5 fails until this is done. |
-| **The reranker** | writeup 01 section 6, `[TODO]` | Drop it. 384 ms for zero measured gain, and say you removed it. That reads better than leaving it on. |
-| **The VC analysis doc** | `guide/` | Keep it out of the public tree (Stage 1). |
-| **Repo URL** | `README.md` quickstart | Only you know it. |
+| Decision                | Where                          | Recommendation                                                                                                                                                                                                                                                                                              |
+|-------------------------|--------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **The CV**              | Not in this directory          | Three corrections: flowcharts are rendered for human review, not fed to the model; the stub path exists and the repair caps are 2 (operation) and 3 (task); "sequential scheduling with keep alive" is Ollama keep alive plus two roles plus measurement, not a scheduler. Gate 5 fails until this is done. |
+| **The reranker**        | writeup 01 section 6, `[TODO]` | Drop it. 384 ms for zero measured gain, and say you removed it. That reads better than leaving it on.                                                                                                                                                                                                       |
+| **The VC analysis doc** | `guide/`                       | Keep it out of the public tree (Stage 1).                                                                                                                                                                                                                                                                   |
+| **Repo URL**            | `README.md` quickstart         | Only you know it.                                                                                                                                                                                                                                                                                           |
 
 ---
 
