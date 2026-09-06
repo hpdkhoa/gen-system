@@ -1,0 +1,6 @@
+docs
+djangoproject
+compile
+parse_duration
+_modules
+standard_duration_re

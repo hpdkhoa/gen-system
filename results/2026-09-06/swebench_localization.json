@@ -1,0 +1,1561 @@
+{
+  "_provenance": {
+    "date": "2026-09-06",
+    "gen_system_commit": "b503f324690b4424086826aea3c47e00d435ea29",
+    "task_set": "SWE-bench Verified, princeton-nlp, frozen sha256 fcef3a49f31e",
+    "gpu": "not used (parser path only)",
+    "metric": "Localization recall only. Not a solve rate. gen-system has no issue to patch pipeline, so a SWE-bench solve rate cannot be produced and is not claimed."
+  },
+  "swebench_verified_localization": {
+    "_columns": [
+      "hops",
+      "file_recall_mean",
+      "hit_rate_pct",
+      "mean_neighbourhood_files",
+      "median_neighbourhood_files",
+      "n_tasks"
+    ],
+    "_provenance": {
+      "date": "2026-09-06",
+      "gen_system_commit": "b503f324690b4424086826aea3c47e00d435ea29",
+      "task_set": "SWE-bench Verified, princeton-nlp, frozen sha256 fcef3a49f31e",
+      "gpu": "not used (parser path only)",
+      "metric": "Localization recall only. Not a solve rate. gen-system has no issue to patch pipeline, so a SWE-bench solve rate cannot be produced and is not claimed."
+    },
+    "rows": [
+      [
+        0,
+        0.615,
+        63.3,
+        201.933,
+        92.5,
+        60
+      ],
+      [
+        1,
+        0.615,
+        63.3,
+        285.75,
+        221.0,
+        60
+      ],
+      [
+        2,
+        0.674,
+        70.0,
+        513.05,
+        511.0,
+        60
+      ]
+    ]
+  },
+  "swebench_verified_localization_by_repo": {
+    "_columns": [
+      "repo",
+      "hops",
+      "file_recall_mean",
+      "hit_rate_pct",
+      "seeds_matched_pct",
+      "n_tasks"
+    ],
+    "_provenance": {
+      "date": "2026-09-06",
+      "gen_system_commit": "b503f324690b4424086826aea3c47e00d435ea29",
+      "task_set": "SWE-bench Verified, princeton-nlp, frozen sha256 fcef3a49f31e",
+      "gpu": "not used (parser path only)",
+      "metric": "Localization recall only. Not a solve rate. gen-system has no issue to patch pipeline, so a SWE-bench solve rate cannot be produced and is not claimed."
+    },
+    "rows": [
+      [
+        "astropy/astropy",
+        2,
+        0.716,
+        77.3,
+        100.0,
+        22
+      ],
+      [
+        "django/django",
+        2,
+        0.649,
+        65.8,
+        92.1,
+        38
+      ]
+    ]
+  },
+  "swebench_verified_repos": {
+    "_columns": [
+      "repo",
+      "files_parsed",
+      "parse_errors",
+      "internal_recall_pct",
+      "call_edges_internal"
+    ],
+    "_provenance": {
+      "date": "2026-09-06",
+      "gen_system_commit": "b503f324690b4424086826aea3c47e00d435ea29",
+      "task_set": "SWE-bench Verified, princeton-nlp, frozen sha256 fcef3a49f31e",
+      "gpu": "not used (parser path only)",
+      "metric": "Localization recall only. Not a solve rate. gen-system has no issue to patch pipeline, so a SWE-bench solve rate cannot be produced and is not claimed."
+    },
+    "rows": [
+      [
+        "astropy/astropy",
+        786,
+        0,
+        100,
+        27412
+      ],
+      [
+        "django/django",
+        2572,
+        0,
+        100,
+        55126
+      ]
+    ]
+  },
+  "per_task": [
+    {
+      "instance": "astropy__astropy-12907",
+      "repo": "astropy/astropy",
+      "seeds_total": 29,
+      "seeds_matched": 15,
+      "gold_files": 1,
+      "hops": {
+        "0": {
+          "recall": 1,
+          "hit": true,
+          "files": 39
+        },
+        "1": {
+          "recall": 1,
+          "hit": true,
+          "files": 230
+        },
+        "2": {
+          "recall": 1,
+          "hit": true,
+          "files": 486
+        }
+      }
+    },
+    {
+      "instance": "astropy__astropy-13033",
+      "repo": "astropy/astropy",
+      "seeds_total": 66,
+      "seeds_matched": 17,
+      "gold_files": 1,
+      "hops": {
+        "0": {
+          "recall": 0,
+          "hit": false,
+          "files": 162
+        },
+        "1": {
+          "recall": 0,
+          "hit": false,
+          "files": 259
+        },
+        "2": {
+          "recall": 1,
+          "hit": true,
+          "files": 580
+        }
+      }
+    },
+    {
+      "instance": "astropy__astropy-13236",
+      "repo": "astropy/astropy",
+      "seeds_total": 30,
+      "seeds_matched": 9,
+      "gold_files": 1,
+      "hops": {
+        "0": {
+          "recall": 0,
+          "hit": false,
+          "files": 58
+        },
+        "1": {
+          "recall": 0,
+          "hit": false,
+          "files": 251
+        },
+        "2": {
+          "recall": 0,
+          "hit": false,
+          "files": 534
+        }
+      }
+    },
+    {
+      "instance": "astropy__astropy-13398",
+      "repo": "astropy/astropy",
+      "seeds_total": 78,
+      "seeds_matched": 34,
+      "gold_files": 4,
+      "hops": {
+        "0": {
+          "recall": 0.75,
+          "hit": true,
+          "files": 128
+        },
+        "1": {
+          "recall": 0.75,
+          "hit": true,
+          "files": 181
+        },
+        "2": {
+          "recall": 0.75,
+          "hit": true,
+          "files": 481
+        }
+      }
+    },
+    {
+      "instance": "astropy__astropy-13453",
+      "repo": "astropy/astropy",
+      "seeds_total": 80,
+      "seeds_matched": 26,
+      "gold_files": 1,
+      "hops": {
+        "0": {
+          "recall": 1,
+          "hit": true,
+          "files": 189
+        },
+        "1": {
+          "recall": 1,
+          "hit": true,
+          "files": 318
+        },
+        "2": {
+          "recall": 1,
+          "hit": true,
+          "files": 571
+        }
+      }
+    },
+    {
+      "instance": "astropy__astropy-13579",
+      "repo": "astropy/astropy",
+      "seeds_total": 80,
+      "seeds_matched": 21,
+      "gold_files": 1,
+      "hops": {
+        "0": {
+          "recall": 1,
+          "hit": true,
+          "files": 109
+        },
+        "1": {
+          "recall": 1,
+          "hit": true,
+          "files": 297
+        },
+        "2": {
+          "recall": 1,
+          "hit": true,
+          "files": 517
+        }
+      }
+    },
+    {
+      "instance": "astropy__astropy-13977",
+      "repo": "astropy/astropy",
+      "seeds_total": 80,
+      "seeds_matched": 25,
+      "gold_files": 1,
+      "hops": {
+        "0": {
+          "recall": 0,
+          "hit": false,
+          "files": 112
+        },
+        "1": {
+          "recall": 0,
+          "hit": false,
+          "files": 405
+        },
+        "2": {
+          "recall": 0,
+          "hit": false,
+          "files": 596
+        }
+      }
+    },
+    {
+      "instance": "astropy__astropy-14096",
+      "repo": "astropy/astropy",
+      "seeds_total": 41,
+      "seeds_matched": 10,
+      "gold_files": 1,
+      "hops": {
+        "0": {
+          "recall": 0,
+          "hit": false,
+          "files": 93
+        },
+        "1": {
+          "recall": 0,
+          "hit": false,
+          "files": 343
+        },
+        "2": {
+          "recall": 0,
+          "hit": false,
+          "files": 597
+        }
+      }
+    },
+    {
+      "instance": "astropy__astropy-14182",
+      "repo": "astropy/astropy",
+      "seeds_total": 66,
+      "seeds_matched": 26,
+      "gold_files": 1,
+      "hops": {
+        "0": {
+          "recall": 1,
+          "hit": true,
+          "files": 384
+        },
+        "1": {
+          "recall": 1,
+          "hit": true,
+          "files": 481
+        },
+        "2": {
+          "recall": 1,
+          "hit": true,
+          "files": 769
+        }
+      }
+    },
+    {
+      "instance": "astropy__astropy-14309",
+      "repo": "astropy/astropy",
+      "seeds_total": 80,
+      "seeds_matched": 27,
+      "gold_files": 1,
+      "hops": {
+        "0": {
+          "recall": 1,
+          "hit": true,
+          "files": 190
+        },
+        "1": {
+          "recall": 1,
+          "hit": true,
+          "files": 333
+        },
+        "2": {
+          "recall": 1,
+          "hit": true,
+          "files": 642
+        }
+      }
+    },
+    {
+      "instance": "astropy__astropy-14365",
+      "repo": "astropy/astropy",
+      "seeds_total": 39,
+      "seeds_matched": 13,
+      "gold_files": 1,
+      "hops": {
+        "0": {
+          "recall": 1,
+          "hit": true,
+          "files": 123
+        },
+        "1": {
+          "recall": 1,
+          "hit": true,
+          "files": 226
+        },
+        "2": {
+          "recall": 1,
+          "hit": true,
+          "files": 571
+        }
+      }
+    },
+    {
+      "instance": "astropy__astropy-14369",
+      "repo": "astropy/astropy",
+      "seeds_total": 59,
+      "seeds_matched": 11,
+      "gold_files": 2,
+      "hops": {
+        "0": {
+          "recall": 0,
+          "hit": false,
+          "files": 123
+        },
+        "1": {
+          "recall": 0,
+          "hit": false,
+          "files": 220
+        },
+        "2": {
+          "recall": 0.5,
+          "hit": true,
+          "files": 524
+        }
+      }
+    },
+    {
+      "instance": "astropy__astropy-14508",
+      "repo": "astropy/astropy",
+      "seeds_total": 65,
+      "seeds_matched": 16,
+      "gold_files": 1,
+      "hops": {
+        "0": {
+          "recall": 1,
+          "hit": true,
+          "files": 92
+        },
+        "1": {
+          "recall": 1,
+          "hit": true,
+          "files": 165
+        },
+        "2": {
+          "recall": 1,
+          "hit": true,
+          "files": 500
+        }
+      }
+    },
+    {
+      "instance": "astropy__astropy-14539",
+      "repo": "astropy/astropy",
+      "seeds_total": 36,
+      "seeds_matched": 18,
+      "gold_files": 1,
+      "hops": {
+        "0": {
+          "recall": 1,
+          "hit": true,
+          "files": 123
+        },
+        "1": {
+          "recall": 1,
+          "hit": true,
+          "files": 362
+        },
+        "2": {
+          "recall": 1,
+          "hit": true,
+          "files": 601
+        }
+      }
+    },
+    {
+      "instance": "astropy__astropy-14598",
+      "repo": "astropy/astropy",
+      "seeds_total": 32,
+      "seeds_matched": 10,
+      "gold_files": 1,
+      "hops": {
+        "0": {
+          "recall": 1,
+          "hit": true,
+          "files": 80
+        },
+        "1": {
+          "recall": 1,
+          "hit": true,
+          "files": 222
+        },
+        "2": {
+          "recall": 1,
+          "hit": true,
+          "files": 467
+        }
+      }
+    },
+    {
+      "instance": "astropy__astropy-14995",
+      "repo": "astropy/astropy",
+      "seeds_total": 27,
+      "seeds_matched": 13,
+      "gold_files": 1,
+      "hops": {
+        "0": {
+          "recall": 1,
+          "hit": true,
+          "files": 57
+        },
+        "1": {
+          "recall": 1,
+          "hit": true,
+          "files": 245
+        },
+        "2": {
+          "recall": 1,
+          "hit": true,
+          "files": 436
+        }
+      }
+    },
+    {
+      "instance": "astropy__astropy-7166",
+      "repo": "astropy/astropy",
+      "seeds_total": 4,
+      "seeds_matched": 2,
+      "gold_files": 1,
+      "hops": {
+        "0": {
+          "recall": 1,
+          "hit": true,
+          "files": 26
+        },
+        "1": {
+          "recall": 1,
+          "hit": true,
+          "files": 26
+        },
+        "2": {
+          "recall": 1,
+          "hit": true,
+          "files": 26
+        }
+      }
+    },
+    {
+      "instance": "astropy__astropy-7336",
+      "repo": "astropy/astropy",
+      "seeds_total": 41,
+      "seeds_matched": 12,
+      "gold_files": 1,
+      "hops": {
+        "0": {
+          "recall": 1,
+          "hit": true,
+          "files": 273
+        },
+        "1": {
+          "recall": 1,
+          "hit": true,
+          "files": 306
+        },
+        "2": {
+          "recall": 1,
+          "hit": true,
+          "files": 574
+        }
+      }
+    },
+    {
+      "instance": "astropy__astropy-7606",
+      "repo": "astropy/astropy",
+      "seeds_total": 48,
+      "seeds_matched": 11,
+      "gold_files": 1,
+      "hops": {
+        "0": {
+          "recall": 0,
+          "hit": false,
+          "files": 76
+        },
+        "1": {
+          "recall": 0,
+          "hit": false,
+          "files": 213
+        },
+        "2": {
+          "recall": 0,
+          "hit": false,
+          "files": 471
+        }
+      }
+    },
+    {
+      "instance": "astropy__astropy-7671",
+      "repo": "astropy/astropy",
+      "seeds_total": 48,
+      "seeds_matched": 11,
+      "gold_files": 1,
+      "hops": {
+        "0": {
+          "recall": 1,
+          "hit": true,
+          "files": 55
+        },
+        "1": {
+          "recall": 1,
+          "hit": true,
+          "files": 60
+        },
+        "2": {
+          "recall": 1,
+          "hit": true,
+          "files": 189
+        }
+      }
+    },
+    {
+      "instance": "astropy__astropy-8707",
+      "repo": "astropy/astropy",
+      "seeds_total": 9,
+      "seeds_matched": 8,
+      "gold_files": 2,
+      "hops": {
+        "0": {
+          "recall": 0.5,
+          "hit": true,
+          "files": 23
+        },
+        "1": {
+          "recall": 0.5,
+          "hit": true,
+          "files": 39
+        },
+        "2": {
+          "recall": 0.5,
+          "hit": true,
+          "files": 76
+        }
+      }
+    },
+    {
+      "instance": "astropy__astropy-8872",
+      "repo": "astropy/astropy",
+      "seeds_total": 9,
+      "seeds_matched": 3,
+      "gold_files": 1,
+      "hops": {
+        "0": {
+          "recall": 0,
+          "hit": false,
+          "files": 30
+        },
+        "1": {
+          "recall": 0,
+          "hit": false,
+          "files": 84
+        },
+        "2": {
+          "recall": 0,
+          "hit": false,
+          "files": 154
+        }
+      }
+    },
+    {
+      "instance": "django__django-10097",
+      "repo": "django/django",
+      "seeds_total": 5,
+      "seeds_matched": 2,
+      "gold_files": 1,
+      "hops": {
+        "0": {
+          "recall": 1,
+          "hit": true,
+          "files": 14
+        },
+        "1": {
+          "recall": 1,
+          "hit": true,
+          "files": 14
+        },
+        "2": {
+          "recall": 1,
+          "hit": true,
+          "files": 14
+        }
+      }
+    },
+    {
+      "instance": "django__django-10554",
+      "repo": "django/django",
+      "seeds_total": 35,
+      "seeds_matched": 18,
+      "gold_files": 2,
+      "hops": {
+        "0": {
+          "recall": 0,
+          "hit": false,
+          "files": 155
+        },
+        "1": {
+          "recall": 0,
+          "hit": false,
+          "files": 482
+        },
+        "2": {
+          "recall": 0,
+          "hit": false,
+          "files": 1042
+        }
+      }
+    },
+    {
+      "instance": "django__django-10880",
+      "repo": "django/django",
+      "seeds_total": 1,
+      "seeds_matched": 0,
+      "gold_files": 1,
+      "hops": {
+        "0": {
+          "recall": 0,
+          "hit": false,
+          "files": 0
+        },
+        "1": {
+          "recall": 0,
+          "hit": false,
+          "files": 0
+        },
+        "2": {
+          "recall": 0,
+          "hit": false,
+          "files": 0
+        }
+      }
+    },
+    {
+      "instance": "django__django-10914",
+      "repo": "django/django",
+      "seeds_total": 11,
+      "seeds_matched": 6,
+      "gold_files": 1,
+      "hops": {
+        "0": {
+          "recall": 1,
+          "hit": true,
+          "files": 42
+        },
+        "1": {
+          "recall": 1,
+          "hit": true,
+          "files": 43
+        },
+        "2": {
+          "recall": 1,
+          "hit": true,
+          "files": 81
+        }
+      }
+    },
+    {
+      "instance": "django__django-10973",
+      "repo": "django/django",
+      "seeds_total": 5,
+      "seeds_matched": 4,
+      "gold_files": 1,
+      "hops": {
+        "0": {
+          "recall": 1,
+          "hit": true,
+          "files": 25
+        },
+        "1": {
+          "recall": 1,
+          "hit": true,
+          "files": 25
+        },
+        "2": {
+          "recall": 1,
+          "hit": true,
+          "files": 27
+        }
+      }
+    },
+    {
+      "instance": "django__django-10999",
+      "repo": "django/django",
+      "seeds_total": 6,
+      "seeds_matched": 3,
+      "gold_files": 1,
+      "hops": {
+        "0": {
+          "recall": 1,
+          "hit": true,
+          "files": 4
+        },
+        "1": {
+          "recall": 1,
+          "hit": true,
+          "files": 43
+        },
+        "2": {
+          "recall": 1,
+          "hit": true,
+          "files": 509
+        }
+      }
+    },
+    {
+      "instance": "django__django-11066",
+      "repo": "django/django",
+      "seeds_total": 19,
+      "seeds_matched": 13,
+      "gold_files": 1,
+      "hops": {
+        "0": {
+          "recall": 1,
+          "hit": true,
+          "files": 1052
+        },
+        "1": {
+          "recall": 1,
+          "hit": true,
+          "files": 1189
+        },
+        "2": {
+          "recall": 1,
+          "hit": true,
+          "files": 1774
+        }
+      }
+    },
+    {
+      "instance": "django__django-11087",
+      "repo": "django/django",
+      "seeds_total": 80,
+      "seeds_matched": 23,
+      "gold_files": 1,
+      "hops": {
+        "0": {
+          "recall": 1,
+          "hit": true,
+          "files": 1377
+        },
+        "1": {
+          "recall": 1,
+          "hit": true,
+          "files": 1551
+        },
+        "2": {
+          "recall": 1,
+          "hit": true,
+          "files": 2020
+        }
+      }
+    },
+    {
+      "instance": "django__django-11095",
+      "repo": "django/django",
+      "seeds_total": 3,
+      "seeds_matched": 1,
+      "gold_files": 1,
+      "hops": {
+        "0": {
+          "recall": 0,
+          "hit": false,
+          "files": 6
+        },
+        "1": {
+          "recall": 0,
+          "hit": false,
+          "files": 9
+        },
+        "2": {
+          "recall": 0,
+          "hit": false,
+          "files": 31
+        }
+      }
+    },
+    {
+      "instance": "django__django-11099",
+      "repo": "django/django",
+      "seeds_total": 6,
+      "seeds_matched": 4,
+      "gold_files": 1,
+      "hops": {
+        "0": {
+          "recall": 1,
+          "hit": true,
+          "files": 19
+        },
+        "1": {
+          "recall": 1,
+          "hit": true,
+          "files": 19
+        },
+        "2": {
+          "recall": 1,
+          "hit": true,
+          "files": 20
+        }
+      }
+    },
+    {
+      "instance": "django__django-11119",
+      "repo": "django/django",
+      "seeds_total": 2,
+      "seeds_matched": 2,
+      "gold_files": 1,
+      "hops": {
+        "0": {
+          "recall": 1,
+          "hit": true,
+          "files": 22
+        },
+        "1": {
+          "recall": 1,
+          "hit": true,
+          "files": 125
+        },
+        "2": {
+          "recall": 1,
+          "hit": true,
+          "files": 219
+        }
+      }
+    },
+    {
+      "instance": "django__django-11133",
+      "repo": "django/django",
+      "seeds_total": 7,
+      "seeds_matched": 5,
+      "gold_files": 1,
+      "hops": {
+        "0": {
+          "recall": 1,
+          "hit": true,
+          "files": 61
+        },
+        "1": {
+          "recall": 1,
+          "hit": true,
+          "files": 86
+        },
+        "2": {
+          "recall": 1,
+          "hit": true,
+          "files": 409
+        }
+      }
+    },
+    {
+      "instance": "django__django-11138",
+      "repo": "django/django",
+      "seeds_total": 28,
+      "seeds_matched": 16,
+      "gold_files": 4,
+      "hops": {
+        "0": {
+          "recall": 1,
+          "hit": true,
+          "files": 399
+        },
+        "1": {
+          "recall": 1,
+          "hit": true,
+          "files": 540
+        },
+        "2": {
+          "recall": 1,
+          "hit": true,
+          "files": 757
+        }
+      }
+    },
+    {
+      "instance": "django__django-11141",
+      "repo": "django/django",
+      "seeds_total": 5,
+      "seeds_matched": 2,
+      "gold_files": 1,
+      "hops": {
+        "0": {
+          "recall": 1,
+          "hit": true,
+          "files": 902
+        },
+        "1": {
+          "recall": 1,
+          "hit": true,
+          "files": 938
+        },
+        "2": {
+          "recall": 1,
+          "hit": true,
+          "files": 1682
+        }
+      }
+    },
+    {
+      "instance": "django__django-11149",
+      "repo": "django/django",
+      "seeds_total": 13,
+      "seeds_matched": 7,
+      "gold_files": 1,
+      "hops": {
+        "0": {
+          "recall": 0,
+          "hit": false,
+          "files": 468
+        },
+        "1": {
+          "recall": 0,
+          "hit": false,
+          "files": 472
+        },
+        "2": {
+          "recall": 0,
+          "hit": false,
+          "files": 480
+        }
+      }
+    },
+    {
+      "instance": "django__django-11163",
+      "repo": "django/django",
+      "seeds_total": 3,
+      "seeds_matched": 2,
+      "gold_files": 1,
+      "hops": {
+        "0": {
+          "recall": 1,
+          "hit": true,
+          "files": 12
+        },
+        "1": {
+          "recall": 1,
+          "hit": true,
+          "files": 16
+        },
+        "2": {
+          "recall": 1,
+          "hit": true,
+          "files": 35
+        }
+      }
+    },
+    {
+      "instance": "django__django-11179",
+      "repo": "django/django",
+      "seeds_total": 4,
+      "seeds_matched": 3,
+      "gold_files": 1,
+      "hops": {
+        "0": {
+          "recall": 1,
+          "hit": true,
+          "files": 442
+        },
+        "1": {
+          "recall": 1,
+          "hit": true,
+          "files": 503
+        },
+        "2": {
+          "recall": 1,
+          "hit": true,
+          "files": 1024
+        }
+      }
+    },
+    {
+      "instance": "django__django-11206",
+      "repo": "django/django",
+      "seeds_total": 8,
+      "seeds_matched": 7,
+      "gold_files": 1,
+      "hops": {
+        "0": {
+          "recall": 1,
+          "hit": true,
+          "files": 105
+        },
+        "1": {
+          "recall": 1,
+          "hit": true,
+          "files": 194
+        },
+        "2": {
+          "recall": 1,
+          "hit": true,
+          "files": 698
+        }
+      }
+    },
+    {
+      "instance": "django__django-11211",
+      "repo": "django/django",
+      "seeds_total": 20,
+      "seeds_matched": 9,
+      "gold_files": 1,
+      "hops": {
+        "0": {
+          "recall": 0,
+          "hit": false,
+          "files": 476
+        },
+        "1": {
+          "recall": 0,
+          "hit": false,
+          "files": 494
+        },
+        "2": {
+          "recall": 0,
+          "hit": false,
+          "files": 541
+        }
+      }
+    },
+    {
+      "instance": "django__django-11239",
+      "repo": "django/django",
+      "seeds_total": 12,
+      "seeds_matched": 2,
+      "gold_files": 1,
+      "hops": {
+        "0": {
+          "recall": 0,
+          "hit": false,
+          "files": 11
+        },
+        "1": {
+          "recall": 0,
+          "hit": false,
+          "files": 11
+        },
+        "2": {
+          "recall": 0,
+          "hit": false,
+          "files": 11
+        }
+      }
+    },
+    {
+      "instance": "django__django-11265",
+      "repo": "django/django",
+      "seeds_total": 52,
+      "seeds_matched": 11,
+      "gold_files": 1,
+      "hops": {
+        "0": {
+          "recall": 0,
+          "hit": false,
+          "files": 298
+        },
+        "1": {
+          "recall": 0,
+          "hit": false,
+          "files": 550
+        },
+        "2": {
+          "recall": 0,
+          "hit": false,
+          "files": 909
+        }
+      }
+    },
+    {
+      "instance": "django__django-11276",
+      "repo": "django/django",
+      "seeds_total": 9,
+      "seeds_matched": 5,
+      "gold_files": 1,
+      "hops": {
+        "0": {
+          "recall": 1,
+          "hit": true,
+          "files": 63
+        },
+        "1": {
+          "recall": 1,
+          "hit": true,
+          "files": 80
+        },
+        "2": {
+          "recall": 1,
+          "hit": true,
+          "files": 586
+        }
+      }
+    },
+    {
+      "instance": "django__django-11292",
+      "repo": "django/django",
+      "seeds_total": 1,
+      "seeds_matched": 0,
+      "gold_files": 1,
+      "hops": {
+        "0": {
+          "recall": 0,
+          "hit": false,
+          "files": 0
+        },
+        "1": {
+          "recall": 0,
+          "hit": false,
+          "files": 0
+        },
+        "2": {
+          "recall": 0,
+          "hit": false,
+          "files": 0
+        }
+      }
+    },
+    {
+      "instance": "django__django-11299",
+      "repo": "django/django",
+      "seeds_total": 27,
+      "seeds_matched": 12,
+      "gold_files": 1,
+      "hops": {
+        "0": {
+          "recall": 0,
+          "hit": false,
+          "files": 505
+        },
+        "1": {
+          "recall": 0,
+          "hit": false,
+          "files": 521
+        },
+        "2": {
+          "recall": 0,
+          "hit": false,
+          "files": 583
+        }
+      }
+    },
+    {
+      "instance": "django__django-11333",
+      "repo": "django/django",
+      "seeds_total": 16,
+      "seeds_matched": 15,
+      "gold_files": 2,
+      "hops": {
+        "0": {
+          "recall": 1,
+          "hit": true,
+          "files": 339
+        },
+        "1": {
+          "recall": 1,
+          "hit": true,
+          "files": 389
+        },
+        "2": {
+          "recall": 1,
+          "hit": true,
+          "files": 658
+        }
+      }
+    },
+    {
+      "instance": "django__django-11400",
+      "repo": "django/django",
+      "seeds_total": 12,
+      "seeds_matched": 9,
+      "gold_files": 3,
+      "hops": {
+        "0": {
+          "recall": 0.6666666666666666,
+          "hit": true,
+          "files": 223
+        },
+        "1": {
+          "recall": 0.6666666666666666,
+          "hit": true,
+          "files": 229
+        },
+        "2": {
+          "recall": 0.6666666666666666,
+          "hit": true,
+          "files": 252
+        }
+      }
+    },
+    {
+      "instance": "django__django-11433",
+      "repo": "django/django",
+      "seeds_total": 4,
+      "seeds_matched": 1,
+      "gold_files": 1,
+      "hops": {
+        "0": {
+          "recall": 0,
+          "hit": false,
+          "files": 1
+        },
+        "1": {
+          "recall": 0,
+          "hit": false,
+          "files": 2
+        },
+        "2": {
+          "recall": 1,
+          "hit": true,
+          "files": 26
+        }
+      }
+    },
+    {
+      "instance": "django__django-11451",
+      "repo": "django/django",
+      "seeds_total": 18,
+      "seeds_matched": 9,
+      "gold_files": 1,
+      "hops": {
+        "0": {
+          "recall": 1,
+          "hit": true,
+          "files": 29
+        },
+        "1": {
+          "recall": 1,
+          "hit": true,
+          "files": 102
+        },
+        "2": {
+          "recall": 1,
+          "hit": true,
+          "files": 513
+        }
+      }
+    },
+    {
+      "instance": "django__django-11477",
+      "repo": "django/django",
+      "seeds_total": 1,
+      "seeds_matched": 1,
+      "gold_files": 1,
+      "hops": {
+        "0": {
+          "recall": 0,
+          "hit": false,
+          "files": 4
+        },
+        "1": {
+          "recall": 0,
+          "hit": false,
+          "files": 6
+        },
+        "2": {
+          "recall": 1,
+          "hit": true,
+          "files": 43
+        }
+      }
+    },
+    {
+      "instance": "django__django-11490",
+      "repo": "django/django",
+      "seeds_total": 8,
+      "seeds_matched": 5,
+      "gold_files": 1,
+      "hops": {
+        "0": {
+          "recall": 0,
+          "hit": false,
+          "files": 18
+        },
+        "1": {
+          "recall": 0,
+          "hit": false,
+          "files": 305
+        },
+        "2": {
+          "recall": 0,
+          "hit": false,
+          "files": 681
+        }
+      }
+    },
+    {
+      "instance": "django__django-11532",
+      "repo": "django/django",
+      "seeds_total": 32,
+      "seeds_matched": 20,
+      "gold_files": 5,
+      "hops": {
+        "0": {
+          "recall": 1,
+          "hit": true,
+          "files": 1186
+        },
+        "1": {
+          "recall": 1,
+          "hit": true,
+          "files": 1292
+        },
+        "2": {
+          "recall": 1,
+          "hit": true,
+          "files": 1746
+        }
+      }
+    },
+    {
+      "instance": "django__django-11551",
+      "repo": "django/django",
+      "seeds_total": 39,
+      "seeds_matched": 18,
+      "gold_files": 1,
+      "hops": {
+        "0": {
+          "recall": 1,
+          "hit": true,
+          "files": 557
+        },
+        "1": {
+          "recall": 1,
+          "hit": true,
+          "files": 630
+        },
+        "2": {
+          "recall": 1,
+          "hit": true,
+          "files": 878
+        }
+      }
+    },
+    {
+      "instance": "django__django-11555",
+      "repo": "django/django",
+      "seeds_total": 7,
+      "seeds_matched": 2,
+      "gold_files": 1,
+      "hops": {
+        "0": {
+          "recall": 0,
+          "hit": false,
+          "files": 168
+        },
+        "1": {
+          "recall": 0,
+          "hit": false,
+          "files": 168
+        },
+        "2": {
+          "recall": 0,
+          "hit": false,
+          "files": 177
+        }
+      }
+    },
+    {
+      "instance": "django__django-11603",
+      "repo": "django/django",
+      "seeds_total": 0,
+      "seeds_matched": 0,
+      "gold_files": 1,
+      "hops": {
+        "0": {
+          "recall": 0,
+          "hit": false,
+          "files": 0
+        },
+        "1": {
+          "recall": 0,
+          "hit": false,
+          "files": 0
+        },
+        "2": {
+          "recall": 0,
+          "hit": false,
+          "files": 0
+        }
+      }
+    },
+    {
+      "instance": "django__django-11728",
+      "repo": "django/django",
+      "seeds_total": 3,
+      "seeds_matched": 1,
+      "gold_files": 1,
+      "hops": {
+        "0": {
+          "recall": 1,
+          "hit": true,
+          "files": 1
+        },
+        "1": {
+          "recall": 1,
+          "hit": true,
+          "files": 3
+        },
+        "2": {
+          "recall": 1,
+          "hit": true,
+          "files": 217
+        }
+      }
+    },
+    {
+      "instance": "django__django-11734",
+      "repo": "django/django",
+      "seeds_total": 13,
+      "seeds_matched": 6,
+      "gold_files": 3,
+      "hops": {
+        "0": {
+          "recall": 0,
+          "hit": false,
+          "files": 13
+        },
+        "1": {
+          "recall": 0,
+          "hit": false,
+          "files": 157
+        },
+        "2": {
+          "recall": 0,
+          "hit": false,
+          "files": 355
+        }
+      }
+    },
+    {
+      "instance": "django__django-11740",
+      "repo": "django/django",
+      "seeds_total": 23,
+      "seeds_matched": 8,
+      "gold_files": 1,
+      "hops": {
+        "0": {
+          "recall": 1,
+          "hit": true,
+          "files": 463
+        },
+        "1": {
+          "recall": 1,
+          "hit": true,
+          "files": 488
+        },
+        "2": {
+          "recall": 1,
+          "hit": true,
+          "files": 547
+        }
+      }
+    },
+    {
+      "instance": "django__django-11749",
+      "repo": "django/django",
+      "seeds_total": 20,
+      "seeds_matched": 8,
+      "gold_files": 1,
+      "hops": {
+        "0": {
+          "recall": 1,
+          "hit": true,
+          "files": 111
+        },
+        "1": {
+          "recall": 1,
+          "hit": true,
+          "files": 203
+        },
+        "2": {
+          "recall": 1,
+          "hit": true,
+          "files": 876
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+django/core/mail/message.py
+django/core/mail/utils.py
+django/core/validators.py
+django/utils/encoding.py
+django/utils/html.py

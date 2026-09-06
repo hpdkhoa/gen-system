@@ -1,0 +1,2 @@
+django/db/models/sql/compiler.py
+django/db/models/sql/query.py

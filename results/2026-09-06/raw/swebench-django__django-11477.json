@@ -1,0 +1,136 @@
+{
+  "schema": "genbench/v1",
+  "started_at": "2026-09-06T11:46:38.945339355+07:00",
+  "finished_at": "2026-09-06T11:47:40.809193025+07:00",
+  "host": {
+    "os": "linux",
+    "arch": "amd64",
+    "num_cpu": 16,
+    "go_version": "go1.25.0"
+  },
+  "model": {
+    "name": "qwen2.5-coder:14b",
+    "endpoint": "http://localhost:11434"
+  },
+  "project_root": "/home/kai-hoang/Project/git/gen-system/results/2026-09-06/swebench/repos/django__django",
+  "suites": [
+    {
+      "name": "localization_recall",
+      "cases": [
+        {
+          "name": "gold_files_provided",
+          "pass": true,
+          "got": "1",
+          "want": "\u003e=1"
+        },
+        {
+          "name": "seeds_matched_at_least_one",
+          "pass": true,
+          "got": "1/1",
+          "want": "\u003e=1"
+        },
+        {
+          "name": "gold_file_reached_within_2_hops",
+          "pass": true,
+          "got": "1/1 gold files",
+          "want": "\u003e=1"
+        }
+      ],
+      "metrics": [
+        {
+          "name": "hop0_file_recall",
+          "value": 0,
+          "unit": "ratio",
+          "higher_is_better": true
+        },
+        {
+          "name": "hop0_gold_files_hit",
+          "value": 0,
+          "unit": "files",
+          "higher_is_better": true
+        },
+        {
+          "name": "hop0_neighbourhood_files",
+          "value": 4,
+          "unit": "files"
+        },
+        {
+          "name": "hop0_neighbourhood_symbols",
+          "value": 4,
+          "unit": "symbols"
+        },
+        {
+          "name": "hop1_file_recall",
+          "value": 0,
+          "unit": "ratio",
+          "higher_is_better": true
+        },
+        {
+          "name": "hop1_gold_files_hit",
+          "value": 0,
+          "unit": "files",
+          "higher_is_better": true
+        },
+        {
+          "name": "hop1_neighbourhood_files",
+          "value": 6,
+          "unit": "files"
+        },
+        {
+          "name": "hop1_neighbourhood_symbols",
+          "value": 8,
+          "unit": "symbols"
+        },
+        {
+          "name": "hop2_file_recall",
+          "value": 1,
+          "unit": "ratio",
+          "higher_is_better": true
+        },
+        {
+          "name": "hop2_gold_files_hit",
+          "value": 1,
+          "unit": "files",
+          "higher_is_better": true
+        },
+        {
+          "name": "hop2_neighbourhood_files",
+          "value": 43,
+          "unit": "files"
+        },
+        {
+          "name": "hop2_neighbourhood_symbols",
+          "value": 91,
+          "unit": "symbols"
+        },
+        {
+          "name": "seeds_total",
+          "value": 1,
+          "unit": "seeds"
+        },
+        {
+          "name": "seeds_matched",
+          "value": 1,
+          "unit": "seeds",
+          "higher_is_better": true
+        },
+        {
+          "name": "gold_files_total",
+          "value": 1,
+          "unit": "files"
+        },
+        {
+          "name": "symbols_total",
+          "value": 53311,
+          "unit": "symbols"
+        },
+        {
+          "name": "call_edges_resolved",
+          "value": 54381,
+          "unit": "edges"
+        }
+      ],
+      "duration_ns": 61863852890
+    }
+  ]
+}

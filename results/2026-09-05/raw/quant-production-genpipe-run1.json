@@ -1,0 +1,161 @@
+{
+  "schema": "genbench/v1",
+  "started_at": "2026-09-06T02:32:12.770233717+07:00",
+  "finished_at": "2026-09-06T02:43:07.854868541+07:00",
+  "host": {
+    "os": "linux",
+    "arch": "amd64",
+    "num_cpu": 16,
+    "go_version": "go1.25.0"
+  },
+  "model": {
+    "name": "qwen2.5-coder:14b",
+    "endpoint": "http://localhost:11434"
+  },
+  "project_root": ".",
+  "suites": [
+    {
+      "name": "gen_pipeline",
+      "cases": [
+        {
+          "name": "idea_1: A small library lending…",
+          "pass": true,
+          "got": "ops=0 stubbed=0 repairs=0/0 heals=0/0 entities=3 findings=123 build=true test=true wall=102s",
+          "want": "0 stubs, build+test green"
+        },
+        {
+          "name": "idea_2: An inventory service for…",
+          "pass": true,
+          "got": "ops=1 stubbed=0 repairs=0/0 heals=0/0 entities=3 findings=138 build=true test=true wall=130s",
+          "want": "0 stubs, build+test green"
+        },
+        {
+          "name": "idea_3: A gym membership service:…",
+          "pass": true,
+          "got": "ops=2 stubbed=0 repairs=0/0 heals=0/0 entities=4 findings=179 build=true test=true wall=120s",
+          "want": "0 stubs, build+test green"
+        },
+        {
+          "name": "idea_4: A support ticket tracker:…",
+          "pass": true,
+          "got": "ops=0 stubbed=0 repairs=0/0 heals=0/0 entities=2 findings=86 build=true test=true wall=159s",
+          "want": "0 stubs, build+test green"
+        },
+        {
+          "name": "idea_5: An event registration service:…",
+          "pass": true,
+          "got": "ops=0 stubbed=0 repairs=0/0 heals=0/0 entities=2 findings=86 build=true test=true wall=143s",
+          "want": "0 stubs, build+test green"
+        }
+      ],
+      "metrics": [
+        {
+          "name": "ideas_total",
+          "value": 5,
+          "unit": "ideas"
+        },
+        {
+          "name": "ops_total",
+          "value": 3,
+          "unit": "ops",
+          "higher_is_better": true
+        },
+        {
+          "name": "ops_stubbed",
+          "value": 0,
+          "unit": "ops"
+        },
+        {
+          "name": "stub_rate_pct",
+          "value": 0,
+          "unit": "%"
+        },
+        {
+          "name": "op_repair_attempts",
+          "value": 0,
+          "unit": "attempts"
+        },
+        {
+          "name": "op_repair_successes",
+          "value": 0,
+          "unit": "attempts",
+          "higher_is_better": true
+        },
+        {
+          "name": "heal_attempts_total",
+          "value": 0,
+          "unit": "attempts"
+        },
+        {
+          "name": "heal_success",
+          "value": 0,
+          "unit": "attempts",
+          "higher_is_better": true
+        },
+        {
+          "name": "entities_total",
+          "value": 14,
+          "unit": "entities"
+        },
+        {
+          "name": "planner_fallbacks",
+          "value": 0,
+          "unit": "ideas"
+        },
+        {
+          "name": "verify_findings",
+          "value": 612,
+          "unit": "findings"
+        },
+        {
+          "name": "backend_builds",
+          "value": 5,
+          "unit": "ideas",
+          "higher_is_better": true
+        },
+        {
+          "name": "go_test_pass",
+          "value": 5,
+          "unit": "ideas",
+          "higher_is_better": true
+        },
+        {
+          "name": "wall_s_total",
+          "value": 653.662014214,
+          "unit": "s"
+        },
+        {
+          "name": "prompt_tokens",
+          "value": 35217,
+          "unit": "tokens"
+        },
+        {
+          "name": "eval_tokens",
+          "value": 16933,
+          "unit": "tokens"
+        },
+        {
+          "name": "model_requests",
+          "value": 57,
+          "unit": "requests"
+        },
+        {
+          "name": "model_errors",
+          "value": 0,
+          "unit": "attempts"
+        },
+        {
+          "name": "ideas_no_model_contact",
+          "value": 0,
+          "unit": "ideas"
+        },
+        {
+          "name": "live_mode",
+          "value": 1,
+          "unit": "flag"
+        }
+      ],
+      "duration_ns": 655084622764
+    }
+  ]
+}

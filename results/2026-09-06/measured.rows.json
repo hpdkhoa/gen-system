@@ -1,0 +1,56 @@
+{
+  "two_model_strategies": {
+    "_columns": [
+      "strategy",
+      "reload_cost_s",
+      "tokens_per_sec",
+      "ops_total",
+      "stub_rate_pct",
+      "heal_attempts",
+      "go_test_pass",
+      "n",
+      "runs_not_measured"
+    ],
+    "_provenance": {
+      "date": "2026-09-06",
+      "gen_system_commit": "b503f324690b4424086826aea3c47e00d435ea29",
+      "task_set": "bench/tasks.json (frozen 2026-08-27)",
+      "gpu": "NVIDIA GeForce RTX 4060 Ti, 16380 MiB, 595.71.05"
+    },
+    "rows": [
+      [
+        "A-sequential-keepalive",
+        1.97,
+        30.8,
+        3.0,
+        66.7,
+        0.0,
+        5.0,
+        3,
+        0
+      ],
+      [
+        "B-both-resident",
+        1.97,
+        30.8,
+        3.0,
+        22.2,
+        0.0,
+        5.0,
+        3,
+        0
+      ],
+      [
+        "C-single-shared",
+        1.96,
+        30.8,
+        3.0,
+        0.0,
+        0.0,
+        5.0,
+        3,
+        0
+      ]
+    ]
+  }
+}
