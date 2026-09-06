@@ -69,10 +69,39 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--results", required=True)
     ap.add_argument("--measured")
+    ap.add_argument("--reuse", action="append", default=[],
+                    help="v26.35: earlier results/<date> directory whose swebench_localization.json "
+                         "is merged instead when this run produced no per task results. Keeps "
+                         "its own provenance plus a reused_from field.")
     args = ap.parse_args()
     results = Path(args.results); raw = results / "raw"
     if not raw.is_dir():
         raise SystemExit(f"no raw/ under {results}")
+    if not list(raw.glob("swebench-*.json")):
+        for d in (Path(x) for x in args.reuse):
+            src = d / "swebench_localization.json"
+            if d.resolve() == results.resolve() or not src.exists():
+                continue
+            out = json.loads(src.read_text(encoding="utf-8"))
+            for key in ("swebench_verified_localization", "swebench_verified_localization_by_repo",
+                        "swebench_verified_repos"):
+                if key in out:
+                    out[key]["_provenance"] = dict(out[key].get("_provenance", {}), reused_from=d.name)
+            print(f"\n{BOUNDARY}\n")
+            print(f"no SWE-bench run in {results.name}; reusing {src} (its own date and commit kept)")
+            if args.measured:
+                mp = Path(args.measured)
+                measured = json.loads(mp.read_text(encoding="utf-8")) if mp.exists() else {}
+                gs = measured.setdefault("gen_system", {})
+                for key in ("swebench_verified_localization", "swebench_verified_localization_by_repo",
+                            "swebench_verified_repos"):
+                    if out.get(key, {}).get("rows"):
+                        gs[key] = out[key]
+                mp.write_text(json.dumps(measured, indent=2, ensure_ascii=False), encoding="utf-8")
+                print(f"merged into {mp}")
+            return
+        print(f"no SWE-bench raw files in {results.name} and nothing to reuse; nothing written")
+        return
 
     env = {}
     if (results / "env.json").exists():
@@ -189,7 +218,10 @@ def main():
         mp = Path(args.measured)
         measured = json.loads(mp.read_text(encoding="utf-8")) if mp.exists() else {}
         gs = measured.setdefault("gen_system", {})
-        for key in ("swebench_verified_localization", "swebench_verified_repos"):
+        # v26.35: the per repository table was built but never merged, so the
+        # portfolio's fill tool had nothing to render for it.
+        for key in ("swebench_verified_localization", "swebench_verified_localization_by_repo",
+                    "swebench_verified_repos"):
             if out[key]["rows"]:
                 gs[key] = out[key]
         mp.write_text(json.dumps(measured, indent=2, ensure_ascii=False), encoding="utf-8")

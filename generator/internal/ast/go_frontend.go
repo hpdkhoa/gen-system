@@ -482,7 +482,7 @@ func (c *goConverter) convertStmt(s goast.Stmt) []*Node {
 		return []*Node{n}
 
 	case *goast.DeferStmt:
-		n := &Node{Kind: NodeDefer, Language: LangGo, Span: c.span(st.Pos(), st.End()), Callee: exprText(st.Call.Fun)}
+		n := &Node{Kind: NodeDefer, Language: LangGo, Span: c.span(st.Pos(), st.End()), Callee: calleeName(st.Call.Fun)}
 		return []*Node{n}
 
 	case *goast.BlockStmt:
@@ -530,8 +530,82 @@ func (c *goConverter) callNode(call *goast.CallExpr) *Node {
 		Kind:     NodeCall,
 		Language: LangGo,
 		Span:     c.span(call.Pos(), call.End()),
-		Callee:   exprText(call.Fun),
+		Callee:   calleeName(call.Fun),
 	}
+}
+
+// FuncLiteralCallee is the Callee of a call whose function is an anonymous
+// function literal invoked in place: `func() { ... }()`. Until v26.34 the
+// whole literal's source text was the callee name, which can never resolve
+// and which the verify stage then reported as an unresolved project call.
+const FuncLiteralCallee = "func literal"
+
+// calleeName renders the function part of a call by shape rather than by
+// source text (v26.34):
+//
+//	helper()                      -> helper
+//	pkg.F()                       -> pkg.F
+//	s.mu.Lock()                   -> s.mu.Lock
+//	json.NewDecoder(r).Decode()   -> json.NewDecoder().Decode
+//	w.Header().Set()              -> w.Header().Set
+//	func() { ... }()              -> func literal
+//	g[int](x)                     -> g
+//
+// Argument lists are dropped from chained receivers, so the name is stable
+// and short, and the first segment is always the identifier the resolver
+// needs: a package alias or a receiver variable. Conversions such as
+// []byte(x) keep the type text, as before.
+func calleeName(fun goast.Expr) string {
+	switch f := fun.(type) {
+	case nil:
+		return ""
+	case *goast.Ident:
+		return f.Name
+	case *goast.SelectorExpr:
+		base := calleeBase(f.X)
+		if base == "" {
+			return f.Sel.Name
+		}
+		return base + "." + f.Sel.Name
+	case *goast.FuncLit:
+		return FuncLiteralCallee
+	case *goast.ParenExpr:
+		return calleeName(f.X)
+	case *goast.IndexExpr:
+		return calleeName(f.X)
+	case *goast.IndexListExpr:
+		return calleeName(f.X)
+	}
+	return exprText(fun)
+}
+
+// calleeBase renders the receiver side of a selector without argument lists.
+func calleeBase(x goast.Expr) string {
+	switch b := x.(type) {
+	case nil:
+		return ""
+	case *goast.Ident:
+		return b.Name
+	case *goast.SelectorExpr:
+		base := calleeBase(b.X)
+		if base == "" {
+			return b.Sel.Name
+		}
+		return base + "." + b.Sel.Name
+	case *goast.CallExpr:
+		return calleeName(b.Fun) + "()"
+	case *goast.ParenExpr:
+		return calleeBase(b.X)
+	case *goast.StarExpr:
+		return calleeBase(b.X)
+	case *goast.IndexExpr:
+		return calleeBase(b.X)
+	case *goast.FuncLit:
+		return FuncLiteralCallee + "()"
+	case *goast.CompositeLit:
+		return exprText(b.Type) + "{}"
+	}
+	return exprText(x)
 }
 
 // callsIn returns NodeCall children for every call expression inside expr, so

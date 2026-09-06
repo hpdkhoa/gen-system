@@ -1,4 +1,4 @@
-# PUBLISH: from the v26.33 zip to a public repo, with a fresh campaign
+# PUBLISH: from the v26.35 zip to a public repo, with a fresh campaign
 
 One document, in order, written for a rerun. Everything before Stage 5 is reversible. Nothing
 is public until Stage 6, and Stage 5 is the gate that decides whether you publish at all.
@@ -11,9 +11,12 @@ Where things are: `bench/README.md` (what each driver measures), `bench/swebench
 What changed since the last runbook, in one list:
 
 - Strategy B in the 2026-09-04 campaign measured nothing. A keep alive encoding bug made every
-  request fail. The door, the pipeline and the aggregator are fixed. B must be rerun.
-- SWE-bench never ran. The driver had a line ending bug in the task list. Fixed, and the step is
-  now inside `run-all.sh`.
+  request fail. The door, the pipeline and the aggregator are fixed, and the 2026-09-06 rerun
+  measured all three strategies.
+- SWE-bench ran for the first time on 2026-09-06 (60 tasks). The step is inside `run-all.sh`
+  and `run-partial.sh`.
+- `run-partial.sh` (v26.35) runs only the drivers you name and reuses every other table from an
+  earlier directory without re-dating it.
 - `bench/attest.py` writes the certificate for a campaign. `run-all.sh` runs it last.
 - `results/` no longer picks up the genbench binary or the corpus clones.
 - Team style profiles exist (v26.33). Nothing measures them yet by default; Stage 4 has an
@@ -25,12 +28,13 @@ What changed since the last runbook, in one list:
 
 ```bash
 cd ~/code/gen-system
-unzip -o /path/to/out/gen-system-main-v26.33.zip -d /tmp/gs
+unzip -o /path/to/out/gen-system-main-v26.35.zip -d /tmp/gs
 cp -r /tmp/gs/gen-system-main/. .
 git status                       # review; nothing should surprise you
 ```
 
-The zip does not carry `results/`, `bench/env.json` or `bench/swebench/tasks.jsonl`. Your results
+v26.34 changed the verify stage: it now attaches the standard library and reports internal
+resolution only, so the 171 finding halt you saw does not happen on this zip. The zip does not carry `results/`, `bench/env.json` or `bench/swebench/tasks.jsonl`. Your results
 stay yours, the environment is frozen again in Stage 2, and the task list is re-fetched and
 checked against the committed `tasks.sha256`.
 
@@ -39,9 +43,11 @@ P=~/code/my-portfolio
 cp -r /path/to/out/changes/my-portfolio/. $P/
 ```
 
-That copies writeups 02 and 03 (markdown and regenerated html), the gen-system project page, and
-`tools/fill_portfolio.py`, which now renders the SWE-bench tables. `measured.json` is deliberately
-not in `changes/`, so your filled rows cannot be overwritten.
+That copies writeups 02 and 03 (markdown and regenerated html), the gen-system project page,
+`tools/fill_portfolio.py`, and this time `benchmarks/results/measured.json`: your uploaded file
+plus the 2026-09-05 rows for four tables and the SWE-bench per repository table. If you ran
+anything after the upload, do not copy `measured.json`; run the commands in
+`RESULTS-REVIEW-2.md` section 5 instead.
 
 ```bash
 cp /path/to/out/changes/gen-system/results-2026-09-04/* ~/code/gen-system/results/2026-09-04/
@@ -116,14 +122,14 @@ cd ~/code/gen-system
 go build ./... && go test ./...
 ```
 
-Expected: **26 packages ok, 0 failures.** That is the verified state on Windows at v26.33
+Expected: **26 packages ok, 0 failures.** That is the verified state on Windows at v26.35
 (25 packages plus the new style package). A failure on Linux is new drift; understand it before
 spending hours measuring.
 
 ```bash
 ./bench/freeze-env.sh            # writes bench/env.json: commit, GPU, driver, models
 git add -A
-git commit -m "v26.33: keep alive fix, not measured runs, attestation, SWE-bench in run-all, style profiles"
+git commit -m "v26.35: keep alive fix, attestation, SWE-bench in run-all, style profiles, import scoped resolution, stdlib auto, partial runs with reuse"
 ./bench/freeze-env.sh            # again, now that the tree is clean, so working_tree_dirty is false
 git add bench/env.json && git commit -m "bench: freeze environment at a clean tree"
 ```
@@ -148,7 +154,7 @@ ollama pull deepseek-coder-v2:16b-lite-instruct-q8_0
 One command runs everything, in dependency order, and ends with the summaries and the attestation:
 
 ```bash
-MEASURED=/home/kai-hoang/Project/git/my-portfolio/benchmarks/results/measured.json ./bench/run-all.sh
+MEASURED=~/code/my-portfolio/benchmarks/results/measured.json ./bench/run-all.sh
 ```
 
 `run-all.sh` now includes the SWE-bench step. `SWEBENCH_LIMIT` picks how many of the 500
@@ -157,38 +163,36 @@ clones on disk), `skip` to leave it out.
 
 Or piecewise, fastest feedback first. Every driver writes raw JSON into `results/<date>/raw/`.
 
-| Command                                                                                      | Fills                                                                                                  | Rough time                        |
-|----------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------|-----------------------------------|
-| `./bench/run-understand.sh`                                                                  | 4 pinned public repos + CobolCraft baseline verify                                                     | minutes, no GPU                   |
-| `./bench/run-stream.sh`                                                                      | TTFT, stream on vs off                                                                                 | minutes                           |
-| `./bench/run-offload.sh`                                                                     | tok/s and VRAM vs `OLLAMA_NUM_GPU`                                                                     | ~30 min                           |
-| `./bench/run-quant-sweep.sh`                                                                 | Q4/Q5/Q8 plus the production pair, n=3                                                                 | hours                             |
-| `./bench/run-strategies.sh`                                                                  | strategies A, B, C on the frozen task set. **B must be rerun; the 2026-09-04 B rows measured nothing** | hours                             |
-| `./bench/swebench/run_swebench_localize.sh --limit 60`                                       | localization recall on SWE-bench Verified. Not a solve rate; see its README                            | minutes for 60, hours for all 500 |
-| `python3 bench/summarise.py --results results/<date> --measured $MEASURED`                   | every gen-system table                                                                                 | seconds                           |
-| `python3 bench/swebench/summarise_swebench.py --results results/<date> --measured $MEASURED` | the three SWE-bench tables                                                                             | seconds                           |
-| `python3 bench/attest.py --results results/<date>`                                           | `MANIFEST.sha256` and `ATTESTATION.md`, the certificate                                                | seconds                           |
+| Command | Fills | Rough time |
+|---|---|---|
+| `./bench/run-understand.sh` | 4 pinned public repos + CobolCraft baseline verify | minutes, no GPU |
+| `./bench/run-stream.sh` | TTFT, stream on vs off | minutes |
+| `./bench/run-offload.sh` | tok/s and VRAM vs `OLLAMA_NUM_GPU` | ~30 min |
+| `./bench/run-quant-sweep.sh` | Q4/Q5/Q8 plus the production pair, n=3 | hours |
+| `./bench/run-strategies.sh` | strategies A, B, C on the frozen task set (rerun on 2026-09-06 with all rows measured) | hours |
+| `./bench/swebench/run_swebench_localize.sh --limit 60` | localization recall on SWE-bench Verified. Not a solve rate; see its README | minutes for 60, hours for all 500 |
+| `python3 bench/summarise.py --results results/<date> --measured $MEASURED` | every gen-system table | seconds |
+| `python3 bench/swebench/summarise_swebench.py --results results/<date> --measured $MEASURED` | the three SWE-bench tables | seconds |
+| `python3 bench/attest.py --results results/<date>` | `MANIFEST.sha256` and `ATTESTATION.md`, the certificate | seconds |
 
 Start with `run-understand.sh`. No GPU, and it exercises the parser path end to end, so a broken
 setup shows up in minutes instead of after the sweep.
 
-**If you only rerun what is missing.** The 2026-09-04 campaign already has understand, stream,
-offload and the quant sweep. A results directory is dated, so a partial rerun on a new day makes
-a new directory with only the new drivers. That is fine for the strategies and SWE-bench tables,
-because `summarise.py` replaces one table at a time in `measured.json`. Run these, in this order:
+**If you only rerun what is missing.** `run-partial.sh` (v26.35) runs the drivers you name into
+today's directory and fills every other table from earlier directories without re-dating them:
 
 ```bash
-./bench/run-strategies.sh
-./bench/swebench/run_swebench_localize.sh --limit 60
-python3 bench/summarise.py --results results/$(date +%F) --measured $MEASURED
-python3 bench/swebench/summarise_swebench.py --results results/$(date +%F) --measured $MEASURED
-python3 bench/attest.py --results results/$(date +%F)
+MEASURED=~/code/my-portfolio/benchmarks/results/measured.json   ./bench/run-partial.sh --run strategies,swebench:60   --reuse results/2026-09-05 --reuse results/2026-09-06 --reuse results/2026-09-04
 ```
 
-The quant sweep and offload rows in `measured.json` keep their 2026-09-04 provenance. The
-attestation for the new directory will list the drivers that did not run that day. That is true,
-and it is what a reader should see. If you would rather
-have one directory with everything at one commit, run `run-all.sh` and accept the day.
+Reuse order matters: the first directory with raw data for a table wins, and that table keeps that
+directory's date and commit in its provenance plus a `reused_from` field. The attestation for the
+new directory lists every reused table with its source. With no `--reuse`, every other `results/*`
+directory is tried, newest first. The three directories you have today: `2026-09-05` holds
+understand, stream, offload and the quant sweep at a clean commit; `2026-09-06` holds strategies
+and SWE-bench at the same commit; `2026-09-04` is the first campaign with a dirty tree and should
+be last in the order. If you would rather have one directory with everything at one commit, run
+`run-all.sh` and accept the day.
 
 Then commit the evidence:
 
@@ -227,22 +231,22 @@ Do not skip to Stage 6. Every line is from PLAN.md's Definition of Done, plus th
 
 ```bash
 cd ~/code/my-portfolio
-python3 tools/fill_portfolio.py --gen-system /home/kai-hoang/Project/git/gen-system --hieuluat ~/code/hieuluat
+python3 tools/fill_portfolio.py --gen-system ~/code/gen-system --hieuluat ~/code/hieuluat
 python3 tools/fill_portfolio.py --check          # must list nothing unfilled that you care about
 python3 tools/regen_writeup_html.py              # the html twins carry the tables only after this
 ```
 
-| # | Gate                                                         | How to check                                                                                                                                            |
-|---|--------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 1 | Writeup 02 tables have rows, n and range, or say future work | Open section 6; tables inject between the `measured:gen` markers                                                                                        |
-| 2 | **At least one metric differs across quants**                | Passed on 2026-09-04: stub rate near 99, 82, 74 and 44 percent across Q4, Q5, Q8 and production, n=3. Check again after any rerun.                      |
-| 3 | At least one honest loss reported                            | True twice: writeup 01 section 6 (rerank), writeup 02 section 4 (broken metric); now a third time in section 6 (strategy B)                             |
-| 4 | No template text                                             | `grep -rn '_readme\|WebAssembly-free\|Replace every' ~/code/my-portfolio` returns nothing                                                               |
-| 5 | CV, story, README, portfolio, reference agree                | All done except the CV. See Stage 7                                                                                                                     |
-| 6 | Reference 100% annotated                                     | In refbuild: `extract.py` then `check.py` must exit 0                                                                                                   |
-| 7 | **No row rests on a run that measured nothing**              | `grep -n 'runs not measured' writeups/02-*.md`; every value in that column must be 0                                                                    |
-| 8 | **The attestation exists and matches**                       | `results/<date>/ATTESTATION.md` and `MANIFEST.sha256` are committed; `sha256sum -c results/<date>/MANIFEST.sha256` from inside `results/<date>/` passes |
-| 9 | **SWE-bench is labelled**                                    | The SWE-bench tables in writeup 02 carry "not a solve rate" in their caption, and the text never puts the recall next to the DeepDiscovery solve rate   |
+| # | Gate | How to check |
+|---|---|---|
+| 1 | Writeup 02 tables have rows, n and range, or say future work | Open section 6; tables inject between the `measured:gen` markers |
+| 2 | **At least one metric differs across quants** | Passed on 2026-09-04: stub rate near 99, 82, 74 and 44 percent across Q4, Q5, Q8 and production, n=3. Check again after any rerun. |
+| 3 | At least one honest loss reported | True twice: writeup 01 section 6 (rerank), writeup 02 section 4 (broken metric); now a third time in section 6 (strategy B) |
+| 4 | No template text | `grep -rn '_readme\|WebAssembly-free\|Replace every' ~/code/my-portfolio` returns nothing |
+| 5 | CV, story, README, portfolio, reference agree | All done except the CV. See Stage 7 |
+| 6 | Reference 100% annotated | In refbuild: `extract.py` then `check.py` must exit 0 |
+| 7 | **No row rests on a run that measured nothing** | `grep -n 'runs not measured' writeups/02-*.md`; every value in that column must be 0 |
+| 8 | **The attestation exists and matches** | `results/<date>/ATTESTATION.md` and `MANIFEST.sha256` are committed; `sha256sum -c results/<date>/MANIFEST.sha256` from inside `results/<date>/` passes |
+| 9 | **SWE-bench is labelled** | The SWE-bench tables in writeup 02 carry "not a solve rate" in their caption, and the text never puts the recall next to the DeepDiscovery solve rate |
 
 Gates 7 to 9 are the ones added since the last runbook. A row with a null quality cell and a
 non zero not measured count has not been measured. It must not be described as measured.
@@ -286,12 +290,12 @@ things need your hand:
 
 ## Stage 7. The four things only you can decide
 
-| Decision                | Where                          | Recommendation                                                                                                                                                                                                                                                                                              |
-|-------------------------|--------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **The CV**              | Not in this directory          | Three corrections: flowcharts are rendered for human review, not fed to the model; the stub path exists and the repair caps are 2 (operation) and 3 (task); "sequential scheduling with keep alive" is Ollama keep alive plus two roles plus measurement, not a scheduler. Gate 5 fails until this is done. |
-| **The reranker**        | writeup 01 section 6, `[TODO]` | Drop it. 384 ms for zero measured gain, and say you removed it. That reads better than leaving it on.                                                                                                                                                                                                       |
-| **The VC analysis doc** | `guide/`                       | Keep it out of the public tree (Stage 1).                                                                                                                                                                                                                                                                   |
-| **Repo URL**            | `README.md` quickstart         | Only you know it.                                                                                                                                                                                                                                                                                           |
+| Decision | Where | Recommendation |
+|---|---|---|
+| **The CV** | Not in this directory | Three corrections: flowcharts are rendered for human review, not fed to the model; the stub path exists and the repair caps are 2 (operation) and 3 (task); "sequential scheduling with keep alive" is Ollama keep alive plus two roles plus measurement, not a scheduler. Gate 5 fails until this is done. |
+| **The reranker** | writeup 01 section 6, `[TODO]` | Drop it. 384 ms for zero measured gain, and say you removed it. That reads better than leaving it on. |
+| **The VC analysis doc** | `guide/` | Keep it out of the public tree (Stage 1). |
+| **Repo URL** | `README.md` quickstart | Only you know it. |
 
 ---
 

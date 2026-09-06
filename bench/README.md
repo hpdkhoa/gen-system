@@ -37,6 +37,7 @@ Or piecewise (each writes raw JSON to `results/<date>/raw/`):
 | `swebench/run_swebench_localize.sh` | swebench_verified_localization (recall, not a solve rate; see below). `run-all.sh` runs it with `SWEBENCH_LIMIT` tasks (default 60, `0` = all 500, `skip` = leave out) | minutes for 60 tasks, hours for 500 |
 | `summarise.py` | measured.rows.json → measured.json (with `--measured`) | seconds |
 | `attest.py` | MANIFEST.sha256 + ATTESTATION.md: what ran, what did not, what was dropped (v26.32) | seconds |
+| `run-partial.sh` | only the drivers you name; every other table reused from an earlier results directory without re-dating (v26.35) | depends on the drivers |
 
 ## What changed vs the old quant_sweep.sh (repo root)
 
@@ -70,6 +71,17 @@ marks every such idea as a failed case with `NOT MEASURED` in the note. The 2026
 campaign found this the hard way: strategy B set `OLLAMA_KEEP_ALIVE=-1`, the door sent
 it as the string "-1", Ollama rejected every request, and the row would have read as a
 0 percent stub rate. The door now sends bare integers as numbers.
+
+## Partial runs and reuse (v26.35)
+
+`bench/run-partial.sh --run strategies,swebench:60 --reuse results/2026-09-05` runs only the
+drivers named, into today's directory, then fills every other table from the reuse directories
+in the order given. A reused table keeps its own date and commit in `_provenance` and gains a
+`reused_from` field, so nothing is re-dated. `summarise.py` and `summarise_swebench.py` take the
+same `--reuse` flag on their own. The attestation for the new directory lists every reused table
+with its source directory; the raw files behind a reused table are in that directory's own
+manifest. With no `--reuse`, every other `results/*` directory is tried newest first.
+`run-all.sh` remains the full campaign from fresh.
 
 ## Attestation
 

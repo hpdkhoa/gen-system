@@ -30,7 +30,6 @@ package bench
 import (
 	"fmt"
 	"sort"
-	"strings"
 	"time"
 
 	agentctx "gen-system/generator/internal/context"
@@ -64,12 +63,14 @@ func ResolutionRecall(root string, copybookPath []string, passThreshold float64)
 		return suite
 	}
 
-	// Build set of symbol names present in the index. Edges whose bare
-	// CalleeName matches one of these are "internal" — they should resolve.
-	knownNames := make(map[string]struct{})
-	for _, s := range ctx.Index.AllSymbols() {
-		knownNames[s.Name] = struct{}{}
-	}
+	// v26.34: internal versus external is decided by symbols.EdgeClassifier,
+	// the same rule the Understand verify pass uses. An edge is internal when
+	// it resolved to a PROJECT symbol, or when it is unresolved, a project
+	// symbol carries its bare name, and no import rules it out. Function
+	// literals called in place are neither. The old rule matched the bare name
+	// against every symbol including stdlib ones, so a stdlib ingest changed
+	// the population it was supposed to leave alone.
+	classifier := ctx.Index.NewEdgeClassifier()
 
 	type langStat struct {
 		total      int
@@ -83,23 +84,23 @@ func ResolutionRecall(root string, copybookPath []string, passThreshold float64)
 	resolvedInternal := 0   // resolved AND internal
 	external := 0           // bare name not in knownNames
 
+	literal := 0
 	for _, e := range edges {
-		bare := e.CalleeName
-		if dot := strings.LastIndex(bare, "."); dot >= 0 {
-			bare = bare[dot+1:]
-		}
-		isInternal := false
-		if _, ok := knownNames[bare]; ok {
-			isInternal = true
+		class, toProject := classifier.Classify(e)
+		isInternal := class == symbols.EdgeInternal
+		switch class {
+		case symbols.EdgeInternal:
 			internal++
-		} else {
+		case symbols.EdgeLiteral:
+			literal++
+		default:
 			external++
 		}
 
 		isResolved := e.CalleeID != ""
 		if isResolved {
 			resolved++
-			if isInternal {
+			if toProject {
 				resolvedInternal++
 			}
 		}
@@ -144,6 +145,7 @@ func ResolutionRecall(root string, copybookPath []string, passThreshold float64)
 		Metric{Name: "call_edges_internal", Value: float64(internal), Unit: "edges", HigherIsBetter: true},
 		Metric{Name: "call_edges_resolved", Value: float64(resolved), Unit: "edges", HigherIsBetter: true},
 		Metric{Name: "call_edges_external", Value: float64(external), Unit: "edges"},
+		Metric{Name: "call_edges_literal", Value: float64(literal), Unit: "edges"},
 	)
 
 	// Stable per-language breakdown — recall on the INTERNAL slice.

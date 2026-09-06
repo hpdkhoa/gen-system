@@ -171,11 +171,102 @@ func (idx *Index) ResolveAll() {
 		if edge.CalleeID != "" {
 			continue
 		}
-		callee := idx.resolveByNameLocked(edge.CalleeName)
+		callee := idx.resolveEdgeLocked(edge)
 		if callee != nil {
 			idx.callEdges[i].CalleeID = callee.ID
 		}
 	}
+}
+
+// resolveEdgeLocked (v26.34) resolves one call edge. A package qualified
+// name is resolved through the CALLER FILE'S IMPORTS: when the first segment
+// of the callee is an import alias in that file, only symbols defined under
+// that import path are candidates, and if none exists the edge stays
+// unresolved. Before this, `errors.New` was stripped to the bare name `New`
+// and could be captured by any project symbol called New, and a stdlib call
+// that was not captured showed up as an unresolved project call. A name
+// whose first segment is not an import (a receiver variable such as
+// s.store.Get) falls back to bare name resolution with the tier preference,
+// unchanged. A function literal called in place never resolves.
+func (idx *Index) resolveEdgeLocked(e CallEdge) *Symbol {
+	name := e.CalleeName
+	if name == "" || strings.HasPrefix(name, ast.FuncLiteralCallee) {
+		return nil
+	}
+	if dot := strings.Index(name, "."); dot >= 0 {
+		qual := name[:dot]
+		if caller, ok := idx.allSymbols[e.CallerID]; ok {
+			if importPath := idx.resolveImportPath(qual, caller.DefinedIn); importPath != "" {
+				return idx.resolveUnderImportLocked(importPath, name[strings.LastIndex(name, ".")+1:])
+			}
+		}
+	}
+	return idx.resolveByNameLocked(name)
+}
+
+// resolveUnderImportLocked returns the symbol named bare whose defining
+// directory sits under importPath, preferring an exported one; nil when the
+// package is not in the index (an external package that was not ingested).
+// Candidates are sorted by ID first, so the choice is deterministic.
+func (idx *Index) resolveUnderImportLocked(importPath, bare string) *Symbol {
+	type scored struct {
+		sym   *Symbol
+		score int
+	}
+	var candidates []scored
+	for _, s := range idx.allSymbols {
+		if s.Name != bare || s.Kind == SymImport {
+			continue
+		}
+		if n := importMatchScore(s.DefinedIn, importPath); n > 0 {
+			candidates = append(candidates, scored{s, n})
+		}
+	}
+	if len(candidates) == 0 {
+		return nil
+	}
+	// Longest import suffix first, then project over external, then exported,
+	// then ID. The provenance tie break matters: a project package named
+	// `trace` and the stdlib's `runtime/trace` both end with "/trace", and
+	// without it the stdlib symbol could win on ID order once a stdlib was
+	// attached, which moved internal recall between the two loads.
+	sort.Slice(candidates, func(i, j int) bool {
+		a, b := candidates[i], candidates[j]
+		if a.score != b.score {
+			return a.score > b.score
+		}
+		if a.sym.Provenance.IsExternal() != b.sym.Provenance.IsExternal() {
+			return !a.sym.Provenance.IsExternal()
+		}
+		if a.sym.Exported != b.sym.Exported {
+			return a.sym.Exported
+		}
+		return a.sym.ID < b.sym.ID
+	})
+	return candidates[0].sym
+}
+
+// importMatchScore returns how many trailing segments of importPath the
+// directory of a defining file ends with, or 0 when none. A project import
+// "app/internal/store" lives in .../internal/store (score 2 or 3 depending
+// on the checkout name); a stdlib import "net/http" lives in
+// GOROOT/src/net/http (score 2); "runtime/trace" against a project dir
+// .../internal/trace scores 1.
+func importMatchScore(definedIn, importPath string) int {
+	dir := filepath.ToSlash(filepath.Dir(definedIn))
+	segs := strings.Split(strings.Trim(importPath, "/"), "/")
+	for i := 0; i < len(segs); i++ {
+		sfx := strings.Join(segs[i:], "/")
+		if dir == sfx || strings.HasSuffix(dir, "/"+sfx) {
+			return len(segs) - i
+		}
+	}
+	return 0
+}
+
+// dirMatchesImport reports whether importMatchScore is positive.
+func dirMatchesImport(definedIn, importPath string) bool {
+	return importMatchScore(definedIn, importPath) > 0
 }
 
 // resolveCallEdges links CalleeName → CalleeID where possible.
@@ -194,7 +285,7 @@ func (idx *Index) resolveCallEdges() {
 		if edge.CalleeID != "" {
 			continue
 		}
-		callee := idx.resolveByNameLocked(edge.CalleeName)
+		callee := idx.resolveEdgeLocked(edge)
 		if callee != nil {
 			idx.callEdges[i].CalleeID = callee.ID
 		}
@@ -334,7 +425,7 @@ func (idx *Index) UpdateFile(filePath string, m *ast.Module) {
 		if edge.CalleeID != "" {
 			continue
 		}
-		callee := idx.resolveByNameLocked(edge.CalleeName)
+		callee := idx.resolveEdgeLocked(edge)
 		if callee != nil {
 			idx.callEdges[i].CalleeID = callee.ID
 		}

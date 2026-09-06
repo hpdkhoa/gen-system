@@ -226,9 +226,13 @@ func extractNode(t *Table, n *ast.Node, filePath string, lang ast.Language, laye
 		})
 
 	case ast.NodeImport:
+		importName := n.Name
+		if n.ImportAlias != "" {
+			importName = n.ImportAlias // v26.34: `import js "encoding/json"` is referred to as js
+		}
 		t.Add(&Symbol{
 			ID:        SymbolID(filePath, SymImport, n.ImportPath),
-			Name:      n.Name,
+			Name:      importName,
 			QualName:  n.ImportPath,
 			Kind:      SymImport,
 			Language:  lang,

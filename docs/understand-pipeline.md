@@ -141,20 +141,40 @@ fine inside one run and worth knowing before comparing IDs across machines.
 
 ## Resolution and its priority
 
-`ResolveAll` (`symbols/index.go:166`) is idempotent and only touches edges whose `CalleeID` is
-still empty. `resolveByNameLocked` (`index.go:343`) strips any qualifier before the last dot, then
-prefers, in order:
+`ResolveAll` (`symbols/index.go`) is idempotent and only touches edges whose `CalleeID` is
+still empty. Since v26.34 every edge goes through `resolveEdgeLocked` first. When the callee is
+package qualified and its first segment is an import alias in the caller's file, only symbols
+defined under that import path are candidates. If the package holds none, the edge stays
+unresolved. That is what keeps `errors.New` from being captured by a project function named
+`New`. A callee whose first segment is not an import (a receiver variable, `s.store.Get`) falls
+through to `resolveByNameLocked`, which strips the qualifier and prefers, in order:
 
 1. a project symbol that is exported
 2. any project symbol
 3. an exported external symbol (standard library or third party)
 4. any external symbol
 
-Unresolved edges are counted rather than guessed at. Two counters exist for different purposes.
-`runUnderstandVerify` (`agent/verify_understand.go:111`) reports resolution over project tier
-callers during generation. `ResolutionRecall` (`bench/resolution.go:43`) splits the population into
-internal and external, so the benchmark can report an honest internal recall next to the overall
-number.
+The Go frontend names a callee by the shape of the call, not its source text (v26.34). An
+anonymous function called in place is named `func literal` and never resolves. A chained call
+keeps its receiver chain without argument lists, `json.NewDecoder().Decode`, so the first segment
+is always the identifier the resolver needs.
+
+Unresolved edges are counted rather than guessed at. One rule decides what an edge is, in
+`symbols/classify.go`, and both counters use it. An edge is one of three things. A literal is an
+anonymous function called in place. An external edge resolved to a non project symbol, or is
+unresolved and package qualified through an import that holds no project symbol, or is named
+after nothing any project symbol defines. Everything else is internal. Internal recall
+is resolved internal over internal. It does not move when a standard library is attached: a
+stdlib call is external either way, unresolved through its import before, resolved to a stdlib
+symbol after. `runUnderstandVerify` (`agent/verify_understand.go`) reports it during generation
+and lists only internal unresolved edges as findings. `ResolutionRecall` (`bench/resolution.go`)
+reports it for the benchmark next to the overall number and the external and literal counts.
+
+Before v26.34 the verify pass had its own rule, sixteen builtin names, and reported every stdlib
+call in a generated backend as an unresolved project symbol: 234 of 287 edges, an 18.5 percent
+"recall", and a halt in stop mode over nothing. The generation path also never attached a
+standard library. It now loads with stdlib auto detection (`agent.LoadOpts`, `--stdlib` on the
+gen CLI, `GEN_STDLIB`), the same detection understand-server uses.
 
 **A determinism bug lived here, and it is worth knowing what it was.** Until v26.25 this function
 ranged over `idx.allSymbols` directly and kept the first match in each tier. `allSymbols` is a map

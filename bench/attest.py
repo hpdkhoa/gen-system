@@ -181,19 +181,38 @@ def main():
         w("")
     w("## Tables produced (rows)")
     w("")
+    reused = []
     if rows:
         for key, tbl in rows.items():
             if isinstance(tbl, dict) and "rows" in tbl:
                 n = len(tbl["rows"])
-                w(f"- `gen_system.{key}`: {n} row(s)" if n else f"- `gen_system.{key}`: **no rows**")
+                src = (tbl.get("_provenance") or {}).get("reused_from")
+                if src:
+                    reused.append((key, src, (tbl.get("_provenance") or {}).get("gen_system_commit", "")))
+                    w(f"- `gen_system.{key}`: {n} row(s), **reused from `{src}`**, not measured in this directory")
+                else:
+                    w(f"- `gen_system.{key}`: {n} row(s)" if n else f"- `gen_system.{key}`: **no rows**")
     else:
         w("- `measured.rows.json` not present; run `bench/summarise.py` first.")
     w("")
+    if reused:
+        w("## Tables reused from earlier campaigns")
+        w("")
+        w("These tables were not measured in this directory. `bench/summarise.py --reuse` took them from")
+        w("the directory named, and each keeps that directory's date and commit in its provenance. The")
+        w("raw files behind them are in that directory's own `MANIFEST.sha256`, not in this one.")
+        w("")
+        for key, src, commit in reused:
+            w(f"- `gen_system.{key}` from `{src}` (commit `{commit[:12]}`)")
+        w("")
     w("## SWE-bench Verified")
     w("")
     if sb:
         loc = sb.get("swebench_verified_localization", {})
         n_rows = loc.get("rows", [])
+        if (loc.get("_provenance") or {}).get("reused_from"):
+            w(f"Reused from `{loc['_provenance']['reused_from']}`; not run in this directory.")
+            w("")
         w("**Localization recall only. Not a solve rate.** gen-system has no issue to patch pipeline, so a")
         w("SWE-bench solve rate cannot be produced and is not claimed. The number here answers one question:")
         w("from identifiers in the issue text, does the call graph neighbourhood reach the files the gold")

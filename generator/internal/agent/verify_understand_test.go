@@ -79,11 +79,3 @@ func TestWriteFindingsReport(t *testing.T) {
 	}
 }
 
-func TestLooksIntraProject(t *testing.T) {
-	if looksIntraProject("len") || looksIntraProject("make") || looksIntraProject("") {
-		t.Error("builtins / empty must not look intra-project")
-	}
-	if !looksIntraProject("Checkout") || !looksIntraProject("s.ApplyDiscount") {
-		t.Error("project-ish names should look intra-project")
-	}
-}

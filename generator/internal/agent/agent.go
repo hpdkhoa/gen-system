@@ -56,7 +56,7 @@ func emit(phase, msg string) {
 //
 // ─────────────────────────────────────────────
 func RunFromPlan(plan planner.Plan, rootPath string) error {
-	ctx := agentctx.LoadContext(rootPath)
+	ctx := agentctx.LoadContextWithOpts(rootPath, LoadOpts) // v26.34: stdlib auto detected
 
 	// v25.5: reset per-run Understand-verify state so a prior run's halt/report
 	// never leaks into this one.
@@ -72,8 +72,10 @@ func RunFromPlan(plan planner.Plan, rootPath string) error {
 
 	emit("start", fmt.Sprintf("\n🤖 Agent starting — %d tasks to execute\n", len(plan.Tasks)))
 	emit("start", fmt.Sprintf("   Root: %s\n", rootPath))
-	emit("start", fmt.Sprintf("   Context: %d files, %d entities tracked\n\n",
+	emit("start", fmt.Sprintf("   Context: %d files, %d entities tracked\n",
 		len(ctx.Files), len(ctx.IR.Entities)))
+	emit("start", fmt.Sprintf("   Stdlib: %s, %d root(s) attached\n\n",
+		ctx.StdlibReport.Mode, len(ctx.StdlibReport.Roots)))
 
 	// ── Phase 1.1: Snapshot before any mutation ───────────────────
 	snapDir, snapErr := safety.SnapshotProject(rootPath)

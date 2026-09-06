@@ -67,7 +67,7 @@ func EvolveWithUnderstanding() {
 
 	// ── 1. UNDERSTAND: read the existing code at compiler accuracy ──
 	fmt.Println("🔬 Understanding existing code at", path, "…")
-	ctx := context.LoadContext(path)
+	ctx := context.LoadContextWithOpts(path, loadOpts()) // v26.34: stdlib auto detected
 	resolvedPct, nSyms, nEdges := resolutionStats(ctx.Index)
 	fmt.Printf("   resolved %.1f%% of %d call edges across %d symbols\n",
 		resolvedPct, nEdges, nSyms)
@@ -139,6 +139,7 @@ func EvolveWithUnderstanding() {
 	defer SetupHealLog()()
 	SetupVerifyUnderstand() // v25.5 step 2: Understand-validates-Generate mode
 	SetupStyle()            // v26.33: team style profile (--style / GEN_STYLE)
+	SetupStdlib()           // v26.34: --stdlib / GEN_STDLIB, default auto
 	if err := agent.RunFromPlan(plan, writeDir); err != nil {
 		fmt.Println("❌ Evolution failed:", err)
 		return

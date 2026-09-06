@@ -70,6 +70,7 @@ func IdeaFromInput(input string, useV2 bool, outDir string) {
 	defer SetupHealLog()()
 	SetupVerifyUnderstand() // v25.5 step 2: Understand-validates-Generate mode
 	SetupStyle()            // v26.33: team style profile (--style / GEN_STYLE)
+	SetupStdlib()           // v26.34: --stdlib / GEN_STDLIB, default auto
 
 	if err := agent.RunFromPlan(plan, outDir); err != nil {
 		fmt.Println("\n❌ Agent run completed with errors:", err)

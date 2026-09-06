@@ -91,6 +91,10 @@ Generate a new service:
 gen idea --out ./generated-app "a library lending service with members, books and loans"
 ```
 
+The standard library of every language in the project is attached automatically, import scoped,
+so the verify pass knows `net/http` and `encoding/json` when it rereads the output. `--stdlib none`
+opts out; `--stdlib go,java=/opt/jdk/java.base` is explicit. `GEN_STDLIB` is the environment form.
+
 ## Team style profiles
 
 A team's conventions can be given to the generator as a file, and checked on the way out.

@@ -85,10 +85,20 @@ type VerifyFinding struct {
 }
 
 // VerifyReport is the full result of one Understand validation pass.
+//
+// v26.34: the population is split the way bench/resolution.go splits it.
+// TotalEdges counts INTERNAL edges only: calls from a project caller to a
+// name some project symbol defines. ExternalEdges counts calls to names no
+// project symbol defines (stdlib, third party, methods on stdlib types),
+// whether or not the stdlib pass resolved them. LiteralEdges counts anonymous
+// functions called in place. Neither of the last two is a defect, and neither
+// sits in the denominator of ResolutionPct any more.
 type VerifyReport struct {
 	ResolvedEdges   int
 	UnresolvedEdges int
 	TotalEdges      int
+	ExternalEdges   int
+	LiteralEdges    int
 	Findings        []VerifyFinding
 }
 
@@ -109,13 +119,26 @@ var readOpPrefixes = []string{"get", "list", "find", "fetch", "search", "query",
 // and builds a VerifyReport. It never modifies anything; acting on the findings
 // is the caller's job (per VerifyMode).
 func runUnderstandVerify(backendPath string) VerifyReport {
-	uctx := agentctx.LoadContext(backendPath)
+	uctx := agentctx.LoadContextWithOpts(backendPath, LoadOpts)
 	rep := VerifyReport{}
 	if uctx.Index == nil {
 		return rep
 	}
 
-	// ── Check 1: resolution recall over PROJECT-tier call edges ──
+	// ── Check 1: resolution recall over INTERNAL project call edges ──
+	//
+	// v26.34: before this, every call from a project function counted, and a
+	// callee was "a project defect" unless it was one of 16 builtin names. On a
+	// generated backend that meant 234 of 287 edges were stdlib calls
+	// (errors.New, http.Error, t.Fatalf, s.mu.Lock) reported as unresolved
+	// project symbols, an 18.5 percent "recall", and a halt in stop mode over
+	// nothing. The rule is now the benchmark's: an edge is internal when its
+	// bare callee name is one some PROJECT symbol defines. Everything else is
+	// external and is counted, not reported. A dropped service operation is
+	// still caught: by the orphan check below, and by the compile gate before
+	// it. The known limit: a call to a project receiver's method that no
+	// project symbol defines at all is classified external here.
+	classifier := uctx.Index.NewEdgeClassifier()
 	edges := uctx.Index.AllCallEdges()
 	for _, e := range edges {
 		// Gate on caller provenance so the number stays project-only (the same
@@ -124,16 +147,22 @@ func runUnderstandVerify(backendPath string) VerifyReport {
 		if ok && caller.Provenance != symbols.ProvProject {
 			continue
 		}
+		class, toProject := classifier.Classify(e)
+		switch class {
+		case symbols.EdgeLiteral:
+			rep.LiteralEdges++
+			continue
+		case symbols.EdgeExternal:
+			rep.ExternalEdges++
+			continue
+		}
 		rep.TotalEdges++
-		if e.CalleeID != "" {
+		if toProject {
 			rep.ResolvedEdges++
 			continue
 		}
 		rep.UnresolvedEdges++
-		// Only surface an unresolved call as a finding when it looks like an
-		// intra-project method call (has a caller we know), not a stdlib/builtin
-		// name — those are expected to be external and are not defects.
-		if ok && looksIntraProject(e.CalleeName) {
+		if ok {
 			rep.Findings = append(rep.Findings, VerifyFinding{
 				Kind:   "unresolved",
 				Symbol: e.CalleeName,
@@ -217,20 +246,6 @@ func isReadOpName(name string) bool {
 	return false
 }
 
-// looksIntraProject filters call names that plausibly refer to project code
-// (capitalised method-ish or dotted receiver call) vs obvious builtins.
-func looksIntraProject(name string) bool {
-	if name == "" {
-		return false
-	}
-	// builtins and very common stdlib-ish bare names are not project defects.
-	switch name {
-	case "len", "cap", "make", "new", "append", "copy", "delete", "print", "println",
-		"panic", "recover", "close", "error", "string", "int", "float64":
-		return false
-	}
-	return true
-}
 
 // runVerifyStage runs the Understand pass (when enabled) and acts on it per
 // VerifyUnderstandMode. Returns the report (nil-safe) and whether generation
@@ -243,8 +258,8 @@ func runVerifyStage(backendPath, rootPath string, ctx agentctx.Context) (VerifyR
 	emit("verify", "\n🔎 Understand pass — validating generated output through the comprehension engine...\n")
 	rep := runUnderstandVerify(backendPath)
 
-	emit("verify", fmt.Sprintf("  [verify] resolution: %.1f%% (%d/%d project call edges resolved)\n",
-		rep.ResolutionPct(), rep.ResolvedEdges, rep.TotalEdges))
+	emit("verify", fmt.Sprintf("  [verify] resolution: %.1f%% (%d/%d internal call edges resolved; %d external, %d literal excluded)\n",
+		rep.ResolutionPct(), rep.ResolvedEdges, rep.TotalEdges, rep.ExternalEdges, rep.LiteralEdges))
 	recordLifecycle("verify", fmt.Sprintf("resolution %.1f%% (%d/%d), %d finding(s)",
 		rep.ResolutionPct(), rep.ResolvedEdges, rep.TotalEdges, len(rep.Findings)))
 
@@ -291,8 +306,8 @@ func WriteFindingsReport(rep VerifyReport) string {
 	var b strings.Builder
 	fmt.Fprintf(&b, "gen-system — Understand verification findings\n")
 	fmt.Fprintf(&b, "=============================================\n\n")
-	fmt.Fprintf(&b, "Resolution: %.1f%%  (%d/%d project call edges resolved)\n",
-		rep.ResolutionPct(), rep.ResolvedEdges, rep.TotalEdges)
+	fmt.Fprintf(&b, "Resolution: %.1f%%  (%d/%d internal call edges resolved; %d external, %d literal excluded)\n",
+		rep.ResolutionPct(), rep.ResolvedEdges, rep.TotalEdges, rep.ExternalEdges, rep.LiteralEdges)
 	fmt.Fprintf(&b, "Findings:   %d\n\n", len(rep.Findings))
 	if len(rep.Findings) == 0 {
 		fmt.Fprintf(&b, "No structural findings — generated output is internally consistent.\n")

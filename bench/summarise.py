@@ -274,41 +274,66 @@ TABLES = [
 ]
 
 
-def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--results", required=True, help="results/<date> directory")
-    ap.add_argument("--measured", help="portfolio measured.json to merge into (omit = dry run)")
-    args = ap.parse_args()
-
-    results = Path(args.results)
-    raw = results / "raw"
-    if not raw.is_dir():
-        raise SystemExit(f"no raw/ under {results}")
-
+def provenance_for(results):
+    """Provenance dict for a results directory, from its env.json."""
     env = {}
     env_path = results / "env.json"
     if env_path.exists():
         env = json.loads(env_path.read_text(encoding="utf-8"))
     else:
-        print("WARNING: no env.json in results dir — provenance will be incomplete")
-
-    provenance = {
+        print(f"WARNING: no env.json in {results} — provenance will be incomplete")
+    return {
         "date": results.name,
         "gen_system_commit": env.get("gen_system_commit", "unknown"),
         "task_set": "bench/tasks.json (frozen 2026-08-27)",
         "gpu": env.get("gpu", "unknown"),
     }
 
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--results", required=True, help="results/<date> directory")
+    ap.add_argument("--measured", help="portfolio measured.json to merge into (omit = dry run)")
+    ap.add_argument("--reuse", action="append", default=[],
+                    help="v26.35: earlier results/<date> directory to take a table from when this "
+                         "run has no raw data for it (repeatable, tried in the order given). The "
+                         "reused table keeps ITS OWN date and commit in _provenance and gains a "
+                         "reused_from field, so nothing is re-dated.")
+    args = ap.parse_args()
+
+    results = Path(args.results)
+    raw = results / "raw"
+    if not raw.is_dir():
+        raise SystemExit(f"no raw/ under {results}")
+    provenance = provenance_for(results)
+    reuse_dirs = [Path(d) for d in args.reuse if Path(d).resolve() != results.resolve()]
+
     out = {}
     for name, columns, builder in TABLES:
         rows = builder(raw)
-        if not rows:
-            print(f"  {name}: no raw data, no rows written")
+        if rows:
+            out[name] = {"_columns": columns, "_provenance": provenance, "rows": rows}
+            print(f"  {name}: {len(rows)} rows")
+            for r in rows:
+                print("    ", r)
             continue
-        out[name] = {"_columns": columns, "_provenance": provenance, "rows": rows}
-        print(f"  {name}: {len(rows)} rows")
-        for r in rows:
-            print("    ", r)
+        reused = False
+        for d in reuse_dirs:
+            if not (d / "raw").is_dir():
+                continue
+            rows = builder(d / "raw")
+            if not rows:
+                continue
+            prov = dict(provenance_for(d))
+            prov["reused_from"] = d.name
+            out[name] = {"_columns": columns, "_provenance": prov, "rows": rows}
+            print(f"  {name}: no raw data here; {len(rows)} rows reused from {d.name} (commit {prov['gen_system_commit'][:12]})")
+            for r in rows:
+                print("    ", r)
+            reused = True
+            break
+        if not reused:
+            print(f"  {name}: no raw data, no rows written")
 
     snapshot = results / "measured.rows.json"
     snapshot.write_text(json.dumps(out, indent=2, ensure_ascii=False), encoding="utf-8")

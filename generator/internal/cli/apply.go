@@ -52,6 +52,7 @@ func Apply(schemaFile string) {
 	defer SetupHealLog()()
 	SetupVerifyUnderstand() // v25.5 step 2: Understand-validates-Generate mode
 	SetupStyle()            // v26.33: team style profile (--style / GEN_STYLE)
+	SetupStdlib()           // v26.34: --stdlib / GEN_STDLIB, default auto
 	if err := agent.RunFromPlan(plan, outDir); err != nil {
 		fmt.Println("❌ Apply failed:", err)
 		return
