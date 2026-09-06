@@ -1,0 +1,58 @@
+{
+  "version": 1,
+  "name": "gen-system default (Go backend)",
+  "source": "human",
+  "naming": {
+    "files": "snake_case",
+    "exported_funcs": "PascalCase",
+    "local_funcs": "camelCase",
+    "types": "PascalCase",
+    "receivers": "short",
+    "type_suffixes": {
+      "handler": "Handler",
+      "service": "Service"
+    }
+  },
+  "structure": {
+    "layout": "layered",
+    "required_dirs": [
+      "internal/model",
+      "internal/service",
+      "internal/handler"
+    ],
+    "file_pattern": {
+      "handler": "*_handler.go",
+      "service": "*_service*.go"
+    }
+  },
+  "patterns": {
+    "require": [
+      "constructor",
+      "error-wrapping"
+    ],
+    "forbid": [
+      "panic",
+      "init-func",
+      "reflection"
+    ]
+  },
+  "code": {
+    "paradigm": "struct-methods",
+    "iteration": "range",
+    "max_func_lines": 60,
+    "max_branches_per_func": 12,
+    "max_params": 5,
+    "error_wrapping": "wrap"
+  },
+  "prompt": {
+    "notes": [
+      "Return early on error; do not nest the happy path.",
+      "Name booleans as questions: isPaid, hasStock."
+    ],
+    "exemplars": 2
+  },
+  "gate": {
+    "mode": "report",
+    "max_repairs": 1
+  }
+}
