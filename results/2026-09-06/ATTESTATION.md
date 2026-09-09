@@ -1,8 +1,8 @@
 # Benchmark attestation
 
-Results directory: `/home/kai-hoang/Project/git/gen-system/results/2026-09-06`  
-Written: 2026-09-06T07:51:38Z by `bench/attest.py`  
-Raw files: 118, listed with SHA-256 in `MANIFEST.sha256`
+Results directory: `results/2026-09-04`  
+Written: 2026-09-05T05:41:45Z by `bench/attest.py`  
+Raw files: 129, listed with SHA-256 in `MANIFEST.sha256`
 
 ## What this is
 
@@ -13,12 +13,13 @@ and check every file against the manifest.
 
 ## Environment (from env.json, frozen before the runs)
 
-- gen-system commit: `b503f324690b4424086826aea3c47e00d435ea29`
-- working tree at freeze time: clean
+- gen-system commit: `8040c5370805b0ed6e60539344bbf119b5fedaf8`
+- working tree at freeze time: **dirty**. The commit above is not the exact code that ran;
+  uncommitted changes were present. Treat the commit as approximate and read the run date as the anchor.
 - GPU: NVIDIA GeForce RTX 4060 Ti, 16380 MiB, 595.71.05
 - Ollama: ollama version is 0.24.0
 - Go: go version go1.25.0 linux/amd64
-- frozen at: 2026-09-05T16:40:02Z
+- frozen at: 2026-09-04T07:52:02Z
 
 ## Task set
 
@@ -32,34 +33,38 @@ and check every file against the manifest.
 
 | Driver | Raw files | Script |
 |---|---|---|
-| understand | **0 (did not run)** | `bench/run-understand.sh` |
-| stream | **0 (did not run)** | `bench/run-stream.sh` |
-| offload | **0 (did not run)** | `bench/run-offload.sh` |
-| quant sweep, generation quality (genpipe) | **0 (did not run)** | `bench/run-quant-sweep.sh` |
-| quant sweep, tokens per second (gen) | **0 (did not run)** | `bench/run-quant-sweep.sh` |
+| understand | 12 | `bench/run-understand.sh` |
+| stream | 1 | `bench/run-stream.sh` |
+| offload | 4 | `bench/run-offload.sh` |
+| quant sweep, generation quality (genpipe) | 12 | `bench/run-quant-sweep.sh` |
+| quant sweep, tokens per second (gen) | 12 | `bench/run-quant-sweep.sh` |
 | strategies, generation quality (genpipe) | 9 | `bench/run-strategies.sh` |
 | strategies, tokens per second (gen) | 18 | `bench/run-strategies.sh` |
-| SWE-bench Verified localization (per task) | 60 | `bench/swebench/run_swebench_localize.sh` |
-| SWE-bench Verified readability (per repo) | 4 | `bench/swebench/run_swebench_localize.sh` |
+| SWE-bench Verified localization (per task) | **0 (did not run)** | `bench/swebench/run_swebench_localize.sh` |
+| SWE-bench Verified readability (per repo) | **0 (did not run)** | `bench/swebench/run_swebench_localize.sh` |
+
+## Runs dropped as not measured
+
+These generation runs completed zero model requests (every call failed), so the build and
+test results they carry come from the offline fallback schema and say nothing about the model.
+`summarise.py` excludes them from the quality columns and counts them in `runs_not_measured`.
+
+- `raw/strategy-B-both-resident-genpipe-run1.json`
+- `raw/strategy-B-both-resident-genpipe-run2.json`
+- `raw/strategy-B-both-resident-genpipe-run3.json`
 
 ## Tables produced (rows)
 
+- `gen_system.quantization_sweep`: 4 row(s)
+- `gen_system.offload_curve`: 4 row(s)
+- `gen_system.streaming`: 2 row(s)
 - `gen_system.two_model_strategies`: 3 row(s)
+- `gen_system.understand_public_repos`: 4 row(s)
 
 ## SWE-bench Verified
 
-**Localization recall only. Not a solve rate.** gen-system has no issue to patch pipeline, so a
-SWE-bench solve rate cannot be produced and is not claimed. The number here answers one question:
-from identifiers in the issue text, does the call graph neighbourhood reach the files the gold
-patch touched?
-
-| hops | file_recall_mean | hit_rate_pct | mean_neighbourhood_files | median_neighbourhood_files | n_tasks |
-|---|---|---|---|---|---|
-| 0 | 0.615 | 63.3 | 201.933 | 92.5 | 60 |
-| 1 | 0.615 | 63.3 | 285.75 | 221.0 | 60 |
-| 2 | 0.674 | 70.0 | 513.05 | 511.0 | 60 |
-
-Repositories read: 2 of the 12 in SWE-bench Verified.
+**Did not run.** No `swebench_localization.json` in this results directory. When it runs it
+reports localization recall, which is not a solve rate.
 
 ## Boundaries stated once, here
 
