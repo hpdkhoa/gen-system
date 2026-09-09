@@ -83,6 +83,13 @@ with its source directory; the raw files behind a reused table are in that direc
 manifest. With no `--reuse`, every other `results/*` directory is tried newest first.
 `run-all.sh` remains the full campaign from fresh.
 
+## The results directory and the date
+
+`run-all.sh` and `run-partial.sh` name the results directory after the day the campaign starts
+and export that date to every driver, so a campaign that runs past midnight stays in one
+directory (v26.36). Running a single driver on its own uses the clock at that moment. To choose
+the name yourself: `RUN_DATE=2026-09-10 ./bench/run-all.sh`.
+
 ## Attestation
 
 `bench/attest.py --results results/<date>` writes two files. `MANIFEST.sha256` lists every

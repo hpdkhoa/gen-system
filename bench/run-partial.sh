@@ -23,6 +23,13 @@
 set -euo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${HERE}/lib.sh"
+# v26.36: pin the results directory for the whole campaign. lib.sh computes
+# RUN_DATE from the clock when it is sourced, and every driver sources it again
+# in its own process, so a campaign that crossed midnight wrote the later
+# drivers into the next day's directory and the final summary missed them.
+# Exporting it here makes every child use the directory this script started in.
+export RUN_DATE
+echo "results directory for this campaign: ${RESULTS}"
 
 RUN=""; REUSE=()
 while [ $# -gt 0 ]; do
