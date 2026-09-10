@@ -1,2 +1,0 @@
-NAME         ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
-qwen3:14b    bdbd181c33f2    10 GB    100% GPU     4096       4 minutes from now    

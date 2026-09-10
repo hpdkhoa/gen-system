@@ -1,3 +1,0 @@
-name
-github
-model_to_dict

@@ -1,8 +1,0 @@
-{
-  "instance_id": "astropy__astropy-14508",
-  "repo": "astropy/astropy",
-  "base_commit": "a3f4ae6cd24d5ecdf49f213d77b3513dd509a06c",
-  "version": "5.1",
-  "seeds": 65,
-  "gold_files": 1
-}

@@ -1,1 +1,0 @@
-astropy/modeling/separable.py

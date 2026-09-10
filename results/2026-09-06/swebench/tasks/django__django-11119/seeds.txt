@@ -1,2 +1,0 @@
-Engine
-render_to_string

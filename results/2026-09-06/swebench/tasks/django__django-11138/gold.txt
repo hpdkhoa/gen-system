@@ -1,4 +1,0 @@
-django/db/backends/mysql/operations.py
-django/db/backends/oracle/operations.py
-django/db/backends/sqlite3/base.py
-django/db/backends/sqlite3/operations.py

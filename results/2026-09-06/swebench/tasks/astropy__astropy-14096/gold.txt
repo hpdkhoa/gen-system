@@ -1,1 +1,0 @@
-astropy/coordinates/sky_coordinate.py
