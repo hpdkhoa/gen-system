@@ -1,0 +1,59 @@
+{
+  "schema": "genbench/v1",
+  "started_at": "2026-09-10T01:35:09.969792536+07:00",
+  "finished_at": "2026-09-10T01:35:22.941916464+07:00",
+  "host": {
+    "os": "linux",
+    "arch": "amd64",
+    "num_cpu": 16,
+    "go_version": "go1.25.0"
+  },
+  "model": {
+    "name": "deepseek-coder-v2:16b-lite-instruct-q8_0",
+    "endpoint": "http://localhost:11434"
+  },
+  "project_root": ".",
+  "suites": [
+    {
+      "name": "ollama_doctor",
+      "cases": [
+        {
+          "name": "ollama_reachable",
+          "pass": true,
+          "got": "http://localhost:11434",
+          "want": "200 OK"
+        },
+        {
+          "name": "model_present",
+          "pass": true,
+          "got": "model=deepseek-coder-v2:16b-lite-instruct-q8_0 present=true",
+          "want": "deepseek-coder-v2:16b-lite-instruct-q8_0 present"
+        },
+        {
+          "name": "model_stays_resident_between_calls",
+          "pass": true,
+          "got": "first_load=12321ms second_load=139ms",
+          "want": "second_load \u003c\u003c first_load (set OLLAMA_KEEP_ALIVE=-1 if not)"
+        }
+      ],
+      "metrics": [
+        {
+          "name": "model_size_mb",
+          "value": 15928.777565956116,
+          "unit": "MB"
+        },
+        {
+          "name": "first_load_ms",
+          "value": 12321.415454,
+          "unit": "ms"
+        },
+        {
+          "name": "second_load_ms",
+          "value": 138.572053,
+          "unit": "ms"
+        }
+      ],
+      "duration_ns": 12972119228
+    }
+  ]
+}

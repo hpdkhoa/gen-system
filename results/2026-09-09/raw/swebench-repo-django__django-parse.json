@@ -1,0 +1,74 @@
+{
+  "schema": "genbench/v1",
+  "started_at": "2026-09-10T06:22:21.044444874+07:00",
+  "finished_at": "2026-09-10T06:23:19.318481675+07:00",
+  "host": {
+    "os": "linux",
+    "arch": "amd64",
+    "num_cpu": 16,
+    "go_version": "go1.25.0"
+  },
+  "model": {
+    "name": "qwen2.5-coder:14b",
+    "endpoint": "http://localhost:11434"
+  },
+  "project_root": "/home/kai-hoang/Project/git/gen-system/results/2026-09-09/swebench/repos/django__django",
+  "suites": [
+    {
+      "name": "parse_throughput",
+      "cases": [
+        {
+          "name": "files_found",
+          "pass": true,
+          "got": "2572",
+          "want": "\u003e0"
+        },
+        {
+          "name": "parse_errors_zero",
+          "pass": true,
+          "got": "0",
+          "want": "0"
+        }
+      ],
+      "metrics": [
+        {
+          "name": "files_per_sec_python",
+          "value": 44.19816577137073,
+          "unit": "files/s",
+          "higher_is_better": true
+        },
+        {
+          "name": "kb_per_sec_python",
+          "value": 226.61086871278093,
+          "unit": "kB/s",
+          "higher_is_better": true
+        },
+        {
+          "name": "files_total_python",
+          "value": 2572,
+          "unit": "files",
+          "higher_is_better": true
+        },
+        {
+          "name": "files_per_sec_overall",
+          "value": 44.198162597349196,
+          "unit": "files/s",
+          "higher_is_better": true
+        },
+        {
+          "name": "kb_per_sec_overall",
+          "value": 226.61085243907897,
+          "unit": "kB/s",
+          "higher_is_better": true
+        },
+        {
+          "name": "parse_errors",
+          "value": 0,
+          "unit": "errors"
+        }
+      ],
+      "duration_ns": 58274032411,
+      "notes": "languages: 1, files: 2572, bytes: 13503533"
+    }
+  ]
+}

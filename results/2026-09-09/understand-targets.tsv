@@ -1,0 +1,4 @@
+cobolcraft	https://github.com/meyfa/CobolCraft	c6f34f90ecdff94c3171c2b67334f9a5dc6acffb	cobol
+gorilla-mux	https://github.com/gorilla/mux	db9d1d0073d27a0a2d9a8c1bc52aa0af4374d265	go
+go-chi	https://github.com/go-chi/chi	36611d24579aaca3250ed9732e17e085c5026334	go
+spf13-cobra	https://github.com/spf13/cobra	adbc8813901bba65827259daa8e22ff94ec1f30e	go

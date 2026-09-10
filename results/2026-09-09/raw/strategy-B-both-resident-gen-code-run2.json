@@ -1,0 +1,60 @@
+{
+  "schema": "genbench/v1",
+  "started_at": "2026-09-10T04:50:56.850165935+07:00",
+  "finished_at": "2026-09-10T04:51:02.528820254+07:00",
+  "host": {
+    "os": "linux",
+    "arch": "amd64",
+    "num_cpu": 16,
+    "go_version": "go1.25.0"
+  },
+  "model": {
+    "name": "qwen2.5-coder:14b",
+    "endpoint": "http://localhost:11434"
+  },
+  "project_root": ".",
+  "suites": [
+    {
+      "name": "generation_latency",
+      "cases": [
+        {
+          "name": "at_least_one_of_3_runs_succeeded",
+          "pass": true,
+          "got": "3/3",
+          "want": "\u003e=1"
+        },
+        {
+          "name": "no_failures",
+          "pass": true,
+          "got": "0 failures",
+          "want": "0"
+        }
+      ],
+      "metrics": [
+        {
+          "name": "tokens_per_sec_mean",
+          "value": 30.644454863150198,
+          "unit": "tok/s",
+          "higher_is_better": true
+        },
+        {
+          "name": "eval_ms_mean",
+          "value": 1729.5156906666664,
+          "unit": "ms"
+        },
+        {
+          "name": "total_ms_mean",
+          "value": 1890.582348,
+          "unit": "ms"
+        },
+        {
+          "name": "eval_count_mean",
+          "value": 53,
+          "unit": "tokens",
+          "higher_is_better": true
+        }
+      ],
+      "duration_ns": 5678649949
+    }
+  ]
+}

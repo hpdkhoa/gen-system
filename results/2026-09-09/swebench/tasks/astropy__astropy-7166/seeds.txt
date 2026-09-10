@@ -1,0 +1,4 @@
+inspect
+isfunction
+False
+InheritDocstrings

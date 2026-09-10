@@ -1,0 +1,13 @@
+code
+djangoproject
+models
+Model
+ManyToManyField
+admin
+TabularInline
+Report
+photos
+ManyToManyFields
+Photo
+ReportPhotoInlineModelAdmin
+show_change_link

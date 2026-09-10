@@ -1,0 +1,16 @@
+django
+urls
+resolvers
+get_resolver
+URLResolver
+_populate
+set_urlconf
+BaseHandler
+get_response
+reverse
+base
+functools
+lru_cache
+settings
+ROOT_URLCONF
+get_urlconf

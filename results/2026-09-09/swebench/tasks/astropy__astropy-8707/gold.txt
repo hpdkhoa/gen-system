@@ -1,0 +1,2 @@
+astropy/io/fits/card.py
+astropy/io/fits/header.py
