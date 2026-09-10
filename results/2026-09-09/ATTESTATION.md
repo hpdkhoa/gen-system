@@ -1,8 +1,8 @@
 # Benchmark attestation
 
-Results directory: `/home/kai-hoang/Project/git/gen-system/results/2026-09-09`  
-Written: 2026-09-09T23:24:37Z by `bench/attest.py`  
-Raw files: 193, listed with SHA-256 in `MANIFEST.sha256`
+Results directory: `results/2026-09-09`  
+Written: 2026-09-10T01:23:36Z by `bench/attest.py`  
+Raw files: 194, listed with SHA-256 in `MANIFEST.sha256`
 
 ## What this is
 
