@@ -8,10 +8,10 @@
 // pre-code design into a `design-manifest/` folder INSIDE the generated output so
 // it can be reviewed and kept as a first-class artifact:
 //
-//   <outDir>/design-manifest/
-//     design-manifest.html   — a single self-contained reviewable document
-//     plan.json              — the raw Plan (goal, features, entities, tasks)
-//     schema.json            — just the entities, in the schema-file shape
+//	<outDir>/design-manifest/
+//	  design-manifest.html   — a single self-contained reviewable document
+//	  plan.json              — the raw Plan (goal, features, entities, tasks)
+//	  schema.json            — just the entities, in the schema-file shape
 //
 // The manifest is a SIDE-ARTIFACT: the build proceeds by default (no pause). It
 // is written right after planning succeeds, so even if generation later fails the
@@ -27,8 +27,8 @@ import (
 	"strings"
 	"time"
 
-	"gen-system/generator/internal/planner"
-	"gen-system/generator/internal/schema"
+	"github.com/hpdkhoa/gen-system/generator/internal/planner"
+	"github.com/hpdkhoa/gen-system/generator/internal/schema"
 )
 
 // ManifestPaths reports where the manifest artifacts were written, for the UI and

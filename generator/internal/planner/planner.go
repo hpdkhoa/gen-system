@@ -10,19 +10,20 @@ import (
 	"fmt"
 	"os"
 
-	"gen-system/generator/internal/ai"
-	"gen-system/generator/internal/schema"
+	"github.com/hpdkhoa/gen-system/generator/internal/ai"
+	"github.com/hpdkhoa/gen-system/generator/internal/schema"
 )
 
 // ─────────────────────────────────────────────
 // BuildPlan: goal string → full Plan struct
 //
 // Pipeline:
-//   1. AI generates structured plan JSON (features + raw entities)
-//   2. AI converts plan JSON → schema JSON
-//   3. Schema is parsed into schema.SchemaFile
-//   4. Task graph is built from the schema
-//   5. Plan returned — ready for user review before execution
+//  1. AI generates structured plan JSON (features + raw entities)
+//  2. AI converts plan JSON → schema JSON
+//  3. Schema is parsed into schema.SchemaFile
+//  4. Task graph is built from the schema
+//  5. Plan returned — ready for user review before execution
+//
 // ─────────────────────────────────────────────
 func BuildPlan(goal string) (Plan, error) {
 	if goal == "" {

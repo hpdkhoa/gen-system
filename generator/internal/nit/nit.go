@@ -1,11 +1,11 @@
 // nit/nit.go — AST-NIT serialiser
 // Added for open item 3: compact token-reduced Module serialisation for LLM prompts.
 // "NIT" = Node Indexed Text. Achieves ~28.6% token reduction vs raw source by:
-//   1. Emitting only the structurally-relevant skeleton (signatures, types, names).
-//   2. Replacing function bodies with a one-line call-list summary.
-//   3. Using compact single-line syntax for every node kind.
-//   4. Omitting doc-comments, blank lines, and unexported implementation detail
-//      when ExportedOnly is set.
+//  1. Emitting only the structurally-relevant skeleton (signatures, types, names).
+//  2. Replacing function bodies with a one-line call-list summary.
+//  3. Using compact single-line syntax for every node kind.
+//  4. Omitting doc-comments, blank lines, and unexported implementation detail
+//     when ExportedOnly is set.
 //
 // Output format (one node per line):
 //
@@ -27,7 +27,7 @@ import (
 	"fmt"
 	"strings"
 
-	"gen-system/generator/internal/ast"
+	"github.com/hpdkhoa/gen-system/generator/internal/ast"
 )
 
 // Options control the NIT serialisation detail level.

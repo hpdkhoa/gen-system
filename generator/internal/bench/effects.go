@@ -3,16 +3,16 @@
 //
 // The labels file is JSON of the form:
 //
-//   {
-//     "labels": [
-//       {"file": "generator/internal/symbols/index.go",
-//        "symbol": "Save",
-//        "kind": "method",                 // optional ("func"|"method"|"procedure")
-//        "receiver": "Index",              // required if kind=="method"
-//        "effects": ["fs"]                 // any of: db, fs, network, pure
-//       }
-//     ]
-//   }
+//	{
+//	  "labels": [
+//	    {"file": "generator/internal/symbols/index.go",
+//	     "symbol": "Save",
+//	     "kind": "method",                 // optional ("func"|"method"|"procedure")
+//	     "receiver": "Index",              // required if kind=="method"
+//	     "effects": ["fs"]                 // any of: db, fs, network, pure
+//	    }
+//	  ]
+//	}
 //
 // Precision = correct labels predicted / all labels predicted
 // Recall    = correct labels predicted / all labels in ground truth
@@ -29,9 +29,9 @@ import (
 	"strings"
 	"time"
 
-	agentctx "gen-system/generator/internal/context"
-	"gen-system/generator/internal/flow"
-	"gen-system/generator/internal/symbols"
+	agentctx "github.com/hpdkhoa/gen-system/generator/internal/context"
+	"github.com/hpdkhoa/gen-system/generator/internal/flow"
+	"github.com/hpdkhoa/gen-system/generator/internal/symbols"
 )
 
 type EffectLabel struct {

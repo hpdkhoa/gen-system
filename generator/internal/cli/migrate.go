@@ -8,10 +8,10 @@ import (
 
 	_ "github.com/lib/pq"
 
-	"gen-system/generator/internal/compiler"
-	"gen-system/generator/internal/compiler/diff"
-	"gen-system/generator/internal/compiler/migration"
-	"gen-system/generator/internal/schema"
+	"github.com/hpdkhoa/gen-system/generator/internal/compiler"
+	"github.com/hpdkhoa/gen-system/generator/internal/compiler/diff"
+	"github.com/hpdkhoa/gen-system/generator/internal/compiler/migration"
+	"github.com/hpdkhoa/gen-system/generator/internal/schema"
 )
 
 // Usage:

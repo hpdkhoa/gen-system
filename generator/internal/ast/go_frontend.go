@@ -31,9 +31,9 @@ type GoFrontend struct{}
 
 func init() { Register(&GoFrontend{}) }
 
-func (g *GoFrontend) Language() Language    { return LangGo }
-func (g *GoFrontend) Extensions() []string  { return []string{".go"} }
-func (g *GoFrontend) Available() bool        { return true } // stdlib, always present
+func (g *GoFrontend) Language() Language   { return LangGo }
+func (g *GoFrontend) Extensions() []string { return []string{".go"} }
+func (g *GoFrontend) Available() bool      { return true } // stdlib, always present
 
 // ─── Parse ───────────────────────────────────────────────────
 
@@ -256,10 +256,10 @@ func (c *goConverter) convertInterfaceMethod(f *goast.Field, ifaceName string) *
 	if len(f.Names) == 0 {
 		// Embedded interface
 		return &Node{
-			Kind:       NodeImport, // re-use as "embedded interface" ref
-			Name:       c.convertExpr(f.Type).Name,
-			Language:   LangGo,
-			Span:       c.span(f.Pos(), f.End()),
+			Kind:     NodeImport, // re-use as "embedded interface" ref
+			Name:     c.convertExpr(f.Type).Name,
+			Language: LangGo,
+			Span:     c.span(f.Pos(), f.End()),
 		}
 	}
 	ft, ok := f.Type.(*goast.FuncType)

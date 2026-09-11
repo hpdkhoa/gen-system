@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"time"
 
-	"gen-system/generator/internal/compiler/diff"
+	"github.com/hpdkhoa/gen-system/generator/internal/compiler/diff"
 )
 
 func DiffCorrectness() Suite {
@@ -17,12 +17,12 @@ func DiffCorrectness() Suite {
 	s := Suite{Name: "diff_correctness"}
 
 	type tc struct {
-		name      string
-		oldS      diff.Schema
-		newS      diff.Schema
-		wantAdd   int
-		wantRem   int
-		wantMod   int
+		name    string
+		oldS    diff.Schema
+		newS    diff.Schema
+		wantAdd int
+		wantRem int
+		wantMod int
 	}
 	cases := []tc{
 		{
@@ -52,9 +52,9 @@ func DiffCorrectness() Suite {
 			wantAdd: 0, wantRem: 0, wantMod: 1,
 		},
 		{
-			name: "type_change_is_breaking_but_still_modified",
-			oldS: diff.Schema{Entities: []diff.Entity{{Name: "User", Fields: []diff.Field{{Name: "ID", Type: "int"}}}}},
-			newS: diff.Schema{Entities: []diff.Entity{{Name: "User", Fields: []diff.Field{{Name: "ID", Type: "uuid"}}}}},
+			name:    "type_change_is_breaking_but_still_modified",
+			oldS:    diff.Schema{Entities: []diff.Entity{{Name: "User", Fields: []diff.Field{{Name: "ID", Type: "int"}}}}},
+			newS:    diff.Schema{Entities: []diff.Entity{{Name: "User", Fields: []diff.Field{{Name: "ID", Type: "uuid"}}}}},
 			wantAdd: 0, wantRem: 0, wantMod: 1,
 		},
 		// v19 ghost-entry regression: two schemas equal field-for-field

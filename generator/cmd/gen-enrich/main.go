@@ -16,10 +16,10 @@ import (
 	"sort"
 	"strings"
 
-	"gen-system/generator/internal/belief"
-	gencontext "gen-system/generator/internal/context"
-	"gen-system/generator/internal/enrich"
-	"gen-system/generator/internal/symbols"
+	"github.com/hpdkhoa/gen-system/generator/internal/belief"
+	gencontext "github.com/hpdkhoa/gen-system/generator/internal/context"
+	"github.com/hpdkhoa/gen-system/generator/internal/enrich"
+	"github.com/hpdkhoa/gen-system/generator/internal/symbols"
 )
 
 func main() {

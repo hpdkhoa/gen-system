@@ -14,7 +14,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"gen-system/generator/internal/style"
+	"github.com/hpdkhoa/gen-system/generator/internal/style"
 )
 
 // Style dispatches `gen style ...`.

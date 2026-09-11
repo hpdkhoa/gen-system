@@ -3,11 +3,11 @@
 // "Fully executable" should mean the generated app actually SERVES, not just that
 // it compiles and its no-panic contract test passes. When GEN_HTTP_SMOKE=1, after
 // the validation loop (and Understand-verify) pass, this:
-//   1. builds the backend binary,
-//   2. boots it on a free-ish port (GEN_SMOKE_PORT, default 18080),
-//   3. polls /health until ready (or times out),
-//   4. GETs each discovered collection route and asserts non-000 / non-5xx,
-//   5. shuts the server down.
+//  1. builds the backend binary,
+//  2. boots it on a free-ish port (GEN_SMOKE_PORT, default 18080),
+//  3. polls /health until ready (or times out),
+//  4. GETs each discovered collection route and asserts non-000 / non-5xx,
+//  5. shuts the server down.
 //
 // It is ADVISORY (warn, never abort — the Go backend + contract test remain the
 // hard guarantee) and OPT-IN (needs a runnable box; off by default so the offline
@@ -33,7 +33,9 @@ import (
 )
 
 // smokeRouteRe matches a registered collection route literal in generated code:
-//   mux.HandleFunc("/orders", h.collection)
+//
+//	mux.HandleFunc("/orders", h.collection)
+//
 // It deliberately ignores the "/orders/" item form (trailing slash) and the
 // health route, which are handled separately.
 var smokeRouteRe = regexp.MustCompile(`HandleFunc\("(/[a-z0-9\-]+)"\s*,`)

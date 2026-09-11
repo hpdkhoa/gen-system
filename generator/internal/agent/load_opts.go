@@ -12,7 +12,7 @@
 // sets this from --stdlib or GEN_STDLIB; "none" opts out.
 package agent
 
-import agentctx "gen-system/generator/internal/context"
+import agentctx "github.com/hpdkhoa/gen-system/generator/internal/context"
 
 // LoadOpts is used by every LoadContext call the generation path makes.
 var LoadOpts = agentctx.LoadContextOpts{StdlibAuto: true}

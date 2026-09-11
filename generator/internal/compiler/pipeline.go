@@ -4,11 +4,11 @@ import (
 	"encoding/json"
 	"os"
 
-	"gen-system/generator/internal/compiler/buildplan"
-	"gen-system/generator/internal/compiler/dag"
-	"gen-system/generator/internal/compiler/diff"
-	"gen-system/generator/internal/compiler/evolution"
-	"gen-system/generator/internal/schema"
+	"github.com/hpdkhoa/gen-system/generator/internal/compiler/buildplan"
+	"github.com/hpdkhoa/gen-system/generator/internal/compiler/dag"
+	"github.com/hpdkhoa/gen-system/generator/internal/compiler/diff"
+	"github.com/hpdkhoa/gen-system/generator/internal/compiler/evolution"
+	"github.com/hpdkhoa/gen-system/generator/internal/schema"
 )
 
 const diffIntentPath = ".gen/diff_intent.json"

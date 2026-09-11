@@ -44,10 +44,10 @@ import (
 	"strings"
 	"sync"
 
-	"gen-system/generator/internal/ast"
-	"gen-system/generator/internal/belief"
-	"gen-system/generator/internal/flow"
-	"gen-system/generator/internal/symbols"
+	"github.com/hpdkhoa/gen-system/generator/internal/ast"
+	"github.com/hpdkhoa/gen-system/generator/internal/belief"
+	"github.com/hpdkhoa/gen-system/generator/internal/flow"
+	"github.com/hpdkhoa/gen-system/generator/internal/symbols"
 )
 
 // ─── Response Types ───────────────────────────────────────────
@@ -137,13 +137,13 @@ const (
 // BeliefViewResponse is returned by GET /api/present/beliefs. It stays a
 // presentation-layer DTO (the view shape), distinct from the stored belief model.
 type BeliefViewResponse struct {
-	Beliefs       []Belief             `json:"beliefs"`
-	ArchSummary   string               `json:"arch_summary"`
-	PendingReview int                  `json:"pending_review"`
-	TotalBeliefs  int                  `json:"total_beliefs"`
+	Beliefs       []Belief              `json:"beliefs"`
+	ArchSummary   string                `json:"arch_summary"`
+	PendingReview int                   `json:"pending_review"`
+	TotalBeliefs  int                   `json:"total_beliefs"`
 	Warnings      []belief.StaleWarning `json:"warnings,omitempty"` // v26.8 staleness
-	StaleCount    int                  `json:"stale_count"`
-	Summaries     []Belief             `json:"summaries,omitempty"` // v26.16 scope roll-ups
+	StaleCount    int                   `json:"stale_count"`
+	Summaries     []Belief              `json:"summaries,omitempty"` // v26.16 scope roll-ups
 }
 
 // DiffEntry is one changed understanding (defined in internal/belief).
@@ -229,9 +229,9 @@ func (s *Server) StdlibReport() StdlibReportView {
 // New creates a presentation Server.
 func New(idx *symbols.Index) *Server {
 	return &Server{
-		idx:     idx,
-		cfgs:    make(map[string]flow.CFGSet),
-		efx:     make(map[string]*flow.FuncEffects),
+		idx:  idx,
+		cfgs: make(map[string]flow.CFGSet),
+		efx:  make(map[string]*flow.FuncEffects),
 		// root is not known at New() time; SetRoot rebinds the store to
 		// <root>/.gen once the project root is set. Until then it uses the
 		// legacy CWD-relative path so an unconfigured caller still works.
@@ -253,6 +253,7 @@ func (s *Server) BeliefStore() *belief.Store {
 	defer s.mu.RUnlock()
 	return s.beliefs
 }
+
 // (optionally) the copybook search path for on-demand COBOL parsing.
 // v20: called by gen-server after construction. Safe to pass "" for either.
 // v20.3: browseRoot widens the file browser's reach; pass "" to default it
@@ -583,7 +584,6 @@ func (s *Server) handleFiles(w http.ResponseWriter, r *http.Request) {
 	})
 	writeJSON(w, out)
 }
-
 
 // v24: methodsWithCFGFor returns the methods of a type that DO have a CFG, so the
 // flow panel can offer them when a type (which has none) is selected. Each entry

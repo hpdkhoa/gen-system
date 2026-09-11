@@ -78,4 +78,3 @@ func TestWriteFindingsReport(t *testing.T) {
 		}
 	}
 }
-

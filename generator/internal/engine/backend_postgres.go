@@ -26,7 +26,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"gen-system/generator/internal/schema"
+	"github.com/hpdkhoa/gen-system/generator/internal/schema"
 )
 
 // postgresEnabled reports whether to also generate the Postgres backend.

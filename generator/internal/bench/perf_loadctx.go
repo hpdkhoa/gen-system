@@ -1,10 +1,10 @@
 // generator/internal/bench/perf_loadctx.go — v19.7: LoadContext end-to-end
 // latency for the four practical configurations:
 //
-//   plain:           LoadContext(root)
-//   with_copybook:   LoadContextWithOpts(root, {CopybookPath: ...})
-//   warm_cache:      second call after first has populated DefaultCache
-//   skill_warmup:    LoadContextWithSkill(root, skill) if skill file exists
+//	plain:           LoadContext(root)
+//	with_copybook:   LoadContextWithOpts(root, {CopybookPath: ...})
+//	warm_cache:      second call after first has populated DefaultCache
+//	skill_warmup:    LoadContextWithSkill(root, skill) if skill file exists
 //
 // Reports wall-clock seconds + symbol/file counts so a regression run can
 // detect a slowdown that doesn't change correctness.
@@ -15,7 +15,7 @@ import (
 	"os"
 	"time"
 
-	agentctx "gen-system/generator/internal/context"
+	agentctx "github.com/hpdkhoa/gen-system/generator/internal/context"
 )
 
 // LoadContextLatency runs each of the four configurations once and emits
@@ -61,7 +61,7 @@ func LoadContextLatency(root string, copybookPath []string, skillPath string) Su
 		} else {
 			s.Cases = append(s.Cases, Case{
 				Name: "skill_file_exists", Pass: false,
-				Got:  err.Error(), Want: "readable file at " + skillPath,
+				Got: err.Error(), Want: "readable file at " + skillPath,
 			})
 		}
 	}

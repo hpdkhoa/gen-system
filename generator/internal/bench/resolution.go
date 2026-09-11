@@ -7,16 +7,16 @@
 //
 // The fix splits the population:
 //
-//   internal edges  = edges whose bare CalleeName matches a symbol name
-//                     present in the project index
-//   external edges  = everything else (stdlib, third-party, dynamic)
+//	internal edges  = edges whose bare CalleeName matches a symbol name
+//	                  present in the project index
+//	external edges  = everything else (stdlib, third-party, dynamic)
 //
-//   resolution_recall_internal = resolved / internal
-//   external_call_ratio        = external / total
-//   resolution_recall_overall  = resolved / total   (kept for continuity)
+//	resolution_recall_internal = resolved / internal
+//	external_call_ratio        = external / total
+//	resolution_recall_overall  = resolved / total   (kept for continuity)
 //
 // The internal metric is what the engine can actually be evaluated on.
-// It's the number an investor / design partner cares about: "of the calls
+// It's the number a reader of the benchmark cares about: "of the calls
 // you COULD resolve in this repo, how many did you?"
 //
 // Note on cache staleness: if you applied v19.8 with `unzip -o` and then
@@ -32,8 +32,8 @@ import (
 	"sort"
 	"time"
 
-	agentctx "gen-system/generator/internal/context"
-	"gen-system/generator/internal/symbols"
+	agentctx "github.com/hpdkhoa/gen-system/generator/internal/context"
+	"github.com/hpdkhoa/gen-system/generator/internal/symbols"
 )
 
 // ResolutionRecall loads the project at root, computes resolution rates,
@@ -73,16 +73,16 @@ func ResolutionRecall(root string, copybookPath []string, passThreshold float64)
 	classifier := ctx.Index.NewEdgeClassifier()
 
 	type langStat struct {
-		total      int
-		internal   int
-		resolved   int // resolved AND internal (the cell that earns recall)
+		total    int
+		internal int
+		resolved int // resolved AND internal (the cell that earns recall)
 	}
 	byLang := map[string]*langStat{}
 
 	internal := 0
-	resolved := 0           // resolved overall (CalleeID set)
-	resolvedInternal := 0   // resolved AND internal
-	external := 0           // bare name not in knownNames
+	resolved := 0         // resolved overall (CalleeID set)
+	resolvedInternal := 0 // resolved AND internal
+	external := 0         // bare name not in knownNames
 
 	literal := 0
 	for _, e := range edges {

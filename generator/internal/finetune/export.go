@@ -2,19 +2,21 @@
 // gen-system's repair memory and producing artifacts for LLM fine-tuning.
 //
 // Phase 3.3 — Private Fine-Tuning:
-//   gen-system accumulates repair knowledge in .gen/memory.json every time
-//   the healer successfully fixes a build error. This data is valuable:
-//   it's real code + real errors + real fixes from your own codebase.
 //
-//   ExportTrainingData() reads that memory and formats it as JSONL pairs
-//   compatible with:
-//     • Ollama create <model> -f Modelfile   (Modelfile + JSONL)
-//     • OpenAI fine-tuning API               (chat JSONL format)
-//     • Hugging Face TRL / unsloth           (same JSONL)
+//	gen-system accumulates repair knowledge in .gen/memory.json every time
+//	the healer successfully fixes a build error. This data is valuable:
+//	it's real code + real errors + real fixes from your own codebase.
+//
+//	ExportTrainingData() reads that memory and formats it as JSONL pairs
+//	compatible with:
+//	  • Ollama create <model> -f Modelfile   (Modelfile + JSONL)
+//	  • OpenAI fine-tuning API               (chat JSONL format)
+//	  • Hugging Face TRL / unsloth           (same JSONL)
 //
 // Usage:
-//   gen finetune export [--min-success N] [--out path]
-//   gen finetune modelfile [--base llama3] [--out path]
+//
+//	gen finetune export [--min-success N] [--out path]
+//	gen finetune modelfile [--base llama3] [--out path]
 package finetune
 
 import (
@@ -25,7 +27,7 @@ import (
 	"strings"
 	"time"
 
-	"gen-system/generator/internal/intelligence"
+	"github.com/hpdkhoa/gen-system/generator/internal/intelligence"
 )
 
 // TrainingExample is a single (prompt, completion) pair for fine-tuning.
@@ -37,16 +39,16 @@ type TrainingExample struct {
 
 // ChatMessage is one turn in a chat-format training example.
 type ChatMessage struct {
-	Role    string `json:"role"`    // "system", "user", or "assistant"
+	Role    string `json:"role"` // "system", "user", or "assistant"
 	Content string `json:"content"`
 }
 
 // ExportStats summarises the export operation.
 type ExportStats struct {
-	Total     int    `json:"total_records"`
-	Exported  int    `json:"exported"`
-	Skipped   int    `json:"skipped_low_quality"`
-	OutputPath string `json:"output_path"`
+	Total       int    `json:"total_records"`
+	Exported    int    `json:"exported"`
+	Skipped     int    `json:"skipped_low_quality"`
+	OutputPath  string `json:"output_path"`
 	GeneratedAt string `json:"generated_at"`
 }
 
@@ -75,8 +77,8 @@ func ExportTrainingData(outputPath string, minSuccess int) (ExportStats, error) 
 
 	enc := json.NewEncoder(f)
 	stats := ExportStats{
-		Total:      len(mem.Fixes),
-		OutputPath: outputPath,
+		Total:       len(mem.Fixes),
+		OutputPath:  outputPath,
 		GeneratedAt: time.Now().Format(time.RFC3339),
 	}
 

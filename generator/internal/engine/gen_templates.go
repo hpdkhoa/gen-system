@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"gen-system/generator/internal/schema"
-	"gen-system/generator/internal/tmpl"
+	"github.com/hpdkhoa/gen-system/generator/internal/schema"
+	"github.com/hpdkhoa/gen-system/generator/internal/tmpl"
 )
 
 // templateRoot returns the path to the templates/ directory.
@@ -29,7 +29,7 @@ func templateRoot() string {
 			return root
 		}
 	}
-	return "gen-system/generator/internal/templates"
+	return "github.com/hpdkhoa/gen-system/generator/internal/templates"
 }
 
 func renderBackend(e schema.Entity, path string) {

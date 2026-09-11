@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	agentctx "gen-system/generator/internal/context"
+	agentctx "github.com/hpdkhoa/gen-system/generator/internal/context"
 )
 
 func TestVerifyClassifiesExternalAndLiteralCalls(t *testing.T) {

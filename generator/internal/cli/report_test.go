@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"gen-system/generator/internal/bench"
+	"github.com/hpdkhoa/gen-system/generator/internal/bench"
 )
 
 // baselinePath locates the committed frozen baseline relative to this package.

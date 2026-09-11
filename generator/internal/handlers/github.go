@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	ghclient "gen-system/generator/internal/github"
+	ghclient "github.com/hpdkhoa/gen-system/generator/internal/github"
 )
 
 // GetGitHubConfig returns the current GitHub integration config (token redacted).

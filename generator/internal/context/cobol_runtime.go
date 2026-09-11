@@ -3,12 +3,12 @@
 // signature tree) do. Its "runtime" is two things, neither of which is a source
 // tree you can point a loader at:
 //
-//   1. INTRINSIC FUNCTIONS — FUNCTION NUMVAL, FUNCTION CURRENT-DATE, FUNCTION
-//      MAX … defined by the ISO/ANSI COBOL standard. No source exists; they are
-//      part of the language.
-//   2. RUNTIME / CALLABLE SERVICES — CEE3ABD, CEEMOUT, IGZ* , DSNTIAR … IBM
-//      Language Environment and common vendor services, shipped as compiled
-//      binaries on the mainframe. No portable source.
+//  1. INTRINSIC FUNCTIONS — FUNCTION NUMVAL, FUNCTION CURRENT-DATE, FUNCTION
+//     MAX … defined by the ISO/ANSI COBOL standard. No source exists; they are
+//     part of the language.
+//  2. RUNTIME / CALLABLE SERVICES — CEE3ABD, CEEMOUT, IGZ* , DSNTIAR … IBM
+//     Language Environment and common vendor services, shipped as compiled
+//     binaries on the mainframe. No portable source.
 //
 // Before this, every CALL "CEE3ABD" and FUNCTION NUMVAL surfaced as an
 // unresolved (external) call edge — visually identical to a genuinely missing
@@ -32,8 +32,8 @@
 package context
 
 import (
-	genast "gen-system/generator/internal/ast"
-	"gen-system/generator/internal/symbols"
+	genast "github.com/hpdkhoa/gen-system/generator/internal/ast"
+	"github.com/hpdkhoa/gen-system/generator/internal/symbols"
 )
 
 // cobolIntrinsics are the ISO/ANSI COBOL intrinsic functions (invoked as

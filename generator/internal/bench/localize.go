@@ -27,7 +27,7 @@ import (
 	"strings"
 	"time"
 
-	agentctx "gen-system/generator/internal/context"
+	agentctx "github.com/hpdkhoa/gen-system/generator/internal/context"
 )
 
 // ReadLines returns the non-empty, trimmed lines of a text file. Used for the

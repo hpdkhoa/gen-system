@@ -1,9 +1,9 @@
 package services
 
 import (
-	"gen-system/generator/internal/api/sse"
-	"gen-system/generator/internal/safety"
-	"gen-system/generator/internal/store"
+	"github.com/hpdkhoa/gen-system/generator/internal/api/sse"
+	"github.com/hpdkhoa/gen-system/generator/internal/safety"
+	"github.com/hpdkhoa/gen-system/generator/internal/store"
 )
 
 type SnapshotService struct {

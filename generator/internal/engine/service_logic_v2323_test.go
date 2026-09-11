@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"gen-system/generator/internal/ai"
-	"gen-system/generator/internal/schema"
+	"github.com/hpdkhoa/gen-system/generator/internal/ai"
+	"github.com/hpdkhoa/gen-system/generator/internal/schema"
 )
 
 // repairingProvider returns a body that does NOT compile on the first call

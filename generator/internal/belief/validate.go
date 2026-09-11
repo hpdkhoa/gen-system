@@ -85,12 +85,13 @@ func validateEnrich(b *Belief, f parserFacts) {
 
 // assertsPersistence detects language claiming the routine persists state.
 // Two lessons are encoded here, both found by real runs:
-//   1. The phrasing test must tolerate words BETWEEN verb and target — "saves the
-//      order to the database" is a persistence claim that a naive "saves to"
-//      substring misses.
-//   2. It must NOT fire on incidental nouns. "creates a handler with an in-memory
-//      store" mentions "store" but claims no persistence, and an explicit
-//      in-memory/cache qualifier is a positive signal of NON-persistence.
+//  1. The phrasing test must tolerate words BETWEEN verb and target — "saves the
+//     order to the database" is a persistence claim that a naive "saves to"
+//     substring misses.
+//  2. It must NOT fire on incidental nouns. "creates a handler with an in-memory
+//     store" mentions "store" but claims no persistence, and an explicit
+//     in-memory/cache qualifier is a positive signal of NON-persistence.
+//
 // So: an unambiguous phrase, OR (a persistence VERB + a durable-storage TARGET),
 // with in-memory phrasing vetoing the match.
 func assertsPersistence(text string) bool {

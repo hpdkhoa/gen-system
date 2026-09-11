@@ -31,12 +31,12 @@ import (
 	"strings"
 	"time"
 
-	"gen-system/generator/internal/agent"
-	"gen-system/generator/internal/ai"
-	"gen-system/generator/internal/engine"
-	"gen-system/generator/internal/planner"
-	planner_v2 "gen-system/generator/internal/planner_v2"
-	"gen-system/generator/internal/schema"
+	"github.com/hpdkhoa/gen-system/generator/internal/agent"
+	"github.com/hpdkhoa/gen-system/generator/internal/ai"
+	"github.com/hpdkhoa/gen-system/generator/internal/engine"
+	"github.com/hpdkhoa/gen-system/generator/internal/planner"
+	planner_v2 "github.com/hpdkhoa/gen-system/generator/internal/planner_v2"
+	"github.com/hpdkhoa/gen-system/generator/internal/schema"
 )
 
 // BuiltinGenIdeas is the frozen 5-idea task set (mirrors bench/tasks.json;
@@ -107,7 +107,7 @@ func GenPipeline(ideas []string) Suite {
 		wallTotal                 time.Duration
 		// v26.33 style gate counters (zero unless a profile is active)
 		styleViolations, styleRepairs, styleRepairOK int
-		styleFindings, styleErrors, styleClean        int
+		styleFindings, styleErrors, styleClean       int
 	)
 	// v26.32: in live mode an idea that produced zero completed model
 	// requests was not measured, whatever the build says. The 2026-09-04

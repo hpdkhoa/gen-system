@@ -29,7 +29,9 @@ func TestSalvage_UserBrokenOutput(t *testing.T) {
 		t.Fatalf("want 2 salvaged entities, got %d: %+v", len(sf.Entities), sf.Entities)
 	}
 	names := map[string]int{}
-	for _, e := range sf.Entities { names[e.Name] = len(e.Fields) }
+	for _, e := range sf.Entities {
+		names[e.Name] = len(e.Fields)
+	}
 	if names["User"] != 3 {
 		t.Fatalf("User should have 3 fields, got %d", names["User"])
 	}
@@ -38,9 +40,17 @@ func TestSalvage_UserBrokenOutput(t *testing.T) {
 	}
 	// the spaced key "due date" must have been repaired to due_date
 	var task Entity
-	for _, e := range sf.Entities { if e.Name == "Task" { task = e } }
+	for _, e := range sf.Entities {
+		if e.Name == "Task" {
+			task = e
+		}
+	}
 	found := false
-	for _, f := range task.Fields { if f.Name == "due_date" { found = true } }
+	for _, f := range task.Fields {
+		if f.Name == "due_date" {
+			found = true
+		}
+	}
 	if !found {
 		t.Fatalf("expected due_date field after repair, got %+v", task.Fields)
 	}

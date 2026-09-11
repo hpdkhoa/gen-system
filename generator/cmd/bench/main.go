@@ -12,12 +12,12 @@ import (
 	"text/tabwriter"
 	"time"
 
-	"gen-system/generator/internal/ast"
-	"gen-system/generator/internal/flow"
-	"gen-system/generator/internal/symbols"
+	"github.com/hpdkhoa/gen-system/generator/internal/ast"
+	"github.com/hpdkhoa/gen-system/generator/internal/flow"
+	"github.com/hpdkhoa/gen-system/generator/internal/symbols"
 
 	// Register all frontends via side-effect init().
-	_ "gen-system/generator/internal/ast"
+	_ "github.com/hpdkhoa/gen-system/generator/internal/ast"
 )
 
 // ─── Result types ─────────────────────────────────────────────
@@ -421,9 +421,14 @@ func benchPythonParser() Result {
 		µs := time.Since(t0).Microseconds()
 		hasUnknown := m != nil && len(m.Nodes) > 0 && m.Nodes[0].Kind == ast.NodeUnknown
 		cases = append(cases, CaseResult{
-			Name:   "unavailable runtime → NodeUnknown (not error)",
-			Pass:   err == nil && hasUnknown,
-			Note:   fmt.Sprintf("err=%v nodes=%d", err, func() int { if m != nil { return len(m.Nodes) }; return 0 }()),
+			Name: "unavailable runtime → NodeUnknown (not error)",
+			Pass: err == nil && hasUnknown,
+			Note: fmt.Sprintf("err=%v nodes=%d", err, func() int {
+				if m != nil {
+					return len(m.Nodes)
+				}
+				return 0
+			}()),
 			Micros: µs,
 		})
 	}
@@ -896,7 +901,12 @@ func benchChecksumStability() Result {
 	cases = append(cases, CaseResult{
 		Name: "checksum deterministic (5 parses of same source)",
 		Pass: allSame,
-		Note: fmt.Sprintf("first=%s", func() string { if len(sums) > 0 { return sums[0][:8] + "…" }; return "none" }()),
+		Note: fmt.Sprintf("first=%s", func() string {
+			if len(sums) > 0 {
+				return sums[0][:8] + "…"
+			}
+			return "none"
+		}()),
 	})
 	cases = append(cases, CaseResult{
 		Name: "different source → different checksum",
@@ -905,7 +915,12 @@ func benchChecksumStability() Result {
 	cases = append(cases, CaseResult{
 		Name: "checksum is 64-char hex (SHA-256)",
 		Pass: len(sums) > 0 && len(sums[0]) == 64,
-		Note: fmt.Sprintf("len=%d", func() int { if len(sums) > 0 { return len(sums[0]) }; return 0 }()),
+		Note: fmt.Sprintf("len=%d", func() int {
+			if len(sums) > 0 {
+				return len(sums[0])
+			}
+			return 0
+		}()),
 	})
 
 	return Result{Suite: "Checksum Stability", Cases: cases, Duration: time.Since(start)}
@@ -940,7 +955,12 @@ func benchUnknownNodePolicy() Result {
 	cases = append(cases, CaseResult{
 		Name: "unrecognised construct → at least one node emitted",
 		Pass: hasUnknownOrAny,
-		Note: fmt.Sprintf("nodes=%d", func() int { if m != nil { return len(m.Nodes) }; return 0 }()),
+		Note: fmt.Sprintf("nodes=%d", func() int {
+			if m != nil {
+				return len(m.Nodes)
+			}
+			return 0
+		}()),
 	})
 
 	// TS with opaque function body → NodeUnknown child.
@@ -1034,8 +1054,8 @@ func benchSelfHosted(root string) Result {
 		Note: fmt.Sprintf("parse errors: %d", parseErrs),
 	})
 	cases = append(cases, CaseResult{
-		Name:   fmt.Sprintf("indexed %d symbols", len(allSyms)),
-		Pass:   len(allSyms) > 50,
+		Name: fmt.Sprintf("indexed %d symbols", len(allSyms)),
+		Pass: len(allSyms) > 50,
 		// v18.3: symbols package classifies structs/classes/interfaces/enums
 		// under the single SymType kind. The label below reads "struct" for
 		// continuity with prior bench output.

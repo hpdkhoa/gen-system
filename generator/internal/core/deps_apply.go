@@ -3,7 +3,7 @@ package core
 import (
 	"fmt"
 
-	"gen-system/generator/internal/deps"
+	"github.com/hpdkhoa/gen-system/generator/internal/deps"
 )
 
 func ApplyDependencies(path string, profile string) {

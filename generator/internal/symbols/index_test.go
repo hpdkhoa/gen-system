@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"gen-system/generator/internal/ast"
+	"github.com/hpdkhoa/gen-system/generator/internal/ast"
 )
 
 // ─── Helpers ──────────────────────────────────────────────────
@@ -452,7 +452,6 @@ func TestBuildFromModules(t *testing.T) {
 		t.Error("Alpha not found after BuildFromModules")
 	}
 }
-
 
 // ─── Phase A: RemoveFile ──────────────────────────────────────
 

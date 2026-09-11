@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"gen-system/generator/internal/ast"
+	"github.com/hpdkhoa/gen-system/generator/internal/ast"
 )
 
 // writeGoFile writes a Go source file to a temp directory and returns its path.

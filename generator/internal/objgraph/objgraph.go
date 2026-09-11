@@ -16,12 +16,13 @@
 // raw architecture markdown.
 //
 // Package layout (all in one file, no sub-packages):
-//   ObjectGraph      — the graph type
-//   ObjectNode       — one symbol in the graph
-//   ObjectEdge       — a directed relationship between two nodes
-//   Build()          — constructs the graph from symbols.Index + flow data
-//   Render()         — compact text form for LLM consumption
-//   JSON marshalling — for persistence / transport
+//
+//	ObjectGraph      — the graph type
+//	ObjectNode       — one symbol in the graph
+//	ObjectEdge       — a directed relationship between two nodes
+//	Build()          — constructs the graph from symbols.Index + flow data
+//	Render()         — compact text form for LLM consumption
+//	JSON marshalling — for persistence / transport
 package objgraph
 
 import (
@@ -31,9 +32,9 @@ import (
 	"sort"
 	"strings"
 
-	"gen-system/generator/internal/ast"
-	"gen-system/generator/internal/flow"
-	"gen-system/generator/internal/symbols"
+	"github.com/hpdkhoa/gen-system/generator/internal/ast"
+	"github.com/hpdkhoa/gen-system/generator/internal/flow"
+	"github.com/hpdkhoa/gen-system/generator/internal/symbols"
 )
 
 // ─── Types ────────────────────────────────────────────────────
@@ -42,26 +43,26 @@ import (
 type EdgeKind string
 
 const (
-	EdgeCalls      EdgeKind = "calls"       // function A calls function B
-	EdgeImports    EdgeKind = "imports"     // file A imports package B
-	EdgeReferences EdgeKind = "refs"        // symbol A references type B
-	EdgeInherits   EdgeKind = "inherits"    // class A extends B
-	EdgeImplements EdgeKind = "implements"  // type A implements interface B
+	EdgeCalls      EdgeKind = "calls"      // function A calls function B
+	EdgeImports    EdgeKind = "imports"    // file A imports package B
+	EdgeReferences EdgeKind = "refs"       // symbol A references type B
+	EdgeInherits   EdgeKind = "inherits"   // class A extends B
+	EdgeImplements EdgeKind = "implements" // type A implements interface B
 )
 
 // ObjectNode is one symbol in the graph.
 type ObjectNode struct {
-	ID       string              `json:"id"`
-	Name     string              `json:"name"`
-	Kind     string              `json:"kind"`
-	Language string              `json:"lang"`
-	Layer    string              `json:"layer,omitempty"`
-	File     string              `json:"file"`
-	Line     int                 `json:"line,omitempty"`
-	Exported bool                `json:"exported"`
-	Provenance string            `json:"provenance,omitempty"` // v23.32: "", "stdlib", "thirdparty"
-	Effects  []string            `json:"effects,omitempty"`  // inferred effect kinds
-	NIT      string              `json:"nit,omitempty"`      // compact NIT representation
+	ID         string   `json:"id"`
+	Name       string   `json:"name"`
+	Kind       string   `json:"kind"`
+	Language   string   `json:"lang"`
+	Layer      string   `json:"layer,omitempty"`
+	File       string   `json:"file"`
+	Line       int      `json:"line,omitempty"`
+	Exported   bool     `json:"exported"`
+	Provenance string   `json:"provenance,omitempty"` // v23.32: "", "stdlib", "thirdparty"
+	Effects    []string `json:"effects,omitempty"`    // inferred effect kinds
+	NIT        string   `json:"nit,omitempty"`        // compact NIT representation
 }
 
 // ObjectEdge is a directed relationship between two nodes.
@@ -135,16 +136,16 @@ func Build(
 		efxList := effectsForSymbol(s.ID, effects)
 
 		node := ObjectNode{
-			ID:       s.ID,
-			Name:     s.Name,
-			Kind:     string(s.Kind),
-			Language: string(s.Language),
-			Layer:    s.Layer,
-			File:     s.DefinedIn,
-			Line:     s.Span.Start.Line,
-			Exported: s.Exported,
+			ID:         s.ID,
+			Name:       s.Name,
+			Kind:       string(s.Kind),
+			Language:   string(s.Language),
+			Layer:      s.Layer,
+			File:       s.DefinedIn,
+			Line:       s.Span.Start.Line,
+			Exported:   s.Exported,
 			Provenance: string(s.Provenance),
-			Effects:  efxList,
+			Effects:    efxList,
 		}
 
 		if opts.IncludeNIT {

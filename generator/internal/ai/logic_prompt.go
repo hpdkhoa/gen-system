@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"strings"
 
-	"gen-system/generator/internal/schema"
+	"github.com/hpdkhoa/gen-system/generator/internal/schema"
 )
 
 // BuildLogicPrompt renders the per-entity prompt. The fixed method signature is
@@ -115,8 +115,8 @@ If the idea implies no extra operations, return {"operations": []}.`,
 		otherList,
 		e.Name, e.Name, e.Name, e.Name, e.Name, e.Name, // 6× store method types
 		e.Name, e.Name, e.Name, // CRITICAL block (SUBJECT is / record / NO operation)
-		hint,                   // v23.24 positive op-binding hint
-		e.Name,                 // signature %sService
+		hint,   // v23.24 positive op-binding hint
+		e.Name, // signature %sService
 	) + styleAddendum(e.Name, bindings[e.Name])
 }
 

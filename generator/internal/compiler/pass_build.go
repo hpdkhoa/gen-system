@@ -1,6 +1,6 @@
 package compiler
 
-import "gen-system/generator/internal/schema"
+import "github.com/hpdkhoa/gen-system/generator/internal/schema"
 
 func buildInitialIR(s schema.SchemaFile) SchemaIR {
 	var ir SchemaIR

@@ -8,8 +8,8 @@ package planner_v2
 import (
 	"testing"
 
-	"gen-system/generator/internal/ai"
-	"gen-system/generator/internal/schema"
+	"github.com/hpdkhoa/gen-system/generator/internal/ai"
+	"github.com/hpdkhoa/gen-system/generator/internal/schema"
 )
 
 func existingShop() []schema.Entity {

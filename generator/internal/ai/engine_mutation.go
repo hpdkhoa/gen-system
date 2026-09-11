@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"gen-system/generator/internal/ast"
+	"github.com/hpdkhoa/gen-system/generator/internal/ast"
 )
 
 // MutateHandler uses the AI to rewrite the GetAll handler function body.

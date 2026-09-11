@@ -2,11 +2,11 @@ package ast
 
 import (
 	"bytes"
+	"fmt"
 	"go/ast"
 	"go/format"
 	"go/parser"
 	"go/token"
-	"fmt"
 	"os"
 )
 

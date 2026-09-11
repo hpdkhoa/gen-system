@@ -15,8 +15,8 @@ import (
 	"fmt"
 	"strings"
 
-	"gen-system/generator/internal/ast"
-	"gen-system/generator/internal/symbols"
+	"github.com/hpdkhoa/gen-system/generator/internal/ast"
+	"github.com/hpdkhoa/gen-system/generator/internal/symbols"
 )
 
 // ─── CFG Types ────────────────────────────────────────────────
@@ -37,10 +37,10 @@ type BasicBlock struct {
 
 // CFG is the control-flow graph for one function/procedure.
 type CFG struct {
-	FuncID string       // Symbol.ID of the function
+	FuncID string // Symbol.ID of the function
 	Blocks []*BasicBlock
-	Entry  int          // ID of the entry block
-	Exits  []int        // IDs of exit blocks (return/escape)
+	Entry  int   // ID of the entry block
+	Exits  []int // IDs of exit blocks (return/escape)
 }
 
 // Block returns the block with the given ID, or nil.
@@ -92,7 +92,9 @@ func Build(m *ast.Module, idx *symbols.Index) CFGSet {
 //
 // Go → buildGoCFG (full expression-level CFG from native go/ast children).
 // TS/Python → buildStructuralCFG when structural nodes exist in children;
-//             falls back to single-block when the body is completely opaque.
+//
+//	falls back to single-block when the body is completely opaque.
+//
 // CA Gen functions (not procedures) → buildStructuralCFG.
 func buildFuncCFG(id string, n *ast.Node, lang ast.Language) *CFG {
 	// Go always uses the native multi-block builder.

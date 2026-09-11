@@ -10,8 +10,8 @@
 package engine
 
 import (
-	"gen-system/generator/internal/frontend"
-	"gen-system/generator/internal/schema"
+	"github.com/hpdkhoa/gen-system/generator/internal/frontend"
+	"github.com/hpdkhoa/gen-system/generator/internal/schema"
 )
 
 // ─────────────────────────────────────────────

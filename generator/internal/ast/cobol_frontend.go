@@ -22,22 +22,22 @@
 //
 // v19 (this patch) makes the frontend feature-complete enough to ungate
 // the registration. Coverage added:
-//   • EVALUATE / WHEN / WHEN OTHER       → NodeBranch + per-WHEN children
-//   • COPY <book> [REPLACING ...]        → inlines copybook source
-//   • REDEFINES <field>                  → field-level Tag metadata
-//   • OCCURS n [DEPENDING ON <name>]     → field-level Tag metadata
-//   • OCCURS n TIMES (and 0 TO n TIMES)  → cardinality captured
-//   • FILE-CONTROL / SELECT / ASSIGN     → file binding NodeImport entries
-//   • FD <file>                          → file descriptor NodeStruct
-//   • USAGE: COMP-3 (packed decimal),
-//             COMP / BINARY / COMP-1/2/4/5, DISPLAY → field Tag metadata
-//   • CICS verbs: READ, WRITE, REWRITE,
-//                 DELETE, LINK, XCTL, SEND,
-//                 RECEIVE, RETURN, ABEND,
-//                 SYNCPOINT, ASSIGN, WRITEQ,
-//                 READQ, DELETEQ, READNEXT,
-//                 STARTBR, ENDBR, RESETBR
-//   • PIC clauses now recognise editing chars (Z, $, etc.) and the
+//   - EVALUATE / WHEN / WHEN OTHER       → NodeBranch + per-WHEN children
+//   - COPY <book> [REPLACING ...]        → inlines copybook source
+//   - REDEFINES <field>                  → field-level Tag metadata
+//   - OCCURS n [DEPENDING ON <name>]     → field-level Tag metadata
+//   - OCCURS n TIMES (and 0 TO n TIMES)  → cardinality captured
+//   - FILE-CONTROL / SELECT / ASSIGN     → file binding NodeImport entries
+//   - FD <file>                          → file descriptor NodeStruct
+//   - USAGE: COMP-3 (packed decimal),
+//     COMP / BINARY / COMP-1/2/4/5, DISPLAY → field Tag metadata
+//   - CICS verbs: READ, WRITE, REWRITE,
+//     DELETE, LINK, XCTL, SEND,
+//     RECEIVE, RETURN, ABEND,
+//     SYNCPOINT, ASSIGN, WRITEQ,
+//     READQ, DELETEQ, READNEXT,
+//     STARTBR, ENDBR, RESETBR
+//   - PIC clauses now recognise editing chars (Z, $, etc.) and the
 //     full PIC string up to the next clause keyword.
 //
 // Copybook resolution: CobolFrontend exposes a CopybookPath slice and a

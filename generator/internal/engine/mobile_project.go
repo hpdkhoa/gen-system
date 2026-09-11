@@ -12,7 +12,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"gen-system/generator/internal/schema"
+	"github.com/hpdkhoa/gen-system/generator/internal/schema"
 )
 
 // GenerateMobileProject writes package.json, an entry point, and an App that

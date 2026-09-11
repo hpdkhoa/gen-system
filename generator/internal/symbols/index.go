@@ -50,7 +50,7 @@ import (
 	"strings"
 	"sync"
 
-	"gen-system/generator/internal/ast"
+	"github.com/hpdkhoa/gen-system/generator/internal/ast"
 )
 
 // Index holds all symbols and references for a repository.
@@ -540,10 +540,10 @@ func (idx *Index) ByName(name string) []*Symbol {
 
 // Resolve resolves a name in the context of a specific file.
 // Resolution order:
-//   1. Local file symbols
-//   2. Same-package (same directory) symbols
-//   3. Imported-package symbols (follow import path)
-//   4. Global exported symbols
+//  1. Local file symbols
+//  2. Same-package (same directory) symbols
+//  3. Imported-package symbols (follow import path)
+//  4. Global exported symbols
 func (idx *Index) Resolve(name, fromFile string) (*Symbol, bool) {
 	idx.mu.RLock()
 	defer idx.mu.RUnlock()

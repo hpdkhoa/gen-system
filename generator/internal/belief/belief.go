@@ -10,14 +10,14 @@
 //
 // Session-1 scope: relocate + two honesty fixes carried in without behavior change
 // to any caller:
-//   1. Store is now project-ROOT scoped. The old store hardcoded diskPath
-//      ".gen/beliefs.json" relative to the process CWD, so corrections made while
-//      viewing project A were reloaded when viewing project B from the same shell.
-//      NewStore(root) writes <root>/.gen/beliefs.json.
-//   2. The hardcoded per-kind Confidence float (0.95/0.85/0.75) was a priority
-//      LABEL masquerading as a probability. It is retained for wire-compat but a
-//      new Source field ("parser"/"enrich"/"human") now records where a belief
-//      actually came from — the honest replacement the later sessions build on.
+//  1. Store is now project-ROOT scoped. The old store hardcoded diskPath
+//     ".gen/beliefs.json" relative to the process CWD, so corrections made while
+//     viewing project A were reloaded when viewing project B from the same shell.
+//     NewStore(root) writes <root>/.gen/beliefs.json.
+//  2. The hardcoded per-kind Confidence float (0.95/0.85/0.75) was a priority
+//     LABEL masquerading as a probability. It is retained for wire-compat but a
+//     new Source field ("parser"/"enrich"/"human") now records where a belief
+//     actually came from — the honest replacement the later sessions build on.
 //
 // The behavioral-kind vocabulary, the derived/asserted (Box1/Box2) split, the
 // staleness warning, the LLM enrich tier, and correction-steered generation are
@@ -36,9 +36,9 @@ import (
 	"strings"
 	"sync"
 
-	"gen-system/generator/internal/ast"
-	"gen-system/generator/internal/flow"
-	"gen-system/generator/internal/symbols"
+	"github.com/hpdkhoa/gen-system/generator/internal/ast"
+	"github.com/hpdkhoa/gen-system/generator/internal/flow"
+	"github.com/hpdkhoa/gen-system/generator/internal/symbols"
 )
 
 // Kind classifies a belief in HUMAN-REVIEWABLE, behavioral terms — what a person
@@ -416,14 +416,14 @@ func (bs *Store) enrichLocked(sym *symbols.Symbol, parserBeliefs []*Belief) []*B
 // parser-known facts, so the LLM enriches WITH the deterministic context rather
 // than re-deriving it. Body is the raw source of the routine when available.
 type EnrichFact struct {
-	SymbolID  string
-	Subject   string // qualified name
-	Name      string
-	Language  string
-	Params    string // pre-formatted "id int, amount float64"
-	Calls     string // pre-formatted "OrderService.Place, ..."
-	Effects   string // pre-formatted "db, fs"
-	Body      string // routine source, if the caller can supply it
+	SymbolID   string
+	Subject    string // qualified name
+	Name       string
+	Language   string
+	Params     string // pre-formatted "id int, amount float64"
+	Calls      string // pre-formatted "OrderService.Place, ..."
+	Effects    string // pre-formatted "db, fs"
+	Body       string // routine source, if the caller can supply it
 	DocComment string
 }
 
@@ -741,13 +741,13 @@ func splitCamel(s string) []string {
 // Cases:
 //   - No correction        → nothing to do (pure derived belief).
 //   - DerivedAt empty       → baseline unknown (correction predates fingerprinting,
-//                             or was just made without one): re-baseline to the
-//                             current derived value. No warning — we can't compare
-//                             against a baseline we never recorded.
+//     or was just made without one): re-baseline to the
+//     current derived value. No warning — we can't compare
+//     against a baseline we never recorded.
 //   - DerivedAt == fresh    → source unchanged: overlay silently.
 //   - DerivedAt != fresh    → source moved under the assertion: overlay the human
-//                             value BUT flag Stale and record SourceNow so the UI
-//                             shows both the human's value and the current source.
+//     value BUT flag Stale and record SourceNow so the UI
+//     shows both the human's value and the current source.
 func (bs *Store) applyCorrectionLocked(b *Belief) {
 	c, ok := bs.corrections[b.ID]
 	if !ok {

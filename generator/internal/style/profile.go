@@ -100,8 +100,8 @@ type Patterns struct {
 
 // Code shape rules. Zero means no rule.
 type Code struct {
-	Paradigm         string   `json:"paradigm,omitempty"`      // "struct-methods", "procedural", "functional" (prompt only)
-	Iteration        string   `json:"iteration,omitempty"`     // "range" or "index" (Go); "stream" or "loop" (TS, prompt only)
+	Paradigm         string   `json:"paradigm,omitempty"`  // "struct-methods", "procedural", "functional" (prompt only)
+	Iteration        string   `json:"iteration,omitempty"` // "range" or "index" (Go); "stream" or "loop" (TS, prompt only)
 	MaxFuncLines     int      `json:"max_func_lines,omitempty"`
 	MaxBranches      int      `json:"max_branches_per_func,omitempty"`
 	MaxParams        int      `json:"max_params,omitempty"`

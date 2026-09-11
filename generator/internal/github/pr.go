@@ -11,10 +11,10 @@ import (
 
 // GeneratedPR holds the result of a PR-creation attempt.
 type GeneratedPR struct {
-	Number  int    `json:"number"`
-	URL     string `json:"url"`
-	Branch  string `json:"branch"`
-	Files   int    `json:"files_pushed"`
+	Number int    `json:"number"`
+	URL    string `json:"url"`
+	Branch string `json:"branch"`
+	Files  int    `json:"files_pushed"`
 }
 
 // CreateBuildPR creates a GitHub branch, pushes generated Go + JSX files,

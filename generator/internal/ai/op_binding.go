@@ -18,7 +18,7 @@ package ai
 import (
 	"strings"
 
-	"gen-system/generator/internal/schema"
+	"github.com/hpdkhoa/gen-system/generator/internal/schema"
 )
 
 // candidateOp is a verb phrase found in the idea and the entity it binds to.

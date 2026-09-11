@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"gen-system/generator/internal/safety"
+	"github.com/hpdkhoa/gen-system/generator/internal/safety"
 )
 
 // makeGoModule creates a minimal, valid Go module in a temp directory.

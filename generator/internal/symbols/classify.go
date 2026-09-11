@@ -24,7 +24,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"gen-system/generator/internal/ast"
+	"github.com/hpdkhoa/gen-system/generator/internal/ast"
 )
 
 // EdgeClass is the population an edge belongs to.

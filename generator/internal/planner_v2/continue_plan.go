@@ -19,16 +19,16 @@ import (
 	"sort"
 	"strings"
 
-	"gen-system/generator/internal/ai"
-	"gen-system/generator/internal/planner"
-	"gen-system/generator/internal/schema"
+	"github.com/hpdkhoa/gen-system/generator/internal/ai"
+	"github.com/hpdkhoa/gen-system/generator/internal/planner"
+	"github.com/hpdkhoa/gen-system/generator/internal/schema"
 )
 
 // ContinueResult is the outcome of planning a continuation.
 type ContinueResult struct {
 	Plan       planner.Plan
 	Merged     schema.SchemaFile
-	ChangedSet map[string]bool  // entities to (re)generate
+	ChangedSet map[string]bool // entities to (re)generate
 	NewOps     map[string][]string
 	Removed    map[string][]string // entity → fields removed (entity-level uses key "*")
 	Summary    string              // human-readable change summary

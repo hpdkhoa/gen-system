@@ -3,7 +3,7 @@ package intelligence_test
 import (
 	"testing"
 
-	"gen-system/generator/internal/intelligence"
+	"github.com/hpdkhoa/gen-system/generator/internal/intelligence"
 )
 
 // TestClassifyError_ImportError verifies "imported and not used" classification.

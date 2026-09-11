@@ -16,13 +16,13 @@ import (
 	"path/filepath"
 	"strings"
 
-	"gen-system/generator/internal/ai"
-	"gen-system/generator/internal/ast"
-	agentctx "gen-system/generator/internal/context"
-	"gen-system/generator/internal/intelligence"
-	"gen-system/generator/internal/planner"
-	"gen-system/generator/internal/rag"
-	"gen-system/generator/internal/trace"
+	"github.com/hpdkhoa/gen-system/generator/internal/ai"
+	"github.com/hpdkhoa/gen-system/generator/internal/ast"
+	agentctx "github.com/hpdkhoa/gen-system/generator/internal/context"
+	"github.com/hpdkhoa/gen-system/generator/internal/intelligence"
+	"github.com/hpdkhoa/gen-system/generator/internal/planner"
+	"github.com/hpdkhoa/gen-system/generator/internal/rag"
+	"github.com/hpdkhoa/gen-system/generator/internal/trace"
 )
 
 const maxHealAttempts = 3
@@ -57,7 +57,6 @@ func emitHeal(ev HealEvent) {
 	// sink is set; the HealObserver path above is unchanged.
 	recordHeal(ev)
 }
-
 
 // ─────────────────────────────────────────────
 // FixTask — intelligent self-healing pipeline

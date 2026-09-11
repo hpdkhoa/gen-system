@@ -11,7 +11,7 @@ package symbols
 import (
 	"testing"
 
-	"gen-system/generator/internal/ast"
+	"github.com/hpdkhoa/gen-system/generator/internal/ast"
 )
 
 func importDecl(name, path string) *ast.Node {

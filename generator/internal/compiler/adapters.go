@@ -1,10 +1,10 @@
 package compiler
 
 import (
-	"gen-system/generator/internal/compiler/buildplan"
-	"gen-system/generator/internal/compiler/dag"
-	"gen-system/generator/internal/compiler/diff"
-	"gen-system/generator/internal/compiler/evolution"
+	"github.com/hpdkhoa/gen-system/generator/internal/compiler/buildplan"
+	"github.com/hpdkhoa/gen-system/generator/internal/compiler/dag"
+	"github.com/hpdkhoa/gen-system/generator/internal/compiler/diff"
+	"github.com/hpdkhoa/gen-system/generator/internal/compiler/evolution"
 )
 
 // =====================================================

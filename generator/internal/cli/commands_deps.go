@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"gen-system/generator/internal/core"
+	"github.com/hpdkhoa/gen-system/generator/internal/core"
 )
 
 func Deps() {

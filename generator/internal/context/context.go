@@ -59,17 +59,19 @@ import (
 	"path/filepath"
 	"strings"
 
-	genast "gen-system/generator/internal/ast"
-	"gen-system/generator/internal/compiler"
-	"gen-system/generator/internal/flow"
-	"gen-system/generator/internal/objgraph"
-	"gen-system/generator/internal/symbols"
-	"gen-system/generator/internal/trace"
+	genast "github.com/hpdkhoa/gen-system/generator/internal/ast"
+	"github.com/hpdkhoa/gen-system/generator/internal/compiler"
+	"github.com/hpdkhoa/gen-system/generator/internal/flow"
+	"github.com/hpdkhoa/gen-system/generator/internal/objgraph"
+	"github.com/hpdkhoa/gen-system/generator/internal/symbols"
+	"github.com/hpdkhoa/gen-system/generator/internal/trace"
 )
 
 // Context captures the full runtime picture of the project.
 // v3: deep cross-file awareness — import graph, entity usage,
-//     dependency map, and architecture summary for AI prompts.
+//
+//	dependency map, and architecture summary for AI prompts.
+//
 // v15: adds symbol index, CFG sets, and inferred effect maps.
 type Context struct {
 	Root      string
@@ -221,9 +223,9 @@ func LoadContextWithOpts(root string, opts LoadContextOpts) Context {
 
 	// Counters for phase summary.
 	var (
-		filesSeen      int
-		filesParsed    int
-		filesParseFail int
+		filesSeen       int
+		filesParsed     int
+		filesParseFail  int
 		filesNoFrontend int
 	)
 	parseCtx := trace.WithPhase(tctx, "parse")

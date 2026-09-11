@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"gen-system/generator/internal/finetune"
+	"github.com/hpdkhoa/gen-system/generator/internal/finetune"
 )
 
 // Finetune is the top-level handler for `gen finetune <subcommand>`.

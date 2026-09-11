@@ -32,8 +32,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"gen-system/generator/internal/ai"
-	"gen-system/generator/internal/schema"
+	"github.com/hpdkhoa/gen-system/generator/internal/ai"
+	"github.com/hpdkhoa/gen-system/generator/internal/schema"
 )
 
 // GenerateServiceLogic builds backend/internal/service/<entity>_service.go using

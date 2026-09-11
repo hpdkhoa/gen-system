@@ -12,8 +12,8 @@ import (
 	"os"
 	"strings"
 
-	"gen-system/generator/internal/agent"
-	agentctx "gen-system/generator/internal/context"
+	"github.com/hpdkhoa/gen-system/generator/internal/agent"
+	agentctx "github.com/hpdkhoa/gen-system/generator/internal/context"
 )
 
 var stdlibConfigured bool

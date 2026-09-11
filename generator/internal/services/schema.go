@@ -1,12 +1,12 @@
 package services
 
 import (
-	"strings"
-	"fmt"
 	"encoding/json"
+	"fmt"
 	"os"
+	"strings"
 
-	"gen-system/generator/internal/compiler"
+	"github.com/hpdkhoa/gen-system/generator/internal/compiler"
 )
 
 const proposedSchemaPath = ".gen/proposed_schema.json"
@@ -50,10 +50,11 @@ func (s *SchemaService) CurrentEntities() []map[string]interface{} {
 //   - proposed entity in .gen/proposed_schema.json (what BuildPlanV2 just planned)
 //
 // Status values per field:
-//   "added"     — in proposed but not in current
-//   "removed"   — in current but not in proposed
-//   "modified"  — in both, type changed
-//   "unchanged" — identical in both
+//
+//	"added"     — in proposed but not in current
+//	"removed"   — in current but not in proposed
+//	"modified"  — in both, type changed
+//	"unchanged" — identical in both
 func (s *SchemaService) EntityDiff(entityName string) *EntityDiff {
 	// Load current IR fields
 	currentFields := map[string]string{}
@@ -124,9 +125,9 @@ func (s *SchemaService) EntityDiff(entityName string) *EntityDiff {
 
 // FilePreview describes a single file that would be written by the generator.
 type FilePreview struct {
-	Path   string `json:"path"`            // relative to project root
-	Exists bool   `json:"exists"`          // true if the file is already on disk
-	Status string `json:"status"`          // "new" | "overwrite" | "evolve"
+	Path   string `json:"path"`   // relative to project root
+	Exists bool   `json:"exists"` // true if the file is already on disk
+	Status string `json:"status"` // "new" | "overwrite" | "evolve"
 }
 
 // PreviewEntity returns the list of files that would be generated for
@@ -175,7 +176,7 @@ func (s *SchemaService) PreviewEntity(entityName string) ([]FilePreview, error) 
 	// These mirror the templates used in engine/exports.go and the
 	// generator CLI so the preview is always accurate.
 	lower := strings.ToLower(entityName)
-	root  := s.root
+	root := s.root
 	if root == "" {
 		root = "."
 	}

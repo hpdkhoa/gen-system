@@ -5,12 +5,15 @@
 // from `--version <v>` or a VERSION file (air-gapped boxes often lack git).
 //
 // build-all.sh : backend static binary (CGO_ENABLED=0 GOOS=linux GOARCH=amd64);
-//                web (npm ci && npm run build) and mobile (npm ci) IF those dirs
-//                exist. Postgres migrations are embedded/auto-applied by the
-//                backend, so nothing extra is needed for them.
+//
+//	web (npm ci && npm run build) and mobile (npm ci) IF those dirs
+//	exist. Postgres migrations are embedded/auto-applied by the
+//	backend, so nothing extra is needed for them.
+//
 // bundle.sh    : assembles <app>-<version>-linux-amd64.tar.gz = backend binary +
-//                web build + mobile bundle + migrations + .env.example +
-//                systemd unit + run.sh.
+//
+//	web build + mobile bundle + migrations + .env.example +
+//	systemd unit + run.sh.
 package engine
 
 import (

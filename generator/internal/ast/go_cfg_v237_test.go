@@ -18,18 +18,42 @@ func C(n int) string {
 	}
 }`
 	mod, err := (&GoFrontend{}).Parse("c.go", []byte(src))
-	if err != nil { t.Fatalf("parse: %v", err) }
+	if err != nil {
+		t.Fatalf("parse: %v", err)
+	}
 	var fn *Node
-	for _, n := range mod.Nodes { if n.Kind == NodeFunction && n.Name == "C" { fn = n } }
-	if fn == nil { t.Fatal("C not found") }
+	for _, n := range mod.Nodes {
+		if n.Kind == NodeFunction && n.Name == "C" {
+			fn = n
+		}
+	}
+	if fn == nil {
+		t.Fatal("C not found")
+	}
 	// outer if is a branch with non-empty Else
 	var outer *Node
-	for _, ch := range fn.Children { if ch.Kind == NodeBranch { outer = ch } }
-	if outer == nil { t.Fatal("no outer branch") }
-	if len(outer.Else) == 0 { t.Fatal("outer if has empty Else (else-path lost)") }
+	for _, ch := range fn.Children {
+		if ch.Kind == NodeBranch {
+			outer = ch
+		}
+	}
+	if outer == nil {
+		t.Fatal("no outer branch")
+	}
+	if len(outer.Else) == 0 {
+		t.Fatal("outer if has empty Else (else-path lost)")
+	}
 	// the else should itself contain a nested branch (the "else if")
 	var nested *Node
-	for _, e := range outer.Else { if e.Kind == NodeBranch { nested = e } }
-	if nested == nil { t.Fatal("else-if did not nest as a branch in Else") }
-	if len(nested.Else) == 0 { t.Fatal("final else lost") }
+	for _, e := range outer.Else {
+		if e.Kind == NodeBranch {
+			nested = e
+		}
+	}
+	if nested == nil {
+		t.Fatal("else-if did not nest as a branch in Else")
+	}
+	if len(nested.Else) == 0 {
+		t.Fatal("final else lost")
+	}
 }

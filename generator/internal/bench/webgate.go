@@ -14,9 +14,9 @@ import (
 	"strings"
 	"time"
 
-	"gen-system/generator/internal/engine"
-	"gen-system/generator/internal/frontend"
-	"gen-system/generator/internal/schema"
+	"github.com/hpdkhoa/gen-system/generator/internal/engine"
+	"github.com/hpdkhoa/gen-system/generator/internal/frontend"
+	"github.com/hpdkhoa/gen-system/generator/internal/schema"
 )
 
 // WebGate generates a web project and gates it with tsc (and npm build if deps

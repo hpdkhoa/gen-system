@@ -8,8 +8,8 @@ import (
 	"os"
 	"testing"
 
-	genast "gen-system/generator/internal/ast"
-	"gen-system/generator/internal/symbols"
+	genast "github.com/hpdkhoa/gen-system/generator/internal/ast"
+	"github.com/hpdkhoa/gen-system/generator/internal/symbols"
 )
 
 func TestParseStdlibSpec_PerRootLanguage_v265(t *testing.T) {

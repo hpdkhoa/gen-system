@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"os"
 
-	"gen-system/generator/internal/compiler"
-	"gen-system/generator/internal/compiler/evolution"
-	"gen-system/generator/internal/schema"
+	"github.com/hpdkhoa/gen-system/generator/internal/compiler"
+	"github.com/hpdkhoa/gen-system/generator/internal/compiler/evolution"
+	"github.com/hpdkhoa/gen-system/generator/internal/schema"
 )
 
 const intentPath = ".gen/diff_intent.json"

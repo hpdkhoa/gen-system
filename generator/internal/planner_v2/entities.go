@@ -3,8 +3,8 @@ package planner_v2
 import (
 	"fmt"
 
-	"gen-system/generator/internal/ai"
-	"gen-system/generator/internal/schema"
+	"github.com/hpdkhoa/gen-system/generator/internal/ai"
+	"github.com/hpdkhoa/gen-system/generator/internal/schema"
 )
 
 // GenerateEntities generates entity specs from the idea (goal) + features +

@@ -1,8 +1,8 @@
 package engine
 
 import (
-	"gen-system/generator/internal/ai"
-	"gen-system/generator/internal/schema"
+	"github.com/hpdkhoa/gen-system/generator/internal/ai"
+	"github.com/hpdkhoa/gen-system/generator/internal/schema"
 )
 
 // RunAIMutation runs AI-based handler mutation for a single entity.

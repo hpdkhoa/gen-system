@@ -1,10 +1,12 @@
 // v23.44: NewServerWithWeb pins the static UI dir (absolute) + no-store on the Studio HTML, so a rebuilt UI is never served stale from CWD-relative http.Dir or the browser cache.
 // server.go — v23.9 (Phase 2): the single mux is split into two registration
 // functions so the two products can be assembled independently:
-//   RegisterUnderstandRoutes — /api/events (SSE) + /api/present/* (the Studio).
-//                              This is ALL the enterprise understand-server needs.
-//   RegisterGenerateRoutes   — snapshots, schema, entities, build, heal, evolve,
-//                              and the gated github routes. Internal/generation.
+//
+//	RegisterUnderstandRoutes — /api/events (SSE) + /api/present/* (the Studio).
+//	                           This is ALL the enterprise understand-server needs.
+//	RegisterGenerateRoutes   — snapshots, schema, entities, build, heal, evolve,
+//	                           and the gated github routes. Internal/generation.
+//
 // NewServer composes both (the all-in-one dev/internal server). The enterprise
 // cmd/understand-server calls ONLY RegisterUnderstandRoutes and therefore links
 // no generation packages — verified by an acceptance test (go list -deps).
@@ -31,10 +33,10 @@ import (
 	"net/http"
 	"strings"
 
-	"gen-system/generator/internal/api/sse"
-	"gen-system/generator/internal/api/understand"
-	"gen-system/generator/internal/handlers"
-	"gen-system/generator/internal/presentation"
+	"github.com/hpdkhoa/gen-system/generator/internal/api/sse"
+	"github.com/hpdkhoa/gen-system/generator/internal/api/understand"
+	"github.com/hpdkhoa/gen-system/generator/internal/handlers"
+	"github.com/hpdkhoa/gen-system/generator/internal/presentation"
 )
 
 // RegisterUnderstandRoutes mounts the read-only code-intelligence surface. It

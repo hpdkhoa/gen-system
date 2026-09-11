@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"strings"
 
-	"gen-system/generator/internal/api/sse"
-	"gen-system/generator/internal/services"
+	"github.com/hpdkhoa/gen-system/generator/internal/api/sse"
+	"github.com/hpdkhoa/gen-system/generator/internal/services"
 )
 
 type Handlers struct {

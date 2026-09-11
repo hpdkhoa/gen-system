@@ -11,13 +11,13 @@ import (
 	"path/filepath"
 	"strings"
 
-	"gen-system/generator/internal/ast"
+	"github.com/hpdkhoa/gen-system/generator/internal/ast"
 )
 
 // Table is a flat symbol table for one file.
 type Table struct {
 	FilePath string
-	Symbols  map[string]*Symbol // keyed by Symbol.ID
+	Symbols  map[string]*Symbol   // keyed by Symbol.ID
 	ByName   map[string][]*Symbol // name → possibly multiple (overloads, etc.)
 }
 
@@ -66,14 +66,14 @@ func BuildTable(m *ast.Module) *Table {
 	// Module-level symbol
 	modID := SymbolID(m.FilePath, SymModule, m.PackageName)
 	t.Add(&Symbol{
-		ID:       modID,
-		Name:     m.PackageName,
-		QualName: m.PackageName,
-		Kind:     SymModule,
-		Language: m.Language,
+		ID:        modID,
+		Name:      m.PackageName,
+		QualName:  m.PackageName,
+		Kind:      SymModule,
+		Language:  m.Language,
 		DefinedIn: m.FilePath,
-		Exported: true,
-		Layer:    layer,
+		Exported:  true,
+		Layer:     layer,
 	})
 
 	for _, n := range m.Nodes {

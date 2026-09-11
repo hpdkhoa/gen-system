@@ -15,8 +15,8 @@ import (
 	"path/filepath"
 	"time"
 
-	"gen-system/generator/internal/symbols"
-	"gen-system/generator/internal/watch"
+	"github.com/hpdkhoa/gen-system/generator/internal/symbols"
+	"github.com/hpdkhoa/gen-system/generator/internal/watch"
 )
 
 // IncrementalUpdate writes a Go file into a temp dir, starts a watcher,

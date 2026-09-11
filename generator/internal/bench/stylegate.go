@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"time"
 
-	"gen-system/generator/internal/style"
+	"github.com/hpdkhoa/gen-system/generator/internal/style"
 )
 
 // StyleGate runs p against root.

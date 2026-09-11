@@ -29,12 +29,12 @@ import (
 	"sync"
 	"time"
 
-	"gen-system/generator/internal/agent"
-	"gen-system/generator/internal/api/sse"
-	"gen-system/generator/internal/compiler"
-	"gen-system/generator/internal/planner"
-	planner_v2 "gen-system/generator/internal/planner_v2"
-	"gen-system/generator/internal/schema"
+	"github.com/hpdkhoa/gen-system/generator/internal/agent"
+	"github.com/hpdkhoa/gen-system/generator/internal/api/sse"
+	"github.com/hpdkhoa/gen-system/generator/internal/compiler"
+	"github.com/hpdkhoa/gen-system/generator/internal/planner"
+	planner_v2 "github.com/hpdkhoa/gen-system/generator/internal/planner_v2"
+	"github.com/hpdkhoa/gen-system/generator/internal/schema"
 )
 
 type JobStatus string
@@ -47,25 +47,25 @@ const (
 )
 
 type BuildJob struct {
-	ID         string    `json:"id"`
-	Goal       string    `json:"goal"`
-	Status     JobStatus `json:"status"`
-	Error      string    `json:"error,omitempty"`
-	StartedAt  int64     `json:"started_at"`
-	DoneAt     int64     `json:"done_at,omitempty"`
-	OutputPath string    `json:"output_path,omitempty"` // v23.10: where the generated app landed
-	ManifestDir string   `json:"manifest_dir,omitempty"` // v25.6: design-manifest/ folder
-	Entities   int       `json:"entities,omitempty"`    // v23.10: entity count, for the UI summary
+	ID          string    `json:"id"`
+	Goal        string    `json:"goal"`
+	Status      JobStatus `json:"status"`
+	Error       string    `json:"error,omitempty"`
+	StartedAt   int64     `json:"started_at"`
+	DoneAt      int64     `json:"done_at,omitempty"`
+	OutputPath  string    `json:"output_path,omitempty"`  // v23.10: where the generated app landed
+	ManifestDir string    `json:"manifest_dir,omitempty"` // v25.6: design-manifest/ folder
+	Entities    int       `json:"entities,omitempty"`     // v23.10: entity count, for the UI summary
 }
 
 type BuildService struct {
-	broker  *sse.Broker
-	snapSvc *SnapshotService
-	root    string
+	broker       *sse.Broker
+	snapSvc      *SnapshotService
+	root         string
 	projectsBase string // v25.6: output-folder selection boundary
-	mu      sync.Mutex
-	job     *BuildJob
-	pending *PendingContinue // v25.8: continuation awaiting Approve/Reject
+	mu           sync.Mutex
+	job          *BuildJob
+	pending      *PendingContinue // v25.8: continuation awaiting Approve/Reject
 }
 
 func NewBuildService(broker *sse.Broker, snapSvc *SnapshotService, root string) *BuildService {

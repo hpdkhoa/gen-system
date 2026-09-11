@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"gen-system/generator/internal/ai"
-	"gen-system/generator/internal/schema"
+	"github.com/hpdkhoa/gen-system/generator/internal/ai"
+	"github.com/hpdkhoa/gen-system/generator/internal/schema"
 )
 
 // badProvider emits the failure modes seen in the field with a real model:

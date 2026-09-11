@@ -12,8 +12,8 @@ import (
 //
 // Returns:
 //   - output: combined stdout+stderr from the build command.
-//             This is the raw compiler error text needed for
-//             HashError() and the intelligence repair pipeline.
+//     This is the raw compiler error text needed for
+//     HashError() and the intelligence repair pipeline.
 //   - error:  non-nil if the build failed.
 //
 // The output is always populated on failure so callers can pass

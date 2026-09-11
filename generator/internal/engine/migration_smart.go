@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"gen-system/generator/internal/schema/smartdiff"
+	"github.com/hpdkhoa/gen-system/generator/internal/schema/smartdiff"
 )
 
 func genSmartMigration(entity string, diff smartdiff.Diff, path string) {

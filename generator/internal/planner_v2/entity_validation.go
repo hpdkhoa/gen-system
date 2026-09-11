@@ -13,7 +13,7 @@ import (
 	"fmt"
 	"strings"
 
-	"gen-system/generator/internal/ai"
+	"github.com/hpdkhoa/gen-system/generator/internal/ai"
 )
 
 // validateEntities filters specs to those whose name traces to a noun in the

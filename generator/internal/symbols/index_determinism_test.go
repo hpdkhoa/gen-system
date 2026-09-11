@@ -16,7 +16,7 @@ import (
 	"fmt"
 	"testing"
 
-	"gen-system/generator/internal/ast"
+	"github.com/hpdkhoa/gen-system/generator/internal/ast"
 )
 
 // buildAmbiguousIndex creates n files each defining an exported func with the

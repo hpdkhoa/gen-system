@@ -3,9 +3,9 @@
 // `--heal-log <path>` registers a JSONL agent-event sink so a CLI generation run
 // (gen idea / run / continue / evolve / apply) writes one structured event per
 // line: every lifecycle milestone and every self-healing step. Two uses:
-//   1. Watch/replay what the agent did without scrolling terminal output.
-//   2. Capture repair-trace data for the fine-tune pipeline (open item #6),
-//      which is explicitly blocked on exactly this data.
+//  1. Watch/replay what the agent did without scrolling terminal output.
+//  2. Capture repair-trace data for the fine-tune pipeline (open item #6),
+//     which is explicitly blocked on exactly this data.
 //
 // Off by default: with no --heal-log flag, no sink is registered and behaviour
 // is byte-identical to before. The returned cleanup closes the file; callers
@@ -17,7 +17,7 @@ import (
 	"fmt"
 	"os"
 
-	"gen-system/generator/internal/agent"
+	"github.com/hpdkhoa/gen-system/generator/internal/agent"
 )
 
 // healLogPath returns the value of --heal-log, or "" if absent.

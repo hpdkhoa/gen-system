@@ -19,7 +19,7 @@
 package flow
 
 import (
-	"gen-system/generator/internal/ast"
+	"github.com/hpdkhoa/gen-system/generator/internal/ast"
 )
 
 // buildStructuralCFG builds a CFG for non-Go languages by extracting

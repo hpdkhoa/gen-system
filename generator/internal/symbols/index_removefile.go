@@ -10,7 +10,8 @@
 // on it.
 //
 // To remove cleanly:
-//   git rm generator/internal/symbols/index_removefile.go
+//
+//	git rm generator/internal/symbols/index_removefile.go
 //
 // All RemoveFile tests previously in index_removefile_test.go continue to
 // work against the implementation now living in index.go.

@@ -21,10 +21,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"gen-system/generator/internal/ai"
-	agentctx "gen-system/generator/internal/context"
-	"gen-system/generator/internal/engine"
-	"gen-system/generator/internal/style"
+	"github.com/hpdkhoa/gen-system/generator/internal/ai"
+	agentctx "github.com/hpdkhoa/gen-system/generator/internal/context"
+	"github.com/hpdkhoa/gen-system/generator/internal/engine"
+	"github.com/hpdkhoa/gen-system/generator/internal/style"
 )
 
 var (

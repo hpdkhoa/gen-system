@@ -1,7 +1,7 @@
 package migration
 
 import (
-	"gen-system/generator/internal/compiler/diff"
+	"github.com/hpdkhoa/gen-system/generator/internal/compiler/diff"
 )
 
 func BuildMigration(cs diff.ChangeSet) MigrationIR {

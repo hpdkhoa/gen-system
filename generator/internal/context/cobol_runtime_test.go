@@ -9,8 +9,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	genast "gen-system/generator/internal/ast"
-	"gen-system/generator/internal/symbols"
+	genast "github.com/hpdkhoa/gen-system/generator/internal/ast"
+	"github.com/hpdkhoa/gen-system/generator/internal/symbols"
 )
 
 func TestCobolRuntimeCatalog_Resolution(t *testing.T) {

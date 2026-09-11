@@ -9,17 +9,17 @@ import (
 	"sync"
 	"time"
 
-	"gen-system/generator/internal/ast"
-	"gen-system/generator/internal/flow"
-	"gen-system/generator/internal/symbols"
+	"github.com/hpdkhoa/gen-system/generator/internal/ast"
+	"github.com/hpdkhoa/gen-system/generator/internal/flow"
+	"github.com/hpdkhoa/gen-system/generator/internal/symbols"
 )
 
 // Event is delivered on the Events channel whenever a file changes.
 type Event struct {
 	Path    string // absolute path that changed
 	Kind    EventKind
-	Module  *ast.Module              // freshly parsed module (nil on Delete)
-	CFGs    flow.CFGSet              // freshly built CFGs (nil on Delete)
+	Module  *ast.Module // freshly parsed module (nil on Delete)
+	CFGs    flow.CFGSet // freshly built CFGs (nil on Delete)
 	Effects map[string]*flow.FuncEffects
 }
 

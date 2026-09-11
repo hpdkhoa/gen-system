@@ -2,15 +2,16 @@
 // tiers. The reviewer used to fire "SQL injection" + "unvalidated input" on
 // EVERY in-memory CRUD file (no SQL anywhere), producing ~15 false-positive
 // lines per continue run and eroding trust in [review] output. Now:
-//   • Findings carry a Severity (warn / info).
-//   • SQL-injection + unvalidated-input findings are only WARNINGS on the
+//   - Findings carry a Severity (warn / info).
+//   - SQL-injection + unvalidated-input findings are only WARNINGS on the
 //     postgres store path (GEN_BACKEND=postgres). On the in-memory backend they
 //     are downgraded to INFO (there is no SQL string to inject into), and the
 //     prompt tells the model so up front.
-//   • The generated `_ =` ignored-error idiom (intentional, in scaffold code) is
+//   - The generated `_ =` ignored-error idiom (intentional, in scaffold code) is
 //     downgraded to INFO.
-//   • Safe stays true unless at least one WARN-level issue remains, so the
+//   - Safe stays true unless at least one WARN-level issue remains, so the
 //     [review] block only shouts when something actually warrants attention.
+//
 // ai must NOT import engine (engine imports ai); backend mode is read straight
 // from GEN_BACKEND here to keep the dependency direction intact.
 package ai

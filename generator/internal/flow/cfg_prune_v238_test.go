@@ -7,8 +7,8 @@ package flow
 import (
 	"testing"
 
-	"gen-system/generator/internal/ast"
-	"gen-system/generator/internal/symbols"
+	"github.com/hpdkhoa/gen-system/generator/internal/ast"
+	"github.com/hpdkhoa/gen-system/generator/internal/symbols"
 )
 
 // branchElseReturnNode builds an if/else where the then-body and else-body each

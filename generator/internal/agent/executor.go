@@ -25,14 +25,14 @@ import (
 	"path/filepath"
 	"strings"
 
-	"gen-system/generator/internal/ai"
-	"gen-system/generator/internal/engine"
-	"gen-system/generator/internal/frontend"
-	"gen-system/generator/internal/frontend/router"
-	"gen-system/generator/internal/mobile"
-	"gen-system/generator/internal/planner"
-	"gen-system/generator/internal/schema"
-	"gen-system/generator/internal/trace"
+	"github.com/hpdkhoa/gen-system/generator/internal/ai"
+	"github.com/hpdkhoa/gen-system/generator/internal/engine"
+	"github.com/hpdkhoa/gen-system/generator/internal/frontend"
+	"github.com/hpdkhoa/gen-system/generator/internal/frontend/router"
+	"github.com/hpdkhoa/gen-system/generator/internal/mobile"
+	"github.com/hpdkhoa/gen-system/generator/internal/planner"
+	"github.com/hpdkhoa/gen-system/generator/internal/schema"
+	"github.com/hpdkhoa/gen-system/generator/internal/trace"
 )
 
 // ─────────────────────────────────────────────

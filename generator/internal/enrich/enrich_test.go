@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"gen-system/generator/internal/belief"
+	"github.com/hpdkhoa/gen-system/generator/internal/belief"
 )
 
 func TestMapKind(t *testing.T) {

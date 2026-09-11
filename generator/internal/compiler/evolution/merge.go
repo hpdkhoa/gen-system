@@ -81,8 +81,8 @@ func Merge(oldIR, newIR Schema) Schema {
 // plan (e.g. "Remove the 'age' field from User").
 //
 // Flow:
-//   1. Start with additive Merge (safe base)
-//   2. Apply DiffIntent removals (explicit, user-signaled)
+//  1. Start with additive Merge (safe base)
+//  2. Apply DiffIntent removals (explicit, user-signaled)
 //
 // This keeps the "non-destructive by default" guarantee while
 // enabling intentional deletions when the user asks for them.

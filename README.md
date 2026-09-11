@@ -53,7 +53,7 @@ data. Whether it would help is an open experiment, listed under Future work.
 ## Quickstart
 
 ```bash
-git clone [TODO repo url]
+git clone https://github.com/hpdkhoa/gen-system.git
 cd gen-system
 ./install.sh                    # Go, Ollama, model pulls, optional Postgres and Node
 ```
@@ -120,7 +120,8 @@ before any run, so it cannot be tuned to the results.
 
 ```bash
 ./bench/freeze-env.sh           # record commit, GPU, driver, model list
-./bench/run-all.sh              # the full campaign
+./bench/run-all.sh              # the full campaign from fresh
+./bench/run-partial.sh --run strategies,swebench:60 --reuse results/<earlier date>   # rerun some drivers, reuse the rest
 python3 bench/summarise.py --results results/<date>
 python3 bench/attest.py --results results/<date>   # manifest and attestation for the campaign
 ```
@@ -131,7 +132,8 @@ commit and machine. It says which runs were dropped as not measured and why, and
 published number rests on.
 
 **Numbers are not reproduced in this README.** They live in `benchmarks/results/measured.json` in
-the portfolio repo, each row carrying the date, the commit, the task set, n, and a range. A README
+the [portfolio repository](https://github.com/hpdkhoa/my-portfolio), each row carrying the date,
+the commit, the task set, n, and a range. A README
 table is a copy that goes stale the first time you rerun anything.
 
 What the campaign measures:

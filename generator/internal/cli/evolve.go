@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"os"
 
-	"gen-system/generator/internal/agent"
-	"gen-system/generator/internal/compiler"
-	"gen-system/generator/internal/planner"
-	"gen-system/generator/internal/schema"
+	"github.com/hpdkhoa/gen-system/generator/internal/agent"
+	"github.com/hpdkhoa/gen-system/generator/internal/compiler"
+	"github.com/hpdkhoa/gen-system/generator/internal/planner"
+	"github.com/hpdkhoa/gen-system/generator/internal/schema"
 )
 
 func Evolve() {

@@ -1,6 +1,6 @@
 package versioning
 
-import "gen-system/generator/internal/schema"
+import "github.com/hpdkhoa/gen-system/generator/internal/schema"
 
 type Diff struct {
 	Added   []schema.Field

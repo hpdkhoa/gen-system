@@ -19,12 +19,12 @@ import (
 	"sort"
 	"strings"
 
-	"gen-system/generator/internal/agent"
-	"gen-system/generator/internal/compiler"
-	"gen-system/generator/internal/context"
-	"gen-system/generator/internal/planner"
-	"gen-system/generator/internal/schema"
-	"gen-system/generator/internal/symbols"
+	"github.com/hpdkhoa/gen-system/generator/internal/agent"
+	"github.com/hpdkhoa/gen-system/generator/internal/compiler"
+	"github.com/hpdkhoa/gen-system/generator/internal/context"
+	"github.com/hpdkhoa/gen-system/generator/internal/planner"
+	"github.com/hpdkhoa/gen-system/generator/internal/schema"
+	"github.com/hpdkhoa/gen-system/generator/internal/symbols"
 )
 
 // hasUnderstandFlag reports whether --understand was passed.

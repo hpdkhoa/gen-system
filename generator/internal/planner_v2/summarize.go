@@ -16,9 +16,9 @@ import (
 	"sort"
 	"strings"
 
-	"gen-system/generator/internal/context"
-	"gen-system/generator/internal/schema"
-	"gen-system/generator/internal/symbols"
+	"github.com/hpdkhoa/gen-system/generator/internal/context"
+	"github.com/hpdkhoa/gen-system/generator/internal/schema"
+	"github.com/hpdkhoa/gen-system/generator/internal/symbols"
 )
 
 // ExistingState is the structured snapshot the continue-planner summarizes from.

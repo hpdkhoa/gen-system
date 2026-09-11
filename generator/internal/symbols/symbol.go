@@ -15,7 +15,7 @@ package symbols
 // re-parsing source.
 // ─────────────────────────────────────────────────────────────
 
-import "gen-system/generator/internal/ast"
+import "github.com/hpdkhoa/gen-system/generator/internal/ast"
 
 // Provenance is the origin tier of a symbol. It is language-agnostic: the
 // shared index/metric/UI code keys off this, never off Language. A frontend
@@ -52,7 +52,7 @@ type SymbolKind string
 const (
 	SymFunc      SymbolKind = "func"
 	SymMethod    SymbolKind = "method"
-	SymType      SymbolKind = "type"      // struct, class, interface, enum
+	SymType      SymbolKind = "type" // struct, class, interface, enum
 	SymVar       SymbolKind = "var"
 	SymConst     SymbolKind = "const"
 	SymField     SymbolKind = "field"     // struct/class field
@@ -81,17 +81,17 @@ type Symbol struct {
 	// e.g. "backend/internal/user/handler.go#func:CreateUser"
 	ID string
 
-	Name        string
-	QualName    string          // qualified name, e.g. "http.Handler" or "User.Email"
-	Kind        SymbolKind
-	Language    ast.Language
-	DefinedIn   string          // absolute file path
-	Span        ast.Span
+	Name      string
+	QualName  string // qualified name, e.g. "http.Handler" or "User.Email"
+	Kind      SymbolKind
+	Language  ast.Language
+	DefinedIn string // absolute file path
+	Span      ast.Span
 
 	// Type information
-	Type        ast.TypeRef
-	Params      []ast.Parameter // for functions/methods
-	Returns     []ast.TypeRef   // for functions/methods
+	Type    ast.TypeRef
+	Params  []ast.Parameter // for functions/methods
+	Returns []ast.TypeRef   // for functions/methods
 
 	// For methods: the receiver type name
 	ReceiverType string
@@ -112,8 +112,8 @@ type Symbol struct {
 
 // Reference is one usage site of a symbol.
 type Reference struct {
-	SymbolID string      // the symbol being referenced
-	In       string      // file path containing the reference
+	SymbolID string // the symbol being referenced
+	In       string // file path containing the reference
 	Span     ast.Span
 	Kind     RefKind
 }

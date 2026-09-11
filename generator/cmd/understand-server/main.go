@@ -16,12 +16,12 @@ import (
 	"path/filepath"
 	"time"
 
-	"gen-system/generator/internal/api/sse"
-	"gen-system/generator/internal/api/understand"
-	agentctx "gen-system/generator/internal/context"
-	"gen-system/generator/internal/presentation"
-	"gen-system/generator/internal/watch"
-	"gen-system/generator/internal/webui"
+	"github.com/hpdkhoa/gen-system/generator/internal/api/sse"
+	"github.com/hpdkhoa/gen-system/generator/internal/api/understand"
+	agentctx "github.com/hpdkhoa/gen-system/generator/internal/context"
+	"github.com/hpdkhoa/gen-system/generator/internal/presentation"
+	"github.com/hpdkhoa/gen-system/generator/internal/watch"
+	"github.com/hpdkhoa/gen-system/generator/internal/webui"
 )
 
 func main() {

@@ -200,4 +200,3 @@ func TestDiff_MigrationDoesNotProduceEmptySteps(t *testing.T) {
 		t.Error("Org is unchanged and must not appear in Modified")
 	}
 }
-

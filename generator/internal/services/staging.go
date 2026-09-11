@@ -15,10 +15,10 @@ import (
 	"sync"
 	"time"
 
-	"gen-system/generator/internal/agent"
-	"gen-system/generator/internal/api/sse"
-	"gen-system/generator/internal/compiler"
-	"gen-system/generator/internal/planner"
+	"github.com/hpdkhoa/gen-system/generator/internal/agent"
+	"github.com/hpdkhoa/gen-system/generator/internal/api/sse"
+	"github.com/hpdkhoa/gen-system/generator/internal/compiler"
+	"github.com/hpdkhoa/gen-system/generator/internal/planner"
 )
 
 // stagingDirName is the working copy location, under the live .gen.

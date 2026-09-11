@@ -5,14 +5,14 @@
 // through gen-system's OWN comprehension engine (context.LoadContext) and asserts
 // properties `go build` cannot see:
 //
-//   1. RESOLUTION — every call in the generated code resolves to a real symbol.
-//      go build already guarantees this for Go, but the NUMBER is the first real
-//      internal benchmark and the identical check that matters for non-Go source.
-//   2. ORPHAN OPERATIONS — a handler/test references a service method that is not
-//      in the index (the v23.24 "continue dropped Checkout" class of bug, caught
-//      structurally rather than after it ships).
-//   3. EFFECT SANITY — a read-only operation (Get/List/Find/…) whose inferred
-//      effects include a DB write is a semantic bug go build waves through.
+//  1. RESOLUTION — every call in the generated code resolves to a real symbol.
+//     go build already guarantees this for Go, but the NUMBER is the first real
+//     internal benchmark and the identical check that matters for non-Go source.
+//  2. ORPHAN OPERATIONS — a handler/test references a service method that is not
+//     in the index (the v23.24 "continue dropped Checkout" class of bug, caught
+//     structurally rather than after it ships).
+//  3. EFFECT SANITY — a read-only operation (Get/List/Find/…) whose inferred
+//     effects include a DB write is a semantic bug go build waves through.
 //
 // GATING. VerifyMode controls what happens on a finding:
 //   - VerifyOff (default when RunFromPlan is called directly): skip entirely.
@@ -20,6 +20,7 @@
 //     caller can leave staged output for human review + write a findings report.
 //   - VerifyAutofix: route each fixable finding through the existing repair loop
 //     (dispatchRepairs), then re-report.
+//
 // Both modes ALWAYS report to the human (emit + structured record). This honours
 // the hard constraint: the human stays in the loop before acting on beliefs.
 //
@@ -33,9 +34,9 @@ import (
 	"sort"
 	"strings"
 
-	agentctx "gen-system/generator/internal/context"
-	"gen-system/generator/internal/flow"
-	"gen-system/generator/internal/symbols"
+	agentctx "github.com/hpdkhoa/gen-system/generator/internal/context"
+	"github.com/hpdkhoa/gen-system/generator/internal/flow"
+	"github.com/hpdkhoa/gen-system/generator/internal/symbols"
 )
 
 // VerifyMode selects the Understand-validation behaviour.
@@ -245,7 +246,6 @@ func isReadOpName(name string) bool {
 	}
 	return false
 }
-
 
 // runVerifyStage runs the Understand pass (when enabled) and acts on it per
 // VerifyUnderstandMode. Returns the report (nil-safe) and whether generation

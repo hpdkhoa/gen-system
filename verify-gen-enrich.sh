@@ -80,8 +80,8 @@ import (
 	"sort"
 	"strings"
 
-	gencontext "gen-system/generator/internal/context"
-	"gen-system/generator/internal/symbols"
+	gencontext "github.com/hpdkhoa/gen-system/generator/internal/context"
+	"github.com/hpdkhoa/gen-system/generator/internal/symbols"
 )
 
 func min(a, b int) int {

@@ -3,15 +3,15 @@
 // of the CLI consent gate.
 //
 // Flow:
-//   1. Plan(idea, target) — load the target, summarize what exists, plan the
-//      delta, detect conflicts (planner_v2.DetectConflicts), and publish a
-//      "continue_review" SSE with existing-purpose + delta + conflicts. The
-//      pending plan is HELD (not generated yet).
-//   2. The UI shows the review and calls Approve() or Reject().
-//        Approve → generate the held plan (compile-gate + repair as usual).
-//        Reject  → discard, nothing staged.
-//   With autoApprove=true, step 1 proceeds straight to generation (scripted/CI).
-//   Otherwise it ALWAYS holds for Approve/Reject — the review is a true gate.
+//  1. Plan(idea, target) — load the target, summarize what exists, plan the
+//     delta, detect conflicts (planner_v2.DetectConflicts), and publish a
+//     "continue_review" SSE with existing-purpose + delta + conflicts. The
+//     pending plan is HELD (not generated yet).
+//  2. The UI shows the review and calls Approve() or Reject().
+//     Approve → generate the held plan (compile-gate + repair as usual).
+//     Reject  → discard, nothing staged.
+//     With autoApprove=true, step 1 proceeds straight to generation (scripted/CI).
+//     Otherwise it ALWAYS holds for Approve/Reject — the review is a true gate.
 //
 // Reuses the exact conflict rules the CLI gate uses (planner_v2), so CLI and
 // Studio push back identically. Lives in services (generation surface);
@@ -22,10 +22,10 @@ import (
 	"fmt"
 	"time"
 
-	"gen-system/generator/internal/agent"
-	"gen-system/generator/internal/belief"
-	gencontext "gen-system/generator/internal/context"
-	"gen-system/generator/internal/planner_v2"
+	"github.com/hpdkhoa/gen-system/generator/internal/agent"
+	"github.com/hpdkhoa/gen-system/generator/internal/belief"
+	gencontext "github.com/hpdkhoa/gen-system/generator/internal/context"
+	"github.com/hpdkhoa/gen-system/generator/internal/planner_v2"
 )
 
 // PendingContinue holds a planned-but-unapproved continuation between the review
@@ -41,14 +41,14 @@ type PendingContinue struct {
 
 // ContinueReview is the SSE payload the Studio renders for Approve/Reject.
 type ContinueReview struct {
-	Idea      string                 `json:"idea"`
-	Target    string                 `json:"target"`
-	Summary   string                 `json:"summary"`
-	Existing  []ReviewEntity          `json:"existing"`
-	Changed   []string               `json:"changed"`
-	NewOps    map[string][]string    `json:"new_ops"`
-	Conflicts []planner_v2.Conflict  `json:"conflicts"`
-	AutoOK    bool                   `json:"auto_ok"` // true → no conflicts, safe to proceed
+	Idea      string                `json:"idea"`
+	Target    string                `json:"target"`
+	Summary   string                `json:"summary"`
+	Existing  []ReviewEntity        `json:"existing"`
+	Changed   []string              `json:"changed"`
+	NewOps    map[string][]string   `json:"new_ops"`
+	Conflicts []planner_v2.Conflict `json:"conflicts"`
+	AutoOK    bool                  `json:"auto_ok"` // true → no conflicts, safe to proceed
 }
 
 // ReviewEntity is one existing entity in the review.

@@ -8,7 +8,7 @@ import "time"
 
 // Run is the top-level artefact written by `genbench`. One run per invocation.
 type Run struct {
-	Schema      string    `json:"schema"`        // always "genbench/v1"
+	Schema      string    `json:"schema"` // always "genbench/v1"
 	StartedAt   time.Time `json:"started_at"`
 	FinishedAt  time.Time `json:"finished_at"`
 	HostInfo    HostInfo  `json:"host"`
@@ -19,11 +19,11 @@ type Run struct {
 
 // HostInfo records environment so two runs are only compared when comparable.
 type HostInfo struct {
-	OS         string `json:"os"`
-	Arch       string `json:"arch"`
-	NumCPU     int    `json:"num_cpu"`
-	GoVersion  string `json:"go_version"`
-	GitCommit  string `json:"git_commit,omitempty"`
+	OS        string `json:"os"`
+	Arch      string `json:"arch"`
+	NumCPU    int    `json:"num_cpu"`
+	GoVersion string `json:"go_version"`
+	GitCommit string `json:"git_commit,omitempty"`
 }
 
 // ModelInfo records which LLM was queried (or "n/a" for non-AI suites).
@@ -44,11 +44,11 @@ type Suite struct {
 // Case is a pass/fail check. Use for reliability — assertions about
 // what the engine produced.
 type Case struct {
-	Name  string `json:"name"`
-	Pass  bool   `json:"pass"`
-	Got   string `json:"got,omitempty"`
-	Want  string `json:"want,omitempty"`
-	Note  string `json:"note,omitempty"`
+	Name string `json:"name"`
+	Pass bool   `json:"pass"`
+	Got  string `json:"got,omitempty"`
+	Want string `json:"want,omitempty"`
+	Note string `json:"note,omitempty"`
 }
 
 // Metric is a single numeric measurement. Use for performance.

@@ -5,7 +5,7 @@ package ai
 import (
 	"testing"
 
-	"gen-system/generator/internal/schema"
+	"github.com/hpdkhoa/gen-system/generator/internal/schema"
 )
 
 func TestParseOperations_EnvelopeArrayAndFence(t *testing.T) {

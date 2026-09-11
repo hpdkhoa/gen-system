@@ -5,13 +5,13 @@
 // understand-server, so the air-gapped enterprise binary keeps zero generation
 // routes):
 //
-//   GET  /api/generate/outdirs        list candidate output folders under the
-//                                     projects base (excluding the current root),
-//                                     each flagged existing/empty/has-manifest.
-//   POST /api/generate/mkdir          {name} → create a folder under the base.
-//   GET  /api/generate/base           report the base + current root (for the UI).
-//   GET  /api/generate/tree?dir=      file tree of a generated output folder.
-//   GET  /api/generate/file?path=     read one text file (bounded to the base).
+//	GET  /api/generate/outdirs        list candidate output folders under the
+//	                                  projects base (excluding the current root),
+//	                                  each flagged existing/empty/has-manifest.
+//	POST /api/generate/mkdir          {name} → create a folder under the base.
+//	GET  /api/generate/base           report the base + current root (for the UI).
+//	GET  /api/generate/tree?dir=      file tree of a generated output folder.
+//	GET  /api/generate/file?path=     read one text file (bounded to the base).
 //
 // Every path is validated against the projects base via the same rule the build
 // uses (BuildService.ValidateOutputDir / a base-descendant check), so the browser

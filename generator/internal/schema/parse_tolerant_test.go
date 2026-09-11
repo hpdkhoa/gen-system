@@ -9,8 +9,12 @@ func TestTolerant_ObjectFields(t *testing.T) {
 	// the shape the plan->schema prompt asks the model for (object fields)
 	in := "```json\n{\"entities\":[{\"name\":\"Project\",\"fields\":{\"id\":\"int\",\"title\":\"string\"}},{\"name\":\"Task\",\"fields\":{\"id\":\"int\",\"status\":\"string\",\"due_date\":\"time\"}}]}\n```"
 	sf, err := ParseFileChecked(in)
-	if err != nil { t.Fatalf("unexpected err: %v", err) }
-	if len(sf.Entities) != 2 { t.Fatalf("want 2 entities, got %d", len(sf.Entities)) }
+	if err != nil {
+		t.Fatalf("unexpected err: %v", err)
+	}
+	if len(sf.Entities) != 2 {
+		t.Fatalf("want 2 entities, got %d", len(sf.Entities))
+	}
 	if sf.Entities[0].Name != "Project" || len(sf.Entities[0].Fields) != 2 {
 		t.Fatalf("Project fields wrong: %+v", sf.Entities[0])
 	}
@@ -26,7 +30,9 @@ func TestTolerant_ObjectFields(t *testing.T) {
 func TestTolerant_ArrayFields(t *testing.T) {
 	in := `{"entities":[{"name":"User","fields":[{"name":"id","type":"int"},{"name":"email","type":"string"}]}]}`
 	sf, err := ParseFileChecked(in)
-	if err != nil { t.Fatalf("unexpected err: %v", err) }
+	if err != nil {
+		t.Fatalf("unexpected err: %v", err)
+	}
 	if len(sf.Entities) != 1 || len(sf.Entities[0].Fields) != 2 {
 		t.Fatalf("array form wrong: %+v", sf.Entities)
 	}

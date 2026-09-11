@@ -36,14 +36,14 @@ const (
 	NodeExport    NodeKind = "export"
 
 	// Statements (inside function bodies)
-	NodeCall     NodeKind = "call"
-	NodeReturn   NodeKind = "return"
-	NodeAssign   NodeKind = "assign"
-	NodeBranch   NodeKind = "branch"   // if/switch/match
-	NodeLoop     NodeKind = "loop"     // for/while/each
-	NodeDefer    NodeKind = "defer"    // Go defer
-	NodeTry      NodeKind = "try"      // try/catch/except
-	NodeEscape   NodeKind = "escape"   // CA Gen ESCAPE
+	NodeCall      NodeKind = "call"
+	NodeReturn    NodeKind = "return"
+	NodeAssign    NodeKind = "assign"
+	NodeBranch    NodeKind = "branch"    // if/switch/match
+	NodeLoop      NodeKind = "loop"      // for/while/each
+	NodeDefer     NodeKind = "defer"     // Go defer
+	NodeTry       NodeKind = "try"       // try/catch/except
+	NodeEscape    NodeKind = "escape"    // CA Gen ESCAPE
 	NodeProcedure NodeKind = "procedure" // CA Gen PROCEDURE block
 
 	// Explicit ignorance — parser encountered this but cannot fully model it.
@@ -67,7 +67,9 @@ type Span struct {
 }
 
 // Patched in v18 (D1#1): the prior implementation
-//     s.Start.Offset < s.End.Offset || s.Start.Line > 0
+//
+//	s.Start.Offset < s.End.Offset || s.Start.Line > 0
+//
 // returned true for any span whose Start.Line was set, including the
 // inverted span {Start:{Line:1,Offset:5}, End:{Line:1,Offset:3}} that
 // the test fixture deliberately marks invalid. The corrected predicate
@@ -116,8 +118,8 @@ var UnknownType = TypeRef{Name: "?"}
 type Parameter struct {
 	Name     string
 	Type     TypeRef
-	Variadic bool // *args, ...T
-	Optional bool // TypeScript optional params
+	Variadic bool   // *args, ...T
+	Optional bool   // TypeScript optional params
 	Default  string // default value literal if present
 }
 
@@ -143,17 +145,17 @@ type EnumMember struct {
 // to Kind — see inline comments for which fields are relevant.
 type Node struct {
 	// Universal fields
-	ID       string   // unique within module, e.g. "func:CreateUser"
+	ID       string // unique within module, e.g. "func:CreateUser"
 	Kind     NodeKind
 	Name     string
 	Language Language
 	Span     Span
 
 	// Modifiers
-	Exported  bool
-	Abstract  bool   // abstract class/method
-	Async     bool   // async function
-	Static    bool   // static method
+	Exported   bool
+	Abstract   bool // abstract class/method
+	Async      bool // async function
+	Static     bool // static method
 	DocComment string
 
 	// ── NodeFunction / NodeMethod ──────────────────────────
@@ -183,7 +185,7 @@ type Node struct {
 	ImportAll   bool     // import * as X
 
 	// ── NodeVariable / NodeConstant ────────────────────────
-	TypeHint    TypeRef
+	TypeHint     TypeRef
 	ValueLiteral string // literal value if statically known
 
 	// ── NodeCall ───────────────────────────────────────────
@@ -212,9 +214,9 @@ type Node struct {
 // It corresponds to one file regardless of language.
 type Module struct {
 	Language    Language
-	FilePath    string   // absolute path
-	PackageName string   // Go package, Python module, TS module name
-	Nodes       []*Node  // top-level declarations and imports
+	FilePath    string  // absolute path
+	PackageName string  // Go package, Python module, TS module name
+	Nodes       []*Node // top-level declarations and imports
 	ParseErrors []ParseError
 
 	// Checksum (SHA-256 hex) of the source bytes at parse time.

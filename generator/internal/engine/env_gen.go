@@ -11,7 +11,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"gen-system/generator/internal/schema"
+	"github.com/hpdkhoa/gen-system/generator/internal/schema"
 )
 
 // GenerateEnvFiles writes three files to rootPath:

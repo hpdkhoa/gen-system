@@ -8,21 +8,21 @@
 //
 // Four new routes, all under /api/present/v23/:
 //
-//   GET /api/present/v23/architecture
-//       Language breakdown, top packages, entry-point candidates, unknown
-//       counts. Used as the landing-page payload.
+//	GET /api/present/v23/architecture
+//	    Language breakdown, top packages, entry-point candidates, unknown
+//	    counts. Used as the landing-page payload.
 //
-//   GET /api/present/v23/search?q=<query>&effect=<db|fs|network|pure>&limit=N
-//       Fuzzy symbol search + optional effect facet. Returns ranked symbol
-//       hits with file, line, kind, language.
+//	GET /api/present/v23/search?q=<query>&effect=<db|fs|network|pure>&limit=N
+//	    Fuzzy symbol search + optional effect facet. Returns ranked symbol
+//	    hits with file, line, kind, language.
 //
-//   GET /api/present/v23/callgraph?root=<symbolID>&depth=N&direction=<callers|callees|both>
-//       Subgraph rooted at one symbol. Caps at depth=4 to keep payloads
-//       reasonable. Each node carries its dominant effect for colouring.
+//	GET /api/present/v23/callgraph?root=<symbolID>&depth=N&direction=<callers|callees|both>
+//	    Subgraph rooted at one symbol. Caps at depth=4 to keep payloads
+//	    reasonable. Each node carries its dominant effect for colouring.
 //
-//   GET /api/present/v23/effects
-//       All inferred function effects, grouped by kind, for the effect-facet
-//       UI in Wave 4.
+//	GET /api/present/v23/effects
+//	    All inferred function effects, grouped by kind, for the effect-facet
+//	    UI in Wave 4.
 //
 // This file does NOT modify the v15 endpoints in presentation.go.
 // It plugs into the same Server via RegisterV23Routes, which gen-server's
@@ -36,8 +36,8 @@ import (
 	"strconv"
 	"strings"
 
-	"gen-system/generator/internal/flow"
-	"gen-system/generator/internal/symbols"
+	"github.com/hpdkhoa/gen-system/generator/internal/flow"
+	"github.com/hpdkhoa/gen-system/generator/internal/symbols"
 )
 
 // RegisterV23Routes attaches the v23 endpoints to mux. Call after
@@ -259,16 +259,16 @@ func classifyEntry(sym *symbols.Symbol) string {
 // ─── /api/present/v23/search ──────────────────────────────────────────
 
 type SearchHit struct {
-	SymbolID  string   `json:"symbol_id"`
-	Name      string   `json:"name"`
-	Kind      string   `json:"kind"`
-	Language  string   `json:"language"`
-	File      string   `json:"file"`
-	Line      int      `json:"line"`
-	Exported  bool     `json:"exported"`
-	Provenance string  `json:"provenance,omitempty"` // v23.32
-	Effects   []string `json:"effects,omitempty"`
-	MatchRank int      `json:"match_rank"`
+	SymbolID   string   `json:"symbol_id"`
+	Name       string   `json:"name"`
+	Kind       string   `json:"kind"`
+	Language   string   `json:"language"`
+	File       string   `json:"file"`
+	Line       int      `json:"line"`
+	Exported   bool     `json:"exported"`
+	Provenance string   `json:"provenance,omitempty"` // v23.32
+	Effects    []string `json:"effects,omitempty"`
+	MatchRank  int      `json:"match_rank"`
 }
 
 type SearchResponse struct {
@@ -361,7 +361,7 @@ func (s *Server) handleSearchV23(w http.ResponseWriter, r *http.Request) {
 			Language: string(sym.Language), File: sym.DefinedIn,
 			Line: sym.Span.Start.Line, Exported: sym.Exported,
 			Provenance: string(sym.Provenance),
-			Effects: efxNames, MatchRank: rank,
+			Effects:    efxNames, MatchRank: rank,
 		})
 	}
 	sort.SliceStable(hits, func(i, j int) bool {
@@ -399,16 +399,16 @@ func subsequenceMatch(needle, haystack string) bool {
 // ─── /api/present/v23/callgraph ───────────────────────────────────────
 
 type CallgraphNode struct {
-	SymbolID string   `json:"symbol_id"`
-	Name     string   `json:"name"`
-	Kind     string   `json:"kind"`
-	Language string   `json:"language"`
-	File     string   `json:"file"`
-	Line     int      `json:"line"`
-	Depth    int      `json:"depth"`
-	Provenance string `json:"provenance,omitempty"` // v23.32: "", "stdlib", "thirdparty"
-	IsInit   bool     `json:"is_init,omitempty"`     // v24: constructor / allocation (new X)
-	Effects  []string `json:"effects,omitempty"`
+	SymbolID   string   `json:"symbol_id"`
+	Name       string   `json:"name"`
+	Kind       string   `json:"kind"`
+	Language   string   `json:"language"`
+	File       string   `json:"file"`
+	Line       int      `json:"line"`
+	Depth      int      `json:"depth"`
+	Provenance string   `json:"provenance,omitempty"` // v23.32: "", "stdlib", "thirdparty"
+	IsInit     bool     `json:"is_init,omitempty"`    // v24: constructor / allocation (new X)
+	Effects    []string `json:"effects,omitempty"`
 }
 
 type CallgraphEdge struct {

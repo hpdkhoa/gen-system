@@ -13,7 +13,7 @@ import (
 	"os"
 	"strings"
 
-	"gen-system/generator/internal/schema"
+	"github.com/hpdkhoa/gen-system/generator/internal/schema"
 )
 
 // Operation is one business operation the model proposes for an entity. The

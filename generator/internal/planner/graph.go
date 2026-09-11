@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"gen-system/generator/internal/schema"
+	"github.com/hpdkhoa/gen-system/generator/internal/schema"
 )
 
 // ─────────────────────────────────────────────
@@ -51,13 +51,13 @@ func buildTaskGraph(s schema.SchemaFile, rootPath string, changedEntities map[st
 			needsMigrate = true
 		}
 
-		modelID      := taskID("generate_model", name)
-		repoID       := taskID("generate_repo", name)
-		serviceID    := taskID("generate_service", name)
-		handlerID    := taskID("generate_handler", name)
+		modelID := taskID("generate_model", name)
+		repoID := taskID("generate_repo", name)
+		serviceID := taskID("generate_service", name)
+		handlerID := taskID("generate_handler", name)
 		validationID := taskID("generate_validation", name)
-		frontendID   := taskID("generate_frontend", name)
-		mobileID     := taskID("generate_mobile", name)
+		frontendID := taskID("generate_frontend", name)
+		mobileID := taskID("generate_mobile", name)
 
 		// Determine model dep: fresh → depends on migrate; existing → no migrate dep
 		modelDeps := []string{}

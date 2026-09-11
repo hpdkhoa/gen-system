@@ -119,17 +119,17 @@ func parseLine(raw string) (string, string, bool) {
 // This list is the single reference for what a .env may contain. The constants
 // are the variable NAMES, so callers and tests share one spelling.
 const (
-	EnvLogic      = "GEN_LOGIC"         // "ollama" → live model logic; else templates
-	EnvModel      = "OLLAMA_MODEL"      // legacy single model (fallback for both roles)
-	EnvModelPlan  = "OLLAMA_MODEL_PLAN" // planner model (analysis/architecture/entities)
-	EnvModelCode  = "OLLAMA_MODEL_CODE" // code model (service-logic bodies)
-	EnvOllamaHost = "OLLAMA_HOST"       // e.g. http://127.0.0.1:11434
-	EnvOllamaTODO = "OLLAMA_TIMEOUT"    // seconds; per-request HTTP timeout
-	EnvKeepAlive  = "OLLAMA_KEEP_ALIVE" // e.g. "30m"; how long Ollama keeps a model warm
-	EnvBackend    = "GEN_BACKEND"       // "postgres" → generate PG store; else in-memory
-	EnvDBURL      = "DATABASE_URL"      // postgres DSN (DB_URL accepted as alias)
-	EnvProfile    = "GEN_ENV"           // selects .env.<name>
-	EnvOutDir     = "GEN_OUT"           // optional default output dir for generators
+	EnvLogic         = "GEN_LOGIC"         // "ollama" → live model logic; else templates
+	EnvModel         = "OLLAMA_MODEL"      // legacy single model (fallback for both roles)
+	EnvModelPlan     = "OLLAMA_MODEL_PLAN" // planner model (analysis/architecture/entities)
+	EnvModelCode     = "OLLAMA_MODEL_CODE" // code model (service-logic bodies)
+	EnvOllamaHost    = "OLLAMA_HOST"       // e.g. http://127.0.0.1:11434
+	EnvOllamaTimeout = "OLLAMA_TIMEOUT"    // seconds; per-request HTTP timeout
+	EnvKeepAlive     = "OLLAMA_KEEP_ALIVE" // e.g. "30m"; how long Ollama keeps a model warm
+	EnvBackend       = "GEN_BACKEND"       // "postgres" → generate PG store; else in-memory
+	EnvDBURL         = "DATABASE_URL"      // postgres DSN (DB_URL accepted as alias)
+	EnvProfile       = "GEN_ENV"           // selects .env.<name>
+	EnvOutDir        = "GEN_OUT"           // optional default output dir for generators
 )
 
 // Summary returns a redacted, human-readable view of the active config for
@@ -156,7 +156,7 @@ func Summary() string {
 	fmt.Fprintf(&b, "plan=%s ", get(EnvModelPlan, get(EnvModel, "qwen3:14b")))
 	fmt.Fprintf(&b, "code=%s ", get(EnvModelCode, get(EnvModel, "qwen2.5-coder:14b")))
 	fmt.Fprintf(&b, "host=%s ", get(EnvOllamaHost, "http://localhost:11434"))
-	fmt.Fprintf(&b, "timeout=%ss ", get(EnvOllamaTODO, "600"))
+	fmt.Fprintf(&b, "timeout=%ss ", get(EnvOllamaTimeout, "600"))
 	fmt.Fprintf(&b, "keep_alive=%s ", get(EnvKeepAlive, "30m"))
 	fmt.Fprintf(&b, "db=%s", dsn)
 	return b.String()

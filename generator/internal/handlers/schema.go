@@ -41,7 +41,9 @@ func (h *Handlers) ApproveEntity(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handlers) RejectEntity(w http.ResponseWriter, r *http.Request) {
 	name := pathParam(r, "name")
-	var req struct{ Comment string `json:"comment"` }
+	var req struct {
+		Comment string `json:"comment"`
+	}
 	_ = json.NewDecoder(r.Body).Decode(&req)
 	h.broker.Publish("entity_rejected", map[string]string{"entity": name, "comment": req.Comment})
 	writeJSON(w, map[string]string{"entity": name, "status": "rejected"})
@@ -49,7 +51,9 @@ func (h *Handlers) RejectEntity(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handlers) RequestChanges(w http.ResponseWriter, r *http.Request) {
 	name := pathParam(r, "name")
-	var req struct{ Comment string `json:"comment"` }
+	var req struct {
+		Comment string `json:"comment"`
+	}
 	_ = json.NewDecoder(r.Body).Decode(&req)
 	h.broker.Publish("entity_changes_requested", map[string]string{"entity": name, "comment": req.Comment})
 	writeJSON(w, map[string]string{"entity": name, "status": "changes_requested"})

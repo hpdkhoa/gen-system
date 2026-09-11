@@ -5,9 +5,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"gen-system/generator/internal/agent"
-	"gen-system/generator/internal/planner"
-	"gen-system/generator/internal/schema"
+	"github.com/hpdkhoa/gen-system/generator/internal/agent"
+	"github.com/hpdkhoa/gen-system/generator/internal/planner"
+	"github.com/hpdkhoa/gen-system/generator/internal/schema"
 )
 
 // Apply loads a schema JSON and runs the full generation pipeline

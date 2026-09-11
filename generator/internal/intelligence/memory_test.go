@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"gen-system/generator/internal/intelligence"
+	"github.com/hpdkhoa/gen-system/generator/internal/intelligence"
 )
 
 // ─────────────────────────────────────────────

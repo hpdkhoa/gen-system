@@ -37,7 +37,7 @@ func init() { Register(&TSFrontend{}) }
 
 func (t *TSFrontend) Language() Language   { return LangTS }
 func (t *TSFrontend) Extensions() []string { return []string{".ts", ".tsx"} }
-func (t *TSFrontend) Available() bool       { return true } // pure Go, always available
+func (t *TSFrontend) Available() bool      { return true } // pure Go, always available
 
 // ─── Parse ───────────────────────────────────────────────────
 
@@ -66,41 +66,41 @@ func (t *TSFrontend) Emit(module *Module) ([]byte, error) {
 type tsTokenKind int
 
 const (
-	tsTOF        tsTokenKind = iota // start of file
-	tsIdent                         // identifier or keyword
-	tsString                        // 'x' or "x" or `x`
-	tsNumber                        // numeric literal
-	tsLBrace                        // {
-	tsRBrace                        // }
-	tsLParen                        // (
-	tsRParen                        // )
-	tsLAngle                        // <
-	tsRAngle                        // >
-	tsLBracket                      // [
-	tsRBracket                      // ]
-	tsComma                         // ,
-	tsSemicolon                     // ;
-	tsColon                         // :
-	tsQuestion                      // ?
-	tsEquals                        // =
-	tsDot                           // .
-	tsAt                            // @  (decorator)
-	tsSlash                         // /
-	tsAmpersand                     // &
-	tsPipe                          // |
-	tsEllipsis                      // ...
-	tsArrow                         // =>
-	tsNewline                       // \n (significant for ASI)
+	tsTOF       tsTokenKind = iota // start of file
+	tsIdent                        // identifier or keyword
+	tsString                       // 'x' or "x" or `x`
+	tsNumber                       // numeric literal
+	tsLBrace                       // {
+	tsRBrace                       // }
+	tsLParen                       // (
+	tsRParen                       // )
+	tsLAngle                       // <
+	tsRAngle                       // >
+	tsLBracket                     // [
+	tsRBracket                     // ]
+	tsComma                        // ,
+	tsSemicolon                    // ;
+	tsColon                        // :
+	tsQuestion                     // ?
+	tsEquals                       // =
+	tsDot                          // .
+	tsAt                           // @  (decorator)
+	tsSlash                        // /
+	tsAmpersand                    // &
+	tsPipe                         // |
+	tsEllipsis                     // ...
+	tsArrow                        // =>
+	tsNewline                      // \n (significant for ASI)
 	tsEOF
 	tsOther
 )
 
 type tsToken struct {
-	kind  tsTokenKind
-	text  string
-	line  int
-	col   int
-	off   int
+	kind tsTokenKind
+	text string
+	line int
+	col  int
+	off  int
 }
 
 // tsLoopCond extracts a loop's condition text from the token stream: the tokens
@@ -300,13 +300,15 @@ func (l *tsLexer) next() tsToken {
 
 		// Ellipsis
 		if ch == '.' && l.peekAt(1) == '.' && l.peekAt(2) == '.' {
-			l.pos += 3; l.col += 3
+			l.pos += 3
+			l.col += 3
 			return tsToken{kind: tsEllipsis, text: "...", line: startLine, col: startCol, off: startOff}
 		}
 
 		// Arrow
 		if ch == '=' && l.peekAt(1) == '>' {
-			l.pos += 2; l.col += 2
+			l.pos += 2
+			l.col += 2
 			return tsToken{kind: tsArrow, text: "=>", line: startLine, col: startCol, off: startOff}
 		}
 
@@ -1112,15 +1114,24 @@ func (p *tsParser) parseClassBody(className string) ([]Field, []*Node) {
 		for tok.kind == tsIdent {
 			switch tok.text {
 			case "static":
-				static = true; p.consume(); tok = p.peek()
+				static = true
+				p.consume()
+				tok = p.peek()
 			case "async":
-				async = true; p.consume(); tok = p.peek()
+				async = true
+				p.consume()
+				tok = p.peek()
 			case "abstract":
-				abstract2 = true; p.consume(); tok = p.peek()
+				abstract2 = true
+				p.consume()
+				tok = p.peek()
 			case "private", "protected":
-				priv = true; p.consume(); tok = p.peek()
+				priv = true
+				p.consume()
+				tok = p.peek()
 			case "public", "readonly", "override", "declare":
-				p.consume(); tok = p.peek()
+				p.consume()
+				tok = p.peek()
 			default:
 				goto memberName
 			}
@@ -1186,7 +1197,8 @@ func (p *tsParser) parseClassBody(className string) ([]Field, []*Node) {
 				// Property declaration
 				optional := false
 				if p.peek().kind == tsQuestion {
-					optional = true; p.consume()
+					optional = true
+					p.consume()
 				}
 				if p.peek().kind == tsOther && p.peek().text == "!" {
 					p.consume()
@@ -1336,7 +1348,8 @@ func (p *tsParser) parseVarDecl(exported bool, line, col, off int) []*Node {
 		name := p.consume().text
 		optional := false
 		if p.peek().kind == tsQuestion {
-			optional = true; p.consume()
+			optional = true
+			p.consume()
 		}
 		var typ TypeRef
 		if p.peek().kind == tsColon {
@@ -1506,7 +1519,8 @@ func (p *tsParser) parseSingleType() TypeRef {
 			p.skipAngles()
 		}
 		for p.peek().kind == tsLBracket && p.peekAt(1).kind == tsRBracket {
-			p.consume(); p.consume()
+			p.consume()
+			p.consume()
 			ref.IsSlice = true
 		}
 		return ref

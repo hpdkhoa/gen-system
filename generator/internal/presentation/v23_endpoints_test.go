@@ -4,8 +4,8 @@ package presentation
 import (
 	"testing"
 
-	"gen-system/generator/internal/ast"
-	"gen-system/generator/internal/symbols"
+	"github.com/hpdkhoa/gen-system/generator/internal/ast"
+	"github.com/hpdkhoa/gen-system/generator/internal/symbols"
 )
 
 func TestIsConstructorSym_v24(t *testing.T) {

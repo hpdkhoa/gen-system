@@ -3,13 +3,13 @@ package engine
 import (
 	"fmt"
 
-	"gen-system/generator/internal/compiler"
-	"gen-system/generator/internal/frontend"
-	"gen-system/generator/internal/frontend/router"
-	"gen-system/generator/internal/mobile"
-	"gen-system/generator/internal/schema"
-	"gen-system/generator/internal/schema/smartdiff"
-	"gen-system/generator/internal/schema/versioning"
+	"github.com/hpdkhoa/gen-system/generator/internal/compiler"
+	"github.com/hpdkhoa/gen-system/generator/internal/frontend"
+	"github.com/hpdkhoa/gen-system/generator/internal/frontend/router"
+	"github.com/hpdkhoa/gen-system/generator/internal/mobile"
+	"github.com/hpdkhoa/gen-system/generator/internal/schema"
+	"github.com/hpdkhoa/gen-system/generator/internal/schema/smartdiff"
+	"github.com/hpdkhoa/gen-system/generator/internal/schema/versioning"
 )
 
 // RunAll is the main generation pipeline.

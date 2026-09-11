@@ -22,7 +22,7 @@ import (
 	"os"
 	"strings"
 
-	"gen-system/generator/internal/schema"
+	"github.com/hpdkhoa/gen-system/generator/internal/schema"
 )
 
 // springEnabled reports whether Spring Boot generation is selected.

@@ -5,8 +5,8 @@ import (
 	"os/exec"
 	"path/filepath"
 
-	"gen-system/generator/internal/ast"
-	"gen-system/generator/internal/schema"
+	"github.com/hpdkhoa/gen-system/generator/internal/ast"
+	"github.com/hpdkhoa/gen-system/generator/internal/schema"
 )
 
 func mutateHandler(s schema.Entity, path string) {

@@ -1,4 +1,4 @@
-module gen-system
+module github.com/hpdkhoa/gen-system
 
 go 1.25.0
 

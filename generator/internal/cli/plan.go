@@ -6,9 +6,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"gen-system/generator/internal/agent"
-	"gen-system/generator/internal/planner"
-	planner_v2 "gen-system/generator/internal/planner_v2"
+	"github.com/hpdkhoa/gen-system/generator/internal/agent"
+	"github.com/hpdkhoa/gen-system/generator/internal/planner"
+	planner_v2 "github.com/hpdkhoa/gen-system/generator/internal/planner_v2"
 )
 
 const defaultPlanFile = "plan.generated.json"

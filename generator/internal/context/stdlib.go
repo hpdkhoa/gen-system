@@ -20,9 +20,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	genast "gen-system/generator/internal/ast"
-	"gen-system/generator/internal/flow"
-	"gen-system/generator/internal/symbols"
+	genast "github.com/hpdkhoa/gen-system/generator/internal/ast"
+	"github.com/hpdkhoa/gen-system/generator/internal/flow"
+	"github.com/hpdkhoa/gen-system/generator/internal/symbols"
 )
 
 // stdlibProgress is the per-pass counter set returned for trace logging.
@@ -286,6 +286,7 @@ func (ctx *Context) resolveStdlibScope(roots []StdlibRoot) []StdlibRoot {
 	}
 	return out
 }
+
 // For Go and Java the path separators in an import map onto filesystem
 // separators ("net/http" -> root/net/http; "java/util" if signatures are laid
 // out that way). Dots in Java-style imports are treated as separators too, so

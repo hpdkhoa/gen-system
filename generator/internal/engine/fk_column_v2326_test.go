@@ -12,7 +12,7 @@ import (
 	"strings"
 	"testing"
 
-	"gen-system/generator/internal/schema"
+	"github.com/hpdkhoa/gen-system/generator/internal/schema"
 )
 
 func TestFKColumnMatchesTableColumn(t *testing.T) {

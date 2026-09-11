@@ -9,9 +9,10 @@ import (
 // SystemGraph captures structural relationships between code layers.
 //
 // Unlike Context.Files (a flat path→content map), this builds:
-//   Entity → all files that define or reference it
-//   Layer  → file paths grouped by architectural role
-//   Call chain: Handler → Service → Repo → Model (inferred from imports)
+//
+//	Entity → all files that define or reference it
+//	Layer  → file paths grouped by architectural role
+//	Call chain: Handler → Service → Repo → Model (inferred from imports)
 //
 // This enables the healer to find ALL related files for an entity
 // across layers, not just the single file that errored.

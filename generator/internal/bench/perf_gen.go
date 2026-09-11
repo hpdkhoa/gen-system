@@ -40,11 +40,11 @@ type ollamaTimings struct {
 }
 
 type ollamaReq struct {
-	Model   string          `json:"model"`
-	Prompt  string          `json:"prompt"`
-	Stream  bool            `json:"stream"`
-	Options *ollamaOpts     `json:"options,omitempty"`
-	Keep    interface{}     `json:"keep_alive,omitempty"`
+	Model   string      `json:"model"`
+	Prompt  string      `json:"prompt"`
+	Stream  bool        `json:"stream"`
+	Options *ollamaOpts `json:"options,omitempty"`
+	Keep    interface{} `json:"keep_alive,omitempty"`
 }
 
 // ollamaOpts mirrors ai.OllamaOptions: deterministic pins plus the optional
@@ -86,14 +86,14 @@ func benchOpts() *ollamaOpts {
 }
 
 type ollamaResp struct {
-	Response             string `json:"response"`
-	Error                string `json:"error,omitempty"`
-	EvalCount            int    `json:"eval_count"`
-	EvalDuration         int64  `json:"eval_duration"`
-	PromptEvalCount      int    `json:"prompt_eval_count"`
-	PromptEvalDuration   int64  `json:"prompt_eval_duration"`
-	TotalDuration        int64  `json:"total_duration"`
-	LoadDuration         int64  `json:"load_duration"`
+	Response           string `json:"response"`
+	Error              string `json:"error,omitempty"`
+	EvalCount          int    `json:"eval_count"`
+	EvalDuration       int64  `json:"eval_duration"`
+	PromptEvalCount    int    `json:"prompt_eval_count"`
+	PromptEvalDuration int64  `json:"prompt_eval_duration"`
+	TotalDuration      int64  `json:"total_duration"`
+	LoadDuration       int64  `json:"load_duration"`
 }
 
 func ollamaGenerate(host, model, prompt string, timeoutSec int) (*ollamaTimings, error) {

@@ -38,7 +38,7 @@ func init() { Register(&CAGenFrontend{}) }
 
 func (c *CAGenFrontend) Language() Language   { return LangCAGen }
 func (c *CAGenFrontend) Extensions() []string { return []string{".ad", ".cagen", ".gel"} }
-func (c *CAGenFrontend) Available() bool       { return true } // pure Go
+func (c *CAGenFrontend) Available() bool      { return true } // pure Go
 
 // ─── Parse ───────────────────────────────────────────────────
 
@@ -379,12 +379,12 @@ func (p *caGenParser) parseWrite() *Node {
 		entity = l.rawToks[1]
 	}
 	return &Node{
-		ID:       fmt.Sprintf("write:%s@%d", entity, l.lineNo),
-		Kind:     NodeAssign,
-		Name:     "WRITE " + entity,
-		Language: LangCAGen,
-		Span:     Span{Start: Pos{Line: l.lineNo, Column: 1}},
-		Callee:   entity,
+		ID:        fmt.Sprintf("write:%s@%d", entity, l.lineNo),
+		Kind:      NodeAssign,
+		Name:      "WRITE " + entity,
+		Language:  LangCAGen,
+		Span:      Span{Start: Pos{Line: l.lineNo, Column: 1}},
+		Callee:    entity,
 		RawSource: l.raw,
 	}
 }
@@ -396,12 +396,12 @@ func (p *caGenParser) parseDelete() *Node {
 		entity = l.rawToks[1]
 	}
 	return &Node{
-		ID:       fmt.Sprintf("delete:%s@%d", entity, l.lineNo),
-		Kind:     NodeCall,
-		Name:     "DELETE " + entity,
-		Language: LangCAGen,
-		Span:     Span{Start: Pos{Line: l.lineNo, Column: 1}},
-		Callee:   entity,
+		ID:        fmt.Sprintf("delete:%s@%d", entity, l.lineNo),
+		Kind:      NodeCall,
+		Name:      "DELETE " + entity,
+		Language:  LangCAGen,
+		Span:      Span{Start: Pos{Line: l.lineNo, Column: 1}},
+		Callee:    entity,
 		RawSource: l.raw,
 	}
 }
@@ -421,13 +421,13 @@ func (p *caGenParser) parseCall() *Node {
 		}
 	}
 	return &Node{
-		ID:       fmt.Sprintf("call:%s@%d", callee, l.lineNo),
-		Kind:     NodeCall,
-		Name:     "CALL " + callee,
-		Language: LangCAGen,
-		Span:     Span{Start: Pos{Line: l.lineNo, Column: 1}},
-		Callee:   callee,
-		CallArgs: args,
+		ID:        fmt.Sprintf("call:%s@%d", callee, l.lineNo),
+		Kind:      NodeCall,
+		Name:      "CALL " + callee,
+		Language:  LangCAGen,
+		Span:      Span{Start: Pos{Line: l.lineNo, Column: 1}},
+		Callee:    callee,
+		CallArgs:  args,
 		RawSource: l.raw,
 	}
 }
@@ -472,11 +472,11 @@ func (p *caGenParser) parseIf() *Node {
 		condition = strings.Join(l.rawToks[1:], " ")
 	}
 	n := &Node{
-		ID:       fmt.Sprintf("if@%d", l.lineNo),
-		Kind:     NodeBranch,
-		Name:     "IF",
-		Language: LangCAGen,
-		Span:     Span{Start: Pos{Line: l.lineNo, Column: 1}},
+		ID:        fmt.Sprintf("if@%d", l.lineNo),
+		Kind:      NodeBranch,
+		Name:      "IF",
+		Language:  LangCAGen,
+		Span:      Span{Start: Pos{Line: l.lineNo, Column: 1}},
 		RawSource: condition,
 	}
 	ifDepth := l.depth
@@ -532,13 +532,13 @@ func (p *caGenParser) parseEscape() *Node {
 		target = strings.Join(l.rawToks[1:], " ")
 	}
 	return &Node{
-		ID:       fmt.Sprintf("escape@%d", l.lineNo),
-		Kind:     NodeEscape,
-		Name:     "ESCAPE",
-		Language: LangCAGen,
-		Span:     Span{Start: Pos{Line: l.lineNo, Column: 1}},
+		ID:        fmt.Sprintf("escape@%d", l.lineNo),
+		Kind:      NodeEscape,
+		Name:      "ESCAPE",
+		Language:  LangCAGen,
+		Span:      Span{Start: Pos{Line: l.lineNo, Column: 1}},
 		RawSource: target,
-		Callee:   target,
+		Callee:    target,
 	}
 }
 
@@ -549,11 +549,11 @@ func (p *caGenParser) parseExit() *Node {
 		target = l.rawToks[1]
 	}
 	return &Node{
-		ID:       fmt.Sprintf("exit@%d", l.lineNo),
-		Kind:     NodeReturn,
-		Name:     "EXIT " + target,
-		Language: LangCAGen,
-		Span:     Span{Start: Pos{Line: l.lineNo, Column: 1}},
+		ID:        fmt.Sprintf("exit@%d", l.lineNo),
+		Kind:      NodeReturn,
+		Name:      "EXIT " + target,
+		Language:  LangCAGen,
+		Span:      Span{Start: Pos{Line: l.lineNo, Column: 1}},
 		RawSource: l.raw,
 	}
 }
@@ -565,11 +565,11 @@ func (p *caGenParser) parseWhere() *Node {
 		condition = strings.Join(l.rawToks[1:], " ")
 	}
 	return &Node{
-		ID:       fmt.Sprintf("where@%d", l.lineNo),
-		Kind:     NodeBranch,
-		Name:     "WHERE",
-		Language: LangCAGen,
-		Span:     Span{Start: Pos{Line: l.lineNo, Column: 1}},
+		ID:        fmt.Sprintf("where@%d", l.lineNo),
+		Kind:      NodeBranch,
+		Name:      "WHERE",
+		Language:  LangCAGen,
+		Span:      Span{Start: Pos{Line: l.lineNo, Column: 1}},
 		RawSource: condition,
 	}
 }

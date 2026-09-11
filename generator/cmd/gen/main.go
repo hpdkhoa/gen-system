@@ -12,8 +12,8 @@ import (
 	"fmt"
 	"os"
 
-	"gen-system/generator/internal/cli"
-	"gen-system/generator/internal/config"
+	"github.com/hpdkhoa/gen-system/generator/internal/cli"
+	"github.com/hpdkhoa/gen-system/generator/internal/config"
 )
 
 func main() {

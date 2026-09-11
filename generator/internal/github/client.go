@@ -2,14 +2,16 @@
 // Intentionally avoids external dependencies — uses only net/http + encoding/json.
 //
 // Phase 3.1 — HITL CI/CD:
-//   After a successful build, gen-system can open a GitHub PR so a human
-//   can review and approve the generated code before it lands on main.
+//
+//	After a successful build, gen-system can open a GitHub PR so a human
+//	can review and approve the generated code before it lands on main.
 //
 // Configuration (via environment variables or /api/github/config):
-//   GH_TOKEN    GitHub personal access token (repo scope)
-//   GH_OWNER    Repository owner (user or org)
-//   GH_REPO     Repository name
-//   GH_BASE     Base branch for PRs (default: main)
+//
+//	GH_TOKEN    GitHub personal access token (repo scope)
+//	GH_OWNER    Repository owner (user or org)
+//	GH_REPO     Repository name
+//	GH_BASE     Base branch for PRs (default: main)
 package github
 
 import (
@@ -27,10 +29,10 @@ const apiBase = "https://api.github.com"
 // Config holds GitHub integration settings.
 // Loaded from env vars; overrideable at runtime via /api/github/config.
 type Config struct {
-	Token  string `json:"token"`   // GH_TOKEN — never logged
-	Owner  string `json:"owner"`   // GH_OWNER
-	Repo   string `json:"repo"`    // GH_REPO
-	Base   string `json:"base"`    // GH_BASE, default "main"
+	Token string `json:"token"` // GH_TOKEN — never logged
+	Owner string `json:"owner"` // GH_OWNER
+	Repo  string `json:"repo"`  // GH_REPO
+	Base  string `json:"base"`  // GH_BASE, default "main"
 }
 
 // LoadConfig reads GitHub config from environment variables.
@@ -53,8 +55,8 @@ func LoadConfig() (Config, error) {
 
 // Client is a thin GitHub REST API wrapper.
 type Client struct {
-	cfg    Config
-	http   *http.Client
+	cfg  Config
+	http *http.Client
 }
 
 // NewClient returns a Client ready to make authenticated GitHub API requests.
@@ -154,8 +156,8 @@ func (c *Client) UpsertFile(filePath, content, message, branch, sha string) erro
 type PRRequest struct {
 	Title string `json:"title"`
 	Body  string `json:"body"`
-	Head  string `json:"head"`  // branch to merge from
-	Base  string `json:"base"`  // branch to merge into
+	Head  string `json:"head"` // branch to merge from
+	Base  string `json:"base"` // branch to merge into
 	Draft bool   `json:"draft"`
 }
 

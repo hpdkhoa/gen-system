@@ -2,10 +2,10 @@
 // <stop|autofix>` turns on the Understand-validates-Generate pass and picks the
 // behaviour on a finding.
 //
-//   stop     (default when the flag is present without a value): report every
-//            finding, halt for human review, and — for a staged continue — write
-//            a findings report next to the .evolve-review dir.
-//   autofix  route fixable findings through the repair loop, then re-report.
+//	stop     (default when the flag is present without a value): report every
+//	         finding, halt for human review, and — for a staged continue — write
+//	         a findings report next to the .evolve-review dir.
+//	autofix  route fixable findings through the repair loop, then re-report.
 //
 // Absent flag → VerifyOff → byte-identical to before. Parsing mirrors
 // GetSchemaPath / healLogPath (a plain os.Args scan), consistent with the CLI.
@@ -16,7 +16,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"gen-system/generator/internal/agent"
+	"github.com/hpdkhoa/gen-system/generator/internal/agent"
 )
 
 // verifyUnderstandValue returns the --verify-understand value. Supports both

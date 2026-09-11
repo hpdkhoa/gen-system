@@ -1,7 +1,7 @@
 package engine
 
 import (
-	"gen-system/generator/internal/schema"
+	"github.com/hpdkhoa/gen-system/generator/internal/schema"
 )
 
 func mapToDTO(e schema.Entity, rows []map[string]interface{}) interface{} {

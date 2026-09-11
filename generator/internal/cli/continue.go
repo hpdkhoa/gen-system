@@ -21,12 +21,12 @@ import (
 	"os"
 	"strings"
 
-	"gen-system/generator/internal/agent"
-	"gen-system/generator/internal/belief"
-	"gen-system/generator/internal/compiler"
-	"gen-system/generator/internal/context"
-	planner_v2 "gen-system/generator/internal/planner_v2"
-	"gen-system/generator/internal/schema"
+	"github.com/hpdkhoa/gen-system/generator/internal/agent"
+	"github.com/hpdkhoa/gen-system/generator/internal/belief"
+	"github.com/hpdkhoa/gen-system/generator/internal/compiler"
+	"github.com/hpdkhoa/gen-system/generator/internal/context"
+	planner_v2 "github.com/hpdkhoa/gen-system/generator/internal/planner_v2"
+	"github.com/hpdkhoa/gen-system/generator/internal/schema"
 )
 
 // Continue handles `gen continue <path> "<idea>" [flags]`.

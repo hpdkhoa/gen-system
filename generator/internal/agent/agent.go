@@ -18,11 +18,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	"gen-system/generator/internal/ai"
-	agentctx "gen-system/generator/internal/context"
-	"gen-system/generator/internal/planner"
-	"gen-system/generator/internal/safety"
-	"gen-system/generator/internal/style"
+	"github.com/hpdkhoa/gen-system/generator/internal/ai"
+	agentctx "github.com/hpdkhoa/gen-system/generator/internal/context"
+	"github.com/hpdkhoa/gen-system/generator/internal/planner"
+	"github.com/hpdkhoa/gen-system/generator/internal/safety"
+	"github.com/hpdkhoa/gen-system/generator/internal/style"
 )
 
 const maxValidationRounds = 3

@@ -5,7 +5,7 @@ package symbols
 import (
 	"testing"
 
-	"gen-system/generator/internal/ast"
+	"github.com/hpdkhoa/gen-system/generator/internal/ast"
 )
 
 func TestRemoveFile_RemovesSymbols(t *testing.T) {

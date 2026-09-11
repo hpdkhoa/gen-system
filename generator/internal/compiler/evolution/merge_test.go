@@ -3,7 +3,7 @@ package evolution_test
 import (
 	"testing"
 
-	"gen-system/generator/internal/compiler/evolution"
+	"github.com/hpdkhoa/gen-system/generator/internal/compiler/evolution"
 )
 
 // ─────────────────────────────────────────────

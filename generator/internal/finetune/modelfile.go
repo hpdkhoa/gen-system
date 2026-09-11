@@ -37,17 +37,17 @@ func DefaultModelfileConfig(datasetPath string) ModelfileConfig {
 //
 // Fine-tuning with Ollama (LoRA):
 //
-//        ollama create gen-system-repair -f Modelfile
+//	ollama create gen-system-repair -f Modelfile
 //
 // Note: Ollama's `ollama create` command supports fine-tuning via
 // the ADAPTER directive when using GGUF LoRA adapters. For full
 // fine-tuning workflows (generating the LoRA adapter itself), use
 // the exported JSONL with unsloth or axolotl, then convert to GGUF.
 func GenerateModelfile(cfg ModelfileConfig, outputPath string) error {
-	// We use concatenation for the triple backticks because Go raw strings 
+	// We use concatenation for the triple backticks because Go raw strings
 	// cannot contain a backtick character.
 	tripleBacktick := "`" + "`" + "`"
-	
+
 	content := fmt.Sprintf(`# gen-system Repair Model — Ollama Modelfile
 # Generated: %s
 #
@@ -225,7 +225,7 @@ if __name__ == "__main__":
 	)
 
 	// return os.WriteFile(outputPath, []byte(content), 0644)
-    if err := os.WriteFile(outputPath, []byte(content), 0644); err != nil {
+	if err := os.WriteFile(outputPath, []byte(content), 0644); err != nil {
 		return fmt.Errorf("write train script: %w", err)
 	}
 	return nil

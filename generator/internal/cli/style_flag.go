@@ -13,8 +13,8 @@ import (
 	"fmt"
 	"os"
 
-	"gen-system/generator/internal/agent"
-	"gen-system/generator/internal/style"
+	"github.com/hpdkhoa/gen-system/generator/internal/agent"
+	"github.com/hpdkhoa/gen-system/generator/internal/style"
 )
 
 func flagValue(name string) (string, bool) {

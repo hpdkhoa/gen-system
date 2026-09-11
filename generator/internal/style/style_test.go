@@ -207,10 +207,10 @@ func TestDirtyTreeFindingsByRule(t *testing.T) {
 	rep := Check(dirtyTree(t), p)
 	got := rules(rep)
 	want := []string{
-		"naming.files",                   // bad-name.go
-		"naming.receivers",               // receiver "handler"
-		"naming.type_suffixes",           // Cart in service layer
-		"patterns.require.constructor",   // no NewCart
+		"naming.files",                    // bad-name.go
+		"naming.receivers",                // receiver "handler"
+		"naming.type_suffixes",            // Cart in service layer
+		"patterns.require.constructor",    // no NewCart
 		"patterns.require.error-wrapping", // %v with err
 		"patterns.forbid.panic",
 		"patterns.forbid.init-func",

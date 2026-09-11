@@ -1,6 +1,6 @@
 package planner
 
-import "gen-system/generator/internal/schema"
+import "github.com/hpdkhoa/gen-system/generator/internal/schema"
 
 // ─────────────────────────────────────────────
 // Core domain types
@@ -23,22 +23,22 @@ type Feature struct {
 // before any code is generated. It can be reviewed and edited by the user
 // before execution is triggered.
 type Plan struct {
-	Goal     string           `json:"goal"`
-	Features []Feature        `json:"features"`
-	Entities []schema.Entity  `json:"entities"`
-	Tasks    []Task           `json:"tasks"`
-	Notes    []string         `json:"notes,omitempty"`
+	Goal     string          `json:"goal"`
+	Features []Feature       `json:"features"`
+	Entities []schema.Entity `json:"entities"`
+	Tasks    []Task          `json:"tasks"`
+	Notes    []string        `json:"notes,omitempty"`
 }
 
 // TaskStatus represents lifecycle state of a single task.
 type TaskStatus string
 
 const (
-	StatusPending  TaskStatus = "pending"
-	StatusRunning  TaskStatus = "running"
-	StatusDone     TaskStatus = "done"
-	StatusFailed   TaskStatus = "failed"
-	StatusSkipped  TaskStatus = "skipped"
+	StatusPending TaskStatus = "pending"
+	StatusRunning TaskStatus = "running"
+	StatusDone    TaskStatus = "done"
+	StatusFailed  TaskStatus = "failed"
+	StatusSkipped TaskStatus = "skipped"
 )
 
 // Task is a single unit of work in the execution graph.
@@ -46,7 +46,7 @@ const (
 // order them correctly and skip already-completed work.
 type Task struct {
 	ID           string                 `json:"id"`
-	Type         string                 `json:"type"`   // generate_model | generate_repo | generate_service | generate_handler | generate_frontend | generate_mobile | migrate | test | fix
+	Type         string                 `json:"type"` // generate_model | generate_repo | generate_service | generate_handler | generate_frontend | generate_mobile | migrate | test | fix
 	EntityName   string                 `json:"entity,omitempty"`
 	Dependencies []string               `json:"dependencies,omitempty"`
 	Payload      map[string]interface{} `json:"payload,omitempty"`

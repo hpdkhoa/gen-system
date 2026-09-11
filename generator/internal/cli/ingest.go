@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"gen-system/generator/internal/rag"
+	"github.com/hpdkhoa/gen-system/generator/internal/rag"
 )
 
 // Ingest handles `gen ingest --framework <name> <docs-dir>`.

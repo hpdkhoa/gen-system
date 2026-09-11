@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"gen-system/generator/internal/schema"
+	"github.com/hpdkhoa/gen-system/generator/internal/schema"
 )
 
 const SNAPSHOT_FILE = ".gen/schema_snapshot.json"

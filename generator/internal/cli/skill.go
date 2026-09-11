@@ -17,8 +17,8 @@ import (
 	"os"
 	"strings"
 
-	agentctx "gen-system/generator/internal/context"
-	"gen-system/generator/internal/objgraph"
+	agentctx "github.com/hpdkhoa/gen-system/generator/internal/context"
+	"github.com/hpdkhoa/gen-system/generator/internal/objgraph"
 )
 
 // WriteSkill implements 'gen skill'. args are the command-line args

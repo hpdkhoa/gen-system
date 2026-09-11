@@ -12,7 +12,7 @@ import (
 	"runtime"
 	"testing"
 
-	agentctx "gen-system/generator/internal/context"
+	agentctx "github.com/hpdkhoa/gen-system/generator/internal/context"
 )
 
 // findProjectRoot walks up from this test file to the module root (the dir

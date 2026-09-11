@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"gen-system/generator/internal/schema"
+	"github.com/hpdkhoa/gen-system/generator/internal/schema"
 )
 
 func genRepository(s schema.Entity, path string) {

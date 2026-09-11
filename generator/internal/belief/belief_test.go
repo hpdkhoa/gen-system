@@ -14,9 +14,9 @@ import (
 	"strings"
 	"testing"
 
-	"gen-system/generator/internal/ast"
-	"gen-system/generator/internal/flow"
-	"gen-system/generator/internal/symbols"
+	"github.com/hpdkhoa/gen-system/generator/internal/ast"
+	"github.com/hpdkhoa/gen-system/generator/internal/flow"
+	"github.com/hpdkhoa/gen-system/generator/internal/symbols"
 )
 
 // funcIndex builds a module with one function of the given name and params.
@@ -629,7 +629,6 @@ func symIDFor(bs *Store, kind Kind) string {
 	}
 	return ""
 }
-
 
 func TestUpsertEnrichPersistsAcrossReparse(t *testing.T) {
 	root := t.TempDir()

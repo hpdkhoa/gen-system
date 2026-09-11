@@ -24,12 +24,12 @@ const (
 
 const (
 	// Repair strategies mapped to error types
-	StrategySyntaxRepair  RepairStrategy = "syntax_repair"
-	StrategyFixReference  RepairStrategy = "fix_reference"
-	StrategyFixTypes      RepairStrategy = "fix_types"
-	StrategyFixImports    RepairStrategy = "fix_imports"
-	StrategyRewriteLogic  RepairStrategy = "rewrite_logic"
-	StrategyGeneric       RepairStrategy = "generic_repair"
+	StrategySyntaxRepair RepairStrategy = "syntax_repair"
+	StrategyFixReference RepairStrategy = "fix_reference"
+	StrategyFixTypes     RepairStrategy = "fix_types"
+	StrategyFixImports   RepairStrategy = "fix_imports"
+	StrategyRewriteLogic RepairStrategy = "rewrite_logic"
+	StrategyGeneric      RepairStrategy = "generic_repair"
 )
 
 // ClassificationResult bundles the error type, strategy choice,

@@ -11,7 +11,7 @@ import (
 	"sort"
 	"time"
 
-	"gen-system/generator/internal/ast"
+	"github.com/hpdkhoa/gen-system/generator/internal/ast"
 )
 
 // ParseThroughput measures wall-clock cold parse rate per language across

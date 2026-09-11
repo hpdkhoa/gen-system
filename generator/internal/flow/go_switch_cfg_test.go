@@ -13,8 +13,8 @@ import (
 	"strings"
 	"testing"
 
-	"gen-system/generator/internal/ast"
-	"gen-system/generator/internal/symbols"
+	"github.com/hpdkhoa/gen-system/generator/internal/ast"
+	"github.com/hpdkhoa/gen-system/generator/internal/symbols"
 )
 
 const switchSrc = `package p

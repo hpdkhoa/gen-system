@@ -27,9 +27,9 @@ import (
 	"strings"
 	"time"
 
-	"gen-system/generator/internal/ast"
-	"gen-system/generator/internal/flow"
-	"gen-system/generator/internal/symbols"
+	"github.com/hpdkhoa/gen-system/generator/internal/ast"
+	"github.com/hpdkhoa/gen-system/generator/internal/flow"
+	"github.com/hpdkhoa/gen-system/generator/internal/symbols"
 )
 
 // ─── Format types ─────────────────────────────────────────────
@@ -52,18 +52,18 @@ type SkillRecord struct {
 	Kind string `json:"kind"`
 
 	// node fields
-	ID       string   `json:"id,omitempty"`
-	Name     string   `json:"name,omitempty"`
-	SymKind  string   `json:"sym_kind,omitempty"`
-	Language string   `json:"lang,omitempty"`
-	Layer    string   `json:"layer,omitempty"`
-	File     string   `json:"file,omitempty"`
-	Line     int      `json:"line,omitempty"`
-	Exported bool     `json:"exported,omitempty"`
-	Provenance string `json:"provenance,omitempty"` // v23.32: "", "stdlib", "thirdparty"
-	Effects  []string `json:"effects,omitempty"`
-	NIT      string   `json:"nit,omitempty"`
-	Note     string   `json:"note,omitempty"` // human-authored annotation
+	ID         string   `json:"id,omitempty"`
+	Name       string   `json:"name,omitempty"`
+	SymKind    string   `json:"sym_kind,omitempty"`
+	Language   string   `json:"lang,omitempty"`
+	Layer      string   `json:"layer,omitempty"`
+	File       string   `json:"file,omitempty"`
+	Line       int      `json:"line,omitempty"`
+	Exported   bool     `json:"exported,omitempty"`
+	Provenance string   `json:"provenance,omitempty"` // v23.32: "", "stdlib", "thirdparty"
+	Effects    []string `json:"effects,omitempty"`
+	NIT        string   `json:"nit,omitempty"`
+	Note       string   `json:"note,omitempty"` // human-authored annotation
 
 	// edge fields
 	From     string `json:"from,omitempty"`
@@ -139,19 +139,19 @@ func WriteSkillFile(
 			note = notes[n.ID]
 		}
 		rec := SkillRecord{
-			Kind:     "node",
-			ID:       n.ID,
-			Name:     n.Name,
-			SymKind:  n.Kind,
-			Language: n.Language,
-			Layer:    n.Layer,
-			File:     n.File,
-			Line:     n.Line,
-			Exported: n.Exported,
+			Kind:       "node",
+			ID:         n.ID,
+			Name:       n.Name,
+			SymKind:    n.Kind,
+			Language:   n.Language,
+			Layer:      n.Layer,
+			File:       n.File,
+			Line:       n.Line,
+			Exported:   n.Exported,
 			Provenance: n.Provenance,
-			Effects:  n.Effects,
-			NIT:      n.NIT,
-			Note:     note,
+			Effects:    n.Effects,
+			NIT:        n.NIT,
+			Note:       note,
 		}
 		if err := enc.Encode(rec); err != nil {
 			return err

@@ -23,8 +23,8 @@ import (
 	"sort"
 	"strings"
 
-	"gen-system/generator/internal/ai"
-	"gen-system/generator/internal/belief"
+	"github.com/hpdkhoa/gen-system/generator/internal/ai"
+	"github.com/hpdkhoa/gen-system/generator/internal/belief"
 )
 
 // Enricher is the LLM-backed belief.Enricher. Zero value is usable.
@@ -184,14 +184,14 @@ func (e *Enricher) buildPrompt(fact belief.EnrichFact) string {
 // The caller (the gen-enrich binary) builds these from a loaded context, keeping
 // the enrich package decoupled from internal/context.
 type Routine struct {
-	SymbolID string
-	Subject  string
-	Name     string
-	Language string
-	Params   string
-	Calls    string
-	Effects  string
-	Body     string
+	SymbolID   string
+	Subject    string
+	Name       string
+	Language   string
+	Params     string
+	Calls      string
+	Effects    string
+	Body       string
 	DocComment string
 }
 

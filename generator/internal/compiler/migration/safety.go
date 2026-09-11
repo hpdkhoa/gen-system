@@ -1,6 +1,6 @@
 package migration
 
-import "gen-system/generator/internal/compiler/diff"
+import "github.com/hpdkhoa/gen-system/generator/internal/compiler/diff"
 
 func HasBreakingChanges(cs diff.ChangeSet) bool {
 

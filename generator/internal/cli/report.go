@@ -27,8 +27,8 @@ import (
 	"strings"
 	"time"
 
-	"gen-system/generator/internal/bench"
-	"gen-system/generator/internal/objgraph"
+	"github.com/hpdkhoa/gen-system/generator/internal/bench"
+	"github.com/hpdkhoa/gen-system/generator/internal/objgraph"
 )
 
 // ─── public entry ─────────────────────────────────────────────

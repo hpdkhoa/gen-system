@@ -19,26 +19,26 @@ import (
 	"sync"
 	"time"
 
-	"gen-system/generator/internal/api"
-	"gen-system/generator/internal/api/sse"
-	"gen-system/generator/internal/belief"
-	agentctx "gen-system/generator/internal/context"
-	"gen-system/generator/internal/enrich"
-	"gen-system/generator/internal/handlers"
-	"gen-system/generator/internal/presentation"
-	"gen-system/generator/internal/services"
-	"gen-system/generator/internal/store"
-	"gen-system/generator/internal/symbols"
-	"gen-system/generator/internal/watch"
+	"github.com/hpdkhoa/gen-system/generator/internal/api"
+	"github.com/hpdkhoa/gen-system/generator/internal/api/sse"
+	"github.com/hpdkhoa/gen-system/generator/internal/belief"
+	agentctx "github.com/hpdkhoa/gen-system/generator/internal/context"
+	"github.com/hpdkhoa/gen-system/generator/internal/enrich"
+	"github.com/hpdkhoa/gen-system/generator/internal/handlers"
+	"github.com/hpdkhoa/gen-system/generator/internal/presentation"
+	"github.com/hpdkhoa/gen-system/generator/internal/services"
+	"github.com/hpdkhoa/gen-system/generator/internal/store"
+	"github.com/hpdkhoa/gen-system/generator/internal/symbols"
+	"github.com/hpdkhoa/gen-system/generator/internal/watch"
 )
 
 func main() {
-	port          := flag.String("port", "28080", "HTTP server port")
-	root          := flag.String("root", ".", "Project root path")
-	copybooks     := flag.String("copybooks", "", "COBOL copybook search path (for COPY resolution in the Understand tab)")
-	browseRoot    := flag.String("browse-root", "", "wider directory the Understand-tab file browser may reach (default: --root). Use a parent dir to browse sibling projects like a COBOL demo.")
-	stdlibSpec    := flag.String("stdlib", "", "v26.5: comma-separated stdlib roots, language PER ROOT. 'auto' (default when omitted) detects a runtime for every language in the project; 'none' opts out. Shorthands: 'go' → GOROOT/src, 'cobol' → built-in runtime catalog. Explicit form: 'java=/opt/jdk/java.base'. Mixable: 'go,java=/opt/jdk/java.base'. All roots are import-scoped.")
-	stdlibLang    := flag.String("stdlib-lang", "", "DEPRECATED (v26.5): legacy single language label applied to bare --stdlib paths. Prefer the per-root 'lang=path' form, which is the only way to express a multi-language project.")
+	port := flag.String("port", "28080", "HTTP server port")
+	root := flag.String("root", ".", "Project root path")
+	copybooks := flag.String("copybooks", "", "COBOL copybook search path (for COPY resolution in the Understand tab)")
+	browseRoot := flag.String("browse-root", "", "wider directory the Understand-tab file browser may reach (default: --root). Use a parent dir to browse sibling projects like a COBOL demo.")
+	stdlibSpec := flag.String("stdlib", "", "v26.5: comma-separated stdlib roots, language PER ROOT. 'auto' (default when omitted) detects a runtime for every language in the project; 'none' opts out. Shorthands: 'go' → GOROOT/src, 'cobol' → built-in runtime catalog. Explicit form: 'java=/opt/jdk/java.base'. Mixable: 'go,java=/opt/jdk/java.base'. All roots are import-scoped.")
+	stdlibLang := flag.String("stdlib-lang", "", "DEPRECATED (v26.5): legacy single language label applied to bare --stdlib paths. Prefer the per-root 'lang=path' form, which is the only way to express a multi-language project.")
 	githubEnabled := flag.Bool("github-enabled", false,
 		"mount /api/github/* routes; default off — keeps the studio offline")
 	webDir := flag.String("web", "",
@@ -53,13 +53,13 @@ func main() {
 		"v24: start the file watcher live at boot (default STATIC: no live watching until switched on per-project in the Studio).")
 	flag.Parse()
 
-	broker    := sse.NewBroker()
+	broker := sse.NewBroker()
 	snapStore := store.NewSnapshotStore(*root)
-	snapSvc   := services.NewSnapshotService(snapStore, broker, *root)
-	buildSvc  := services.NewBuildService(broker, snapSvc, *root)
+	snapSvc := services.NewSnapshotService(snapStore, broker, *root)
+	buildSvc := services.NewBuildService(broker, snapSvc, *root)
 	schemaSvc := services.NewSchemaService(*root)
 	stagingSvc := services.NewStagingService(broker, snapSvc, *root)
-	h         := handlers.New(broker, snapSvc, buildSvc, schemaSvc, stagingSvc)
+	h := handlers.New(broker, snapSvc, buildSvc, schemaSvc, stagingSvc)
 
 	// Full initial parse (idempotent, remains the authoritative first load).
 	// v23.32: optional read-only stdlib ingest for cross-boundary resolution.
@@ -221,11 +221,11 @@ type watchManager struct {
 	pres     *presentation.Server
 	interval time.Duration
 
-	mu      sync.Mutex
-	cur     *watch.Watcher
-	idx     *symbols.Index // index the current watcher updates
-	root    string
-	live    bool
+	mu   sync.Mutex
+	cur  *watch.Watcher
+	idx  *symbols.Index // index the current watcher updates
+	root string
+	live bool
 }
 
 // rebind points the manager at a new symbol index (after a project swap) without

@@ -11,9 +11,9 @@ import (
 	"os"
 	"strings"
 
-	"gen-system/generator/internal/ai"
-	"gen-system/generator/internal/planner"
-	"gen-system/generator/internal/schema"
+	"github.com/hpdkhoa/gen-system/generator/internal/ai"
+	"github.com/hpdkhoa/gen-system/generator/internal/planner"
+	"github.com/hpdkhoa/gen-system/generator/internal/schema"
 )
 
 // ─────────────────────────────────────────────

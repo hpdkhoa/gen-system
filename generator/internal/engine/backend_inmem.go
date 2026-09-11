@@ -34,7 +34,7 @@ import (
 	"sort"
 	"strings"
 
-	"gen-system/generator/internal/schema"
+	"github.com/hpdkhoa/gen-system/generator/internal/schema"
 )
 
 // goType maps schema field types to Go types for the generated model.

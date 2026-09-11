@@ -1,10 +1,10 @@
 // generator/internal/bench/cfg_correctness.go — v19.7: validates that every
 // CFG produced by `flow.Build` is structurally sound. The four invariants:
 //
-//   1. exactly one entry block, and Entry must index into Blocks
-//   2. every Exits[i] must index into Blocks
-//   3. no orphan blocks — every block (except Entry) must have ≥1 predecessor
-//   4. every successor ID referenced from any block must index into Blocks
+//  1. exactly one entry block, and Entry must index into Blocks
+//  2. every Exits[i] must index into Blocks
+//  3. no orphan blocks — every block (except Entry) must have ≥1 predecessor
+//  4. every successor ID referenced from any block must index into Blocks
 //
 // These properties have to hold for the graph view in the Studio to render
 // without breaking, and for any downstream analysis (dataflow, dominator
@@ -17,8 +17,8 @@ import (
 	"fmt"
 	"time"
 
-	agentctx "gen-system/generator/internal/context"
-	"gen-system/generator/internal/flow"
+	agentctx "github.com/hpdkhoa/gen-system/generator/internal/context"
+	"github.com/hpdkhoa/gen-system/generator/internal/flow"
 )
 
 type cfgIssue struct {
@@ -46,7 +46,7 @@ func CFGCorrectness(root string, copybookPath []string) Suite {
 	var issues []cfgIssue
 	// per-rule counters so each rule gets its own pass/fail case
 	var (
-		entryOK, exitOK, orphanOK, succOK int
+		entryOK, exitOK, orphanOK, succOK     int
 		entryBad, exitBad, orphanBad, succBad int
 	)
 

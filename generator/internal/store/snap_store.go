@@ -183,10 +183,10 @@ func (s *SnapshotStore) Branch(id string) *SnapshotRecord {
 	now := time.Now()
 	h := sha256.Sum256([]byte(fmt.Sprintf("%d", now.UnixNano())))
 	branch := &SnapshotRecord{
-		ID: fmt.Sprintf("snap-%d", now.UnixMilli()),
+		ID:          fmt.Sprintf("snap-%d", now.UnixMilli()),
 		Name:        src.Name + " · branch",
 		Description: fmt.Sprintf("Branched from \"%s\"", src.Name),
-		Tag: "CURRENT", Author: "you",
+		Tag:         "CURRENT", Author: "you",
 		CreatedAt: now.UnixMilli(), Entities: src.Entities,
 		Fields: src.Fields, Lines: src.Lines,
 		Hash:      fmt.Sprintf("SHA256:%x", h[:4]),

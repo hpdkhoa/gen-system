@@ -491,24 +491,24 @@ func (py *PyFrontend) Parse(filePath string, source []byte) (*Module, error) {
 // ─── Output Parser ───────────────────────────────────────────
 
 type pyNodeJSON struct {
-	Kind        string          `json:"kind"`
-	Name        string          `json:"name"`
-	Async       bool            `json:"async"`
-	Line        int             `json:"line"`
-	Col         int             `json:"col"`
-	EndLine     int             `json:"end_line"`
-	Params      []pyParamJSON   `json:"params"`
-	Returns     pyTypeJSON      `json:"returns"`
-	Doc         string          `json:"doc"`
-	Exported    bool            `json:"exported"`
-	Bases       []string        `json:"bases"`
-	Fields      []pyFieldJSON   `json:"fields"`
-	Methods     []string        `json:"methods"`
-	Path        string          `json:"path"`
-	Alias       string          `json:"alias"`
-	ImportNames []string        `json:"import_names"`
-	Type        pyTypeJSON      `json:"type"`
-	Value       string          `json:"value"`
+	Kind        string           `json:"kind"`
+	Name        string           `json:"name"`
+	Async       bool             `json:"async"`
+	Line        int              `json:"line"`
+	Col         int              `json:"col"`
+	EndLine     int              `json:"end_line"`
+	Params      []pyParamJSON    `json:"params"`
+	Returns     pyTypeJSON       `json:"returns"`
+	Doc         string           `json:"doc"`
+	Exported    bool             `json:"exported"`
+	Bases       []string         `json:"bases"`
+	Fields      []pyFieldJSON    `json:"fields"`
+	Methods     []string         `json:"methods"`
+	Path        string           `json:"path"`
+	Alias       string           `json:"alias"`
+	ImportNames []string         `json:"import_names"`
+	Type        pyTypeJSON       `json:"type"`
+	Value       string           `json:"value"`
 	BodyNodes   []pyBodyNodeJSON `json:"body_nodes"` // v19 TASK 2
 }
 

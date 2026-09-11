@@ -22,8 +22,8 @@ import (
 	"fmt"
 	"strings"
 
-	"gen-system/generator/internal/planner"
-	"gen-system/generator/internal/planner_v2"
+	"github.com/hpdkhoa/gen-system/generator/internal/planner"
+	"github.com/hpdkhoa/gen-system/generator/internal/planner_v2"
 )
 
 // RunConsentGate prints the existing-purpose summary, the proposed delta, and any

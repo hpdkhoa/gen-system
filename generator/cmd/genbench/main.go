@@ -32,10 +32,10 @@ import (
 	"strings"
 	"time"
 
-	"gen-system/generator/internal/agent"
-	"gen-system/generator/internal/bench"
-	"gen-system/generator/internal/style"
-	agentctx "gen-system/generator/internal/context"
+	"github.com/hpdkhoa/gen-system/generator/internal/agent"
+	"github.com/hpdkhoa/gen-system/generator/internal/bench"
+	agentctx "github.com/hpdkhoa/gen-system/generator/internal/context"
+	"github.com/hpdkhoa/gen-system/generator/internal/style"
 )
 
 const usage = `genbench — reliability and performance bench for gen-system
@@ -162,22 +162,22 @@ const defaultModel = "qwen2.5-coder:14b"
 const defaultHost = "http://localhost:11434"
 
 type commonFlags struct {
-	root      string
-	copybooks string
-	skill     string
-	model     string
-	host      string
-	out       string
-	skipAI    bool
-	tolerance float64
-	old       string
-	newPath   string
-	baseline  bool
-	strict    bool
-	labels    string
-	runs      int
-	threshold float64
-	stdlib    string // v23.32: stdlib roots, colon-separated; "go" expands to GOROOT/src
+	root       string
+	copybooks  string
+	skill      string
+	model      string
+	host       string
+	out        string
+	skipAI     bool
+	tolerance  float64
+	old        string
+	newPath    string
+	baseline   bool
+	strict     bool
+	labels     string
+	runs       int
+	threshold  float64
+	stdlib     string // v23.32: stdlib roots, colon-separated; "go" expands to GOROOT/src
 	stdlibLang string // v23.32: advisory language label for the stdlib roots
 }
 

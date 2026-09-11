@@ -22,8 +22,8 @@ import (
 	"strings"
 	"time"
 
-	"gen-system/generator/internal/engine"
-	"gen-system/generator/internal/schema"
+	"github.com/hpdkhoa/gen-system/generator/internal/engine"
+	"github.com/hpdkhoa/gen-system/generator/internal/schema"
 )
 
 // PostgresGeneration generates a GEN_BACKEND=postgres app into a temp dir from

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"gen-system/generator/internal/engine"
-	"gen-system/generator/internal/schema"
+	"github.com/hpdkhoa/gen-system/generator/internal/engine"
+	"github.com/hpdkhoa/gen-system/generator/internal/schema"
 )
 
 func EvolveFromSchema() {

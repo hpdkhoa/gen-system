@@ -2,16 +2,16 @@
 // NEW. ResolutionRecallWithStdlib loads the project WITH one or more stdlib
 // roots ingested read-only (ProvStdlib), then reports TWO separate numbers:
 //
-//   resolution_recall_internal       — UNCHANGED meaning: of calls to the
-//                                       project's OWN symbols, how many resolved.
-//                                       Stdlib symbols are excluded from this
-//                                       denominator by PROVENANCE, not by name,
-//                                       so the headline number stays honest even
-//                                       though the stdlib is now in the index.
-//   resolution_recall_with_stdlib     — NEW: of all calls that land on a symbol
-//                                       we hold (project OR stdlib), how many
-//                                       resolved. This is the "we resolve into
-//                                       the runtime" number.
+//	resolution_recall_internal       — UNCHANGED meaning: of calls to the
+//	                                    project's OWN symbols, how many resolved.
+//	                                    Stdlib symbols are excluded from this
+//	                                    denominator by PROVENANCE, not by name,
+//	                                    so the headline number stays honest even
+//	                                    though the stdlib is now in the index.
+//	resolution_recall_with_stdlib     — NEW: of all calls that land on a symbol
+//	                                    we hold (project OR stdlib), how many
+//	                                    resolved. This is the "we resolve into
+//	                                    the runtime" number.
 //
 // Keeping the internal metric provenance-gated is the whole point: merging the
 // stdlib into the index would otherwise silently redefine "internal" and make
@@ -25,8 +25,8 @@ import (
 	"strings"
 	"time"
 
-	agentctx "gen-system/generator/internal/context"
-	"gen-system/generator/internal/symbols"
+	agentctx "github.com/hpdkhoa/gen-system/generator/internal/context"
+	"github.com/hpdkhoa/gen-system/generator/internal/symbols"
 )
 
 // ResolutionRecallWithStdlib is ResolutionRecall plus read-only stdlib ingest.

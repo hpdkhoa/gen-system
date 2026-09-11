@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"gen-system/generator/internal/symbols"
+	"github.com/hpdkhoa/gen-system/generator/internal/symbols"
 )
 
 const deadline = 500 * time.Millisecond

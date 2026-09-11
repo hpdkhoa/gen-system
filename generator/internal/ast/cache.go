@@ -19,7 +19,7 @@ import (
 	"path/filepath"
 	"sync"
 
-	"gen-system/generator/internal/trace"
+	"github.com/hpdkhoa/gen-system/generator/internal/trace"
 )
 
 // Cache stores parsed modules keyed by (filePath, checksum).

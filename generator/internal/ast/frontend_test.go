@@ -49,10 +49,10 @@ func TestRegistry_ForFile(t *testing.T) {
 		{"order.ad", LangCAGen},
 		{"workflow.cagen", LangCAGen},
 		{"logic.gel", LangCAGen},
-		{"program.cob", LangCOBOL},   // v19
-		{"main.cbl", LangCOBOL},      // v19
-		{"book.cpy", LangCOBOL},      // v19
-		{"app.cobol", LangCOBOL},     // v19
+		{"program.cob", LangCOBOL}, // v19
+		{"main.cbl", LangCOBOL},    // v19
+		{"book.cpy", LangCOBOL},    // v19
+		{"app.cobol", LangCOBOL},   // v19
 		{"readme.md", LangUnknown},
 		{"data.json", LangUnknown},
 		{"", LangUnknown},

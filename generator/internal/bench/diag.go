@@ -19,8 +19,8 @@ import (
 	"strings"
 	"time"
 
-	agentctx "gen-system/generator/internal/context"
-	"gen-system/generator/internal/symbols"
+	agentctx "github.com/hpdkhoa/gen-system/generator/internal/context"
+	"github.com/hpdkhoa/gen-system/generator/internal/symbols"
 )
 
 func ResolutionDiagnostic(root string, copybookPath []string, limit int) Suite {

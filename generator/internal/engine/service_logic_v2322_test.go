@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"gen-system/generator/internal/ai"
-	"gen-system/generator/internal/schema"
+	"github.com/hpdkhoa/gen-system/generator/internal/ai"
+	"github.com/hpdkhoa/gen-system/generator/internal/schema"
 )
 
 // realFieldProvider emits bodies that read the entity's REAL fields — exactly

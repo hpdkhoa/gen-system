@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"gen-system/generator/internal/ast"
+	"github.com/hpdkhoa/gen-system/generator/internal/ast"
 )
 
 // ─── Helpers ──────────────────────────────────────────────────

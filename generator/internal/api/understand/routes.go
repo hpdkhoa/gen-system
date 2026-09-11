@@ -11,8 +11,8 @@ package understand
 import (
 	"net/http"
 
-	"gen-system/generator/internal/api/sse"
-	"gen-system/generator/internal/presentation"
+	"github.com/hpdkhoa/gen-system/generator/internal/api/sse"
+	"github.com/hpdkhoa/gen-system/generator/internal/presentation"
 )
 
 // RegisterRoutes mounts the read-only code-intelligence surface: the SSE stream

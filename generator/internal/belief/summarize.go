@@ -6,11 +6,12 @@
 // change anywhere below re-flags the summaries above it.
 //
 // Scope levels:
-//   service — members are the routine beliefs whose Subject shares a receiver
-//             (OrderService.Checkout, OrderService.Refund → service "OrderService").
-//   module  — members are service summaries in the same package/layer (the caller,
-//             which has the index, supplies the grouping via UpsertSummary members).
-//   project — members are the module summaries.
+//
+//	service — members are the routine beliefs whose Subject shares a receiver
+//	          (OrderService.Checkout, OrderService.Refund → service "OrderService").
+//	module  — members are service summaries in the same package/layer (the caller,
+//	          which has the index, supplies the grouping via UpsertSummary members).
+//	project — members are the module summaries.
 //
 // The belief package can derive SERVICE membership itself from qualified names.
 // MODULE/PROJECT grouping needs package/layer info the beliefs don't carry, so the

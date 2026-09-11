@@ -1,7 +1,7 @@
 package planner_v2
 
 import (
-	"gen-system/generator/internal/ai"
+	"github.com/hpdkhoa/gen-system/generator/internal/ai"
 )
 
 // DesignArchitecture converts extracted features into an Architecture struct.
