@@ -13,17 +13,31 @@ func SnapshotProject(root string) (string, error) {
 	ts := time.Now().Format("20060102_150405")
 	snapDir := filepath.Join(root, ".gen", "snapshots", ts)
 
+	// v26.57 (D015): compare the path relative to root with the OS separator,
+	// and skip the whole folder. The old test, strings.Contains(path,
+	// ".gen/snapshots"), never matched the backslash paths filepath.Walk gives
+	// on Windows, so the walk copied the snapshot being written into itself
+	// and nested until the path was too long; RunFromPlan then ran with no
+	// rollback. On other systems it skipped the entries one by one but still
+	// walked every old snapshot.
+	snapshotsRel := filepath.Join(".gen", "snapshots")
+
 	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
 
-		// skip snapshots folder itself
-		if strings.Contains(path, ".gen/snapshots") {
+		rel, relErr := filepath.Rel(root, path)
+		if relErr != nil {
+			return relErr
+		}
+		if rel == snapshotsRel || strings.HasPrefix(rel, snapshotsRel+string(filepath.Separator)) {
+			if info.IsDir() {
+				return filepath.SkipDir
+			}
 			return nil
 		}
 
-		rel, _ := filepath.Rel(root, path)
 		target := filepath.Join(snapDir, rel)
 
 		if info.IsDir() {

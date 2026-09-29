@@ -402,17 +402,27 @@ func (s *Server) handleSymbols(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "file param required", http.StatusBadRequest)
 		return
 	}
-	// v20.1: guard against a directory being sent here (e.g. pasted into the
-	// manual path box). Reading a dir as a file yields a confusing
-	// "permission denied" — reject it cleanly and tell the client to browse.
-	if fi, statErr := os.Stat(filePath); statErr == nil && fi.IsDir() {
-		http.Error(w, fmt.Sprintf("%s is a directory — open it in the browser, then pick a file", filePath), http.StatusBadRequest)
-		return
-	}
 
 	idx := s.index() // v24: guarded snapshot; consistent within this request
 	t, ok := idx.TableFor(filePath)
 	if !ok {
+		// v26.57 (D013): a file the project load did not index is parsed on
+		// demand only when it lies inside the browse root, the same rule
+		// handleFiles applies. Before, any path on the machine was parsed and
+		// added to the shared index, and /api/present/source then returned
+		// the bodies. The check runs before os.Stat, so a refused request
+		// learns nothing about the path.
+		if !s.insideBrowseRoot(filePath) {
+			http.Error(w, "path outside browse root", http.StatusForbidden)
+			return
+		}
+		// v20.1: guard against a directory being sent here (e.g. pasted into the
+		// manual path box). Reading a dir as a file yields a confusing
+		// "permission denied" — reject it cleanly and tell the client to browse.
+		if fi, statErr := os.Stat(filePath); statErr == nil && fi.IsDir() {
+			http.Error(w, fmt.Sprintf("%s is a directory — open it in the browser, then pick a file", filePath), http.StatusBadRequest)
+			return
+		}
 		// Try re-parsing on-demand. v20: COBOL files (esp. copybooks) need a
 		// copybook-aware frontend or COPY resolution fails and the module
 		// comes back with no indexable symbols.
@@ -486,6 +496,36 @@ func (s *Server) handleSymbols(w http.ResponseWriter, r *http.Request) {
 	}
 
 	writeJSON(w, resp)
+}
+
+// insideBrowseRoot reports whether path lies inside the browse root, or the
+// project root when no browse root is set. Symbolic links are resolved on both
+// sides, so a link inside the root that points outside it is refused. With no
+// root at all nothing is inside. v26.57 (D013).
+func (s *Server) insideBrowseRoot(path string) bool {
+	base := s.browseRoot
+	if base == "" {
+		base = s.root
+	}
+	if base == "" {
+		return false
+	}
+	abs, err := filepath.Abs(path)
+	if err != nil {
+		return false
+	}
+	if real, err := filepath.EvalSymlinks(abs); err == nil {
+		abs = real
+	}
+	if real, err := filepath.EvalSymlinks(base); err == nil {
+		base = real
+	}
+	rel, err := filepath.Rel(base, abs)
+	if err != nil || filepath.IsAbs(rel) || rel == ".." ||
+		strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
+		return false
+	}
+	return true
 }
 
 // ─── Flow View ────────────────────────────────────────────────

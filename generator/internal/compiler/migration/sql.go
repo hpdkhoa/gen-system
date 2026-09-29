@@ -1,6 +1,9 @@
 package migration
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 // GenerateSQL converts MigrationIR into UP SQL statements
 func GenerateSQL(m MigrationIR) []string {
@@ -10,8 +13,14 @@ func GenerateSQL(m MigrationIR) []string {
 		switch step.Type {
 
 		case "CREATE_TABLE":
+			// v26.57 (D007): one column per field of the new entity, typed the
+			// same way ADD_COLUMN types it.
+			cols := []string{"id SERIAL PRIMARY KEY"}
+			for _, c := range step.Columns {
+				cols = append(cols, c.Name+" "+mapType(c.Type))
+			}
 			sql = append(sql,
-				fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s (id SERIAL PRIMARY KEY);", step.Entity),
+				fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s (%s);", step.Entity, strings.Join(cols, ", ")),
 			)
 
 		case "DROP_TABLE":

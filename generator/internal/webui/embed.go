@@ -2,7 +2,7 @@
 // enterprise Studio UI into the binary so the understand-server ships as a
 // single self-contained, tamper-evident file (no loose web/ directory required
 // on the customer's box). Only studio-v23.html is embedded — the legacy
-// studio.html and generate.html are internal/dev assets and are intentionally
+// web/legacy/studio.html and web/legacy/generate.html are internal/dev assets and are intentionally
 // NOT part of the enterprise artifact.
 //
 // The embedded FS serves "/" -> studio-v23.html so the appliance opens straight

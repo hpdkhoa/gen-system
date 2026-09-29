@@ -277,15 +277,19 @@ func runVerifyStage(backendPath, rootPath string, ctx agentctx.Context) (VerifyR
 	case VerifyAutofix:
 		emit("verify", "  [verify] autofix mode — routing fixable findings to the repair loop\n")
 		var files []string
+		var evidence strings.Builder
 		seen := map[string]bool{}
 		for _, f := range rep.Findings {
 			if f.File != "" && !seen[f.File] {
 				seen[f.File] = true
 				files = append(files, f.File)
 			}
+			if f.File != "" {
+				fmt.Fprintf(&evidence, "%s: %s %s: %s\n", f.File, f.Kind, f.Symbol, f.Detail)
+			}
 		}
 		if len(files) > 0 {
-			dispatchRepairs(files, ctx, rootPath, 99) // round 99 = verify-driven
+			dispatchRepairs(files, evidence.String(), ctx, rootPath, 99) // round 99 = verify-driven
 		}
 		// Re-run once to report the post-repair state (does not re-heal).
 		after := runUnderstandVerify(backendPath)

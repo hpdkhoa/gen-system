@@ -4,7 +4,7 @@
 // resolves regardless of task ordering. v23.2: GenerateHandler now emits a
 // COMPLETE CRUD handler (list/create/get/update/delete) over the in-memory
 // store, plus the shared writeJSON helper and a table test — replacing the old
-// one-line `// TODO: implement` stub. Always overwrites so re-runs converge.
+// one-line stub. Always overwrites so re-runs converge.
 package engine
 
 import (

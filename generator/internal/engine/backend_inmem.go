@@ -38,20 +38,7 @@ import (
 )
 
 // goType maps schema field types to Go types for the generated model.
-func goType(t string) string {
-	switch strings.ToLower(t) {
-	case "int", "integer":
-		return "int"
-	case "bool", "boolean":
-		return "bool"
-	case "float", "float64", "double", "decimal":
-		return "float64"
-	case "time", "datetime", "date", "timestamp":
-		return "string" // ISO-8601 string keeps the in-mem app dependency-free
-	default:
-		return "string"
-	}
-}
+func goType(t string) string { return schema.GoFieldType(t) }
 
 func emitGoMod(path string) {
 	p := filepath.Join(path, "go.mod")
@@ -167,28 +154,7 @@ func genModelInMem(e schema.Entity, path string) {
 // belongsTo User -> UserID int `json:"user_id"`), appended after the explicit
 // fields and run through the SAME dedup so the FK appears exactly once in the
 // model struct, the in-memory store, the PG store, and the SQL migration.
-func fieldsForEntity(e schema.Entity) []schema.Field {
-	var out []schema.Field
-	usedIdent := map[string]bool{"id": true}
-	usedTag := map[string]bool{"id": true}
-	add := func(f schema.Field) {
-		ident := strings.ToLower(exportName(f.Name))
-		tag := strings.ToLower(jsonTag(f.Name))
-		if ident == "" || usedIdent[ident] || usedTag[tag] {
-			return
-		}
-		usedIdent[ident] = true
-		usedTag[tag] = true
-		out = append(out, f)
-	}
-	for _, f := range e.Fields {
-		add(f)
-	}
-	for _, f := range relationFields(e) {
-		add(f)
-	}
-	return out
-}
+func fieldsForEntity(e schema.Entity) []schema.Field { return schema.ModelFields(e) }
 
 // relationFields derives synthetic foreign-key fields from an entity's
 // belongsTo relations. Each FK is an int column. The field name comes from the
@@ -197,30 +163,14 @@ func fieldsForEntity(e schema.Entity) []schema.Field {
 // (splitIdent alone can't split a delimiter-free camelCase word).
 // hasMany/other relation types add no column on this side (the FK lives on the
 // child entity).
-func relationFields(e schema.Entity) []schema.Field {
-	var out []schema.Field
-	for _, r := range e.Relations {
-		if !strings.EqualFold(r.Type, "belongsTo") {
-			continue
-		}
-		name := r.ForeignKey
-		if strings.TrimSpace(name) == "" {
-			if strings.TrimSpace(r.Target) == "" {
-				continue
-			}
-			name = r.Target + "ID"
-		}
-		out = append(out, schema.Field{Name: fkFieldName(name), Type: "int"})
-	}
-	return out
-}
+func relationFields(e schema.Entity) []schema.Field { return schema.RelationFields(e) }
 
 // fkFieldName is the canonical Go-ish field name for a foreign key, used when
 // synthesizing the relation column field. genTable/genMigration then turn this
 // into the SQL column via jsonTag, so this is the SINGLE point that decides the
 // synthesized FK field shape. Kept as splitCamel(name) to preserve the
 // historical column spelling "user_id" for "UserID".
-func fkFieldName(name string) string { return splitCamel(name) }
+func fkFieldName(name string) string { return schema.FKFieldName(name) }
 
 // resolveFKColumn returns the SQL column name the CREATE TABLE actually emitted
 // for the foreign key whose raw key is `name`. genTable names columns
@@ -247,32 +197,7 @@ func resolveFKColumn(e schema.Entity, name string) string {
 // downstream splitIdent/jsonTag produce snake_case ("UserID" -> "User ID" ->
 // json "user_id"; "OrderItemID" -> "order_item_id"). Already-delimited names
 // (spaces, underscores) pass through unchanged because those delimiters survive.
-func splitCamel(s string) string {
-	var b strings.Builder
-	rs := []rune(s)
-	for i, r := range rs {
-		if i > 0 {
-			prev := rs[i-1]
-			upper := r >= 'A' && r <= 'Z'
-			prevLower := prev >= 'a' && prev <= 'z'
-			prevDigit := prev >= '0' && prev <= '9'
-			// boundary: lower|digit -> Upper  (userID, user2ID)
-			if upper && (prevLower || prevDigit) {
-				b.WriteByte(' ')
-			} else if upper && i+1 < len(rs) {
-				// boundary inside an acronym before a trailing word: "IDs" stays,
-				// but "HTTPServer" -> "HTTP Server" (Upper followed by lower).
-				next := rs[i+1]
-				prevUpper := prev >= 'A' && prev <= 'Z'
-				if prevUpper && next >= 'a' && next <= 'z' {
-					b.WriteByte(' ')
-				}
-			}
-		}
-		b.WriteRune(r)
-	}
-	return b.String()
-}
+func splitCamel(s string) string { return schema.SplitCamel(s) }
 
 // genStoreInMem writes backend/internal/store/<lower>.go — a thread-safe
 // in-memory CRUD store with auto-incrementing IDs.
@@ -446,51 +371,21 @@ func emitMain(entities []schema.Entity, path string) {
 // "due date"), which are not valid Go identifiers and broke the generated
 // model (more-than-one-char rune / unexpected literal). We split on any
 // non-alphanumeric run, Title-case each part, join, and guard a leading digit.
-func exportName(s string) string {
-	parts := splitIdent(s)
-	if len(parts) == 0 {
-		return "Field"
-	}
-	var b strings.Builder
-	for _, p := range parts {
-		b.WriteString(strings.ToUpper(p[:1]) + p[1:])
-	}
-	out := b.String()
-	if out[0] >= '0' && out[0] <= '9' {
-		out = "F" + out
-	}
-	return out
-}
+func exportName(s string) string { return schema.ExportName(s) }
 
 // jsonTag normalises a field name to a stable snake_case JSON key.
-func jsonTag(s string) string {
-	parts := splitIdent(s)
-	if len(parts) == 0 {
-		return "field"
-	}
-	for i := range parts {
-		parts[i] = strings.ToLower(parts[i])
-	}
-	return strings.Join(parts, "_")
-}
+func jsonTag(s string) string { return schema.JSONKey(s) }
 
 // routeName turns an entity name into a lowercase route/path segment with no
 // spaces or punctuation (e.g. "Order Item" -> "orderitem").
-func routeName(s string) string {
-	return strings.ToLower(strings.Join(splitIdent(s), ""))
-}
+func routeName(s string) string { return schema.RouteName(s) }
 
 // plural appends "s" unless the word already ends in "s" (so "Tasks" stays
 // "tasks", not "taskss"). Deliberately simple — good enough for route/table.
-func plural(s string) string {
-	if strings.HasSuffix(s, "s") {
-		return s
-	}
-	return s + "s"
-}
+func plural(s string) string { return schema.Plural(s) }
 
 // collPath is the REST collection path for an entity, e.g. "/tasks".
-func collPath(e schema.Entity) string { return "/" + plural(routeName(e.Name)) }
+func collPath(e schema.Entity) string { return schema.CollectionPath(e.Name) }
 
 // tableName is the SQL table for an entity, e.g. "tasks".
 func tableName(e schema.Entity) string { return plural(routeName(e.Name)) }
@@ -500,25 +395,7 @@ func typeName(s string) string { return exportName(s) }
 
 // splitIdent splits a string on any run of non-alphanumeric characters,
 // dropping empties. "due date" -> [due date]; "user-id" -> [user id].
-func splitIdent(s string) []string {
-	var parts []string
-	var cur strings.Builder
-	flush := func() {
-		if cur.Len() > 0 {
-			parts = append(parts, cur.String())
-			cur.Reset()
-		}
-	}
-	for _, r := range s {
-		if (r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || (r >= '0' && r <= '9') {
-			cur.WriteRune(r)
-		} else {
-			flush()
-		}
-	}
-	flush()
-	return parts
-}
+func splitIdent(s string) []string { return schema.SplitIdent(s) }
 
 // writeFileMk writes content, creating parent dirs.
 func writeFileMk(p, content string) {

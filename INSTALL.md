@@ -9,7 +9,7 @@ gen-system on a fresh Linux server.
 |-----------------|--------------------|--------------------------------|
 | Go              | 1.25.0             | `/usr/local/go`                |
 | Ollama          | latest             | `/usr/local/bin/ollama` (per upstream installer) |
-| deepseek-coder  | latest, ~4 GB      | Ollama models dir               |
+| qwen3:14b, qwen2.5-coder:14b | latest | Ollama models dir              |
 | PostgreSQL      | distro-default 15+ | system package paths           |
 | gen, gen-server | from your source   | `/opt/gen-system/bin`          |
 | web/ assets     | from your source   | `/opt/gen-system/web`          |
@@ -23,7 +23,7 @@ RHEL-family distros. AMD64 and ARM64 supported.
 ## Prerequisites
 
 - A fresh Linux server with sudo/root access
-- ~10 GB disk free (Go toolchain + deepseek-coder model + your data)
+- Disk for the Go toolchain, the two Ollama models and your data
 - Internet access at install time (afterwards everything runs offline)
 - Your gen-system source tree (the full project, not just the patches)
 
@@ -57,7 +57,7 @@ sudo ./install.sh --no-postgres
 # Skip Ollama (already installed, or running on another machine)
 sudo ./install.sh --no-ollama
 
-# Skip the 4 GB model pull (do it later with `ollama pull deepseek-coder`)
+# Skip the model pulls (do them later with `ollama pull qwen3:14b` and `ollama pull qwen2.5-coder:14b`)
 sudo ./install.sh --skip-model
 
 # Install to a non-default prefix
@@ -187,7 +187,7 @@ sudo systemctl restart gen-server
 ```
 
 **Ollama is running but generation is slow.**
-deepseek-coder needs GPU acceleration for reasonable speed on real workloads.
+The models need GPU acceleration for reasonable speed on real workloads.
 Without a GPU, the studio still parses code and shows intelligence — only the
 generation features will be slow. For NVIDIA GPUs, install CUDA drivers before
 running `ollama pull` and Ollama will detect and use them automatically.
@@ -196,7 +196,7 @@ running `ollama pull` and Ollama will detect and use them automatically.
 
 Once installed, gen-system runs fully offline. The only network operations are:
 - Initial download of Go and Ollama installers
-- `ollama pull deepseek-coder` (once)
+- `ollama pull qwen3:14b` and `ollama pull qwen2.5-coder:14b` (once)
 
 After install you can disconnect the server from the internet entirely. The
 engine will keep working. To re-pull or update the model, you'll need network

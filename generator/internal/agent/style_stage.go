@@ -101,7 +101,13 @@ func runStyleStage(backendPath, rootPath string, ctx agentctx.Context) (style.Re
 		for _, f := range rep.FixableFiles() {
 			files = append(files, filepath.Join(backendPath, filepath.FromSlash(f)))
 		}
-		dispatchRepairs(files, ctx, rootPath, 98) // round 98 = style-driven
+		var evidence strings.Builder
+		for _, f := range rep.Findings {
+			if f.Fixable && f.File != "" {
+				fmt.Fprintf(&evidence, "%s:%d:1: %s %s: %s\n", f.File, f.Line, f.Rule, f.Symbol, f.Detail)
+			}
+		}
+		dispatchRepairs(files, evidence.String(), ctx, rootPath, 98) // round 98 = style-driven
 		after := style.Check(backendPath, styleProfile)
 		emit("style", fmt.Sprintf("  [style] after repair: %d error, %d warn remain\n", after.Errors(), after.Warnings()))
 		recordLifecycle("style", fmt.Sprintf("autofix done: %d→%d findings", len(rep.Findings), len(after.Findings)))

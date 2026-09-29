@@ -8,7 +8,7 @@ This bridge extracts the writeup-02 numbers from its output. Place anywhere; run
     cd ~/code/gen-system
     go build -o /tmp/genbench ./generator/cmd/genbench
 
-    # per quantization / model tag (see quant_sweep.sh for the loop + VRAM sampling):
+    # per quantization / model tag (see scripts/legacy/quant_sweep.sh for the loop + VRAM sampling):
     /tmp/genbench all --root . --model deepseek-coder-v2:16b-lite-instruct-q5_K_M \
         --json /tmp/run-q5.json
     python3 genbench_to_measured.py /tmp/run-q5.json \

@@ -65,8 +65,9 @@ of 30 to 90 seconds can land in the middle of a run on top of generation time.
 
 **There is no scheduler.** "Sequential scheduling with keep alive" means Ollama's own keep alive,
 these two roles, and measurement of what swapping costs. No scheduling code exists in this
-repository. `gen doctor` checks that a second load is much faster than the first, which is how you
-confirm keep alive is actually working rather than assuming it.
+repository. `genbench model` (the `ollama_doctor` suite) checks that a second load is much faster than the first, which
+is how you confirm keep alive is actually working rather than assuming it. (`gen doctor` itself only
+checks that `.gen`, `generator` and `go.mod` exist.)
 
 ## Schema-constrained calls
 

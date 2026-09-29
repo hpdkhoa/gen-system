@@ -170,7 +170,7 @@ func main() {
 	fmt.Printf("   Root:  %s\n", *root)
 	fmt.Printf("   Studio (v23): http://localhost%s/studio-v23.html (%d symbols indexed)\n",
 		addr, len(ctx.Index.AllSymbols()))
-	fmt.Printf("   Studio (v20, legacy): http://localhost%s/studio.html\n", addr)
+	fmt.Printf("   Studio (v20, legacy): http://localhost%s/legacy/studio.html\n", addr)
 	fmt.Printf("   Web UI dir: %s\n", resolvedWeb)
 	fmt.Printf("   Projects base (dynamic load): %s\n", base)
 	if *watchLive {

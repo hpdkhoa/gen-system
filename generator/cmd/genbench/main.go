@@ -94,7 +94,7 @@ EXAMPLES
   # same, but fail the build (exit 1) if any metric drifts beyond tolerance
   genbench regression --baseline --new bench-fresh.json --strict --tolerance 0.02
 
-See BENCH_GUIDE.md for the runbook.
+See bench/README.md for the runbook.
 `
 
 func main() {

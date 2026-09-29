@@ -1,6 +1,8 @@
 package migration
 
 import (
+	"strings"
+
 	"github.com/hpdkhoa/gen-system/generator/internal/compiler/diff"
 )
 
@@ -10,9 +12,19 @@ func BuildMigration(cs diff.ChangeSet) MigrationIR {
 
 	// CREATE TABLES
 	for _, e := range cs.AddEntities {
+		// v26.57 (D007): carry the fields, so GenerateSQL writes one column per
+		// field. The id field is the built-in SERIAL key, not a second column.
+		var cols []Column
+		for _, f := range e.Fields {
+			if strings.EqualFold(f.Name, "id") {
+				continue
+			}
+			cols = append(cols, Column{Name: f.Name, Type: f.Type})
+		}
 		m.Steps = append(m.Steps, MigrationStep{
-			Type:   "CREATE_TABLE",
-			Entity: e.Name,
+			Type:    "CREATE_TABLE",
+			Entity:  e.Name,
+			Columns: cols,
 		})
 	}
 

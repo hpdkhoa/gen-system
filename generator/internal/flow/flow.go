@@ -469,13 +469,28 @@ func (b *cfgBuilder) processCAGenNode(n *ast.Node) {
 		thenBlock := b.newBlock("if_true")
 		mergeBlock := b.newBlock("if_merge")
 		b.edge(pred, thenBlock)
-		b.edge(pred, mergeBlock)
 		b.current = thenBlock
 		for _, child := range n.Children {
 			b.processCAGenNode(child)
 		}
 		if b.current != nil {
 			b.edge(b.current, mergeBlock)
+		}
+		// v26.57 (D014): an ELSE body gets its own block (pred → else → merge),
+		// as processNode does. Every COBOL SECTION is built here, and its ELSE
+		// body used to have no block at all.
+		if len(n.Else) > 0 {
+			elseBlock := b.newBlock("if_false")
+			b.edge(pred, elseBlock)
+			b.current = elseBlock
+			for _, child := range n.Else {
+				b.processCAGenNode(child)
+			}
+			if b.current != nil {
+				b.edge(b.current, mergeBlock)
+			}
+		} else {
+			b.edge(pred, mergeBlock)
 		}
 		b.current = mergeBlock
 
@@ -612,6 +627,10 @@ func inferNodeEffects(id string, children []*ast.Node, lang ast.Language) *FuncE
 				callees = append(callees, n.Name)
 			}
 			walk(n.Children)
+			// v26.57 (D014): the Go, Java and COBOL frontends put else and
+			// catch bodies in n.Else. Walking Children alone tagged a function
+			// pure when its only database call sat in an else branch.
+			walk(n.Else)
 		}
 	}
 	walk(children)

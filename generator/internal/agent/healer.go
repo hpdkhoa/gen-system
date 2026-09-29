@@ -12,8 +12,11 @@ package agent
 import (
 	stdctx "context"
 	"fmt"
+	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/hpdkhoa/gen-system/generator/internal/ai"
@@ -98,14 +101,34 @@ func FixTask(task planner.Task, ctx agentctx.Context, rootPath string) error {
 		return fmt.Errorf("cannot determine target file for task %s", task.ID)
 	}
 
-	funcName := resolveFuncName(task)
-	if funcName == "" {
-		trace.Error(tctx, "cannot resolve func name", "task", task.ID, "type", task.Type)
-		return fmt.Errorf("cannot determine function name for task %s", task.ID)
+	funcName, nameErr := resolveFuncName(task, targetFile)
+	if nameErr != nil {
+		trace.Error(tctx, "cannot resolve func name", "task", task.ID, "type", task.Type, "err", nameErr)
+		return fmt.Errorf("cannot determine the function to repair for task %s: %w", task.ID, nameErr)
+	}
+
+	// v26.57 (D010): keep the exact bytes of the file before the first rewrite
+	// and restore THEM after a failed attempt. The old restore passed the whole
+	// file text to RewriteFunction as a function body; parseBody rejected it,
+	// the error was dropped, and the failed AI body stayed in the file.
+	original, readErr := os.ReadFile(targetFile)
+	if readErr != nil {
+		trace.Error(tctx, "cannot read target file", "task", task.ID, "err", readErr)
+		return fmt.Errorf("cannot read %s for task %s: %w", relPath(targetFile, rootPath), task.ID, readErr)
+	}
+	restore := func() error {
+		if err := os.WriteFile(targetFile, original, 0o644); err != nil {
+			trace.Error(tctx, "restore failed", "file", relPath(targetFile, rootPath), "err", err)
+			return fmt.Errorf("restore of %s failed after a failed repair: %w", relPath(targetFile, rootPath), err)
+		}
+		return nil
 	}
 
 	errMsg := task.Error
 	existingCode := ctx.FileContent(relPath(targetFile, rootPath))
+	if existingCode == "" {
+		existingCode = string(original) // the file may postdate the context load
+	}
 
 	// ── STEP 1: Classify the error ────────────────────────────
 	classification := intelligence.ClassifyError(errMsg)
@@ -150,7 +173,9 @@ func FixTask(task planner.Task, ctx agentctx.Context, rootPath string) error {
 				trace.Info(tctx, "cached fix did not compile", "outcome", "degraded", "err", compileErr)
 				mem.RecordFailure(errHash)
 				_ = intelligence.SaveMemory(mem)
-				_ = ast.RewriteFunction(targetFile, funcName, existingCode)
+				if err := restore(); err != nil {
+					return err
+				}
 			}
 		}
 	}
@@ -253,7 +278,10 @@ func FixTask(task planner.Task, ctx agentctx.Context, rootPath string) error {
 			lastErr = fmt.Errorf("compile failed after attempt %d: %w", attempt, compileErr)
 			fmt.Printf("     [heal] ❌ Compile check failed — restoring and retrying\n")
 			trace.Info(actx, "compile failed, restoring", "attempt", attempt, "outcome", "degraded", "err", compileErr)
-			_ = ast.RewriteFunction(targetFile, funcName, existingCode)
+			if err := restore(); err != nil {
+				attemptTimer.End("outcome", "restore_fail")
+				return err
+			}
 			attemptTimer.End("outcome", "compile_fail")
 			continue
 		}
@@ -335,15 +363,51 @@ func resolveTargetFile(task planner.Task, rootPath string) string {
 	return targetFileFor(task.EntityName, task.Type, rootPath)
 }
 
-func resolveFuncName(task planner.Task) string {
-	name := task.EntityName
-	switch task.Type {
-	case "generate_repo", "generate_service", "generate_handler":
-		return "GetAll" + name
-	case "generate_validation":
-		return "Validate" + name
+// errLineRe matches the "file.go:12:3:" position of a Go compiler or vet error.
+var errLineRe = regexp.MustCompile(`([^\s:]+\.go):(\d+)(?::\d+)?:`)
+
+// resolveFuncName returns the function in targetFile that the task's error
+// points at: the declaration that covers a compiler error line in that file.
+// A validation task with no usable line falls back to Validate<Entity>, the one
+// function every generated validation file declares. It returns an error when
+// it cannot name a function that exists in the file.
+//
+// v26.57 (D011): it used to return GetAll<Entity> for repo, service and handler
+// tasks. No generated file declares that function, so RewriteFunction appended
+// a new stub GetAllOrder with the AI body, and the function that failed stayed
+// as it was.
+func resolveFuncName(task planner.Task, targetFile string) (string, error) {
+	base := strings.ToLower(filepath.Base(targetFile))
+	for _, m := range errLineRe.FindAllStringSubmatch(task.Error, -1) {
+		if strings.ToLower(filepath.Base(m[1])) != base {
+			continue
+		}
+		line, err := strconv.Atoi(m[2])
+		if err != nil {
+			continue
+		}
+		if name, ok := ast.FuncAtLine(targetFile, line); ok {
+			return name, nil
+		}
 	}
-	return ""
+	// Second evidence: exactly one function of the file is named as a word in
+	// the error text ("Checkout panicked", "Checkout: unresolved call ...").
+	var named []string
+	for _, fn := range ast.FuncNames(targetFile) {
+		if regexp.MustCompile(`\b` + regexp.QuoteMeta(fn) + `\b`).MatchString(task.Error) {
+			named = append(named, fn)
+		}
+	}
+	if len(named) == 1 {
+		return named[0], nil
+	}
+	if task.Type == "generate_validation" {
+		name := "Validate" + sanitizeIdent(task.EntityName)
+		if ast.HasFunc(targetFile, name) {
+			return name, nil
+		}
+	}
+	return "", fmt.Errorf("no error line or function name in the error text points into a function of %s", filepath.Base(targetFile))
 }
 
 func relPath(abs, root string) string {

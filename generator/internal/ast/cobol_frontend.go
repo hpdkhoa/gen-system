@@ -1251,6 +1251,13 @@ func (p *cobolParser) parseEvaluate(m *Module, current *Node, startLine int) {
 				})
 				// Skip the body until END-EXEC.
 				p.consume()
+				// v26.57 (D009): a one-line EXEC CICS ... END-EXEC is complete on
+				// its start line, as parseCICSBlock already knows. Scanning on
+				// swallowed every line up to the NEXT END-EXEC: the rest of the
+				// EVALUATE and whole paragraphs after it.
+				if strings.Contains(l.upper, "END-EXEC") {
+					continue
+				}
 				for p.pos < len(p.lines) {
 					next := p.peek()
 					if next == nil || strings.Contains(next.upper, "END-EXEC") {
@@ -1388,6 +1395,28 @@ func isSection(l *cobolLine) bool {
 	return false
 }
 
+// paragraphReserved lists the words that can stand alone on a line with a
+// period but never name a paragraph: verbs without operands and every
+// explicit scope terminator of the COBOL standard.
+//
+// v26.57 (D008): END-PERFORM, CONTINUE and the other END- terminators were
+// missing, so "END-PERFORM." opened a false paragraph named END-PERFORM and
+// every later statement landed in it. The list is explicit on purpose: a real
+// paragraph may start with END- (END-OF-JOB-PARA).
+var paragraphReserved = map[string]bool{
+	"END": true, "STOP": true, "GOBACK": true, "EXIT": true, "CONTINUE": true,
+	"MOVE": true, "ADD": true, "SUBTRACT": true, "MULTIPLY": true,
+	"DIVIDE": true, "COMPUTE": true, "DISPLAY": true, "ACCEPT": true,
+	"EVALUATE": true, "WHEN": true, "ELSE": true, "PERFORM": true,
+	"FILE-CONTROL": true,
+	"END-ACCEPT":   true, "END-ADD": true, "END-CALL": true, "END-COMPUTE": true,
+	"END-DELETE": true, "END-DISPLAY": true, "END-DIVIDE": true,
+	"END-EVALUATE": true, "END-EXEC": true, "END-IF": true, "END-MULTIPLY": true,
+	"END-PERFORM": true, "END-READ": true, "END-RECEIVE": true, "END-RETURN": true,
+	"END-REWRITE": true, "END-SEARCH": true, "END-START": true, "END-STRING": true,
+	"END-SUBTRACT": true, "END-UNSTRING": true, "END-WRITE": true,
+}
+
 // isParagraphHeader: a single COBOL name token ending with ".",
 // not a keyword, not a level number.
 func isParagraphHeader(l *cobolLine) bool {
@@ -1402,15 +1431,7 @@ func isParagraphHeader(l *cobolLine) bool {
 	if name == "" {
 		return false
 	}
-	reserved := map[string]bool{
-		"END": true, "STOP": true, "GOBACK": true, "EXIT": true,
-		"MOVE": true, "ADD": true, "SUBTRACT": true, "MULTIPLY": true,
-		"DIVIDE": true, "COMPUTE": true, "DISPLAY": true, "ACCEPT": true,
-		"EVALUATE": true, "END-EVALUATE": true, "END-IF": true,
-		"WHEN": true, "ELSE": true, "PERFORM": true,
-		"FILE-CONTROL": true,
-	}
-	if reserved[name] {
+	if paragraphReserved[name] {
 		return false
 	}
 	if parseLevel(name) > 0 {

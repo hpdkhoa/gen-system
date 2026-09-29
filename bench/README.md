@@ -39,13 +39,13 @@ Or piecewise (each writes raw JSON to `results/<date>/raw/`):
 | `attest.py` | MANIFEST.sha256 + ATTESTATION.md: what ran, what did not, what was dropped (v26.32) | seconds |
 | `run-partial.sh` | only the drivers you name; every other table reused from an earlier results directory without re-dating (v26.35) | depends on the drivers |
 
-## What changed vs the old quant_sweep.sh (repo root)
+## What changed vs the old quant_sweep.sh (now in scripts/legacy/)
 
 The old sweep's quality axis was compile pass over the generation gates. That was always 100
 percent, because the stub path guarantees a green build. The new headline
 comes from `genbench genpipe` (v26.24): stub rate, op-repair attempts, heal
-attempts, go-test pass over 5 frozen ideas, per quant. `quant_sweep.sh` at the
-repo root is superseded by `bench/run-quant-sweep.sh`.
+attempts, go-test pass over 5 frozen ideas, per quant. `scripts/legacy/quant_sweep.sh` (formerly at the
+repo root) is superseded by `bench/run-quant-sweep.sh`.
 
 ## SWE-bench Verified, localization only
 

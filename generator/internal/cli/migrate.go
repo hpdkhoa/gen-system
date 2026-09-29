@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	_ "github.com/lib/pq"
@@ -40,9 +41,7 @@ func RunMigrate(args []string) {
 	}
 
 	if rollback {
-		fmt.Println("⚠️  Rollback: using last stored down SQL (if available)")
-		// TODO: load from .gen/last_down.sql
-		fmt.Println("❌ Automated rollback requires --force re-run or manual down SQL in .gen/last_down.sql")
+		runRollback(dryRun)
 		return
 	}
 
@@ -81,8 +80,14 @@ func RunMigrate(args []string) {
 		fmt.Println("🚨 BREAKING CHANGES DETECTED:")
 		for _, mod := range cs.Modified {
 			for _, fc := range mod.Modified {
+				if !fc.Breaking {
+					continue
+				}
 				fmt.Printf("   ⚠️  %s.%s: %s → %s (TYPE CHANGE — data loss risk)\n",
 					mod.EntityName, fc.Field, fc.OldType, fc.NewType)
+			}
+			for _, f := range mod.Removed { // v26.57 (D005)
+				fmt.Printf("   ❌  DROP COLUMN %s.%s (irreversible)\n", mod.EntityName, f.Name)
 			}
 		}
 		for _, e := range cs.RemoveEntities {
@@ -152,5 +157,56 @@ func RunMigrate(args []string) {
 		}
 		fmt.Printf("✅ Migration %s applied — %d statements\n", version, len(sqls))
 		fmt.Println("   Down SQL saved to .gen/last_down.sql")
+	}
+}
+
+// runRollback applies the down SQL that the last `gen migrate` run saved to
+// .gen/last_down.sql, through the same migration table as the up path. It is
+// recorded under a "rollback-<timestamp>" version so it shows up in the history.
+// --dry prints the statements and applies nothing.
+func runRollback(dryRun bool) {
+	const downPath = ".gen/last_down.sql"
+	raw, err := os.ReadFile(downPath)
+	if err != nil {
+		fmt.Println("❌ no down SQL found at", downPath)
+		fmt.Println("   a down file is written by every applied `gen migrate` run; nothing to roll back")
+		return
+	}
+	var stmts []string
+	for _, part := range strings.Split(string(raw), ";") {
+		if q := strings.TrimSpace(part); q != "" {
+			stmts = append(stmts, q+";")
+		}
+	}
+	if len(stmts) == 0 {
+		fmt.Println("✔ down SQL is empty, nothing to roll back")
+		return
+	}
+	fmt.Printf("↩️  Rollback: %d statements from %s\n", len(stmts), downPath)
+
+	conn := os.Getenv("DB_URL")
+	if conn == "" {
+		fmt.Println("❌ DB_URL not set")
+		fmt.Println("   export DB_URL=\"postgres://postgres:postgres@localhost:5432/app?sslmode=disable\"")
+		return
+	}
+	db, err := sql.Open("postgres", conn)
+	if err != nil {
+		fmt.Println("DB error:", err)
+		return
+	}
+	defer db.Close()
+	if err = migration.EnsureMigrationTable(db); err != nil {
+		fmt.Println("Migration table error:", err)
+		return
+	}
+	version := "rollback-" + time.Now().Format("20060102150405")
+	if err = migration.ApplySQL(db, version, stmts, dryRun); err != nil {
+		fmt.Println("❌ rollback failed:", err)
+		return
+	}
+	if !dryRun {
+		fmt.Printf("✅ Rollback %s applied, %d statements\n", version, len(stmts))
+		fmt.Println("   the IR snapshot was not changed; run `gen migrate <schema.json>` to re-apply forward")
 	}
 }

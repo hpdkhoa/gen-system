@@ -55,7 +55,6 @@ func RunMutationLayer(s schema.Entity, path string) {
 	fmt.Println("🧬 Running mutation layer...")
 	mutateHandler(s, path)
 	mutateRoutes(s, path)
-	validateGoBuildWithRollback(path)
 	validateGoBuild(path)
 }
 
@@ -73,31 +72,4 @@ func validateGoBuild(path string) {
 	} else {
 		fmt.Println("✅ go vet passed")
 	}
-}
-
-// --------------------------------------------------
-// Rollback system (safe)
-// --------------------------------------------------
-func validateGoBuildWithRollback(path string) {
-
-	enableRollback := true // TODO: set false to disable
-
-	cmd := exec.Command("go", "vet", "./...")
-	cmd.Dir = path
-
-	out, err := cmd.CombinedOutput()
-
-	if err != nil {
-		fmt.Println("❌ go vet failed")
-		fmt.Println(string(out))
-
-		if enableRollback {
-			fmt.Println("⚠️ rollback enabled but not implemented (safe mode)")
-			// TODO: implement full snapshot restore if needed
-		}
-
-		return
-	}
-
-	fmt.Println("✅ go vet passed")
 }

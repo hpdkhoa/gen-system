@@ -157,6 +157,37 @@ func TestPruneKeepsCurrentEntities(t *testing.T) {
 	}
 }
 
+// v26.57 (D001): Order_service_handler.go also ends in "_handler.go". Before the
+// fix the "_handler.go" row read its stem as "order_service", which is never a
+// valid entity, and deleted the business-route file of a current entity.
+func TestPruneKeepsServiceHandlerOfCurrentEntity(t *testing.T) {
+	root := t.TempDir()
+	keep := []string{
+		"backend/internal/handler/Order_handler.go",
+		"backend/internal/handler/Order_handler_test.go",
+		"backend/internal/handler/Order_service_handler.go",
+		"backend/internal/service/order_service.go",
+		"backend/internal/service/order_service_test.go",
+	}
+	gone := []string{
+		"backend/internal/handler/User_service_handler.go",
+	}
+	for _, rel := range append(append([]string{}, keep...), gone...) {
+		writeEmpty(t, filepath.Join(root, rel))
+	}
+	pruneOrphanEntityFiles(root, []string{"Order"})
+	for _, rel := range keep {
+		if _, err := os.Stat(filepath.Join(root, rel)); err != nil {
+			t.Errorf("current-entity file wrongly pruned: %s", rel)
+		}
+	}
+	for _, rel := range gone {
+		if _, err := os.Stat(filepath.Join(root, rel)); err == nil {
+			t.Errorf("orphan should have been pruned: %s", rel)
+		}
+	}
+}
+
 func TestSanitizeIdent(t *testing.T) {
 	cases := map[string]string{
 		"Customer":   "Customer",

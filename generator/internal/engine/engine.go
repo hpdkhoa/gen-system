@@ -105,7 +105,9 @@ func RunAll(entities []schema.Entity, path string) {
 		renderFrontend(e, path)
 
 		// ── MOBILE ─────────────────────────────────────────────────
-		mobile.GenerateScreen(e, path)
+		if err := mobile.GenerateScreen(e, path); err != nil {
+			fmt.Printf("⚠️  %v\n", err) // v26.57 (D003): report, the batch path keeps going
+		}
 		renderMobile(e, path)
 
 		// ── SNAPSHOT ───────────────────────────────────────────────

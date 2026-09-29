@@ -136,13 +136,25 @@ func pruneOrphanEntityFiles(rootPath string, validEntities []string) {
 		"main.go": true, "router.go": true, "routes.go": true,
 	}
 
+	// v26.57 (D001): group the suffixes by directory and judge each file ONCE, by
+	// the longest suffix it ends in. Before, every row ran on its own, so
+	// Order_service_handler.go also matched the "_handler.go" row, got the stem
+	// "order_service", and was deleted although Order is a current entity.
+	var dirs []string
+	suffixesOf := map[string][]string{}
 	for _, L := range layers {
-		dir := filepath.Join(rootPath, L.dir)
+		if _, seen := suffixesOf[L.dir]; !seen {
+			dirs = append(dirs, L.dir)
+		}
+		suffixesOf[L.dir] = append(suffixesOf[L.dir], strings.ToLower(L.suffix))
+	}
+
+	for _, relDir := range dirs {
+		dir := filepath.Join(rootPath, relDir)
 		entries, err := os.ReadDir(dir)
 		if err != nil {
 			continue
 		}
-		suffixLower := strings.ToLower(L.suffix)
 		for _, e := range entries {
 			if e.IsDir() {
 				continue
@@ -152,17 +164,23 @@ func pruneOrphanEntityFiles(rootPath string, validEntities []string) {
 			if sharedBase[nameLower] {
 				continue
 			}
-			if !strings.HasSuffix(nameLower, suffixLower) {
+			suffix := ""
+			for _, s := range suffixesOf[relDir] {
+				if strings.HasSuffix(nameLower, s) && len(s) > len(suffix) {
+					suffix = s
+				}
+			}
+			if suffix == "" {
 				continue
 			}
-			stem := strings.TrimSuffix(nameLower, suffixLower)
+			stem := strings.TrimSuffix(nameLower, suffix)
 			if stem == "" {
 				continue
 			}
 			// For the bare ".go" layers (model/store), the dir holds only
 			// <entity>.go plus shared files; never treat a suffixed file from
 			// another layer (defensive) as an entity stem.
-			if L.suffix == ".go" && (strings.HasSuffix(stem, "_service") ||
+			if suffix == ".go" && (strings.HasSuffix(stem, "_service") ||
 				strings.HasSuffix(stem, "_handler") || strings.HasSuffix(stem, "_validation") ||
 				strings.HasSuffix(stem, "_test")) {
 				continue

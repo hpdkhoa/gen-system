@@ -248,7 +248,7 @@ func runValidationLoop(rootPath, backendPath string, ctx agentctx.Context, round
 				emit("validate", "  [validate] ⚠️  go test failed — a generated operation misbehaves at runtime\n")
 				broken := servicesFromTestOutput(testOut, rootPath)
 				if len(broken) > 0 {
-					dispatchRepairs(broken, ctx, rootPath, round)
+					dispatchRepairs(broken, testOut, ctx, rootPath, round)
 					continue
 				}
 				// Could not localize the failure to a service file; build is green
@@ -258,12 +258,12 @@ func runValidationLoop(rootPath, backendPath string, ctx agentctx.Context, round
 				return nil
 			}
 			emit("validate", "  [validate] ❌ go build failed — extracting broken files\n")
-			dispatchRepairs(extractBrokenFiles(buildOut), ctx, rootPath, round)
+			dispatchRepairs(extractBrokenFiles(buildOut), buildOut, ctx, rootPath, round)
 			continue
 		}
 
 		emit("validate", "  [validate] ❌ go vet failed — extracting broken files\n")
-		dispatchRepairs(extractBrokenFiles(vetOut), ctx, rootPath, round)
+		dispatchRepairs(extractBrokenFiles(vetOut), vetOut, ctx, rootPath, round)
 	}
 	return fmt.Errorf("validation still failing after %d rounds", rounds)
 }
@@ -403,7 +403,28 @@ func extractBrokenFiles(output string) []string {
 	return files
 }
 
-func dispatchRepairs(files []string, ctx agentctx.Context, rootPath string, round int) {
+// repairEvidence returns the lines of output that name the file, or the tail of
+// the whole output when no line does (a failing test names its _test.go file,
+// not the service it exercises). v26.57 (D011): the healer finds the function
+// to repair from these lines; before, every synthetic task carried only the
+// text "compilation error in <file>".
+func repairEvidence(output, file string) string {
+	base := strings.ToLower(filepath.Base(file))
+	var lines []string
+	for _, l := range strings.Split(output, "\n") {
+		if strings.Contains(strings.ToLower(l), base) {
+			lines = append(lines, strings.TrimRight(l, "\r"))
+		}
+	}
+	if len(lines) > 0 {
+		return strings.Join(lines, "\n")
+	}
+	return tail(output)
+}
+
+// dispatchRepairs hands each broken file to FixTask as a synthetic task whose
+// Error holds the output lines about that file.
+func dispatchRepairs(files []string, output string, ctx agentctx.Context, rootPath string, round int) {
 	for _, f := range files {
 		emit("repair", fmt.Sprintf("  [validate] 🔧 Repairing: %s\n", f))
 		entityName, taskType := inferEntityFromPath(f)
@@ -415,7 +436,7 @@ func dispatchRepairs(files []string, ctx agentctx.Context, rootPath string, roun
 			ID:         fmt.Sprintf("validate_fix_%s_%d", entityName, round),
 			Type:       taskType,
 			EntityName: entityName,
-			Error:      fmt.Sprintf("compilation error in %s (round %d)", f, round),
+			Error:      fmt.Sprintf("errors in %s (round %d):\n%s", f, round, repairEvidence(output, f)),
 			Status:     planner.StatusFailed,
 		}
 		if err := FixTask(synthetic, ctx, rootPath); err != nil {

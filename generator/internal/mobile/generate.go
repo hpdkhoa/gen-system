@@ -9,7 +9,9 @@ import (
 	"github.com/hpdkhoa/gen-system/generator/internal/schema"
 )
 
-func GenerateScreen(e schema.Entity, path string) {
+// GenerateScreen writes mobile/<entity>_screen.js, a React Native form and
+// list for one entity. It returns an error when the file cannot be written.
+func GenerateScreen(e schema.Entity, path string) error {
 
 	name := e.Name
 	lower := strings.ToLower(name)
@@ -71,7 +73,17 @@ return ( <View>
 }
 `, lower)
 
-	file := filepath.Join(path, "mobile/"+lower+"_screen.js")
-	os.WriteFile(file, []byte(content), 0644)
-
+	// v26.57 (D003): create mobile/ first and report a failed write. In an agent
+	// build into a fresh folder nothing created mobile/ before the first
+	// generate_mobile task, so the old bare os.WriteFile failed without a
+	// message and App.js imported a screen that did not exist.
+	dir := filepath.Join(path, "mobile")
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		return fmt.Errorf("mobile screen for %s: %w", name, err)
+	}
+	file := filepath.Join(dir, lower+"_screen.js")
+	if err := os.WriteFile(file, []byte(content), 0o644); err != nil {
+		return fmt.Errorf("mobile screen for %s: %w", name, err)
+	}
+	return nil
 }

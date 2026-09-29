@@ -8,6 +8,7 @@ import (
 	"go/parser"
 	"go/token"
 	"os"
+	"strings"
 )
 
 // =========================================================
@@ -34,6 +35,8 @@ func writeFile(path string, fset *token.FileSet, node *ast.File) error {
 // ENSURE IMPORT (NO DUPLICATE)
 // =========================================================
 func EnsureImport(path, pkg string) {
+	// v26.57 (D012): accept a path with or without quote marks.
+	pkg = strings.Trim(pkg, "`\"")
 	node, fset, err := parseFile(path)
 	if err != nil {
 		return

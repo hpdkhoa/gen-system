@@ -12,7 +12,8 @@
 //     frontend/ tree is gated by `tsc --noEmit` (the Phase 2 contract gate).
 //
 // The original GenerateTypeScript / GenerateTypesBarrel behaviour is preserved
-// and extended; goTypeToTS / fieldToTSName / lcFirst are unchanged.
+// and extended. v26.57: field keys, types and routes come from the shared
+// wire rules in internal/schema (wire.go), the same rules the Go backend uses.
 package frontend
 
 import (
@@ -70,78 +71,50 @@ func GenerateTypeScript(e schema.Entity, rootPath string) {
 	sb.WriteString(fmt.Sprintf("export interface %s {\n", e.Name))
 
 	// Track auto-managed fields for the Omit helper below
-	autoFields := []string{}
-	// Track field property names already emitted so a relation's FK scalar is
-	// not duplicated if the schema also declared it as an explicit field.
-	emitted := map[string]bool{}
+	autoFields := []string{"id"}
+	// Property names already emitted, so a navigation field never repeats one.
+	emitted := map[string]bool{"id": true}
 
-	// The generated Go backend ALWAYS assigns an auto-increment id and returns
-	// it in JSON, whether or not the schema declared one. Emit `id: number`
-	// up-front (unless the schema explicitly declares an id field, handled in
-	// the loop) so the TS contract matches what the API actually returns and
-	// `Omit<E,'id'>` for CreateInput is well-formed.
-	hasExplicitID := false
-	for _, f := range e.Fields {
-		if strings.EqualFold(f.Name, "id") {
-			hasExplicitID = true
-			break
-		}
-	}
-	if !hasExplicitID {
-		sb.WriteString("  id: number;\n")
-		emitted["id"] = true
-		autoFields = append(autoFields, "id")
-	}
-
-	for _, f := range e.Fields {
-		tsType := goTypeToTS(f.Type)
+	// v26.57 (D004): the interface lists EXACTLY the JSON keys the generated Go
+	// model writes, with the TypeScript form of the Go type it declares. Both
+	// sides take the key set from schema.ModelFields and the key from
+	// schema.JSONKey. Before, this file built camelCase names of its own
+	// (userId, createdAt, passwordHash) while the model wrote user_id,
+	// createdat and passwordhash, so the client read undefined; a field such as
+	// "due date" even became the invalid property `due date`.
+	//
+	// The model always carries the auto-increment id (an explicit "id" field
+	// in the schema is folded into it), so `id: number` comes first.
+	sb.WriteString("  id: number;\n")
+	for _, f := range schema.ModelFields(e) {
+		key := schema.JSONKey(f.Name)
 		optional := ""
-		// nullable or optional fields (extend as needed)
-		if strings.HasSuffix(f.Name, "At") || strings.HasSuffix(f.Name, "_at") {
+		// Timestamps the backend may fill are optional and not client input.
+		if strings.HasSuffix(f.Name, "At") || strings.HasSuffix(strings.ToLower(f.Name), "_at") {
 			optional = "?"
-			autoFields = append(autoFields, fieldToTSName(f.Name))
+			autoFields = append(autoFields, key)
 		}
-		if strings.EqualFold(f.Name, "id") {
-			autoFields = append(autoFields, "id")
-		}
-		prop := fieldToTSName(f.Name)
-		emitted[prop] = true
-		sb.WriteString(fmt.Sprintf("  %s%s: %s;\n", prop, optional, tsType))
-	}
-
-	// ── relation FK scalars (v23.11) ──────────────────────────────
-	// A belongsTo relation is serialised by the API as an integer foreign-key
-	// column (e.g. {"authorId": 7}). The nested object below is OPTIONAL and
-	// only present when the API eager-loads it. Emitting the FK scalar makes
-	// the contract match what the backend actually returns.
-	for _, rel := range e.Relations {
-		if rel.Type != "belongsTo" {
-			continue
-		}
-		fk := rel.ForeignKey
-		if fk == "" {
-			fk = rel.Target + "ID"
-		}
-		prop := fieldToTSName(fk)
-		if !emitted[prop] {
-			emitted[prop] = true
-			sb.WriteString(fmt.Sprintf("  %s: number;\n", prop))
-		}
+		emitted[key] = true
+		sb.WriteString(fmt.Sprintf("  %s%s: %s;\n", tsPropName(key), optional, goToTS(schema.GoFieldType(f.Type))))
 	}
 
 	// ── relation navigation fields ────────────────────────────────
+	// Optional; present only when the API eager-loads the related object.
 	for _, rel := range e.Relations {
+		var prop, typ string
 		switch rel.Type {
 		case "hasMany":
-			sb.WriteString(fmt.Sprintf("  %s?: %s[];\n",
-				lcFirst(rel.Target)+"s", rel.Target))
-		case "belongsTo":
-			sb.WriteString(fmt.Sprintf("  %s?: %s;\n",
-				lcFirst(rel.Target), rel.Target))
-		case "hasOne":
-			sb.WriteString(fmt.Sprintf("  %s?: %s;\n",
-				lcFirst(rel.Target), rel.Target))
+			prop, typ = lcFirst(rel.Target)+"s", rel.Target+"[]"
+		case "belongsTo", "hasOne":
+			prop, typ = lcFirst(rel.Target), rel.Target
+		default:
+			continue
 		}
+		if rel.Target == "" || emitted[prop] {
+			continue
+		}
+		emitted[prop] = true
+		sb.WriteString(fmt.Sprintf("  %s?: %s;\n", prop, typ))
 	}
 
 	sb.WriteString("}\n\n")
@@ -254,7 +227,11 @@ func GenerateAPIClient(entities []schema.Entity, rootPath string) {
 
 	// One typed CRUD block per entity.
 	for _, e := range entities {
-		coll := "/" + lcFirst(e.Name) + "s"
+		// v26.57 (D002): the path the generated backend registers. Before, this
+		// was "/" + lcFirst(name) + "s" ("/blogPosts"), while the backend served
+		// "/blogposts"; Go's ServeMux matches case exactly, so every call of a
+		// multi-word entity got 404.
+		coll := schema.CollectionPath(e.Name)
 		sb.WriteString(fmt.Sprintf("// ── %s ──────────────────────────────────────────\n", e.Name))
 		sb.WriteString(fmt.Sprintf("export const %s = {\n", lcFirst(e.Name)+"Api"))
 		sb.WriteString(fmt.Sprintf("  list: (): Promise<%s[]> =>\n", e.Name))
@@ -316,45 +293,26 @@ func GenerateTSConfig(rootPath string) {
 	fmt.Printf("[typescript] ✅ wrote frontend/tsconfig.json (tsc --noEmit gate)\n")
 }
 
-// ─────────────────────────────────────────────
-// goTypeToTS maps gen-system field types to TypeScript primitive types.
-// ─────────────────────────────────────────────
-func goTypeToTS(goType string) string {
-	switch strings.ToLower(goType) {
-	case "string", "uuid", "varchar", "text", "char":
-		return "string"
-	case "int", "integer", "bigint", "int64", "int32", "uint", "uint64":
+// goToTS maps the Go type of a generated model field (schema.GoFieldType) to
+// the TypeScript type of its JSON value.
+func goToTS(goType string) string {
+	switch goType {
+	case "int", "float64":
 		return "number"
-	case "float", "float32", "float64", "double", "decimal", "numeric":
-		return "number"
-	case "bool", "boolean":
+	case "bool":
 		return "boolean"
-	case "time", "timestamp", "datetime", "date", "timestamptz":
-		return "string" // ISO-8601 string from JSON serialization
 	default:
-		return "unknown"
+		return "string"
 	}
 }
 
-// fieldToTSName converts snake_case or Go camelCase field names to
-// camelCase TypeScript property names.
-// e.g. "created_at" → "createdAt",  "PasswordHash" → "passwordHash"
-func fieldToTSName(name string) string {
-	// If it contains underscores, convert snake_case → camelCase
-	if strings.Contains(name, "_") {
-		parts := strings.Split(name, "_")
-		for i := 1; i < len(parts); i++ {
-			if len(parts[i]) > 0 {
-				parts[i] = strings.ToUpper(parts[i][:1]) + parts[i][1:]
-			}
-		}
-		return parts[0] + strings.Join(parts[1:], "")
+// tsPropName writes a JSON key as a TypeScript property name, quoted when the
+// key is not a valid identifier (a JSON key can start with a digit).
+func tsPropName(key string) string {
+	if key != "" && (key[0] < '0' || key[0] > '9') {
+		return key
 	}
-	// PascalCase → camelCase (e.g. "PasswordHash" → "passwordHash")
-	if len(name) == 0 {
-		return name
-	}
-	return strings.ToLower(name[:1]) + name[1:]
+	return "'" + key + "'"
 }
 
 func lcFirst(s string) string {

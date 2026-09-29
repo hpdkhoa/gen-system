@@ -182,7 +182,9 @@ func ExecuteTask(task planner.Task, entityMap map[string]interface{}, rootPath s
 		if err != nil {
 			return err
 		}
-		mobile.GenerateScreen(e, rootPath)
+		if err := mobile.GenerateScreen(e, rootPath); err != nil {
+			return err // v26.57 (D003): a missing screen now fails the task, so the healer and the summary see it
+		}
 		engine.RenderMobile(e, rootPath)
 		return nil
 
