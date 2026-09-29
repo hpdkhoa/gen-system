@@ -10,6 +10,7 @@
 package engine
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 	"strings"
@@ -23,23 +24,32 @@ import (
 // this fills in package.json, the Vite config, index.html, the entry point, and
 // a small typed App that consumes the generated client so the whole tree
 // type-checks and bundles.
-func GenerateWebProject(entities []schema.Entity, rootPath string) {
+//
+// v26.58 (D030): a failed MkdirAll returned without a message and every other
+// write went through writeFileMk, which dropped its error, so the task
+// generate_types_barrel counted as a success with the web project missing. The
+// function now returns the MkdirAll error, or the joined write errors, and the
+// executor fails the task with it.
+func GenerateWebProject(entities []schema.Entity, rootPath string) error {
 	webDir := filepath.Join(rootPath, "frontend")
 	if err := os.MkdirAll(filepath.Join(webDir, "src"), 0755); err != nil {
-		return
+		return err
 	}
 
-	writeFileMk(filepath.Join(webDir, "package.json"), webPackageJSON)
-	writeFileMk(filepath.Join(webDir, "vite.config.ts"), webViteConfig)
-	writeFileMk(filepath.Join(webDir, "index.html"), webIndexHTML)
-	writeFileMk(filepath.Join(webDir, "src", "main.tsx"), webMainTSX)
-	writeFileMk(filepath.Join(webDir, "src", "App.tsx"), webAppTSX(entities))
+	errs := []error{
+		writeFileMk(filepath.Join(webDir, "package.json"), webPackageJSON),
+		writeFileMk(filepath.Join(webDir, "vite.config.ts"), webViteConfig),
+		writeFileMk(filepath.Join(webDir, "index.html"), webIndexHTML),
+		writeFileMk(filepath.Join(webDir, "src", "main.tsx"), webMainTSX),
+		writeFileMk(filepath.Join(webDir, "src", "App.tsx"), webAppTSX(entities)),
+	}
 	// Note: tsconfig.json is written by frontend.GenerateTSConfig (Phase 2); we
 	// do not overwrite it here. If absent (older path), write a strict default.
 	if _, err := os.Stat(filepath.Join(webDir, "tsconfig.json")); err != nil {
-		writeFileMk(filepath.Join(webDir, "tsconfig.json"), webTSConfigFallback)
+		errs = append(errs, writeFileMk(filepath.Join(webDir, "tsconfig.json"), webTSConfigFallback))
 	}
-	writeFileMk(filepath.Join(webDir, "tsconfig.node.json"), webTSConfigNode)
+	errs = append(errs, writeFileMk(filepath.Join(webDir, "tsconfig.node.json"), webTSConfigNode))
+	return errors.Join(errs...)
 }
 
 // pinned, dependency-light Vite + React + TS. No router dep (the loose
@@ -212,9 +222,13 @@ const webTSConfigNode = `{
 // stage uses the vendored module; no network needed at image-build time beyond
 // the base images. The actual `docker build` is a verify-on-box step (no daemon
 // in this sandbox).
-func GenerateDockerfile(rootPath string) {
-	writeFileMk(filepath.Join(rootPath, "Dockerfile"), dockerfileContents)
-	writeFileMk(filepath.Join(rootPath, ".dockerignore"), dockerignoreContents)
+//
+// v26.58 (D029): returns the write errors instead of dropping them.
+func GenerateDockerfile(rootPath string) error {
+	return errors.Join(
+		writeFileMk(filepath.Join(rootPath, "Dockerfile"), dockerfileContents),
+		writeFileMk(filepath.Join(rootPath, ".dockerignore"), dockerignoreContents),
+	)
 }
 
 const dockerfileContents = `# Multi-stage build for the generated Go backend.

@@ -10,6 +10,8 @@
 package engine
 
 import (
+	"errors"
+
 	"github.com/hpdkhoa/gen-system/generator/internal/frontend"
 	"github.com/hpdkhoa/gen-system/generator/internal/schema"
 )
@@ -18,35 +20,39 @@ import (
 // Exported engine entry points for the agent executor.
 // Coherent (entity, path) → void signatures producing a go-build-green,
 // runnable in-memory CRUD backend (module "app").
+//
+// v26.58 (D029): the backend generators return the file system errors of their
+// writes (joined, after every write was tried), so the executor fails the task
+// instead of counting it as done. Callers that ignore the result still compile.
 // ─────────────────────────────────────────────
 
-func GenerateModel(e schema.Entity, path string) {
+func GenerateModel(e schema.Entity, path string) error {
 	if springEnabled() {
-		return // Spring mode emits JPA @Entity via GenerateSpringApp
+		return nil // Spring mode emits JPA @Entity via GenerateSpringApp
 	}
-	emitGoMod(path)
-	genModelInMem(e, path)
+	return errors.Join(emitGoMod(path), genModelInMem(e, path))
 }
 
-func GenerateRepo(e schema.Entity, path string) {
+func GenerateRepo(e schema.Entity, path string) error {
 	if springEnabled() {
-		return // Spring mode emits Spring Data repositories via GenerateSpringApp
+		return nil // Spring mode emits Spring Data repositories via GenerateSpringApp
 	}
-	genStoreInMem(e, path)
+	err := genStoreInMem(e, path)
 	if postgresEnabled() {
-		genStorePostgres(e, path)
+		err = errors.Join(err, genStorePostgres(e, path))
 	}
+	return err
 }
 
 // GenerateService is folded into the handler+store layer for the in-memory
 // backend; kept as a no-op so the agent's generate_service task is harmless.
 func GenerateService(e schema.Entity, path string) {}
 
-func GenerateValidation(e schema.Entity, path string) {
+func GenerateValidation(e schema.Entity, path string) error {
 	if springEnabled() {
-		return // Spring mode validates via DTO bean-validation annotations
+		return nil // Spring mode validates via DTO bean-validation annotations
 	}
-	genValidation(e, path)
+	return genValidation(e, path)
 }
 
 func GenerateTable(e schema.Entity, path string) {
@@ -60,35 +66,37 @@ func RenderBackend(e schema.Entity, path string) {}
 // GenerateBackendApp emits the app-level files that need every entity:
 // go.mod, the per-entity store interfaces, backend/main.go, and (when
 // GEN_BACKEND=postgres) the db connector + migration runner + migrations.
-func GenerateBackendApp(entities []schema.Entity, path string) {
+func GenerateBackendApp(entities []schema.Entity, path string) error {
 	if springEnabled() {
 		// Phase 6: emit a Spring Boot 3.x / Java 17 Maven project instead of the
 		// Go backend. Ship scripts + Dockerfile are Spring-aware (Maven build).
 		GenerateSpringApp(entities, path)
 		writeSpringShipScripts(path)
 		GenerateSpringDockerfile(path)
-		return
+		return nil
 	}
 	// v23.15: scrub stale artifacts from a reused output directory BEFORE
 	// emitting anything, so an older run's files can't poison this build (a
 	// leftover backend/go.mod pinning an old lib/pq with no go.sum, an obsolete
 	// backend/cmd/main.go, or a memory-mode-irrelevant backend/internal/db).
-	cleanStaleBackend(path)
-	emitGoMod(path)
-	emitStoreInterfaces(entities, path)
-	if postgresEnabled() {
-		emitDBConnector(path)
-		emitMigrationRunner(path)
-		for i, e := range entities {
-			genPGMigration(e, i+1, path)
-		}
-		genForeignKeyMigration(entities, path) // v23.8: trailing FK constraints
+	errs := []error{
+		cleanStaleBackend(path),
+		emitGoMod(path),
+		emitStoreInterfaces(entities, path),
 	}
-	emitMain(entities, path)
+	if postgresEnabled() {
+		errs = append(errs, emitDBConnector(path), emitMigrationRunner(path))
+		for i, e := range entities {
+			errs = append(errs, genPGMigration(e, i+1, path))
+		}
+		errs = append(errs, genForeignKeyMigration(entities, path)) // v23.8: trailing FK constraints
+	}
+	errs = append(errs, emitMain(entities, path))
 	// Phase 4-B: emit build + bundle scripts (artifact only; no deploy).
-	writeShipScripts("app", path)
+	errs = append(errs, writeShipScripts("app", path))
 	// Phase 5: emit a multi-stage Dockerfile (companion to docker-compose.yml).
-	GenerateDockerfile(path)
+	errs = append(errs, GenerateDockerfile(path))
+	return errors.Join(errs...)
 }
 
 func RenderFrontend(e schema.Entity, path string) {

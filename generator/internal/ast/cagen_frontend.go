@@ -91,10 +91,10 @@ func tokenizeCAGen(src []byte) []caGenLine {
 		spaces := len(raw) - len(trimmed)
 		depth := spaces / 2
 
-		// Strip inline comments (* to end of line)
-		if idx := strings.Index(trimmed, " * "); idx >= 0 {
-			trimmed = trimmed[:idx]
-		}
+		// v26.58 (D057): the line was cut at the first " * " as an inline
+		// comment, which dropped the rest of a multiplication such as
+		// "SET A TO B * C". A "*" starts a comment only at the start of the
+		// trimmed line, so only that check remains.
 		if strings.HasPrefix(trimmed, "* ") || trimmed == "*" {
 			continue // comment line
 		}

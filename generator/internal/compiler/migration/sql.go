@@ -3,7 +3,19 @@ package migration
 import (
 	"fmt"
 	"strings"
+
+	"github.com/hpdkhoa/gen-system/generator/internal/schema"
 )
+
+// tableName and columnName name tables and columns the way the generated app
+// does. v26.58 (OPEN-TABLES): the SQL used the entity and field names as
+// given, so gen migrate wrote table Post (Postgres folds it to post) and
+// column createdAt, while the app reads table posts (engine tableName) and
+// column createdat (engine jsonTag). Both sides now use the shared rules of
+// internal/schema/wire.go, so they name the same table and columns.
+func tableName(entity string) string { return schema.Plural(schema.RouteName(entity)) }
+
+func columnName(field string) string { return schema.JSONKey(field) }
 
 // GenerateSQL converts MigrationIR into UP SQL statements
 func GenerateSQL(m MigrationIR) []string {
@@ -17,22 +29,22 @@ func GenerateSQL(m MigrationIR) []string {
 			// same way ADD_COLUMN types it.
 			cols := []string{"id SERIAL PRIMARY KEY"}
 			for _, c := range step.Columns {
-				cols = append(cols, c.Name+" "+mapType(c.Type))
+				cols = append(cols, columnName(c.Name)+" "+mapType(c.Type))
 			}
 			sql = append(sql,
-				fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s (%s);", step.Entity, strings.Join(cols, ", ")),
+				fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s (%s);", tableName(step.Entity), strings.Join(cols, ", ")),
 			)
 
 		case "DROP_TABLE":
 			sql = append(sql,
-				fmt.Sprintf("DROP TABLE IF EXISTS %s;", step.Entity),
+				fmt.Sprintf("DROP TABLE IF EXISTS %s;", tableName(step.Entity)),
 			)
 
 		case "ADD_COLUMN":
 			sql = append(sql,
 				fmt.Sprintf("ALTER TABLE %s ADD COLUMN IF NOT EXISTS %s %s;",
-					step.Entity,
-					step.Column,
+					tableName(step.Entity),
+					columnName(step.Column),
 					mapType(step.ColumnType),
 				),
 			)
@@ -40,8 +52,8 @@ func GenerateSQL(m MigrationIR) []string {
 		case "ALTER_COLUMN":
 			sql = append(sql,
 				fmt.Sprintf("ALTER TABLE %s ALTER COLUMN %s TYPE %s;",
-					step.Entity,
-					step.Column,
+					tableName(step.Entity),
+					columnName(step.Column),
 					mapType(step.ColumnType),
 				),
 			)
@@ -49,8 +61,8 @@ func GenerateSQL(m MigrationIR) []string {
 		case "DROP_COLUMN":
 			sql = append(sql,
 				fmt.Sprintf("ALTER TABLE %s DROP COLUMN IF EXISTS %s;",
-					step.Entity,
-					step.Column,
+					tableName(step.Entity),
+					columnName(step.Column),
 				),
 			)
 		}
@@ -70,28 +82,28 @@ func GenerateRollbackSQL(m MigrationIR) []string {
 
 		case "CREATE_TABLE":
 			sql = append(sql,
-				fmt.Sprintf("DROP TABLE IF EXISTS %s;", step.Entity),
+				fmt.Sprintf("DROP TABLE IF EXISTS %s;", tableName(step.Entity)),
 			)
 
 		case "DROP_TABLE":
 			// Cannot auto-restore a dropped table without schema snapshot
 			sql = append(sql,
-				fmt.Sprintf("-- MANUAL RESTORE REQUIRED for table: %s", step.Entity),
+				fmt.Sprintf("-- MANUAL RESTORE REQUIRED for table: %s", tableName(step.Entity)),
 			)
 
 		case "ADD_COLUMN":
 			sql = append(sql,
 				fmt.Sprintf("ALTER TABLE %s DROP COLUMN IF EXISTS %s;",
-					step.Entity,
-					step.Column,
+					tableName(step.Entity),
+					columnName(step.Column),
 				),
 			)
 
 		case "ALTER_COLUMN":
 			sql = append(sql,
 				fmt.Sprintf("ALTER TABLE %s ALTER COLUMN %s TYPE %s; -- was %s",
-					step.Entity,
-					step.Column,
+					tableName(step.Entity),
+					columnName(step.Column),
 					mapType(step.OldType),
 					step.ColumnType,
 				),
@@ -100,8 +112,8 @@ func GenerateRollbackSQL(m MigrationIR) []string {
 		case "DROP_COLUMN":
 			sql = append(sql,
 				fmt.Sprintf("ALTER TABLE %s ADD COLUMN %s %s; -- restored",
-					step.Entity,
-					step.Column,
+					tableName(step.Entity),
+					columnName(step.Column),
 					mapType(step.ColumnType),
 				),
 			)

@@ -14,6 +14,11 @@ package schema
 
 import "strings"
 
+// DefaultBackendPort is the port the generated backend listens on when PORT is
+// not set, and the port the generated .env and the mobile client name.
+// v26.58: before, .env said 28080 while main.go listened on 8080.
+const DefaultBackendPort = "8080"
+
 // SplitIdent splits a string on any run of non-alphanumeric characters,
 // dropping empties. "due date" -> [due date]; "user-id" -> [user id].
 func SplitIdent(s string) []string {

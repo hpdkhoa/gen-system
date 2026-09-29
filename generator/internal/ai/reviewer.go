@@ -113,7 +113,10 @@ JSON:`, taskType, entityName, storeNote, string(data))
 
 	start := strings.Index(resp, "{")
 	end := strings.LastIndex(resp, "}")
-	if start == -1 || end == -1 {
+	// v26.58 (D046): the guard tested only for -1, so an answer whose last }
+	// stood before its first { ("done} now {") sliced resp[10:5] and panicked.
+	// end <= start means there is no JSON object; treat it like a missing one.
+	if start == -1 || end == -1 || end <= start {
 		return ReviewResult{Safe: true}
 	}
 
@@ -148,10 +151,7 @@ func scopeIssues(raw []string, pg bool) ReviewResult {
 		// The model often "reports" the absence of a problem as an issue line
 		// ("does not contain any hardcoded secrets" / "good practice"). Those
 		// are not findings at all — drop them entirely.
-		isNonFinding := strings.Contains(lc, "does not contain") ||
-			strings.Contains(lc, "no hardcoded") ||
-			strings.Contains(lc, "good practice") ||
-			strings.Contains(lc, "which is good")
+		isNonFinding := isNonFindingLine(lc)
 
 		switch {
 		case isNonFinding:
@@ -172,6 +172,42 @@ func scopeIssues(raw []string, pg bool) ReviewResult {
 		}
 	}
 	return res
+}
+
+// isNonFindingLine reports whether a lowercased issue line only states the
+// absence of a problem ("does not contain any hardcoded secrets", "which is
+// good practice").
+//
+// v26.58 (D047): the old test was a bare substring match, so a real finding
+// that held a praise phrase was dropped: "storing secrets in source is not good
+// practice" matched "good practice", and "does not contain any check on the
+// owner" matched "does not contain". Praise now counts only when it is not
+// negated, and "does not contain" counts only when what is absent is a problem
+// (a secret, an injection) and not a safeguard (a check, validation).
+func isNonFindingLine(lc string) bool {
+	if strings.Contains(lc, "no hardcoded") {
+		return true
+	}
+	if i := strings.Index(lc, "does not contain"); i >= 0 {
+		absent := lc[i+len("does not contain"):]
+		if containsAny(absent, "hardcoded", "secret", "credential", "injection", "vulnerab", "issue", "problem") &&
+			!containsAny(absent, "check", "validat", "sanitiz", "guard", "verif", "auth", "limit") {
+			return true
+		}
+	}
+	praise := strings.Contains(lc, "good practice") || strings.Contains(lc, "which is good")
+	negated := containsAny(lc, "not good", "not a good", "n't good", "n't a good", "bad practice")
+	return praise && !negated
+}
+
+// containsAny reports whether s holds any of subs.
+func containsAny(s string, subs ...string) bool {
+	for _, sub := range subs {
+		if strings.Contains(s, sub) {
+			return true
+		}
+	}
+	return false
 }
 
 // Warnings returns just the WARN-level finding texts (for the repair hint).

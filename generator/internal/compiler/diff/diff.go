@@ -99,6 +99,20 @@ func Diff(oldIR, newIR Schema) ChangeSet {
 			}
 		}
 
+		// v26.58 (D040): the loop above walks only the new fields, so a field
+		// the entity lost never reached Removed, and gen migrate reported no
+		// change while the column stayed. Old fields absent from the new
+		// entity are removed; old order keeps the output stable.
+		newFields := map[string]bool{}
+		for _, nf := range newE.Fields {
+			newFields[nf.Name] = true
+		}
+		for _, of := range oldE.Fields {
+			if !newFields[of.Name] {
+				change.Removed = append(change.Removed, of)
+			}
+		}
+
 		// Only record this entity as modified when there is at least one
 		// field-level change. Appending an empty EntityChange for unchanged
 		// entities caused ghost entries in the UI and redundant work in

@@ -1,6 +1,8 @@
 package services
 
 import (
+	"fmt"
+
 	"github.com/hpdkhoa/gen-system/generator/internal/api/sse"
 	"github.com/hpdkhoa/gen-system/generator/internal/safety"
 	"github.com/hpdkhoa/gen-system/generator/internal/store"
@@ -21,11 +23,20 @@ func (s *SnapshotService) List(projectID string) []*store.SnapshotRecord {
 }
 
 func (s *SnapshotService) Create(name, desc, author, projectID string, auto bool) (*store.SnapshotRecord, error) {
+	// v26.58 (D096): a failed project copy was replaced by an empty SnapPath
+	// and a nil error, so the API returned a normal record that a later
+	// Restore could not restore. Return the error and store no record. The
+	// auto flag was also dropped; the store now records it.
 	snapPath, err := safety.SnapshotProject(s.root)
 	if err != nil {
-		snapPath = ""
+		return nil, fmt.Errorf("snapshot of %s failed: %w", s.root, err)
 	}
-	rec := s.st.Create(name, desc, author, projectID, snapPath, 0, 0, 0)
+	// v26.58 (D098): the store now reports a failed save, for example when
+	// snapshots.json did not load; pass it on instead of a record.
+	rec, err := s.st.Create(name, desc, author, projectID, snapPath, 0, 0, 0, auto)
+	if err != nil {
+		return nil, err
+	}
 	s.broker.Publish("snapshot_created", rec)
 	return rec, nil
 }

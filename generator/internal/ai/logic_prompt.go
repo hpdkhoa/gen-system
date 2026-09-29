@@ -13,6 +13,10 @@ import (
 // BuildLogicPrompt renders the per-entity prompt. The fixed method signature is
 // stated so the model only writes the body; the JSON-schema (operationsSchema)
 // constrains the response shape.
+//
+// v26.58 (D027): the generated store List now returns ([]T, error), so the
+// prompt states that contract; a body written against List() []T no longer
+// compiles in the gate or in the app.
 func BuildLogicPrompt(idea string, e schema.Entity, all []schema.Entity) string {
 	var fields []string
 	for _, f := range e.Fields {
@@ -57,7 +61,7 @@ FIELDS: %s
 OTHER ENTITIES: %s
 
 The app already has working CRUD (create/read/update/delete) and a thread-safe
-store with methods: List() []%s, Get(id int) (%s, bool),
+store with methods: List() ([]%s, error), Get(id int) (%s, bool),
 Create(m %s) %s, Update(id int, m %s) (%s, bool), Delete(id int) bool.
 A service struct 's' holds the store as 's.store'.
 
@@ -138,6 +142,7 @@ func styleAddendum(entity string, hints []string) string {
 // compile, giving it the exact build error. The same fixed signature + field
 // context as the original prompt is restated so the model has what it needs.
 // v23.23.
+// v26.58 (D027): the store contract names List() ([]T, error), as above.
 func BuildLogicRepairPrompt(idea string, e schema.Entity, all []schema.Entity, op Operation, buildErr string) string {
 	var fields []string
 	for _, f := range e.Fields {
@@ -156,7 +161,7 @@ FIELDS: %s
 The method has this EXACT signature (do not change it):
     func (s *%sService) %s(id int, in map[string]any) (any, error)
 
-The store offers: List() []%s, Get(id int) (%s, bool),
+The store offers: List() ([]%s, error), Get(id int) (%s, bool),
 Create(m %s) %s, Update(id int, m %s) (%s, bool), Delete(id int) bool.
 Access it as s.store. Get/Update return (value, ok bool) — NOT (value, error).
 

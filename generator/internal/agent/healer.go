@@ -116,6 +116,9 @@ func FixTask(task planner.Task, ctx agentctx.Context, rootPath string) error {
 		trace.Error(tctx, "cannot read target file", "task", task.ID, "err", readErr)
 		return fmt.Errorf("cannot read %s for task %s: %w", relPath(targetFile, rootPath), task.ID, readErr)
 	}
+	// v26.58 (follow up of D050): the body that failed, read before any
+	// rewrite, goes into the memory record so the training export can show it.
+	brokenBody, _ := ast.FuncBodyText(targetFile, funcName)
 	restore := func() error {
 		if err := os.WriteFile(targetFile, original, 0o644); err != nil {
 			trace.Error(tctx, "restore failed", "file", relPath(targetFile, rootPath), "err", err)
@@ -159,13 +162,19 @@ func FixTask(task planner.Task, ctx agentctx.Context, rootPath string) error {
 			_ = intelligence.SaveMemory(mem)
 		} else {
 			// Phase 0.2: auto-fix imports after body rewrite
-			ast.AutoResolveImports(targetFile, rec.FixBody)
+			// v26.58 (D077): report an import that could not be added; the
+			// compile check below still decides the outcome.
+			if err := ast.AutoResolveImports(targetFile, rec.FixBody); err != nil {
+				fmt.Printf("     [heal] ⚠️  Import fix failed: %v\n", err)
+				trace.Error(tctx, "auto import failed", "func", funcName, "err", err)
+			}
 
 			if compileErr := verifyCompiles(rootPath); compileErr == nil {
 				fmt.Printf("     [heal] ✅ Cached fix applied and verified\n")
 				trace.Info(tctx, "cached fix verified", "func", funcName)
 				mem.RecordSuccess(errHash, string(classification.ErrorType),
 					task.Type, task.EntityName, rec.FixBody)
+				mem.RecordBroken(errHash, brokenBody)
 				_ = intelligence.SaveMemory(mem)
 				return nil
 			} else {
@@ -272,7 +281,12 @@ func FixTask(task planner.Task, ctx agentctx.Context, rootPath string) error {
 		}
 
 		// Phase 0.2: resolve any new imports introduced by the AI-generated body
-		ast.AutoResolveImports(targetFile, body)
+		// v26.58 (D077): report an import that could not be added; the
+		// compile check below still decides the outcome.
+		if err := ast.AutoResolveImports(targetFile, body); err != nil {
+			fmt.Printf("     [heal] ⚠️  Import fix failed: %v\n", err)
+			trace.Error(actx, "auto import failed", "attempt", attempt, "func", funcName, "err", err)
+		}
 
 		if compileErr := verifyCompiles(rootPath); compileErr != nil {
 			lastErr = fmt.Errorf("compile failed after attempt %d: %w", attempt, compileErr)
@@ -312,6 +326,7 @@ func FixTask(task planner.Task, ctx agentctx.Context, rootPath string) error {
 	// ── STEP 5: Save successful fix to memory ─────────────────
 	mem.RecordSuccess(errHash, string(classification.ErrorType),
 		task.Type, task.EntityName, successBody)
+	mem.RecordBroken(errHash, brokenBody)
 	mem.Evict()
 	if err := intelligence.SaveMemory(mem); err != nil {
 		fmt.Printf("     [heal] ⚠️  Failed to save memory: %s\n", err)

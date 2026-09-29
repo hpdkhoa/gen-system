@@ -52,12 +52,21 @@ func SalvageEntities(raw string) SchemaFile {
 	var sf SchemaFile
 	repaired := RepairJSON(raw)
 	seen := map[string]bool{}
+	consumed := 0
 	for _, anchor := range findNameAnchors(repaired) {
 		name := anchor.name
-		if name == "" || seen[name] {
+		if name == "" || seen[name] || anchor.start < consumed {
 			continue
 		}
-		fieldsRaw := extractFieldsAfter(repaired, anchor.end, anchor.nextStart)
+		fieldsRaw, valueEnd := extractFieldsAfter(repaired, anchor.end, anchor.nextStart, anchor.nextStart)
+		if fieldsRaw == "" {
+			// v26.58 (D042): array form fields hold their own "name" keys, so the
+			// next anchor falls inside the array and the bounded scan never sees
+			// the closing bracket. Scan to the end of the text instead; the value
+			// counts only if it parses, and the "name" anchors inside it are
+			// skipped through consumed, so field names never become entities.
+			fieldsRaw, valueEnd = extractFieldsAfter(repaired, anchor.end, anchor.nextStart, len(repaired))
+		}
 		if fieldsRaw == "" {
 			continue
 		}
@@ -65,6 +74,7 @@ func SalvageEntities(raw string) SchemaFile {
 		if err != nil || len(fields) == 0 {
 			continue
 		}
+		consumed = valueEnd
 		seen[name] = true
 		sf.Entities = append(sf.Entities, Entity{Name: name, Fields: fields})
 	}
@@ -73,6 +83,7 @@ func SalvageEntities(raw string) SchemaFile {
 
 type nameAnchor struct {
 	name      string
+	start     int // index where this "name" key begins
 	end       int // index just after the matched "name":"X"
 	nextStart int // index where the next name anchor begins (or len)
 }
@@ -89,33 +100,37 @@ func findNameAnchors(s string) []nameAnchor {
 		if i+1 < len(locs) {
 			next = locs[i+1][0]
 		}
-		out = append(out, nameAnchor{name: s[m[2]:m[3]], end: m[1], nextStart: next})
+		out = append(out, nameAnchor{name: s[m[2]:m[3]], start: m[0], end: m[1], nextStart: next})
 	}
 	return out
 }
 
 var reFieldsKey = regexp.MustCompile(`"fields"\s*:\s*`)
 
-// extractFieldsAfter finds the "fields" value within [from,to) and returns the
-// balanced {...} or [...] substring for it, ignoring everything else.
-func extractFieldsAfter(s string, from, to int) string {
+// extractFieldsAfter finds the "fields" key within [from,to) and returns the
+// balanced {...} or [...] substring for its value, ignoring everything else,
+// plus the index just after that value. The bracket scan stops at limit.
+func extractFieldsAfter(s string, from, to, limit int) (string, int) {
 	if to > len(s) {
 		to = len(s)
 	}
+	if limit > len(s) {
+		limit = len(s)
+	}
 	if from < 0 || from >= to {
-		return ""
+		return "", 0
 	}
 	region := s[from:to]
 	loc := reFieldsKey.FindStringIndex(region)
 	if loc == nil {
-		return ""
+		return "", 0
 	}
 	start := from + loc[1]
 	for start < to && (s[start] == ' ' || s[start] == '\t' || s[start] == '\n') {
 		start++
 	}
 	if start >= to {
-		return ""
+		return "", 0
 	}
 	open := s[start]
 	var closeCh byte
@@ -125,9 +140,10 @@ func extractFieldsAfter(s string, from, to int) string {
 	case '[':
 		closeCh = ']'
 	default:
-		return ""
+		return "", 0
 	}
-	return balancedSlice(s, start, open, closeCh, to)
+	v := balancedSlice(s, start, open, closeCh, limit)
+	return v, start + len(v)
 }
 
 // balancedSlice returns s[start:end+1] where end closes the bracket opened at

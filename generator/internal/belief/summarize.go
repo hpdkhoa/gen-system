@@ -19,8 +19,11 @@
 package belief
 
 import (
+	"context"
 	"sort"
 	"strings"
+
+	"github.com/hpdkhoa/gen-system/generator/internal/trace"
 )
 
 // Scope levels for summary beliefs.
@@ -139,7 +142,9 @@ type SummaryInput struct {
 
 // UpsertSummary stores (or replaces) a scope summary, fingerprinting its members
 // so a later change below cascades staleness. Persisted immediately.
-func (bs *Store) UpsertSummary(in SummaryInput) {
+//
+// v26.58 (D020): returns the save error, so a lost write is not reported as done.
+func (bs *Store) UpsertSummary(in SummaryInput) error {
 	bs.mu.Lock()
 	defer bs.mu.Unlock()
 	fp := bs.childFingerprintLocked(in.MemberIDs)
@@ -156,7 +161,7 @@ func (bs *Store) UpsertSummary(in SummaryInput) {
 		MemberIDs:        append([]string(nil), in.MemberIDs...),
 		Parent:           in.Parent,
 	}
-	bs.saveLocked()
+	return bs.saveLocked()
 }
 
 // reattachSummariesLocked folds persisted summaries into the live belief set,
@@ -175,10 +180,14 @@ func (bs *Store) reattachSummariesLocked() {
 			}
 			members := bs.membersForScopeLocked(sm)
 			cur := bs.childFingerprintLocked(members)
+			// v26.58 (D019): Stale was only ever set to true, so a summary stayed
+			// stale after its members returned to the summarized values. Compute it
+			// fresh: clear first, then set when the fingerprint differs.
+			resetSummaryStale(sm)
 			if sm.ChildFingerprint != "" && cur != sm.ChildFingerprint {
 				sm.Stale = true
 				if sm.ValidationNote == "" {
-					sm.ValidationNote = "a member changed since this summary was written — re-summarize"
+					sm.ValidationNote = staleSummaryNote
 				}
 			}
 			bs.applyCorrectionLocked(sm) // a human may correct a summary too
@@ -188,9 +197,24 @@ func (bs *Store) reattachSummariesLocked() {
 	// Any summary with an unrecognised scope still gets attached.
 	for id, sm := range bs.summaries {
 		if _, done := bs.beliefs[id]; !done {
+			resetSummaryStale(sm) // v26.58 (D019): only a correction can make it stale here
 			bs.applyCorrectionLocked(sm)
 			bs.beliefs[id] = sm
 		}
+	}
+}
+
+// staleSummaryNote is the note a summary carries while a member differs from the
+// value it summarized.
+const staleSummaryNote = "a member changed since this summary was written — re-summarize"
+
+// resetSummaryStale clears the stale state a previous rebuild left on a summary,
+// so each rebuild decides it again (v26.58, D019).
+func resetSummaryStale(sm *Belief) {
+	sm.Stale = false
+	sm.SourceNow = ""
+	if sm.ValidationNote == staleSummaryNote {
+		sm.ValidationNote = ""
 	}
 }
 
@@ -293,7 +317,9 @@ func (bs *Store) DeleteSummary(scope, name string) {
 	id := summaryID(scope, name)
 	delete(bs.summaries, id)
 	delete(bs.beliefs, id)
-	bs.saveLocked()
+	if err := bs.saveLocked(); err != nil { // v26.58 (D020): log, do not hide
+		trace.Error(context.Background(), "belief store save failed", "path", bs.diskPath, "err", err)
+	}
 }
 
 // Summaries returns all scope summaries, scope- then name-sorted.

@@ -210,9 +210,14 @@ func (pm *ProjectManager) handleLoad(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprintf("load failed: %v", err), http.StatusUnprocessableEntity)
 		return
 	}
+	// v26.58 (D081): SetRoot runs before the swap. SetRoot makes the belief
+	// store of the new root; the swap then rebuilds the beliefs in that store
+	// and gen-server attaches the enricher to it. With the old order the swap
+	// saved the new project's beliefs in the old root's file, and SetRoot then
+	// replaced the store that held the enricher.
+	pm.srv.SetRoot(loadedRoot, body.CopybookPath, "")
 	// Apply the swap (mutex-guarded inside ReplaceContext via the closure).
 	swap(pm.srv)
-	pm.srv.SetRoot(loadedRoot, body.CopybookPath, "")
 
 	pm.mu.Lock()
 	pm.current = loadedRoot

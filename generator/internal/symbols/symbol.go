@@ -96,6 +96,11 @@ type Symbol struct {
 	// For methods: the receiver type name
 	ReceiverType string
 
+	// For imports: the explicit alias, "" when the import has none.
+	// v26.58 (D101): resolveImportPath needs it to match an unaliased import by
+	// the last segment of its path without letting an aliased one claim it.
+	ImportAlias string `json:",omitempty"`
+
 	Exported   bool
 	DocComment string
 

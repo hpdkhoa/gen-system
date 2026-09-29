@@ -15,13 +15,15 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/hpdkhoa/gen-system/generator/internal/agent"
 )
 
-// verifyUnderstandValue returns the --verify-understand value. Supports both
-// "--verify-understand stop" and a bare "--verify-understand" (defaults to
-// "stop"). Returns ("", false) when the flag is absent.
+// verifyUnderstandValue returns the --verify-understand value. Supports
+// "--verify-understand stop", "--verify-understand=stop" and a bare
+// "--verify-understand" (defaults to "stop"). Returns ("", false) when the
+// flag is absent.
 func verifyUnderstandValue() (string, bool) {
 	for i, arg := range os.Args {
 		if arg == "--verify-understand" {
@@ -29,6 +31,16 @@ func verifyUnderstandValue() (string, bool) {
 				return os.Args[i+1], true
 			}
 			return "stop", true // bare flag defaults to stop
+		}
+		// v26.58 (D024): accept "--verify-understand=stop" as GetFlag accepts
+		// the "=" form of other flags. Before, the word did not match, the flag
+		// counted as absent and the pass stayed off. An empty value after "="
+		// means the bare flag, so it defaults to stop too.
+		if v, ok := strings.CutPrefix(arg, "--verify-understand="); ok {
+			if v == "" {
+				return "stop", true
+			}
+			return v, true
 		}
 	}
 	return "", false
@@ -49,7 +61,14 @@ func SetupVerifyUnderstand() string {
 		agent.VerifyUnderstandMode = agent.VerifyOff
 		return ""
 	}
-	agent.VerifyUnderstandMode = agent.ParseVerifyMode(val)
+	mode, err := agent.ParseVerifyMode(val)
+	if err != nil {
+		// v26.58 (D021): a typo used to turn the pass off without a word. Stop
+		// with a usage error instead, as the other CLI usage errors do.
+		fmt.Printf("❌ %v\n", err)
+		os.Exit(2)
+	}
+	agent.VerifyUnderstandMode = mode
 	switch agent.VerifyUnderstandMode {
 	case agent.VerifyAutofix:
 		fmt.Println("🔎 verify-understand: AUTOFIX — findings route to the repair loop")

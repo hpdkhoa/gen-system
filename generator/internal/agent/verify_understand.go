@@ -66,14 +66,20 @@ func VerifyHalted() bool { return verifyHalted }
 
 // ParseVerifyMode maps the --verify-understand flag value to a VerifyMode.
 // "" / "off" → Off; "stop" → Stop; "autofix"/"heal" → Autofix.
-func ParseVerifyMode(s string) VerifyMode {
+//
+// v26.58 (D021): an unknown word used to give VerifyOff with no message, so a
+// typo such as "sotp" turned the gate off while the user believed it ran. Off
+// is now named explicitly and every other word is an error the CLI reports.
+func ParseVerifyMode(s string) (VerifyMode, error) {
 	switch strings.ToLower(strings.TrimSpace(s)) {
+	case "", "off":
+		return VerifyOff, nil
 	case "stop":
-		return VerifyStop
+		return VerifyStop, nil
 	case "autofix", "heal", "fix":
-		return VerifyAutofix
+		return VerifyAutofix, nil
 	default:
-		return VerifyOff
+		return VerifyOff, fmt.Errorf("unknown --verify-understand value %q (want off, stop or autofix)", s)
 	}
 }
 
@@ -216,7 +222,10 @@ func runUnderstandVerify(backendPath string) VerifyReport {
 		if fe == nil || fe.Effects == nil {
 			continue
 		}
-		if fe.Effects[flow.EffectDB] {
+		// v26.58 (D100): test the write, not any DB access. EffectDB is also
+		// set for a SELECT through Query or QueryRow, so every correct Get and
+		// List of a PG store was reported as a read that writes.
+		if fe.Effects[flow.EffectDB] && fe.DBWrite {
 			rep.Findings = append(rep.Findings, VerifyFinding{
 				Kind:   "effect",
 				Symbol: s.ReceiverType + "." + s.Name,

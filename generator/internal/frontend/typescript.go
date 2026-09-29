@@ -58,8 +58,13 @@ func GenerateTypeScript(e schema.Entity, rootPath string) {
 	sb.WriteString("// Regenerated whenever the " + e.Name + " schema changes.\n\n")
 
 	// ── import related entity types ───────────────────────────────
+	// v26.58 (D033): import each target once. Two relations to one target
+	// (author_id and editor_id, both User) wrote the same import two times, and
+	// tsc rejects a duplicate identifier.
+	imported := map[string]bool{}
 	for _, rel := range e.Relations {
-		if rel.Target != "" && rel.Target != e.Name {
+		if rel.Target != "" && rel.Target != e.Name && !imported[rel.Target] {
+			imported[rel.Target] = true
 			sb.WriteString(fmt.Sprintf("import type { %s } from './%s';\n", rel.Target, rel.Target))
 		}
 	}
@@ -100,6 +105,12 @@ func GenerateTypeScript(e schema.Entity, rootPath string) {
 
 	// ── relation navigation fields ────────────────────────────────
 	// Optional; present only when the API eager-loads the related object.
+	singleTargets := map[string]int{}
+	for _, rel := range e.Relations {
+		if rel.Type == "belongsTo" || rel.Type == "hasOne" {
+			singleTargets[rel.Target]++
+		}
+	}
 	for _, rel := range e.Relations {
 		var prop, typ string
 		switch rel.Type {
@@ -107,6 +118,15 @@ func GenerateTypeScript(e schema.Entity, rootPath string) {
 			prop, typ = lcFirst(rel.Target)+"s", rel.Target+"[]"
 		case "belongsTo", "hasOne":
 			prop, typ = lcFirst(rel.Target), rel.Target
+			// v26.58 (D033): when two relations share a target, the name
+			// "user" fits neither and the second one was dropped. Name each
+			// after its foreign key instead (author_id -> author), so both
+			// related objects are typed and no property repeats.
+			if singleTargets[rel.Target] > 1 {
+				if p := navPropFromForeignKey(rel.ForeignKey); p != "" {
+					prop = p
+				}
+			}
 		default:
 			continue
 		}
@@ -313,6 +333,21 @@ func tsPropName(key string) string {
 		return key
 	}
 	return "'" + key + "'"
+}
+
+// navPropFromForeignKey derives a navigation property name from a foreign key:
+// its JSON key without the trailing "_id" ("author_id" and "AuthorID" ->
+// "author"). It returns "" when nothing is left or the name is not a valid
+// identifier.
+func navPropFromForeignKey(fk string) string {
+	if strings.TrimSpace(fk) == "" {
+		return ""
+	}
+	key := strings.TrimSuffix(schema.JSONKey(schema.FKFieldName(fk)), "_id")
+	if key == "" || key == "id" || (key[0] >= '0' && key[0] <= '9') {
+		return ""
+	}
+	return key
 }
 
 func lcFirst(s string) string {

@@ -1,10 +1,12 @@
 package ast
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
 )
 
@@ -52,17 +54,20 @@ func RewritePythonFunction(filePath, funcName, newBody string) error {
 // The script uses the ast module for parsing and ast.unparse for
 // serialization, falling back to a text-based approach on Python < 3.9.
 func buildPythonRewriteScript(filePath, funcName, newBody string) string {
-	// Escape the new body for embedding in the script
-	escapedBody := strings.ReplaceAll(newBody, `\`, `\\`)
-	escapedBody = strings.ReplaceAll(escapedBody, `"`, `\"`)
-	escapedBody = strings.ReplaceAll(escapedBody, "\n", `\n`)
+	// v26.58 (D076): the body was escaped by hand and then quoted again with
+	// %q, so Python saw literal \n and \" text and wrote a broken file. The
+	// body is now encoded once, with json.Marshal. A JSON string literal is
+	// also a Python string literal with the same value: its only escapes are
+	// \" \\ \b \f \n \r \t and \uXXXX, and Go writes characters above U+FFFF
+	// as raw UTF-8. json.Marshal of a string cannot fail.
+	bodyJSON, _ := json.Marshal(newBody)
 
 	return fmt.Sprintf(`
 import ast, sys, os, textwrap
 
 FILE_PATH  = %q
 FUNC_NAME  = %q
-NEW_BODY   = %q
+NEW_BODY   = %s
 
 def rewrite_ast(source, func_name, new_body_src):
     """Parse source, replace function body, unparse back to text."""
@@ -149,7 +154,7 @@ with open(FILE_PATH, "w") as f:
     f.write(result)
 
 print(f"OK: rewrote {FUNC_NAME} in {FILE_PATH}")
-`, filePath, funcName, escapedBody)
+`, filePath, funcName, bodyJSON)
 }
 
 // CheckPython3Available returns true if python3 ≥ 3.9 is on PATH.
@@ -170,6 +175,12 @@ func CheckPython3Available() bool {
 		return false
 	}
 	major := vparts[0]
-	minor := vparts[1]
-	return major == "3" && minor >= "9"
+	// v26.58 (D075): the minor version was compared as a string, so "14" >=
+	// "9" was false and every Python from 3.10 on counted as missing. Compare
+	// the number instead.
+	minor, err := strconv.Atoi(vparts[1])
+	if err != nil {
+		return false
+	}
+	return major == "3" && minor >= 9
 }

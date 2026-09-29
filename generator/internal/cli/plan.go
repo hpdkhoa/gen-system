@@ -28,10 +28,23 @@ func Plan() {
 
 	useV2 := false
 	var goalParts []string
+	skipNext := false
 	for _, arg := range os.Args[2:] {
-		if arg == "--v2" {
+		if skipNext {
+			skipNext = false
+			continue
+		}
+		// v26.58 (D025): every argument but --v2 went into the goal, so
+		// "--out ./x" reached the planner and the plan file. Skip the known
+		// flags and their values, as Idea does; GetFlag reads --out below.
+		switch {
+		case arg == "--v2":
 			useV2 = true
-		} else {
+		case arg == "--out" || arg == "--env":
+			skipNext = true
+		case strings.HasPrefix(arg, "--out=") || strings.HasPrefix(arg, "--env="):
+		case arg == "--force" || arg == "--yes":
+		default:
 			goalParts = append(goalParts, arg)
 		}
 	}

@@ -43,11 +43,7 @@ func main() {
 	// current body on rebuild (v26.17). Without a provider, SourceHash fingerprints
 	// are stored but never compared, so a changed routine would not flag its
 	// description out of date.
-	bodies := map[string]string{}
-	routines := buildRoutines(&ctx, *limit)
-	for _, r := range routines {
-		bodies[r.SymbolID] = r.Body
-	}
+	routines, bodies := routinesAndBodies(&ctx, *limit)
 	store.SetBodyProvider(func(id string) string { return bodies[id] })
 
 	fmt.Printf("Enriching %d routines with the local model …\n", len(routines))
@@ -57,6 +53,9 @@ func main() {
 
 	fmt.Printf("Done: %d routines enriched, %d skipped, %d beliefs written to %s/.gen/beliefs.json\n",
 		res.Enriched, res.Skipped, res.Beliefs, ctx.Root)
+	if res.SaveErrors > 0 {
+		fmt.Printf("⚠️  %d routines were enriched but their beliefs could not be saved\n", res.SaveErrors)
+	}
 
 	if *summarize {
 		// Rebuild so the fresh enrich beliefs are live in the store, then roll up
@@ -114,6 +113,24 @@ func reportValidation(store *belief.Store) {
 	if counts["contradicts"] > 0 {
 		fmt.Printf("  ⚠ %d claim(s) contradict what the parser observed — review these first.\n", counts["contradicts"])
 	}
+}
+
+// routinesAndBodies returns the routines to enrich (at most limit, 0 means all)
+// and the body of each routine by symbol ID, for the store's stale check.
+func routinesAndBodies(ctx *gencontext.Context, limit int) ([]enrich.Routine, map[string]string) {
+	// v26.58 (D016): the body map was filled only from the first limit routines, so
+	// a changed routine outside the limit had no body and the rebuild skipped its
+	// stale check. Bodies now come from every routine; the limit only cuts the list
+	// that goes to the model.
+	bodies := map[string]string{}
+	routines := buildRoutines(ctx, 0)
+	for _, r := range routines {
+		bodies[r.SymbolID] = r.Body
+	}
+	if limit > 0 && len(routines) > limit {
+		routines = routines[:limit]
+	}
+	return routines, bodies
 }
 
 // buildRoutines turns the project's callable symbols into enrichment units, reading

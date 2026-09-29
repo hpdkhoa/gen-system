@@ -46,7 +46,14 @@ func RunMigrate(args []string) {
 	}
 
 	schemaPath := args[0]
-	if schemaPath[0] == '-' {
+	// v26.58 (D023): schemaPath[0] panicked on an empty first argument (an
+	// unset shell variable). An empty path gets the usage text; HasPrefix is
+	// safe on "".
+	if strings.TrimSpace(schemaPath) == "" {
+		fmt.Println("Usage: gen migrate <schema.json> [--dry] [--force] [--rollback]")
+		return
+	}
+	if strings.HasPrefix(schemaPath, "-") {
 		fmt.Println("❌ First arg must be schema path, not a flag")
 		return
 	}
@@ -66,7 +73,15 @@ func RunMigrate(args []string) {
 	}
 
 	// 3. Load previous IR
-	oldIR, _ := compiler.LoadPreviousIR()
+	// v26.58 (D038): the error was dropped, so a corrupt snapshot counted as
+	// empty, every entity looked new and ADD COLUMN steps were lost (then SaveIR
+	// replaced the evidence). Stop and name the file so the user can fix it.
+	oldIR, err := compiler.LoadPreviousIR()
+	if err != nil {
+		fmt.Println("❌ cannot read the IR snapshot .gen/ir_snapshot.json:", err)
+		fmt.Println("   repair or restore the file, then run gen migrate again")
+		return
+	}
 
 	// 4. Diff
 	cs := diff.Diff(
@@ -109,14 +124,6 @@ func RunMigrate(args []string) {
 		return
 	}
 
-	// Save down SQL for rollback reference
-	downContent := ""
-	for _, q := range downSQLs {
-		downContent += q + "\n"
-	}
-	_ = os.MkdirAll(".gen", 0755)
-	_ = os.WriteFile(".gen/last_down.sql", []byte(downContent), 0644)
-
 	// 6. DB connection
 	conn := os.Getenv("DB_URL")
 	if conn == "" {
@@ -156,8 +163,30 @@ func RunMigrate(args []string) {
 			fmt.Println("⚠️  failed to save IR snapshot:", err)
 		}
 		fmt.Printf("✅ Migration %s applied — %d statements\n", version, len(sqls))
-		fmt.Println("   Down SQL saved to .gen/last_down.sql")
+		// v26.58 (D039): the down SQL was written before the DB_URL check and
+		// before ApplySQL, with both errors dropped, so a dry or failed run
+		// replaced the down SQL of the migration really applied. runRollback
+		// trusts this file, so write it only here, after a real apply, and say
+		// "saved" only when the write worked.
+		if err := saveLastDown(downSQLs); err != nil {
+			fmt.Println("⚠️  failed to save down SQL to .gen/last_down.sql:", err)
+		} else {
+			fmt.Println("   Down SQL saved to .gen/last_down.sql")
+		}
 	}
+}
+
+// saveLastDown writes the down SQL of an applied migration to
+// .gen/last_down.sql for `gen migrate --rollback`. v26.58 (D039).
+func saveLastDown(downSQLs []string) error {
+	downContent := ""
+	for _, q := range downSQLs {
+		downContent += q + "\n"
+	}
+	if err := os.MkdirAll(".gen", 0755); err != nil {
+		return err
+	}
+	return os.WriteFile(".gen/last_down.sql", []byte(downContent), 0644)
 }
 
 // runRollback applies the down SQL that the last `gen migrate` run saved to

@@ -19,6 +19,7 @@ import (
 	"testing"
 
 	agentctx "github.com/hpdkhoa/gen-system/generator/internal/context"
+	"github.com/hpdkhoa/gen-system/generator/internal/intelligence"
 	"github.com/hpdkhoa/gen-system/generator/internal/planner"
 )
 
@@ -95,6 +96,27 @@ func TestFixTask_RepairsTheFunctionTheErrorNames(t *testing.T) {
 	squash := strings.Join(strings.Fields(src), "")
 	if !strings.Contains(squash, "returntotal*2,nil") {
 		t.Errorf("Checkout did not receive the repaired body:\n%s", src)
+	}
+}
+
+// v26.58 (follow up of D050): a verified repair stores the body that failed next
+// to the fix, so the training export can show real broken code.
+func TestFixTask_StoresTheBrokenBody(t *testing.T) {
+	root, _, _ := healFixture(t, "total := s.n + id\n\treturn total * 2, nil")
+	if err := FixTask(healTask(checkoutErr), agentctx.Context{}, root); err != nil {
+		t.Fatalf("FixTask: %v", err)
+	}
+	mem := intelligence.LoadMemory()
+	if len(mem.Fixes) != 1 {
+		t.Fatalf("want one memory record, got %d", len(mem.Fixes))
+	}
+	for _, rec := range mem.Fixes {
+		if !strings.Contains(rec.BrokenBody, "return s.n + id, nil") {
+			t.Errorf("broken body not stored: %q", rec.BrokenBody)
+		}
+		if strings.Contains(rec.BrokenBody, "total * 2") {
+			t.Errorf("broken body holds the fix: %q", rec.BrokenBody)
+		}
 	}
 }
 

@@ -319,12 +319,19 @@ func (w *Watcher) skipRel(rel string) bool {
 // builtinSkip mirrors context.shouldSkip without importing context
 // (to keep the watch package free of that dependency).
 func builtinSkip(rel string) bool {
+	// v26.58 (D107): filepath.Rel gives backslashes on Windows, so the two
+	// ".gen/..." entries never matched and the watcher parsed snapshot copies.
+	// Every rule below is written with "/", so test the slash form of rel.
+	rel = filepath.ToSlash(rel)
 	blocked := []string{
 		".git", ".gen/snapshots", "node_modules", "vendor",
 		"output", ".gen/entities",
 	}
 	for _, b := range blocked {
-		if strings.HasPrefix(rel, b) {
+		// v26.58 (D090): a bare HasPrefix also skipped vendor.go, output.go and
+		// outputs/x.go. Match the whole name or the name plus a separator, as
+		// context.shouldSkip does (rel is in slash form, see D107 above).
+		if rel == b || strings.HasPrefix(rel, b+"/") {
 			return true
 		}
 	}

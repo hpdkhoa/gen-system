@@ -10,7 +10,6 @@ package engine
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
 	"strings"
 
@@ -44,13 +43,13 @@ func RequireInt(field string, value int) error {
 
 // writeRequireHelper writes require.go into the generated validation dir if it
 // is not already present. Idempotent and safe to call once per entity.
-func writeRequireHelper(path string) {
+// v26.58 (D029): returns the write error instead of dropping it.
+func writeRequireHelper(path string) error {
 	dir := filepath.Join(path, "backend/internal/validation")
-	os.MkdirAll(dir, 0755)
 	helper := filepath.Join(dir, "require.go")
 	// Always overwrite so re-runs converge on the v23.8 typed helper even if an
 	// older interface{} require.go is present from a prior generation.
-	os.WriteFile(helper, []byte(requireHelperSrc), 0644)
+	return writeFileMk(helper, requireHelperSrc)
 }
 
 // genValidation writes backend/internal/validation/<route>_validation.go with a
@@ -59,8 +58,12 @@ func writeRequireHelper(path string) {
 // up) for its zero value. Synthetic FK fields are NOT required (a child may be
 // created before being linked). If there are no checkable fields the validator
 // is still emitted (returns nil) so the handler call always compiles.
-func genValidation(e schema.Entity, path string) {
-	writeRequireHelper(path)
+//
+// v26.58 (D029): returns the first write error instead of dropping it.
+func genValidation(e schema.Entity, path string) error {
+	if err := writeRequireHelper(path); err != nil {
+		return err
+	}
 
 	n := typeName(e.Name)
 	fkTags := map[string]bool{}
@@ -91,6 +94,5 @@ func genValidation(e schema.Entity, path string) {
 	b.WriteString("\treturn nil\n}\n")
 
 	file := filepath.Join(path, "backend/internal/validation/"+e.Name+"_validation.go")
-	os.MkdirAll(filepath.Dir(file), 0755)
-	os.WriteFile(file, []byte(b.String()), 0644)
+	return writeFileMk(file, b.String())
 }

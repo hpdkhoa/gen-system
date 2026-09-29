@@ -9,6 +9,7 @@ package symbols
 
 import (
 	"path/filepath"
+	"sort"
 	"strings"
 
 	"github.com/hpdkhoa/gen-system/generator/internal/ast"
@@ -47,12 +48,16 @@ func (t *Table) Lookup(name string) []*Symbol {
 	return t.ByName[name]
 }
 
-// All returns every symbol in this table (order is non-deterministic).
+// All returns every symbol in this table, sorted by ID.
+//
+// v26.58 (D101): the order came from the map and changed between runs, so a
+// caller that took the first match (resolveImportPath) was not deterministic.
 func (t *Table) All() []*Symbol {
 	out := make([]*Symbol, 0, len(t.Symbols))
 	for _, s := range t.Symbols {
 		out = append(out, s)
 	}
+	sort.Slice(out, func(i, j int) bool { return out[i].ID < out[j].ID })
 	return out
 }
 
@@ -77,13 +82,14 @@ func BuildTable(m *ast.Module) *Table {
 	})
 
 	for _, n := range m.Nodes {
-		extractNode(t, n, m.FilePath, m.Language, layer, "")
+		extractNode(t, n, m.FilePath, m.Language, layer, "", "")
 	}
 	return t
 }
 
 // extractNode recursively extracts symbols from a Node and its children.
-func extractNode(t *Table, n *ast.Node, filePath string, lang ast.Language, layer, ownerName string) {
+// ownerName and ownerKind name the enclosing node ("" at file level).
+func extractNode(t *Table, n *ast.Node, filePath string, lang ast.Language, layer, ownerName string, ownerKind ast.NodeKind) {
 	if n == nil {
 		return
 	}
@@ -106,15 +112,25 @@ func extractNode(t *Table, n *ast.Node, filePath string, lang ast.Language, laye
 		}
 		t.Add(s)
 		for _, child := range n.Children {
-			extractNode(t, child, filePath, lang, layer, n.Name)
+			extractNode(t, child, filePath, lang, layer, n.Name, n.Kind)
 		}
 
 	case ast.NodeMethod:
+		// v26.58 (D102): TS and Python methods have no Receiver, so the QualName
+		// was ".name" and two classes with the same method name in one file shared
+		// one ID. With no Receiver the owner name now qualifies the method. Only a
+		// class or struct owner becomes the ReceiverType: a Go interface method
+		// has no receiver, and callers such as the style gate read ReceiverType as
+		// "this type has methods with bodies".
 		receiver := ""
+		owner := ownerName
 		if n.Receiver != nil {
 			receiver = n.Receiver.Name
+			owner = receiver
+		} else if ownerKind == ast.NodeClass || ownerKind == ast.NodeStruct {
+			receiver = ownerName
 		}
-		qn := receiver + "." + n.Name
+		qn := owner + "." + n.Name
 		s := &Symbol{
 			ID:           SymbolID(filePath, SymMethod, qn),
 			Name:         n.Name,
@@ -163,7 +179,7 @@ func extractNode(t *Table, n *ast.Node, filePath string, lang ast.Language, laye
 		}
 		// Methods / nested nodes
 		for _, child := range n.Children {
-			extractNode(t, child, filePath, lang, layer, n.Name)
+			extractNode(t, child, filePath, lang, layer, n.Name, n.Kind)
 		}
 
 	case ast.NodeInterface:
@@ -181,7 +197,7 @@ func extractNode(t *Table, n *ast.Node, filePath string, lang ast.Language, laye
 		}
 		t.Add(s)
 		for _, child := range n.Children {
-			extractNode(t, child, filePath, lang, layer, n.Name)
+			extractNode(t, child, filePath, lang, layer, n.Name, n.Kind)
 		}
 
 	case ast.NodeTypeAlias, ast.NodeEnum:
@@ -231,14 +247,15 @@ func extractNode(t *Table, n *ast.Node, filePath string, lang ast.Language, laye
 			importName = n.ImportAlias // v26.34: `import js "encoding/json"` is referred to as js
 		}
 		t.Add(&Symbol{
-			ID:        SymbolID(filePath, SymImport, n.ImportPath),
-			Name:      importName,
-			QualName:  n.ImportPath,
-			Kind:      SymImport,
-			Language:  lang,
-			DefinedIn: filePath,
-			Span:      n.Span,
-			Layer:     layer,
+			ID:          SymbolID(filePath, SymImport, n.ImportPath),
+			Name:        importName,
+			QualName:    n.ImportPath,
+			Kind:        SymImport,
+			Language:    lang,
+			DefinedIn:   filePath,
+			Span:        n.Span,
+			Layer:       layer,
+			ImportAlias: n.ImportAlias, // v26.58 (D101)
 		})
 
 	case ast.NodeProcedure:
@@ -255,7 +272,7 @@ func extractNode(t *Table, n *ast.Node, filePath string, lang ast.Language, laye
 			Layer:      "procedure",
 		})
 		for _, child := range n.Children {
-			extractNode(t, child, filePath, lang, layer, n.Name)
+			extractNode(t, child, filePath, lang, layer, n.Name, n.Kind)
 		}
 
 	// Calls embedded in function bodies
@@ -278,10 +295,13 @@ func qualName(owner, name string) string {
 
 // inferLayer derives an architectural layer from the file path.
 // Matches the convention in the existing v14 SystemGraph.
+//
+// v26.58 (D106): the folder rules tested the raw OS path, so on Windows they all
+// missed; the path is now in slash form first. The CA Gen rule used Contains, so
+// any path with ".ad" in it (x.admin.go) got "cagen"; it now tests the extension.
 func inferLayer(filePath string) string {
-	lower := strings.ToLower(filePath)
-	base := filepath.Base(lower)
-	_ = base
+	lower := strings.ToLower(filepath.ToSlash(filePath))
+	ext := filepath.Ext(lower)
 	switch {
 	case strings.Contains(lower, "/model/") || strings.HasSuffix(lower, "_model.go"):
 		return "model"
@@ -299,7 +319,7 @@ func inferLayer(filePath string) string {
 		return "frontend"
 	case strings.Contains(lower, "/mobile/"):
 		return "mobile"
-	case strings.Contains(lower, ".ad") || strings.Contains(lower, ".cagen"):
+	case ext == ".ad" || ext == ".cagen":
 		return "cagen"
 	default:
 		return ""

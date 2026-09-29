@@ -19,7 +19,6 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/hpdkhoa/gen-system/generator/internal/agent"
 	"github.com/hpdkhoa/gen-system/generator/internal/compiler"
 	"github.com/hpdkhoa/gen-system/generator/internal/context"
 	"github.com/hpdkhoa/gen-system/generator/internal/planner"
@@ -53,7 +52,7 @@ func EvolveWithUnderstanding() {
 	}
 
 	// Safety policy: stage into a review dir by default; --apply to write in place.
-	writeDir, _, ok := ResolveEvolveTarget(path)
+	writeDir, inPlace, ok := ResolveEvolveTarget(path)
 	if !ok {
 		return
 	}
@@ -76,9 +75,22 @@ func EvolveWithUnderstanding() {
 	oldIR, _ := compiler.LoadPreviousIR()
 	newIR, err := compiler.Compile(sfile)
 	if err != nil {
-		fmt.Println("⚠️ IR compile warning:", err, "— continuing")
+		// v26.58 (D044): stop on a schema that does not compile, as Evolve
+		// does; going on with an empty IR hid the change or pruned files.
+		fmt.Println("❌ IR compile error:", err)
+		return
 	}
-	_, buildPlan, _ := compiler.CompileV3(oldIR, newIR)
+	cs, buildPlan, _ := compiler.CompileV3(oldIR, newIR)
+	// v26.58: a field that left the schema stays in the code, with a warning
+	// (evolve_keep.go). The plan and the snapshot are rebuilt from the schema
+	// with the kept fields.
+	if keptIR, err := keepFieldsAndReplan(&sfile, oldIR, newIR, cs); err != nil {
+		fmt.Println("❌ IR compile error:", err)
+		return
+	} else if len(keptIR.Entities) > 0 {
+		newIR = keptIR
+		_, buildPlan, _ = compiler.CompileV3(oldIR, newIR)
+	}
 
 	changedSet := map[string]bool{}
 	for _, name := range buildPlan.Entities {
@@ -131,7 +143,9 @@ func EvolveWithUnderstanding() {
 		}
 	}
 
-	plan := planner.Plan{Goal: "evolve", Entities: filtered, Tasks: tasks}
+	// v26.58 (D044): the full schema entity set, not only the processed
+	// entities; the agent prunes the files of every entity outside it.
+	plan := planner.Plan{Goal: "evolve", Entities: sfile.Entities, Tasks: tasks}
 	fmt.Printf("🧬 Running evolution (%d entities, %d tasks, understanding-informed)…\n",
 		len(filtered), len(tasks))
 
@@ -140,13 +154,11 @@ func EvolveWithUnderstanding() {
 	SetupVerifyUnderstand() // v25.5 step 2: Understand-validates-Generate mode
 	SetupStyle()            // v26.33: team style profile (--style / GEN_STYLE)
 	SetupStdlib()           // v26.34: --stdlib / GEN_STDLIB, default auto
-	if err := agent.RunFromPlan(plan, writeDir); err != nil {
+	if err := evolveRunFromPlan(plan, writeDir); err != nil {
 		fmt.Println("❌ Evolution failed:", err)
 		return
 	}
-	if err := compiler.SaveIR(newIR); err != nil {
-		fmt.Println("⚠️ Could not save IR snapshot:", err)
-	}
+	saveEvolveSnapshot(newIR, inPlace) // v26.58 (D037): not after a staged run
 	fmt.Println("✅ Evolution complete (understanding-informed)")
 }
 

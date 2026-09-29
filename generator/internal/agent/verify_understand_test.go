@@ -17,12 +17,15 @@ func TestParseVerifyMode(t *testing.T) {
 		"autofix": VerifyAutofix,
 		"heal":    VerifyAutofix,
 		"fix":     VerifyAutofix,
-		"garbage": VerifyOff,
 	}
 	for in, want := range cases {
-		if got := ParseVerifyMode(in); got != want {
-			t.Errorf("ParseVerifyMode(%q) = %v, want %v", in, got, want)
+		if got, err := ParseVerifyMode(in); err != nil || got != want {
+			t.Errorf("ParseVerifyMode(%q) = %v, %v, want %v", in, got, err, want)
 		}
+	}
+	// v26.58 (D021): an unknown word is an error, not a silent VerifyOff.
+	if _, err := ParseVerifyMode("garbage"); err == nil {
+		t.Errorf("ParseVerifyMode(%q) gave no error", "garbage")
 	}
 }
 

@@ -7,6 +7,7 @@
 package services
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"os"
@@ -78,6 +79,12 @@ func (s *StagingService) Stage(change string) (*StageResult, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
+	// v26.58 (D094): the next lines wipe the staging folder that the previous
+	// proposal points at. The old code kept s.last until this run succeeded,
+	// so after a failed Stage, Pending showed the old proposal and Commit
+	// copied files of the new, failed run. Drop it before touching staging.
+	s.last = nil
+
 	stageRoot := filepath.Join(s.root, stagingDirName)
 
 	// Fresh staging tree each time.
@@ -109,7 +116,7 @@ func (s *StagingService) Stage(change string) (*StageResult, error) {
 
 	// Build the evolve plan from the staged IR. We load IR from the live
 	// .gen (same content we just copied) to enumerate entities.
-	ir, err := compiler.LoadPreviousIR()
+	ir, err := loadIRAt(s.root)
 	if err != nil || len(ir.Entities) == 0 {
 		return nil, fmt.Errorf("no IR found — run a full build before evolving")
 	}
@@ -150,6 +157,25 @@ func (s *StagingService) Stage(change string) (*StageResult, error) {
 	return res, nil
 }
 
+// loadIRAt reads <root>/.gen/ir_snapshot.json. A missing file gives an empty
+// IR, as compiler.LoadPreviousIR does.
+//
+// v26.58 (D093): Stage called compiler.LoadPreviousIR, which reads the path
+// relative to the working directory. gen-server --root never changes the
+// working directory, so Stage planned the entities of the folder the server
+// was started in, not of the project it stages.
+func loadIRAt(root string) (compiler.SchemaIR, error) {
+	var ir compiler.SchemaIR
+	data, err := os.ReadFile(filepath.Join(root, ".gen", "ir_snapshot.json"))
+	if err != nil {
+		return compiler.SchemaIR{}, nil
+	}
+	if err := json.Unmarshal(data, &ir); err != nil {
+		return compiler.SchemaIR{}, err
+	}
+	return ir, nil
+}
+
 // computeDiff walks the staged generated layers and compares each file to its
 // live counterpart.
 func (s *StagingService) computeDiff(stageRoot string) []FileDiff {
@@ -181,6 +207,26 @@ func (s *StagingService) computeDiff(stageRoot string) []FileDiff {
 			})
 			return nil
 		})
+		// v26.58 (D092): the walk above sees only files that exist in staging,
+		// so a file the staged run deleted (pruneOrphanEntityFiles in
+		// agent.RunFromPlan) never got the status removed and Commit left it in
+		// live. Walk the live layer too and list each file staging lacks.
+		liveLayer := filepath.Join(s.root, layer)
+		_ = filepath.Walk(liveLayer, func(p string, info os.FileInfo, err error) error {
+			if err != nil || info.IsDir() {
+				return nil
+			}
+			rel, _ := filepath.Rel(s.root, p)
+			if _, statErr := os.Lstat(filepath.Join(stageRoot, rel)); !os.IsNotExist(statErr) {
+				return nil
+			}
+			live, _ := os.ReadFile(p)
+			out = append(out, FileDiff{
+				Path: rel, Layer: layer, Status: "removed",
+				Before: countLines(live), Hunks: removedHunks(live),
+			})
+			return nil
+		})
 	}
 	return out
 }
@@ -193,20 +239,57 @@ func (s *StagingService) Commit() (int, error) {
 		return 0, fmt.Errorf("nothing staged")
 	}
 	stageRoot := s.last.StagingDir
+
+	// v26.58 (D095): the old loop returned on the first copy error with the
+	// earlier files already in live, so live held a mix of old and staged
+	// files, and it ignored a failed delete. Now each live file is first
+	// copied into a backup folder, and on any error every touched path is put
+	// back: live is either fully the staged state or unchanged. The proposal
+	// stays pending after a failure, so the user can retry or discard it.
+	backupRoot := filepath.Join(s.root, ".gen", "commit-backup")
+	if err := os.RemoveAll(backupRoot); err != nil {
+		return 0, fmt.Errorf("clearing commit backup: %w", err)
+	}
+	type touched struct{ dst, backup string } // backup "" when dst was absent
+	var done []touched
+	fail := func(path string, err error) (int, error) {
+		for i := len(done) - 1; i >= 0; i-- {
+			if done[i].backup != "" {
+				_ = copyFileStaging(done[i].backup, done[i].dst)
+			} else {
+				_ = os.Remove(done[i].dst)
+			}
+		}
+		_ = os.RemoveAll(backupRoot)
+		return 0, fmt.Errorf("committing %s: %w (live left unchanged)", path, err)
+	}
 	n := 0
 	for _, f := range s.last.Files {
 		src := filepath.Join(stageRoot, f.Path)
 		dst := filepath.Join(s.root, f.Path)
+		t := touched{dst: dst}
+		if _, err := os.Lstat(dst); err == nil {
+			t.backup = filepath.Join(backupRoot, f.Path)
+			if err := copyFileStaging(dst, t.backup); err != nil {
+				return fail(f.Path, err)
+			}
+		} else if !os.IsNotExist(err) {
+			return fail(f.Path, err)
+		}
+		done = append(done, t)
 		if f.Status == "removed" {
-			_ = os.Remove(dst)
+			if err := os.Remove(dst); err != nil && !os.IsNotExist(err) {
+				return fail(f.Path, err)
+			}
 			n++
 			continue
 		}
 		if err := copyFileStaging(src, dst); err != nil {
-			return n, fmt.Errorf("committing %s: %w", f.Path, err)
+			return fail(f.Path, err)
 		}
 		n++
 	}
+	_ = os.RemoveAll(backupRoot)
 	change := s.last.Change
 	s.last = nil
 	_ = os.RemoveAll(stageRoot)
@@ -247,13 +330,22 @@ func countLines(b []byte) int {
 }
 
 func addedHunks(b []byte) string {
+	return prefixedHunks(b, "+ ")
+}
+
+// removedHunks lists a deleted file as "- " lines (v26.58, D092).
+func removedHunks(b []byte) string {
+	return prefixedHunks(b, "- ")
+}
+
+func prefixedHunks(b []byte, prefix string) string {
 	lines := strings.Split(string(b), "\n")
 	if len(lines) > 200 {
 		lines = lines[:200]
 	}
 	var sb strings.Builder
 	for _, l := range lines {
-		sb.WriteString("+ ")
+		sb.WriteString(prefix)
 		sb.WriteString(l)
 		sb.WriteString("\n")
 	}

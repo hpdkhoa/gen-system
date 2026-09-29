@@ -53,6 +53,13 @@ func (h *Handlers) CommitStage(w http.ResponseWriter, r *http.Request) {
 
 // DiscardStage handles POST /api/evolve/discard — throws away the proposal.
 func (h *Handlers) DiscardStage(w http.ResponseWriter, r *http.Request) {
+	// v26.58 (D091): POST only, as CommitStage. The route passes every method
+	// but OPTIONS, so a GET removed the staging folder and the pending
+	// proposal. The Studio sends POST.
+	if r.Method != http.MethodPost {
+		http.Error(w, "method not allowed", 405)
+		return
+	}
 	if err := h.staging.Discard(); err != nil {
 		http.Error(w, err.Error(), 500)
 		return

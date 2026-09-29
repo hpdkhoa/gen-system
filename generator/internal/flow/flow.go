@@ -125,7 +125,7 @@ func buildFuncCFG(id string, n *ast.Node, lang ast.Language) *CFG {
 // We model: calls, returns, branches, loops.
 func buildGoCFG(id string, stmts []*ast.Node) *CFG {
 	cfg := &CFG{FuncID: id}
-	b := &cfgBuilder{cfg: cfg}
+	b := &cfgBuilder{cfg: cfg, deadBlocks: true}
 	b.entry = b.newBlock("entry")
 	b.current = b.entry
 
@@ -167,8 +167,19 @@ func pruneUnreachable(cfg *CFG) {
 		byID[blk.ID] = blk
 	}
 	// BFS over successors from Entry.
+	//
+	// v26.58 (D103): a block with statements and no predecessors is dead code
+	// (statements after a return). It is a root of the walk too, so it and the
+	// blocks it flows into survive; AnalyzeDataFlow reports it as dead_code.
+	// Only EMPTY orphans, such as the join of an if/else whose arms both
+	// return, are dropped, which is what v23.8 set out to do.
 	reachable := map[int]bool{}
 	queue := []int{cfg.Entry}
+	for _, blk := range cfg.Blocks {
+		if blk.ID != cfg.Entry && len(blk.Preds) == 0 && len(blk.Stmts) > 0 {
+			queue = append(queue, blk.ID)
+		}
+	}
 	for len(queue) > 0 {
 		cur := queue[0]
 		queue = queue[1:]
@@ -233,6 +244,10 @@ type cfgBuilder struct {
 	current *BasicBlock
 	entry   *BasicBlock
 	nextID  int
+	// deadBlocks makes processNode put statements after a return into a block
+	// with no predecessors instead of dropping them (v26.58, D103). Set only
+	// by buildGoCFG, where the node order is the source order.
+	deadBlocks bool
 }
 
 func (b *cfgBuilder) newBlock(label string) *BasicBlock {
@@ -251,8 +266,22 @@ func (b *cfgBuilder) edge(from, to *BasicBlock) {
 }
 
 func (b *cfgBuilder) processNode(n *ast.Node) {
-	if n == nil || b.current == nil {
+	if n == nil {
 		return
+	}
+	if b.current == nil {
+		// v26.58 (D103): after a return the cursor is nil, and every following
+		// statement was dropped, so AnalyzeDataFlow never saw dead code. In the
+		// Go builder the statement now opens a block with no predecessors.
+		// pruneUnreachable keeps such a block because it holds statements, so
+		// the flow view shows the dead code and the dead_code check finds it.
+		// The structural TS/Python builder keeps the old drop: those frontends
+		// emit a return before the calls of its own expression, so a node after
+		// a return there is not dead code.
+		if !b.deadBlocks {
+			return
+		}
+		b.current = b.newBlock("unreachable")
 	}
 	switch n.Kind {
 	case ast.NodeCall:
@@ -557,6 +586,13 @@ const (
 type FuncEffects struct {
 	SymbolID string
 	Effects  map[EffectKind]bool
+	// DBWrite is true when a DB callee writes (see dbWritePatterns).
+	//
+	// v26.58 (D100): EffectDB is set for any database access, reads included,
+	// so the verify pass reported every Get and List of a PG store as a read
+	// that writes. The write is a separate field, not a new EffectKind, so the
+	// Effects map that the Studio, belief and objgraph list stays as it was.
+	DBWrite bool
 }
 
 // dbPatterns: package/function names that indicate DB access.
@@ -565,6 +601,11 @@ var dbPatterns = []string{
 	"DB.", "Tx.", "Exec", "Query", "QueryRow", "Prepare",
 	"WRITE", "READ", "DELETE", "INSERT", "UPDATE", // CA Gen
 }
+
+// dbWritePatterns: the subset of DB callees that write. Go writes go through
+// Exec (Exec, ExecContext, NamedExec); CA Gen names the verb. READ and Query
+// only read. v26.58 (D100).
+var dbWritePatterns = []string{"Exec", "WRITE", "INSERT", "UPDATE", "DELETE"}
 
 var fsPatterns = []string{
 	"os.", "ioutil.", "afero.", "filepath.",
@@ -643,6 +684,9 @@ func inferNodeEffects(id string, children []*ast.Node, lang ast.Language) *FuncE
 				strings.HasPrefix(cu, "DELETE") || strings.HasPrefix(cu, "INSERT") ||
 				strings.HasPrefix(cu, "UPDATE") {
 				efx.Effects[EffectDB] = true
+				if !strings.HasPrefix(cu, "READ") {
+					efx.DBWrite = true // v26.58 (D100)
+				}
 			}
 		}
 	}
@@ -650,6 +694,9 @@ func inferNodeEffects(id string, children []*ast.Node, lang ast.Language) *FuncE
 	for _, callee := range callees {
 		if matchesAny(callee, dbPatterns) {
 			efx.Effects[EffectDB] = true
+			if matchesAny(callee, dbWritePatterns) {
+				efx.DBWrite = true // v26.58 (D100)
+			}
 		}
 		if matchesAny(callee, fsPatterns) {
 			efx.Effects[EffectFS] = true

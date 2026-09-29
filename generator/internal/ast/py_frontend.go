@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os/exec"
+	"path/filepath"
 	"strings"
 )
 
@@ -435,11 +436,11 @@ func (py *PyFrontend) Parse(filePath string, source []byte) (*Module, error) {
 		RawSource: source,
 	}
 
-	// Derive module name from file path
-	base := filePath
-	if idx := strings.LastIndex(base, "/"); idx >= 0 {
-		base = base[idx+1:]
-	}
+	// Derive module name from file path.
+	// v26.58 (D105): the path was cut only at "/", so a Windows path kept its
+	// directories in PackageName. filepath.Base cuts at the separators of the
+	// host, as tsModuleName does.
+	base := filepath.Base(filePath)
 	m.PackageName = strings.TrimSuffix(strings.TrimSuffix(base, ".pyw"), ".py")
 
 	if !py.Available() {

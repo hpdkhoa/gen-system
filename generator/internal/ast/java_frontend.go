@@ -633,14 +633,28 @@ func (p *javaParser) parseRecordComponents() []Field {
 	}
 	p.advance() // (
 	for !p.eof() && !p.isPunct(")") {
+		// v26.58 (D058): a round that met a token it did not expect, such as
+		// the dots of "int... xs" or a stray "=", consumed nothing and the loop
+		// never ended. Varargs dots are skipped as parseParamList does, and a
+		// round that still consumed nothing advances one token, so the loop
+		// always reaches ")" or EOF.
+		start := p.pos
 		// component: [annotations] Type name
 		p.collectLeadingMods()
 		typeName := p.collectTypeRefName()
+		if p.isPunct(".") && p.peek(1).kind == jtPunct && p.peek(1).text == "." {
+			for p.isPunct(".") {
+				p.advance()
+			}
+		}
 		if p.cur().kind == jtIdent {
 			fname := p.advance().text
 			fields = append(fields, Field{Name: fname, Type: TypeRef{Name: typeName}})
 		}
 		if p.isPunct(",") {
+			p.advance()
+		}
+		if p.pos == start {
 			p.advance()
 		}
 	}
@@ -825,6 +839,11 @@ func (p *javaParser) parseParamList() []Parameter {
 	}
 	p.advance() // (
 	for !p.eof() && !p.isPunct(")") {
+		// v26.58 (F4): a round that met a token it did not expect, such as the
+		// "=" of "int x = 1", consumed nothing and the loop never ended. As in
+		// parseRecordComponents (D058), a round that consumed nothing advances
+		// one token, so the loop always reaches ")" or EOF.
+		start := p.pos
 		p.collectLeadingMods() // param annotations / final
 		typeName := p.collectTypeRefName()
 		variadic := false
@@ -844,6 +863,9 @@ func (p *javaParser) parseParamList() []Parameter {
 			})
 		}
 		if p.isPunct(",") {
+			p.advance()
+		}
+		if p.pos == start {
 			p.advance()
 		}
 	}

@@ -1,6 +1,9 @@
 package ast
 
-import "strings"
+import (
+	"errors"
+	"strings"
+)
 
 // commonImports maps code patterns to their Go import path.
 // v26.57 (D012): plain paths. EnsureImport adds the quote marks; the old
@@ -41,15 +44,22 @@ var commonImports = []struct {
 // Called after every RewriteFunctionBody to prevent import-missing build failures.
 //
 // This covers ~90% of cases without needing golang.org/x/tools/imports.
-func AutoResolveImports(filePath, newBody string) {
+//
+// v26.58 (D077): it returns the errors of EnsureImport, joined, so the caller
+// can report an import that was not added. It still tries every import.
+func AutoResolveImports(filePath, newBody string) error {
 	seen := map[string]bool{}
+	var errs []error
 	for _, entry := range commonImports {
 		if seen[entry.importPath] {
 			continue
 		}
 		if strings.Contains(newBody, entry.pattern) {
-			EnsureImport(filePath, entry.importPath)
+			if err := EnsureImport(filePath, entry.importPath); err != nil {
+				errs = append(errs, err)
+			}
 			seen[entry.importPath] = true
 		}
 	}
+	return errors.Join(errs...)
 }

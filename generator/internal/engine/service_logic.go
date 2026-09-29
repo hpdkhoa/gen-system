@@ -25,11 +25,13 @@
 package engine
 
 import (
+	"errors"
 	"fmt"
 	"go/format"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"github.com/hpdkhoa/gen-system/generator/internal/ai"
@@ -40,11 +42,14 @@ import (
 // the supplied provider + idea text, generates its test, and writes the business
 // routes file. Safe to call for every entity; an entity with no operations still
 // gets a compiling (empty-but-valid) service so handler wiring is uniform.
-func GenerateServiceLogic(idea string, e schema.Entity, all []schema.Entity, provider ai.LogicProvider, path string) {
+//
+// v26.58 (D029): returns the write errors of the service files instead of
+// dropping them, so the executor fails the generate_service task.
+func GenerateServiceLogic(idea string, e schema.Entity, all []schema.Entity, provider ai.LogicProvider, path string) error {
 	if springEnabled() {
 		// Phase 6 Spring backend is CRUD scaffolding; the LLM business-logic
 		// service layer is a Go-backend feature and is not injected into Java.
-		return
+		return nil
 	}
 	ops, err := provider.Operations(idea, e, all)
 	if err != nil {
@@ -62,10 +67,12 @@ func GenerateServiceLogic(idea string, e schema.Entity, all []schema.Entity, pro
 	// name collision; any existing op not re-proposed is carried forward.
 	ops = mergeWithExistingOps(e, ops, path)
 
-	genServiceFile(e, ops, path)
-	genServiceTest(e, ops, path)
-	genServiceRoutes(e, ops, path)
-	writePayloadHelpers(path) // shared service/payload.go (idempotent, one per app)
+	return errors.Join(
+		genServiceFile(e, ops, path),
+		genServiceTest(e, ops, path),
+		genServiceRoutes(e, ops, path),
+		writePayloadHelpers(path), // shared service/payload.go (idempotent, one per app)
+	)
 }
 
 // mergeWithExistingOps reads the operations already present in the entity's
@@ -220,7 +227,7 @@ func sanitizeOperations(idea string, e schema.Entity, all []schema.Entity, ops [
 		// retry up to maxRepairAttempts before stubbing. The more real the
 		// logic, the more likely a near-miss (e.g. a missing type assertion on
 		// the payload) is fixed on the second pass instead of discarded.
-		ok, buildErr := operationCompiles(e, n, op)
+		ok, buildErr := operationCompiles(e, all, n, op)
 		if !ok && canRepair {
 			for attempt := 1; attempt <= maxRepairAttempts; attempt++ {
 				fmt.Printf("     [logic] %s.%s did not compile; repair attempt %d/%d…\n",
@@ -236,7 +243,7 @@ func sanitizeOperations(idea string, e schema.Entity, all []schema.Entity, ops [
 				if fixed.Subpath == "" {
 					fixed.Subpath = op.Subpath
 				}
-				ok, buildErr = operationCompiles(e, n, fixed)
+				ok, buildErr = operationCompiles(e, all, n, fixed)
 				recordRepairAttempt(ok) // WP1: count every repair round-trip
 				if ok {
 					op = fixed
@@ -271,7 +278,7 @@ func sanitizeOperations(idea string, e schema.Entity, all []schema.Entity, ops [
 							break
 						}
 						fixed.Name, fixed.HTTPMethod, fixed.Subpath = name, op.HTTPMethod, op.Subpath
-						compiles, _ := operationCompiles(e, n, fixed)
+						compiles, _ := operationCompiles(e, all, n, fixed)
 						clean := compiles && StyleGate(name, fixed.Body, fixed.Helpers) == ""
 						recordStyleRepair(clean)
 						if clean {
@@ -344,7 +351,15 @@ func standInModelStruct(e schema.Entity, structName string) string {
 // operationCompiles type-checks one operation against the store/model contract.
 // v23.23: returns the build error output (empty when it compiles) so the caller
 // can feed it back to the model for a repair attempt before falling back to a stub.
-func operationCompiles(e schema.Entity, structName string, op ai.Operation) (bool, string) {
+//
+// v26.58 (D073): the probe held a stand-in model for e only, and the rewrite
+// replaced the prefix model.<Name> inside longer names (model.OrderItem became
+// model_OrderItem while the check ran for Order). A body that used the model of
+// another plan entity failed the gate although it compiles in the real package,
+// where every entity model exists. The probe now gets a stand-in for every
+// entity in all, and model.<Name> and store.<Name>CRUD are rewritten only at
+// word boundaries.
+func operationCompiles(e schema.Entity, all []schema.Entity, structName string, op ai.Operation) (bool, string) {
 	method := renderMethod(structName, op)
 
 	// If go isn't available, degrade to the old syntax-only check.
@@ -378,9 +393,21 @@ func operationCompiles(e schema.Entity, structName string, op ai.Operation) (boo
 	// fieldsForEntity loop as genModelInMem), so a body referencing a real
 	// field type-checks here identically to the real package.
 	b.WriteString(standInModelStruct(e, structName))
+	modelNames := []string{structName}
+	seenModel := map[string]bool{structName: true}
+	for _, other := range all {
+		on := typeName(other.Name)
+		if on == "" || seenModel[on] {
+			continue
+		}
+		seenModel[on] = true
+		modelNames = append(modelNames, on)
+		b.WriteString(standInModelStruct(other, on))
+	}
 	fmt.Fprintf(&b, "type store_%sCRUD interface {\n", structName)
 	fmt.Fprintf(&b, "\tCreate(m model_%s) (model_%s, error)\n", structName, structName)
-	fmt.Fprintf(&b, "\tList() []model_%s\n", structName)
+	// v26.58 (D027): the real CRUD interface now gives List an error result.
+	fmt.Fprintf(&b, "\tList() ([]model_%s, error)\n", structName)
 	fmt.Fprintf(&b, "\tGet(id int) (model_%s, bool)\n", structName)
 	fmt.Fprintf(&b, "\tUpdate(id int, m model_%s) (model_%s, bool)\n", structName, structName)
 	b.WriteString("\tDelete(id int) bool\n}\n\n")
@@ -401,8 +428,10 @@ func operationCompiles(e schema.Entity, structName string, op ai.Operation) (boo
 	// Rewrite the references the method makes to the REAL packages onto the
 	// local stand-ins so the temp package is self-contained.
 	src := b.String()
-	src = strings.ReplaceAll(src, "model."+structName, "model_"+structName)
-	src = strings.ReplaceAll(src, "store."+structName+"CRUD", "store_"+structName+"CRUD")
+	for _, mn := range modelNames {
+		src = regexp.MustCompile(`\bmodel\.`+regexp.QuoteMeta(mn)+`\b`).ReplaceAllString(src, "model_"+mn)
+	}
+	src = regexp.MustCompile(`\bstore\.`+regexp.QuoteMeta(structName)+`CRUD\b`).ReplaceAllString(src, "store_"+structName+"CRUD")
 	// Drop the now-unneeded app imports (added by buildServiceImports) to avoid
 	// "cannot find package"; the local stand-ins replace them.
 	src = strings.ReplaceAll(src, "\t\"app/backend/internal/model\"\n", "")
@@ -518,12 +547,12 @@ var _ = payloadString
 `
 
 // writePayloadHelpers emits the shared service/payload.go once per app.
-func writePayloadHelpers(path string) {
+func writePayloadHelpers(path string) error {
 	src := servicePayloadHelpers
 	if formatted, err := format.Source([]byte(src)); err == nil {
 		src = string(formatted)
 	}
-	writeFileMk(filepath.Join(path, "backend/internal/service/payload.go"), src)
+	return writeFileMk(filepath.Join(path, "backend/internal/service/payload.go"), src)
 }
 
 // payloadHelperFuncs returns just the helper function declarations (no package
@@ -539,7 +568,7 @@ func payloadHelperFuncs() string {
 }
 
 // genServiceFile renders the service file for one entity.
-func genServiceFile(e schema.Entity, ops []ai.Operation, path string) {
+func genServiceFile(e schema.Entity, ops []ai.Operation, path string) error {
 	n := typeName(e.Name)
 	var b strings.Builder
 	b.WriteString("// Code generated by gen-system (business logic). DO NOT EDIT.\n")
@@ -571,7 +600,7 @@ func genServiceFile(e schema.Entity, ops []ai.Operation, path string) {
 	if formatted, err := format.Source([]byte(src)); err == nil {
 		src = string(formatted)
 	}
-	writeFileMk(filepath.Join(path, "backend/internal/service/"+routeName(e.Name)+"_service.go"), src)
+	return writeFileMk(filepath.Join(path, "backend/internal/service/"+routeName(e.Name)+"_service.go"), src)
 }
 
 // serviceStdlibPkgs are the standard-library packages a model body may use that
@@ -697,9 +726,9 @@ func sortStrings(s []string) {
 // /<collection>/{id}/<subpath> (or /<collection>/<subpath> when there is no id
 // semantics). The handler decodes the JSON body into `in`, calls the op, writes
 // (any,error) as JSON / HTTP error. CRUD routes remain in the handler file.
-func genServiceRoutes(e schema.Entity, ops []ai.Operation, path string) {
+func genServiceRoutes(e schema.Entity, ops []ai.Operation, path string) error {
 	if len(ops) == 0 {
-		return // no business routes file when there are no operations
+		return nil // no business routes file when there are no operations
 	}
 	n := typeName(e.Name)
 	coll := collPath(e)         // e.g. "/orders"
@@ -745,7 +774,7 @@ func genServiceRoutes(e schema.Entity, ops []ai.Operation, path string) {
 	if formatted, err := format.Source([]byte(src)); err == nil {
 		src = string(formatted)
 	}
-	writeFileMk(filepath.Join(path, "backend/internal/handler/"+typeName(e.Name)+"_service_handler.go"), src)
+	return writeFileMk(filepath.Join(path, "backend/internal/handler/"+typeName(e.Name)+"_service_handler.go"), src)
 }
 
 // isReadOp reports whether an operation name denotes a read (so it may stay GET).
@@ -811,9 +840,9 @@ func memModeHasAnyServiceHandler(path string, names []string) bool {
 // op never panics. Exercising a POPULATED payload against a PRESENT record is
 // essential: many panics (unchecked type assertions on in[...] values) only fire
 // on the value-processing path, which an empty payload skips. v23.24.
-func genServiceTest(e schema.Entity, ops []ai.Operation, path string) {
+func genServiceTest(e schema.Entity, ops []ai.Operation, path string) error {
 	if len(ops) == 0 {
-		return
+		return nil
 	}
 	n := typeName(e.Name)
 	var b strings.Builder
@@ -843,5 +872,5 @@ func genServiceTest(e schema.Entity, ops []ai.Operation, path string) {
 	if formatted, err := format.Source([]byte(src)); err == nil {
 		src = string(formatted)
 	}
-	writeFileMk(filepath.Join(path, "backend/internal/service/"+routeName(e.Name)+"_service_test.go"), src)
+	return writeFileMk(filepath.Join(path, "backend/internal/service/"+routeName(e.Name)+"_service_test.go"), src)
 }

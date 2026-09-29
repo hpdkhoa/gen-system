@@ -200,6 +200,10 @@ type RunResult struct {
 	Enriched int // routines that produced at least one observation
 	Skipped  int // routines the model returned nothing for (or errored)
 	Beliefs  int // total observations stored
+	// SaveErrors counts routines whose beliefs could not be saved. v26.58
+	// (follow up of D020): the result of the save was ignored, so a lost
+	// write still counted as enriched.
+	SaveErrors int
 }
 
 // Run is the INDEPENDENT PRODUCER entry point. It enriches each routine with the
@@ -230,7 +234,10 @@ func (e *Enricher) Run(store *belief.Store, routines []Routine) RunResult {
 				Kind: p.Kind, Object: p.Object, Body: r.Body,
 			})
 		}
-		store.UpsertEnrichBeliefs(inputs)
+		if err := store.UpsertEnrichBeliefs(inputs); err != nil {
+			res.SaveErrors++
+			continue
+		}
 		res.Enriched++
 		res.Beliefs += len(inputs)
 	}
@@ -259,9 +266,11 @@ func (e *Enricher) SummarizeServices(store *belief.Store) int {
 		if err != nil || prose == "" {
 			continue
 		}
-		store.UpsertSummary(belief.SummaryInput{
+		if err := store.UpsertSummary(belief.SummaryInput{
 			Scope: belief.ScopeService, Name: svc, Object: prose, MemberIDs: memberIDs,
-		})
+		}); err != nil {
+			continue // v26.58: a summary that was not saved is not counted
+		}
 		n++
 	}
 	return n

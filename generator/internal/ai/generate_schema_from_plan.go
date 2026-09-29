@@ -5,15 +5,19 @@ package ai
 
 import "strings"
 
-func GenerateSchemaFromPlan(plan string) string {
+// GenerateSchemaFromPlan asks the model to turn a plan into a schema.
+// v26.58 (D049): it returned "" on a model error and dropped the error, so
+// gen schema wrote an empty file and reported success. It now returns the
+// error; callers that want the old fallback treat an error like "".
+func GenerateSchemaFromPlan(plan string) (string, error) {
 	prompt := buildSchemaFromPlanPrompt(plan)
 
 	resp, err := AskLLMJSON(prompt, ModelFor(RolePlan), entitiesSchema)
 	if err != nil {
-		return ""
+		return "", err
 	}
 
-	return extractJSON(resp)
+	return extractJSON(resp), nil
 }
 
 func buildSchemaFromPlanPrompt(plan string) string {

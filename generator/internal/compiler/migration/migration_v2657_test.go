@@ -57,12 +57,13 @@ func TestCreateTable_HasEveryField(t *testing.T) {
 		},
 	}}}
 	sql := GenerateSQL(BuildMigration(cs))
-	want := "CREATE TABLE IF NOT EXISTS Post (id SERIAL PRIMARY KEY, title TEXT, views INTEGER, published BOOLEAN);"
+	// v26.58 (OPEN-TABLES): the table is posts, the name the generated app uses.
+	want := "CREATE TABLE IF NOT EXISTS posts (id SERIAL PRIMARY KEY, title TEXT, views INTEGER, published BOOLEAN);"
 	if len(sql) != 1 || sql[0] != want {
 		t.Fatalf("got %q\nwant %q", sql, want)
 	}
 	down := GenerateRollbackSQL(BuildMigration(cs))
-	if len(down) != 1 || !strings.HasPrefix(down[0], "DROP TABLE IF EXISTS Post;") {
+	if len(down) != 1 || !strings.HasPrefix(down[0], "DROP TABLE IF EXISTS posts;") {
 		t.Fatalf("rollback of a new table must drop it, got %q", down)
 	}
 }

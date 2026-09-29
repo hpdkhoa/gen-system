@@ -331,23 +331,36 @@ func attachEnricher(ps *presentation.Server, idx *symbols.Index, on bool) {
 // bodyProviderFor returns a BodyProvider that reads a routine's source on demand,
 // preferring exact byte offsets and falling back to line slicing for the frontends
 // that record only line numbers (Java/COBOL/TS/Python — see v26.20). Results are
-// cached per file for the life of the closure.
+// cached per file while the file keeps its mod time and size.
 func bodyProviderFor(idx *symbols.Index) belief.BodyProvider {
+	// v26.58 (D017): the cache kept the first bytes of a file for the life of
+	// the closure and also kept a failed read, so after a watcher edit the span
+	// of the new index was cut from the old bytes. Each entry now carries the
+	// mod time and size it was read at; a change reads the file again, and a
+	// failed stat or read is not stored.
+	type cached struct {
+		src  []byte
+		mod  time.Time
+		size int64
+	}
 	var mu sync.Mutex
-	files := map[string][]byte{}
+	files := map[string]cached{}
 	return func(symbolID string) string {
 		sym, ok := idx.ByID(symbolID)
 		if !ok || sym == nil || sym.DefinedIn == "" {
 			return ""
 		}
+		var src []byte
 		mu.Lock()
-		src, ok := files[sym.DefinedIn]
-		if !ok {
-			b, err := os.ReadFile(sym.DefinedIn)
-			if err != nil {
-				b = nil
-			}
-			src, files[sym.DefinedIn] = b, b
+		if fi, err := os.Stat(sym.DefinedIn); err != nil {
+			delete(files, sym.DefinedIn)
+		} else if c, ok := files[sym.DefinedIn]; ok && c.mod.Equal(fi.ModTime()) && c.size == fi.Size() {
+			src = c.src
+		} else if b, err := os.ReadFile(sym.DefinedIn); err == nil {
+			src = b
+			files[sym.DefinedIn] = cached{src: b, mod: fi.ModTime(), size: fi.Size()}
+		} else {
+			delete(files, sym.DefinedIn)
 		}
 		mu.Unlock()
 		if src == nil {

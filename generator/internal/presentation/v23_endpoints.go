@@ -116,11 +116,17 @@ func (s *Server) handleArchitectureV23(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodOptions {
 		return
 	}
-	if s.idx == nil {
+	// v26.58 (D085): read the index and the root once through the locked
+	// accessors. The direct reads of s.idx and s.root raced with ReplaceContext
+	// and SetRoot, and a project load in the middle of the request counted the
+	// symbols of one project and the edges of the other.
+	idx := s.index()
+	projRoot, _, _ := s.roots()
+	if idx == nil {
 		writeJSON(w, ArchitectureResponse{})
 		return
 	}
-	all := s.idx.AllSymbols()
+	all := idx.AllSymbols()
 	resp := ArchitectureResponse{}
 
 	// Language + per-file aggregation.
@@ -149,8 +155,8 @@ func (s *Server) handleArchitectureV23(w http.ResponseWriter, r *http.Request) {
 		// Package = the parent directory relative to root. Falls back to
 		// the filename when we can't compute a clean parent.
 		pkg := filepath.Dir(sym.DefinedIn)
-		if s.root != "" {
-			if rel, err := filepath.Rel(s.root, pkg); err == nil && !strings.HasPrefix(rel, "..") {
+		if projRoot != "" {
+			if rel, err := filepath.Rel(projRoot, pkg); err == nil && !strings.HasPrefix(rel, "..") {
 				pkg = rel
 			}
 		}
@@ -209,16 +215,16 @@ func (s *Server) handleArchitectureV23(w http.ResponseWriter, r *http.Request) {
 	// v23.32: counted over PROJECT-caller edges only, so ingesting a stdlib
 	// (which brings its own internal edges) does not move these numbers. Among
 	// project-caller edges, EdgesIntoStdlib is those resolving into the runtime.
-	edges := s.idx.AllCallEdges()
+	edges := idx.AllCallEdges()
 	for _, e := range edges {
-		caller, ok := s.idx.ByID(e.CallerID)
+		caller, ok := idx.ByID(e.CallerID)
 		if !ok || caller == nil || caller.Provenance.IsExternal() {
 			continue
 		}
 		resp.EdgeStats.Total++
 		if e.CalleeID != "" {
 			resp.EdgeStats.Resolved++
-			if callee, ok := s.idx.ByID(e.CalleeID); ok && callee != nil && callee.Provenance.IsExternal() {
+			if callee, ok := idx.ByID(e.CalleeID); ok && callee != nil && callee.Provenance.IsExternal() {
 				resp.Provenance.EdgesIntoStdlib++
 			}
 		}
@@ -292,12 +298,15 @@ func (s *Server) handleSearchV23(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resp := SearchResponse{Query: q}
-	if s.idx == nil {
+	// v26.58 (D085): one locked snapshot of the index, as in the other
+	// handlers. The direct reads of s.idx raced with ReplaceContext.
+	idx := s.index()
+	if idx == nil {
 		writeJSON(w, resp)
 		return
 	}
 
-	all := s.idx.AllSymbols()
+	all := idx.AllSymbols()
 	s.mu.RLock()
 	efxCopy := make(map[string]*flow.FuncEffects, len(s.efx))
 	for k, v := range s.efx {
@@ -464,13 +473,18 @@ func (s *Server) handleCallgraphV23(w http.ResponseWriter, r *http.Request) {
 		r.URL.Query().Get("include_stdlib") == "true"
 
 	resp := CallgraphResponse{Root: root, Direction: direction, Depth: depth}
-	if s.idx == nil {
+	// v26.58 (D084): read the index once through the locked accessor and use
+	// that snapshot for every lookup. The direct reads of s.idx raced with
+	// ReplaceContext, and a project load in the middle of the request gave the
+	// root from the old index and the edges from the new one.
+	idx := s.index()
+	if idx == nil {
 		writeJSON(w, resp)
 		return
 	}
-	rootSym, ok := s.idx.ByID(root)
+	rootSym, ok := idx.ByID(root)
 	if !ok {
-		byName := s.idx.ByName(root)
+		byName := idx.ByName(root)
 		if len(byName) == 0 {
 			http.Error(w, "symbol not found", http.StatusNotFound)
 			return
@@ -521,7 +535,7 @@ func (s *Server) handleCallgraphV23(w http.ResponseWriter, r *http.Request) {
 
 	// Cache all call edges once and index unresolved edges by CallerID so
 	// the BFS doesn't re-scan the edge list per frontier node.
-	allEdges := s.idx.AllCallEdges()
+	allEdges := idx.AllCallEdges()
 	unresolvedByCaller := map[string][]symbols.CallEdge{}
 	for _, e := range allEdges {
 		if e.CalleeID == "" {
@@ -537,9 +551,19 @@ func (s *Server) handleCallgraphV23(w http.ResponseWriter, r *http.Request) {
 				resp.Truncated = true
 				break
 			}
-			var neighbours []*symbols.Symbol
+			// v26.58 (D083): each neighbour carries whether it came from the
+			// callee list or the caller list. The edge used to test only
+			// direction == "callers", so in "both" mode a caller of cur got the
+			// edge cur -> caller. A caller now always gives nb -> cur.
+			type neighbour struct {
+				sym      *symbols.Symbol
+				isCaller bool
+			}
+			var neighbours []neighbour
 			if direction == "callees" || direction == "both" {
-				neighbours = append(neighbours, s.idx.Callees(cur.ID)...)
+				for _, nb := range idx.Callees(cur.ID) {
+					neighbours = append(neighbours, neighbour{sym: nb})
+				}
 				for _, e := range unresolvedByCaller[cur.ID] {
 					resp.Edges = append(resp.Edges, CallgraphEdge{
 						From: cur.ID, ToName: e.CalleeName, Unresolved: true,
@@ -547,9 +571,12 @@ func (s *Server) handleCallgraphV23(w http.ResponseWriter, r *http.Request) {
 				}
 			}
 			if direction == "callers" || direction == "both" {
-				neighbours = append(neighbours, s.idx.Callers(cur.ID)...)
+				for _, nb := range idx.Callers(cur.ID) {
+					neighbours = append(neighbours, neighbour{sym: nb, isCaller: true})
+				}
 			}
-			for _, nb := range neighbours {
+			for _, n := range neighbours {
+				nb := n.sym
 				if nb == nil {
 					continue
 				}
@@ -559,7 +586,7 @@ func (s *Server) handleCallgraphV23(w http.ResponseWriter, r *http.Request) {
 				if !includeStdlib && nb.Provenance.IsExternal() {
 					continue
 				}
-				if direction == "callers" {
+				if n.isCaller {
 					resp.Edges = append(resp.Edges, CallgraphEdge{
 						From: nb.ID, To: cur.ID, ToName: cur.Name,
 					})
@@ -606,7 +633,11 @@ func (s *Server) handleEffectsV23(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	resp := EffectsListResponse{ByEffect: map[string][]EffectListEntry{}}
-	if s.idx == nil {
+	// v26.58 (D084): one locked snapshot of the index for the whole request,
+	// as in handleCallgraphV23. The direct reads of s.idx raced with
+	// ReplaceContext.
+	idx := s.index()
+	if idx == nil {
 		writeJSON(w, resp)
 		return
 	}
@@ -621,7 +652,7 @@ func (s *Server) handleEffectsV23(w http.ResponseWriter, r *http.Request) {
 		if fe == nil {
 			continue
 		}
-		sym, ok := s.idx.ByID(id)
+		sym, ok := idx.ByID(id)
 		if !ok {
 			continue
 		}

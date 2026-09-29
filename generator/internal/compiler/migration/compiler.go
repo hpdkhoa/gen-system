@@ -1,8 +1,6 @@
 package migration
 
 import (
-	"strings"
-
 	"github.com/hpdkhoa/gen-system/generator/internal/compiler/diff"
 )
 
@@ -16,7 +14,9 @@ func BuildMigration(cs diff.ChangeSet) MigrationIR {
 		// field. The id field is the built-in SERIAL key, not a second column.
 		var cols []Column
 		for _, f := range e.Fields {
-			if strings.EqualFold(f.Name, "id") {
+			// v26.58 (OPEN-TABLES): compare the column name, so "ID" or "Id"
+			// never becomes a second id column.
+			if columnName(f.Name) == "id" {
 				continue
 			}
 			cols = append(cols, Column{Name: f.Name, Type: f.Type})
@@ -54,6 +54,22 @@ func BuildMigration(cs diff.ChangeSet) MigrationIR {
 				Column:     ch.Field,
 				OldType:    ch.OldType,
 				ColumnType: ch.NewType,
+			})
+		}
+
+		// v26.58 (D041): mod.Removed was never read, so a removed field left
+		// its column in the database. ColumnType lets the down SQL add the
+		// column back. The id field is the built-in SERIAL key (see
+		// CREATE_TABLE above), never dropped here.
+		for _, rem := range mod.Removed {
+			if columnName(rem.Name) == "id" {
+				continue
+			}
+			m.Steps = append(m.Steps, MigrationStep{
+				Type:       "DROP_COLUMN",
+				Entity:     mod.EntityName,
+				Column:     rem.Name,
+				ColumnType: rem.Type,
 			})
 		}
 	}

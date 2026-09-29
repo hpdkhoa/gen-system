@@ -41,6 +41,12 @@ type ClassificationResult struct {
 	Hint string
 }
 
+// logicHint is the repair hint for LogicError. v26.58 (D078): shared by the
+// return count case and the other logic rules.
+const logicHint = "Semantic error: either a variable is declared but never used, return values " +
+	"don't match the function signature, or a multi-value expression is misused. " +
+	"Rewrite the function body to match the exact return signature."
+
 // ClassifyError reads a Go compiler error string and returns a
 // typed classification with a repair strategy and prompt hint.
 //
@@ -81,6 +87,19 @@ func ClassifyError(errLog string) ClassificationResult {
 				"all referenced identifiers exist in scope.",
 		}
 
+	// ── RETURN COUNT ERRORS ──
+	// v26.58 (D078): the compiler adds "have (...)" and "want (...)" lines to
+	// "not enough return values" and "too many return values", so the "have ("
+	// type rule below caught them first and the healer sent a type hint. These
+	// are logic errors; test them before the type rules.
+	case strings.Contains(lower, "not enough return values") ||
+		strings.Contains(lower, "too many return values"):
+		return ClassificationResult{
+			ErrorType: LogicError,
+			Strategy:  StrategyRewriteLogic,
+			Hint:      logicHint,
+		}
+
 	// ── TYPE ERRORS ──
 	case strings.Contains(lower, "cannot use") ||
 		strings.Contains(lower, "cannot convert") ||
@@ -96,7 +115,8 @@ func ClassifyError(errLog string) ClassificationResult {
 
 	// ── SYNTAX ERRORS ──
 	case strings.Contains(lower, "syntax error") ||
-		strings.Contains(lower, "unexpected ") ||
+		// v26.58 (D078): "unexpected " was tested here too, but it contains
+		// "expected ", so the next test already matches it.
 		strings.Contains(lower, "expected ") ||
 		strings.Contains(lower, "non-declaration statement"):
 		return ClassificationResult{
@@ -109,15 +129,11 @@ func ClassifyError(errLog string) ClassificationResult {
 	// ── LOGIC / SEMANTIC ERRORS ──
 	case strings.Contains(lower, "declared and not used") ||
 		strings.Contains(lower, "no new variables") ||
-		strings.Contains(lower, "not enough return values") ||
-		strings.Contains(lower, "too many return values") ||
 		strings.Contains(lower, "multiple-value") && strings.Contains(lower, "used in single-value"):
 		return ClassificationResult{
 			ErrorType: LogicError,
 			Strategy:  StrategyRewriteLogic,
-			Hint: "Semantic error: either a variable is declared but never used, return values " +
-				"don't match the function signature, or a multi-value expression is misused. " +
-				"Rewrite the function body to match the exact return signature.",
+			Hint:      logicHint,
 		}
 
 	default:

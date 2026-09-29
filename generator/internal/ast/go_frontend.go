@@ -393,6 +393,10 @@ func (c *goConverter) convertStmt(s goast.Stmt) []*Node {
 
 	case *goast.IfStmt:
 		n := &Node{Kind: NodeBranch, Language: LangGo, Name: "if", RawSource: exprText(st.Cond), Span: c.span(st.Pos(), st.End())}
+		// v26.58 (D059): the calls in the Init (`if err := f(); ...`) were
+		// dropped, so the call graph missed f. The Init runs before the
+		// condition, so its calls come first.
+		n.Children = append(n.Children, c.callsIn(st.Init)...)
 		n.Children = append(n.Children, c.callsIn(st.Cond)...)
 		n.Children = append(n.Children, c.convertStmtList(st.Body.List)...)
 		// v23.7 — else / else-if goes into Else (a DISTINCT block in the CFG),
@@ -412,6 +416,7 @@ func (c *goConverter) convertStmt(s goast.Stmt) []*Node {
 			cond = exprText(st.Cond)
 		}
 		n := &Node{Kind: NodeLoop, Language: LangGo, Name: "for", RawSource: cond, Span: c.span(st.Pos(), st.End())}
+		n.Children = append(n.Children, c.callsIn(st.Init)...) // v26.58 (D059): Init calls were dropped
 		if st.Cond != nil {
 			n.Children = append(n.Children, c.callsIn(st.Cond)...)
 		}
@@ -438,6 +443,7 @@ func (c *goConverter) convertStmt(s goast.Stmt) []*Node {
 		// into a cascade of fake decisions whose conditions were borrowed from
 		// the `if`s *inside* the case bodies.
 		n := &Node{Kind: NodeBranch, Language: LangGo, Name: "switch", Span: c.span(st.Pos(), st.End())}
+		n.Children = append(n.Children, c.callsIn(st.Init)...) // v26.58 (D059): Init calls were dropped
 		if st.Tag != nil {
 			n.RawSource = exprText(st.Tag)
 			n.Children = append(n.Children, c.callsIn(st.Tag)...)
@@ -447,7 +453,12 @@ func (c *goConverter) convertStmt(s goast.Stmt) []*Node {
 
 	case *goast.TypeSwitchStmt:
 		// v25.9 — same multi-way treatment. The "tag" is the type-switch guard.
-		n := &Node{Kind: NodeBranch, Language: LangGo, Name: "type-switch", Span: c.span(st.Pos(), st.End())}
+		// v26.58 (D059): the Init and the guard (`t := x.(type)`) were never
+		// read, so their calls were lost and RawSource was empty. The guard text
+		// now labels the node, and the calls in both come before the cases.
+		n := &Node{Kind: NodeBranch, Language: LangGo, Name: "type-switch", RawSource: stmtText(st.Assign), Span: c.span(st.Pos(), st.End())}
+		n.Children = append(n.Children, c.callsIn(st.Init)...)
+		n.Children = append(n.Children, c.callsIn(st.Assign)...)
 		n.Children = append(n.Children, c.caseClauses(st.Body.List)...)
 		return []*Node{n}
 
@@ -483,16 +494,20 @@ func (c *goConverter) convertStmt(s goast.Stmt) []*Node {
 
 	case *goast.DeferStmt:
 		n := &Node{Kind: NodeDefer, Language: LangGo, Span: c.span(st.Pos(), st.End()), Callee: calleeName(st.Call.Fun)}
+		// v26.58 (D060): the defer node held only the callee name, so the
+		// call graph saw neither the deferred call nor the calls in its
+		// arguments or in a deferred func literal. The calls go in as children.
+		n.Children = c.callsIn(st.Call)
 		return []*Node{n}
 
 	case *goast.BlockStmt:
 		return c.convertStmtList(st.List)
 
 	case *goast.ExprStmt:
-		// a bare expression statement — usually a call
-		if call, ok := st.X.(*goast.CallExpr); ok {
-			return []*Node{c.callNode(call)}
-		}
+		// a bare expression statement — usually a call.
+		// v26.58 (D060): the outer call alone lost the calls in its arguments
+		// (outer(nested())). callsIn walks the whole expression and still
+		// yields the outer call first, as AssignStmt already does.
 		return c.callsIn(st.X)
 
 	case *goast.AssignStmt:

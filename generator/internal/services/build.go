@@ -568,6 +568,11 @@ func relTypeIRToSchema(t string) string {
 	switch t {
 	case "1:1":
 		return "belongsTo"
+	case "N:1":
+		// v26.58 (D043): compiler/pass_infer.go sets "N:1" for Task.userId -> User,
+		// and it is the only type the compiler sets. The FromEntity holds the
+		// foreign key, so it is belongsTo, not the hasMany default.
+		return "belongsTo"
 	case "1:N", "N:M":
 		return "hasMany"
 	default:

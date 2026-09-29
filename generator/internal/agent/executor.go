@@ -23,7 +23,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strings"
 
 	"github.com/hpdkhoa/gen-system/generator/internal/ai"
 	"github.com/hpdkhoa/gen-system/generator/internal/engine"
@@ -84,7 +83,9 @@ func ExecuteTask(task planner.Task, entityMap map[string]interface{}, rootPath s
 		if err != nil {
 			return err
 		}
-		engine.GenerateModel(e, rootPath)
+		if err := engine.GenerateModel(e, rootPath); err != nil {
+			return err // v26.58 (D029): a failed write fails the task
+		}
 		return nil
 
 	case "generate_repo":
@@ -92,7 +93,9 @@ func ExecuteTask(task planner.Task, entityMap map[string]interface{}, rootPath s
 		if err != nil {
 			return err
 		}
-		engine.GenerateRepo(e, rootPath)
+		if err := engine.GenerateRepo(e, rootPath); err != nil {
+			return err // v26.58 (D029): a failed write fails the task
+		}
 		return nil
 
 	case "generate_service":
@@ -107,10 +110,15 @@ func ExecuteTask(task planner.Task, entityMap map[string]interface{}, rootPath s
 		if len(all) == 0 {
 			all = collectEntities(entityMap)
 		}
-		engine.GenerateServiceLogic(runIdea, e, all, logicProvider(), rootPath)
+		if err := engine.GenerateServiceLogic(runIdea, e, all, logicProvider(), rootPath); err != nil {
+			return err // v26.58 (D029): a failed write fails the task
+		}
 		// Phase 2.1 — Reviewer Agent: security pass on generated service
-		targetFile := filepath.Join(rootPath, "backend/internal/service/",
-			strings.ToLower(e.Name)+"_service.go")
+		// v26.58 (D045): the path was built from the raw entity name, so
+		// "Order Item" gave "order item_service.go", a file the generator never
+		// writes; ReviewCode could not read it and reported Safe. targetFileFor
+		// uses the generator's own naming, as the handler branch below does.
+		targetFile := targetFileFor(e.Name, "generate_service", rootPath)
 		review := ai.ReviewCode("service", e.Name, targetFile)
 		if !review.Safe {
 			fmt.Printf("     [review] ⚠️  Security issues in %s_service.go:\n%s\n",
@@ -129,7 +137,9 @@ func ExecuteTask(task planner.Task, entityMap map[string]interface{}, rootPath s
 		if err != nil {
 			return err
 		}
-		engine.GenerateHandler(e, rootPath)
+		if err := engine.GenerateHandler(e, rootPath); err != nil {
+			return err // v26.58 (D029): a failed write fails the task
+		}
 		engine.RenderBackend(e, rootPath)
 		// Phase 2.1 — Reviewer Agent: security pass on generated handler.
 		// v23.15: handler files are <Entity>_handler.go (capitalized), not the
@@ -154,7 +164,9 @@ func ExecuteTask(task planner.Task, entityMap map[string]interface{}, rootPath s
 		if err != nil {
 			return err
 		}
-		engine.GenerateValidation(e, rootPath)
+		if err := engine.GenerateValidation(e, rootPath); err != nil {
+			return err // v26.58 (D029): a failed write fails the task
+		}
 		return nil
 
 	case "generate_frontend":
@@ -162,8 +174,14 @@ func ExecuteTask(task planner.Task, entityMap map[string]interface{}, rootPath s
 		if err != nil {
 			return err
 		}
-		frontend.GenerateForm(e, rootPath)
-		frontend.GenerateList(e, rootPath)
+		// v26.58 (D032): a form or list that could not be written fails the
+		// task; before, the write error was dropped and the task counted as done.
+		if err := frontend.GenerateForm(e, rootPath); err != nil {
+			return err
+		}
+		if err := frontend.GenerateList(e, rootPath); err != nil {
+			return err
+		}
 		engine.RenderFrontend(e, rootPath)
 		return nil
 
@@ -202,11 +220,15 @@ func ExecuteTask(task planner.Task, entityMap map[string]interface{}, rootPath s
 
 	case "generate_router":
 		entities := collectEntities(entityMap)
-		router.GenerateRouter(entities, rootPath)
+		routerErr := router.GenerateRouter(entities, rootPath)
 		// v23.2: emit the in-memory backend app shell (go.mod + main.go wiring
 		// every entity's routes) so the generated project compiles and runs.
-		engine.GenerateBackendApp(entities, rootPath)
-		return nil
+		if err := engine.GenerateBackendApp(entities, rootPath); err != nil {
+			return err // v26.58 (D029): a failed write fails the task
+		}
+		// v26.58 (D034): a router that could not be written fails the task. The
+		// backend shell above does not depend on it, so it is still written.
+		return routerErr
 
 	// Phase 1.2 — Dynamic .env + .env.example + docker-compose.yml
 	// components is extracted from the task payload (set by planner_v2).
@@ -238,7 +260,9 @@ func ExecuteTask(task planner.Task, entityMap map[string]interface{}, rootPath s
 		// frontend/ fragments in a buildable Vite+React+TS project (makes
 		// `tsc --noEmit` + `npm run build` real gates). Mobile project scaffold
 		// is emitted too when a mobile/ layer was generated (JS bundle only).
-		engine.GenerateWebProject(entities, rootPath)
+		if err := engine.GenerateWebProject(entities, rootPath); err != nil {
+			return err // v26.58 (D030): a web project that cannot be written fails the task
+		}
 		if _, err := os.Stat(filepath.Join(rootPath, "mobile")); err == nil {
 			engine.GenerateMobileProject(entities, rootPath)
 		}

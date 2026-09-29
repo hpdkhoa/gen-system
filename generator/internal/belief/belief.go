@@ -26,9 +26,11 @@
 package belief
 
 import (
+	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -39,6 +41,7 @@ import (
 	"github.com/hpdkhoa/gen-system/generator/internal/ast"
 	"github.com/hpdkhoa/gen-system/generator/internal/flow"
 	"github.com/hpdkhoa/gen-system/generator/internal/symbols"
+	"github.com/hpdkhoa/gen-system/generator/internal/trace"
 )
 
 // Kind classifies a belief in HUMAN-REVIEWABLE, behavioral terms — what a person
@@ -308,8 +311,15 @@ func (bs *Store) RebuildFromIndex(idx *symbols.Index, efx map[string]*flow.FuncE
 	bs.reattachSummariesLocked()
 
 	bs.computeChecksumLocked()
-	bs.saveLocked()
+	// v26.58 (D020): a rebuild has no caller to report to, so a failed save is logged.
+	if err := bs.saveLocked(); err != nil {
+		trace.Error(context.Background(), "belief store save failed", "path", bs.diskPath, "err", err)
+	}
 }
+
+// staleSourceNote is the note an enrich belief carries while its routine's source
+// differs from the body it was written from.
+const staleSourceNote = "the routine's source changed since this was written — re-enrich"
 
 // reattachEnrichLocked folds persisted enrich beliefs into the live belief set,
 // re-validating and stale-checking each against current source. Caller holds mu.
@@ -319,6 +329,15 @@ func (bs *Store) reattachEnrichLocked(factsBySym map[string]parserFacts, groupBy
 		// If the routine no longer exists in the index, keep the belief but mark it
 		// stale (its subject is gone) rather than dropping a human-reviewable record.
 		facts, symStillPresent := factsBySym[symID]
+
+		// v26.58 (D019): the stale state was only ever set to true, so it stuck after
+		// the body or the routine came back. It is now computed fresh on each
+		// rebuild: clear it here, and the checks below set it again when one fails.
+		eb.Stale = false
+		eb.SourceNow = ""
+		if eb.ValidationNote == staleSourceNote {
+			eb.ValidationNote = ""
+		}
 
 		// Re-validate against current facts (source may have changed the effects).
 		validateEnrich(eb, facts)
@@ -336,7 +355,7 @@ func (bs *Store) reattachEnrichLocked(factsBySym map[string]parserFacts, groupBy
 			if cur != "" && cur != eb.SourceHash {
 				eb.Stale = true
 				if eb.ValidationNote == "" {
-					eb.ValidationNote = "the routine's source changed since this was written — re-enrich"
+					eb.ValidationNote = staleSourceNote
 				}
 			}
 		}
@@ -934,12 +953,16 @@ func (bs *Store) StaleSummaryCount() int {
 // so a future re-parse can detect if the source moves away from it. Re-correcting
 // a stale belief re-baselines the fingerprint to the current source value and
 // clears the stale flag (the human has just reconciled with the new source).
+// ErrBeliefNotFound is the error Correct wraps for an unknown belief ID, so a
+// caller can tell a bad request from a failed save. v26.58.
+var ErrBeliefNotFound = errors.New("belief not found")
+
 func (bs *Store) Correct(c Correction) error {
 	bs.mu.Lock()
 	defer bs.mu.Unlock()
 	b, ok := bs.beliefs[c.BeliefID]
 	if !ok {
-		return fmt.Errorf("belief %q not found", c.BeliefID)
+		return fmt.Errorf("%w: %q", ErrBeliefNotFound, c.BeliefID)
 	}
 	// Fingerprint = the current source-derived value. If the belief is currently
 	// flagged stale, the fresh source value lives in SourceNow; otherwise Object
@@ -957,8 +980,7 @@ func (bs *Store) Correct(c Correction) error {
 	b.Source = SourceHuman
 	b.Stale = false
 	b.SourceNow = ""
-	bs.saveLocked()
-	return nil
+	return bs.saveLocked() // v26.58 (D020): a lost write is an error, not success
 }
 
 // DiffSince reports unverified beliefs as "changed" when the checksum moved.
@@ -990,13 +1012,18 @@ func (bs *Store) computeChecksumLocked() {
 		keys = append(keys, k)
 	}
 	sort.Strings(keys)
-	var sb strings.Builder
+	// v26.58 (D018): the checksum kept the count and the first 16 bytes of this
+	// text, which the first sorted ID alone fills, so a changed value left it equal
+	// and DiffSince reported nothing. It now hashes the whole text with sha256, as
+	// hashSource does. The separators keep ID and value apart.
+	h := sha256.New()
 	for _, k := range keys {
-		sb.WriteString(k)
-		sb.WriteString(bs.beliefs[k].Object)
+		h.Write([]byte(k))
+		h.Write([]byte{0})
+		h.Write([]byte(bs.beliefs[k].Object))
+		h.Write([]byte{'\n'})
 	}
-	body := sb.String()
-	bs.checksum = fmt.Sprintf("%x", len(bs.beliefs)) + body[:minInt(len(body), 16)]
+	bs.checksum = hex.EncodeToString(h.Sum(nil))
 }
 
 // persisted is the on-disk shape. Only the DURABLE classes are stored: human
@@ -1011,16 +1038,26 @@ type persisted struct {
 	Summaries     map[string]*Belief    `json:"summaries,omitempty"`
 }
 
-func (bs *Store) saveLocked() {
+// saveLocked writes the durable classes to disk. Caller holds mu.
+//
+// v26.58 (D020): every error was dropped, so Correct reported success for a
+// correction that never reached disk and was lost on restart. The error now goes
+// back to the caller.
+func (bs *Store) saveLocked() error {
 	pb := persisted{Corrections: bs.corrections, EnrichBeliefs: bs.enrichBeliefs, Summaries: bs.summaries}
 	data, err := json.MarshalIndent(pb, "", "  ")
 	if err != nil {
-		return
+		return fmt.Errorf("save beliefs: %w", err)
 	}
 	if dir := filepath.Dir(bs.diskPath); dir != "" {
-		_ = os.MkdirAll(dir, 0o755)
+		if err := os.MkdirAll(dir, 0o755); err != nil {
+			return fmt.Errorf("save beliefs: %w", err)
+		}
 	}
-	_ = os.WriteFile(bs.diskPath, data, 0o644)
+	if err := os.WriteFile(bs.diskPath, data, 0o644); err != nil {
+		return fmt.Errorf("save beliefs: %w", err)
+	}
+	return nil
 }
 
 func (bs *Store) load() {
@@ -1049,13 +1086,6 @@ func (bs *Store) load() {
 			}
 		}
 	}
-}
-
-func minInt(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
 }
 
 // hashSource returns a short stable fingerprint of a routine's source text. Empty
@@ -1099,7 +1129,9 @@ type EnrichInput struct {
 // input is fingerprinted against its source and validated later (on the next
 // rebuild, against fresh parser facts). Persisted immediately. Safe to call with
 // the store otherwise idle; it does not require an index.
-func (bs *Store) UpsertEnrichBeliefs(inputs []EnrichInput) {
+//
+// v26.58 (D020): returns the save error, so a lost write is not reported as done.
+func (bs *Store) UpsertEnrichBeliefs(inputs []EnrichInput) error {
 	bs.mu.Lock()
 	defer bs.mu.Unlock()
 	for _, in := range inputs {
@@ -1121,7 +1153,7 @@ func (bs *Store) UpsertEnrichBeliefs(inputs []EnrichInput) {
 			SourceHash: hashSource(in.Body),
 		}
 	}
-	bs.saveLocked()
+	return bs.saveLocked()
 }
 
 // ClearEnrichForSymbol drops all persisted enrich beliefs for one routine — used
@@ -1134,5 +1166,7 @@ func (bs *Store) ClearEnrichForSymbol(symbolID string) {
 			delete(bs.enrichBeliefs, id)
 		}
 	}
-	bs.saveLocked()
+	if err := bs.saveLocked(); err != nil { // v26.58 (D020): log, do not hide
+		trace.Error(context.Background(), "belief store save failed", "path", bs.diskPath, "err", err)
+	}
 }

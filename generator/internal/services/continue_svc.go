@@ -183,6 +183,14 @@ func (s *BuildService) ApproveContinue() error {
 func (s *BuildService) RejectContinue() error {
 	s.mu.Lock()
 	p := s.pending
+	if p == nil {
+		// v26.58 (D089): the old code failed s.job before this test, so a
+		// reject with no review pending marked a RUNNING build failed while its
+		// goroutine still wrote files, and let a second run start. With no
+		// pending plan there is nothing to reject: leave the job alone.
+		s.mu.Unlock()
+		return fmt.Errorf("no continuation is awaiting approval")
+	}
 	s.pending = nil
 	if s.job != nil {
 		s.job.Status = JobFailed
@@ -190,9 +198,6 @@ func (s *BuildService) RejectContinue() error {
 		s.job.DoneAt = time.Now().UnixMilli()
 	}
 	s.mu.Unlock()
-	if p == nil {
-		return fmt.Errorf("no continuation is awaiting approval")
-	}
 	s.broker.Publish("agent_event", map[string]string{"phase": "red", "dot": "red", "text": "Rejected — nothing was generated."})
 	s.broker.Publish("continue_rejected", map[string]string{"idea": p.Idea})
 	return nil

@@ -26,8 +26,11 @@ func EvolveForm(e schema.Entity, rootPath string) {
 
 	existing, err := os.ReadFile(formPath)
 	if err != nil {
-		// File doesn't exist yet — generate fresh
-		GenerateForm(e, rootPath)
+		// v26.58 (D031): the fallback called GenerateForm, which writes
+		// frontend/<lower>Form.jsx, a path this function never reads, so no run
+		// ever created the marker file. Write the file we read, with markers.
+		generateFormWithMarkers(e, rootPath)
+		fmt.Printf("[evolve] ✅ Form generated with evolution markers: %s\n", formPath)
 		return
 	}
 
@@ -65,7 +68,10 @@ func EvolveList(e schema.Entity, rootPath string) {
 
 	existing, err := os.ReadFile(listPath)
 	if err != nil {
-		GenerateList(e, rootPath)
+		// v26.58 (D031): write the path this function reads, with markers, not
+		// GenerateList's frontend/<lower>List.jsx, so the next run can evolve it.
+		generateListWithMarkers(e, rootPath)
+		fmt.Printf("[evolve] ✅ List generated with evolution markers: %s\n", listPath)
 		return
 	}
 
@@ -104,16 +110,19 @@ func buildFormInputs(e schema.Entity) string {
 		if strings.EqualFold(f.Name, "id") {
 			continue // id is not user-editable
 		}
+		// v26.58 (D035): use the JSON key the generated model reads
+		// (schema.JSONKey), not the raw field name.
+		key := schema.JSONKey(f.Name)
 		sb.WriteString(fmt.Sprintf(
 			"        <div className=\"form-field\">\n"+
 				"          <label>%s</label>\n"+
 				"          <input\n"+
 				"            placeholder=\"%s\"\n"+
-				"            value={form.%s || \"\"}\n"+
+				"            value={%s || \"\"}\n"+
 				"            onChange={e => setForm({...form, %s: e.target.value})}\n"+
 				"          />\n"+
 				"        </div>\n",
-			f.Name, f.Name, f.Name, f.Name,
+			f.Name, f.Name, jsProp("form", key), tsPropName(key),
 		))
 	}
 	return sb.String()
@@ -122,8 +131,9 @@ func buildFormInputs(e schema.Entity) string {
 func buildListColumns(e schema.Entity) string {
 	var sb strings.Builder
 	for _, f := range e.Fields {
+		// v26.58 (D035): read the JSON key the model writes.
 		sb.WriteString(fmt.Sprintf(
-			"              <td>{item.%s}</td>\n", f.Name))
+			"              <td>{%s}</td>\n", jsProp("item", schema.JSONKey(f.Name))))
 	}
 	return sb.String()
 }

@@ -105,26 +105,40 @@ func (idx *Index) addModule(m *ast.Module, prov Provenance) {
 
 	// Extract call edges from function bodies
 	for _, n := range m.Nodes {
-		idx.extractCallEdges(n, m.FilePath, m.Language, "")
+		idx.extractCallEdges(n, m.FilePath, m.Language, "", "")
 	}
 }
 
-func (idx *Index) extractCallEdges(n *ast.Node, filePath string, lang ast.Language, ownerID string) {
+// extractCallEdges records one call edge per call node under n.
+//
+// ownerName is the name of the enclosing class, function or procedure, the same
+// owner extractNode passes down, so a method with no Receiver gets the caller ID
+// its symbol has.
+func (idx *Index) extractCallEdges(n *ast.Node, filePath string, lang ast.Language, ownerID, ownerName string) {
 	if n == nil {
 		return
 	}
 	var nodeID string
+	childOwner := ownerName
 	switch n.Kind {
 	case ast.NodeFunction:
 		nodeID = SymbolID(filePath, SymFunc, n.Name)
+		childOwner = n.Name
 	case ast.NodeMethod:
-		recvName := ""
+		// v26.58 (D102): TS and Python methods have no Receiver, so every one got
+		// the caller ID ".name" and the edges of two classes merged. Use the owner
+		// name, as extractNode now does.
+		recvName := ownerName
 		if n.Receiver != nil {
 			recvName = n.Receiver.Name
 		}
 		nodeID = SymbolID(filePath, SymMethod, recvName+"."+n.Name)
 	case ast.NodeProcedure:
 		nodeID = SymbolID(filePath, SymProcedure, n.Name)
+		childOwner = n.Name
+	case ast.NodeStruct, ast.NodeClass, ast.NodeInterface:
+		nodeID = ownerID
+		childOwner = n.Name
 	default:
 		nodeID = ownerID
 	}
@@ -137,7 +151,7 @@ func (idx *Index) extractCallEdges(n *ast.Node, filePath string, lang ast.Langua
 				Span:       child.Span,
 			})
 		}
-		idx.extractCallEdges(child, filePath, lang, nodeID)
+		idx.extractCallEdges(child, filePath, lang, nodeID, childOwner)
 	}
 }
 
@@ -416,7 +430,7 @@ func (idx *Index) UpdateFile(filePath string, m *ast.Module) {
 		idx.allSymbols[id] = sym
 	}
 	for _, n := range m.Nodes {
-		idx.extractCallEdges(n, m.FilePath, m.Language, "")
+		idx.extractCallEdges(n, m.FilePath, m.Language, "", "")
 	}
 
 	// Re-resolve callees that were left dangling. We don't grab the
@@ -564,10 +578,20 @@ func (idx *Index) Resolve(name, fromFile string) (*Symbol, bool) {
 	// "same-package visibility". Only the cross-package paths (the
 	// qualified-name and global-exported branches below) need the
 	// Exported check.
+	//
+	// v26.58 (D101): steps 2 to 4 took the first match in map order, so the
+	// answer changed between runs when two files matched. They now walk the
+	// files, or the symbols, sorted by path or ID and take the first match.
+	files := make([]string, 0, len(idx.tables))
+	for fp := range idx.tables {
+		files = append(files, fp)
+	}
+	sort.Strings(files)
+
 	fromDir := filepath.Dir(fromFile)
-	for fp, t := range idx.tables {
+	for _, fp := range files {
 		if filepath.Dir(fp) == fromDir && fp != fromFile {
-			if syms := t.Lookup(name); len(syms) > 0 {
+			if syms := idx.tables[fp].Lookup(name); len(syms) > 0 {
 				return syms[0], true
 			}
 		}
@@ -579,9 +603,9 @@ func (idx *Index) Resolve(name, fromFile string) (*Symbol, bool) {
 		localName := name[dot+1:]
 		importPath := idx.resolveImportPath(pkg, fromFile)
 		if importPath != "" {
-			for fp, t := range idx.tables {
+			for _, fp := range files {
 				if strings.HasSuffix(fp, importPath) || strings.Contains(fp, importPath) {
-					if syms := t.Lookup(localName); len(syms) > 0 && syms[0].Exported {
+					if syms := idx.tables[fp].Lookup(localName); len(syms) > 0 && syms[0].Exported {
 						return syms[0], true
 					}
 				}
@@ -590,10 +614,15 @@ func (idx *Index) Resolve(name, fromFile string) (*Symbol, bool) {
 	}
 
 	// 4. Global exported
+	var global []*Symbol
 	for _, s := range idx.allSymbols {
 		if s.Name == name && s.Exported {
-			return s, true
+			global = append(global, s)
 		}
+	}
+	if len(global) > 0 {
+		sort.Slice(global, func(i, j int) bool { return global[i].ID < global[j].ID })
+		return global[0], true
 	}
 	return nil, false
 }
@@ -604,20 +633,26 @@ func (idx *Index) resolveImportPath(alias, fromFile string) string {
 	if !ok {
 		return ""
 	}
+	// v26.58 (D101): an aliased import is bound only to its alias, so the last
+	// segment of its path must not match (htmpl "html/template" is not
+	// "template"). An exact name match wins over a last segment match, and
+	// t.All is sorted by ID, so the answer no longer depends on map order.
+	lastSegment := ""
 	for _, s := range t.All() {
-		if s.Kind == SymImport {
-			name := s.Name
-			if name == alias {
-				return s.QualName
-			}
-			// Last path segment match
+		if s.Kind != SymImport {
+			continue
+		}
+		if s.Name == alias {
+			return s.QualName
+		}
+		if s.ImportAlias == "" && lastSegment == "" {
 			parts := strings.Split(s.QualName, "/")
 			if parts[len(parts)-1] == alias {
-				return s.QualName
+				lastSegment = s.QualName
 			}
 		}
 	}
-	return ""
+	return lastSegment
 }
 
 // References returns all known reference sites for a symbol.

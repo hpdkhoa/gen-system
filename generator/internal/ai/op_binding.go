@@ -17,6 +17,8 @@ package ai
 
 import (
 	"strings"
+	"unicode"
+	"unicode/utf8"
 
 	"github.com/hpdkhoa/gen-system/generator/internal/schema"
 )
@@ -25,6 +27,7 @@ import (
 type candidateOp struct {
 	Phrase string // e.g. "adjust stock"
 	Entity string // e.g. "Product"
+	Verb   string // e.g. "adjust", the actionVerbs entry that found it
 }
 
 // actionVerbs are imperative verbs that typically introduce a business
@@ -49,6 +52,18 @@ type entKeys struct {
 // of operation phrases most likely belonging to it.
 func bindOperationsToEntities(idea string, all []schema.Entity) map[string][]string {
 	out := map[string][]string{}
+	for ent, ops := range bindCandidateOps(idea, all) {
+		for _, op := range ops {
+			out[ent] = append(out[ent], op.Phrase)
+		}
+	}
+	return out
+}
+
+// bindCandidateOps does the work of bindOperationsToEntities and keeps the verb
+// that found each phrase, so OpMisplaced can compare verbs, not substrings.
+func bindCandidateOps(idea string, all []schema.Entity) map[string][]candidateOp {
+	out := map[string][]candidateOp{}
 	lower := strings.ToLower(idea)
 
 	// Build a lookup of entity-associated keywords: the entity name (singular &
@@ -70,7 +85,7 @@ func bindOperationsToEntities(idea string, all []schema.Entity) map[string][]str
 	clauses := splitClauses(lower)
 	for _, cl := range clauses {
 		for _, verb := range actionVerbs {
-			idx := strings.Index(cl, verb)
+			idx := indexWord(cl, verb)
 			if idx == -1 {
 				continue
 			}
@@ -79,10 +94,36 @@ func bindOperationsToEntities(idea string, all []schema.Entity) map[string][]str
 			if ent == "" {
 				continue
 			}
-			out[ent] = appendUniqueCI(out[ent], phrase)
+			out[ent] = appendUniqueOp(out[ent], candidateOp{Phrase: phrase, Entity: ent, Verb: verb})
 		}
 	}
 	return out
+}
+
+// indexWord returns the index of the first occurrence of word in s that stands
+// as a whole word, or -1.
+//
+// v26.58 (D069): the binding used strings.Index, so a verb matched inside a
+// longer word: "payment reference" bound "pay" to Order and "relationship"
+// bound "ship" to Product, and the logic prompt then asked the model to
+// implement operations the idea never states. A match now counts only when
+// the characters before and after it are not letters.
+func indexWord(s, word string) int {
+	from := 0
+	for {
+		i := strings.Index(s[from:], word)
+		if i == -1 {
+			return -1
+		}
+		at := from + i
+		end := at + len(word)
+		before, _ := utf8.DecodeLastRuneInString(s[:at])
+		after, _ := utf8.DecodeRuneInString(s[end:])
+		if (at == 0 || !unicode.IsLetter(before)) && (end == len(s) || !unicode.IsLetter(after)) {
+			return at
+		}
+		from = at + 1
+	}
 }
 
 // splitClauses breaks text on ; . and common conjunctions so a verb is matched
@@ -161,6 +202,17 @@ func indexAllNearest(s, sub string, pos int) int {
 	return best
 }
 
+// appendUniqueOp appends op unless a phrase equal to it (ignoring case) is
+// already present, as appendUniqueCI does for the plain phrase list.
+func appendUniqueOp(s []candidateOp, op candidateOp) []candidateOp {
+	for _, x := range s {
+		if strings.EqualFold(x.Phrase, op.Phrase) {
+			return s
+		}
+	}
+	return append(s, op)
+}
+
 func appendUniqueCI(s []string, v string) []string {
 	for _, x := range s {
 		if strings.EqualFold(x, v) {
@@ -182,16 +234,20 @@ func appendUniqueCI(s []string, v string) []string {
 // v23.25 (task B). Pairs with bindOperationsToEntities (the positive hint used
 // in the prompt); this is the negative post-filter applied after generation.
 func OpMisplaced(idea, target string, opName string, all []schema.Entity) bool {
-	bindings := bindOperationsToEntities(idea, all)
+	bindings := bindCandidateOps(idea, all)
 	verb := opVerb(opName)
 	if verb == "" {
 		return false
 	}
 	targetLC := strings.ToLower(target)
 
+	// v26.58 (D068): ownsVerb tested strings.Contains(phrase, verb), so the op
+	// verb "check" (CheckStock) was found inside the Order phrase "check out an
+	// order" and CheckStock was dropped from Product. An entity now owns the
+	// verb only when one of its phrases was bound by that same verb.
 	ownsVerb := func(entity string) bool {
-		for _, phrase := range bindings[entity] {
-			if strings.Contains(strings.ToLower(phrase), verb) {
+		for _, op := range bindings[entity] {
+			if verbKey(op.Verb) == verbKey(verb) {
 				return true
 			}
 		}
@@ -238,14 +294,40 @@ func opVerb(opName string) string {
 		return ""
 	}
 	lead := strings.ToLower(words[0])
-	// two-word verb special case
-	if lead == "check" && len(words) > 1 && strings.EqualFold(words[1], "out") {
-		return "check out"
-	}
-	for _, v := range actionVerbs {
-		if v == lead || strings.HasPrefix(v, lead) || strings.HasPrefix(lead, v) {
-			return strings.Fields(v)[0]
+	// v26.58 (D068): the old loop also accepted a prefix in either direction, so
+	// CheckStock gave "check", ReOpen gave "reject", PaymentStatus gave "pay"
+	// and C gave "check". Only a whole verb maps now: the first two words joined
+	// ("Re"+"Open" is "reopen"), else the lead word. Any other lead is returned
+	// as is and binds to nothing, so OpMisplaced keeps the op.
+	//
+	// v26.58 (D070): Checkout gave "checkout" while CheckOut gave "check out",
+	// and the idea may spell the verb either way, so OpMisplaced missed a
+	// Checkout op on the wrong entity. Both spellings now map by verbKey to the
+	// first actionVerbs entry, "check out", and ownsVerb compares verbKey too.
+	// This replaces the old "check"+"out" special case.
+	if len(words) > 1 {
+		if v := canonicalVerb(lead + strings.ToLower(words[1])); v != "" {
+			return v
 		}
 	}
+	if v := canonicalVerb(lead); v != "" {
+		return v
+	}
 	return lead
+}
+
+// verbKey is the spelling-free form of a verb: "check out" and "checkout" both
+// give "checkout".
+func verbKey(v string) string {
+	return strings.ReplaceAll(v, " ", "")
+}
+
+// canonicalVerb returns the first actionVerbs entry whose verbKey is key, or "".
+func canonicalVerb(key string) string {
+	for _, v := range actionVerbs {
+		if verbKey(v) == key {
+			return v
+		}
+	}
+	return ""
 }

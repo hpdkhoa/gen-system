@@ -172,7 +172,7 @@ func ContinueFromInput(path, idea string) {
 func parseContinueArgs(args []string) (path, idea string, ok bool) {
 	var positional []string
 	skipNext := false
-	for _, a := range args {
+	for i, a := range args {
 		if skipNext {
 			skipNext = false
 			continue
@@ -180,6 +180,13 @@ func parseContinueArgs(args []string) (path, idea string, ok bool) {
 		switch {
 		case a == "--review-dir" || a == "--env":
 			skipNext = true
+		// v26.58 (D022): the value of --heal-log, --out, --style, --style-mode,
+		// --stdlib and --verify-understand became idea text (or the path when the
+		// flag came first). Skip the next word when it is a value, the same rule
+		// the readers of these flags use (isFlagish), so a bare
+		// --verify-understand still leaves the following flag alone.
+		case continueValueFlags[a]:
+			skipNext = i+1 < len(args) && !isFlagish(args[i+1])
 		case strings.HasPrefix(a, "--"):
 			// boolean flags (--v2, --apply, --force, --yes, --allow-remove) or
 			// --flag=value forms; consumed by HasFlag/GetFlag elsewhere.
@@ -193,6 +200,17 @@ func parseContinueArgs(args []string) (path, idea string, ok bool) {
 	path = positional[0]
 	idea = strings.TrimSpace(strings.Join(positional[1:], " "))
 	return path, idea, idea != ""
+}
+
+// continueValueFlags lists the flags of gen continue that take a value in the
+// next word, besides --review-dir and --env. v26.58 (D022).
+var continueValueFlags = map[string]bool{
+	"--heal-log":          true,
+	"--out":               true,
+	"--style":             true,
+	"--style-mode":        true,
+	"--stdlib":            true,
+	"--verify-understand": true,
 }
 
 func printContinueUsage() {

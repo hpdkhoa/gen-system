@@ -24,7 +24,10 @@ import (
 func RunAll(entities []schema.Entity, path string) {
 
 	// ✅ FIX: Load previous IR snapshot for evolution merge
-	oldIR, _ := compiler.LoadPreviousIR()
+	// v26.58 (follow up 7): the snapshot of the OUTPUT folder. It came from the
+	// working directory, so a stale snapshot there skipped entities in a fresh
+	// output folder, and every run overwrote the caller's own snapshot.
+	oldIR, _ := compiler.LoadIRAt(path)
 
 	// Build schema file from entities slice
 	sf := schema.SchemaFile{Entities: entities}
@@ -100,8 +103,14 @@ func RunAll(entities []schema.Entity, path string) {
 		RunMutationLayer(e, path)
 
 		// ── FRONTEND ───────────────────────────────────────────────
-		frontend.GenerateForm(e, path)
-		frontend.GenerateList(e, path)
+		// v26.58 (follow up of D032): report a failed write, as the mobile
+		// screen below does; the batch path keeps going.
+		if err := frontend.GenerateForm(e, path); err != nil {
+			fmt.Printf("⚠️  %v\n", err)
+		}
+		if err := frontend.GenerateList(e, path); err != nil {
+			fmt.Printf("⚠️  %v\n", err)
+		}
 		renderFrontend(e, path)
 
 		// ── MOBILE ─────────────────────────────────────────────────
@@ -115,10 +124,12 @@ func RunAll(entities []schema.Entity, path string) {
 	}
 
 	// ✅ FIX: Save IR snapshot for next evolution cycle
-	if err := compiler.SaveIR(newIR); err != nil {
+	if err := compiler.SaveIRAt(path, newIR); err != nil {
 		fmt.Println("⚠️ Could not save IR snapshot:", err)
 	}
 
 	// Global router
-	router.GenerateRouter(entities, path)
+	if err := router.GenerateRouter(entities, path); err != nil {
+		fmt.Printf("⚠️  %v\n", err) // v26.58 (follow up of D034)
+	}
 }

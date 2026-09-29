@@ -47,7 +47,9 @@ func BuildPlan(goal string) (Plan, error) {
 	saveRaw("plan.raw.json", planJSON)
 
 	// Step 2: plan JSON → schema JSON
-	schemaJSON := ai.GenerateSchemaFromPlan(planJSON)
+	// v26.58 (D049): the error now comes back; an error still means "" here,
+	// so the fallback below runs as before.
+	schemaJSON, _ := ai.GenerateSchemaFromPlan(planJSON)
 
 	// Fallback: if plan→schema fails, generate schema directly from goal
 	if schemaJSON == "" || schemaJSON == "{}" {

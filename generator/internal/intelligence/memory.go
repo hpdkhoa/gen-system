@@ -16,10 +16,14 @@ const MemoryFile = ".gen/memory.json"
 // (across entities/tasks) share the same memory entry.
 // ─────────────────────────────────────────────
 type FixRecord struct {
-	ErrorType    string `json:"error_type"`
-	TaskType     string `json:"task_type"`
-	EntityName   string `json:"entity_name"`
-	FixBody      string `json:"fix_body"`
+	ErrorType  string `json:"error_type"`
+	TaskType   string `json:"task_type"`
+	EntityName string `json:"entity_name"`
+	FixBody    string `json:"fix_body"`
+	// BrokenBody is the function body that failed, before the repair.
+	// v26.58 (follow up of D050): the training export shows it under
+	// "Broken Code"; before, the record held only the fix.
+	BrokenBody   string `json:"broken_body,omitempty"`
 	SuccessCount int    `json:"success_count"`
 	FailCount    int    `json:"fail_count"`
 }
@@ -84,6 +88,17 @@ func (m *Memory) RecordSuccess(errHash, errType, taskType, entityName, fixBody s
 	rec.EntityName = entityName
 	rec.FixBody = fixBody
 	rec.SuccessCount++
+	m.Fixes[errHash] = rec
+}
+
+// RecordBroken stores the body that failed for an error hash. An empty body
+// keeps what the record already holds.
+func (m *Memory) RecordBroken(errHash, brokenBody string) {
+	if brokenBody == "" {
+		return
+	}
+	rec := m.Fixes[errHash]
+	rec.BrokenBody = brokenBody
 	m.Fixes[errHash] = rec
 }
 

@@ -448,12 +448,24 @@ func dispatchRepairs(files []string, output string, ctx agentctx.Context, rootPa
 }
 
 func inferEntityFromPath(path string) (string, string) {
+	// v26.58 (D104): the cases below look for forward slashes, but on Windows
+	// go build prints internal\service\order_service.go and a verify finding
+	// carries an absolute C:\...\ path, so no case matched and no repair ran.
+	// Both separators now count. The proposed filepath.ToSlash would leave a
+	// backslash path unchanged on a system whose separator is "/", so the
+	// backslash is replaced directly.
+	path = strings.ReplaceAll(path, `\`, "/")
 	lower := strings.ToLower(path)
 	var layer string
 	switch {
 	case strings.Contains(lower, "/model/"):
 		layer = "generate_model"
 	case strings.Contains(lower, "/repository/"):
+		layer = "generate_repo"
+	case strings.Contains(lower, "/store/"):
+		// v26.58 (D079): the generator writes the repo layer to internal/store
+		// (layerFor in target_resolve.go); the old "repository" dir is gone, so
+		// an error in a store file matched no case and got no repair.
 		layer = "generate_repo"
 	case strings.Contains(lower, "/service/"):
 		layer = "generate_service"

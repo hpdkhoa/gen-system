@@ -125,14 +125,22 @@ func buildTrainingExample(rec intelligence.FixRecord) TrainingExample {
 		rec.TaskType,
 	)
 
+	// v26.58 (D050): the "## Broken Code" section held summariseBody(rec.FixBody),
+	// the verified fix itself, and the assistant message holds the same fix, so
+	// the model learned to copy its input. The healer now records the body that
+	// failed (FixRecord.BrokenBody); the section shows it, and is left out for
+	// older records that have none or where it equals the fix.
+	broken := ""
+	if rec.BrokenBody != "" && rec.BrokenBody != rec.FixBody {
+		broken = "## Broken Code\n```go\n" + summariseBody(rec.BrokenBody, 600) + "\n```\n\n"
+	}
 	user := fmt.Sprintf(
-		"## Task\n%s\n\n## Entity\n%s\n\n## Error Type\n%s\n\n"+
-			"## Broken Code\n```go\n%s\n```\n\n"+
+		"## Task\n%s\n\n## Entity\n%s\n\n## Error Type\n%s\n\n%s"+
 			"Output only the corrected function body:",
 		rec.TaskType,
 		rec.EntityName,
 		rec.ErrorType,
-		summariseBody(rec.FixBody, 600), // truncate very long bodies
+		broken,
 	)
 
 	assistant := rec.FixBody

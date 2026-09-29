@@ -17,19 +17,23 @@
 package engine
 
 import (
+	"errors"
 	"path/filepath"
 )
 
-func writeShipScripts(appName, path string) {
+// v26.58 (D029): returns the write errors instead of dropping them.
+func writeShipScripts(appName, path string) error {
 	if appName == "" {
 		appName = "app"
 	}
-	writeFileMk(filepath.Join(path, "VERSION"), "0.1.0\n")
-	writeFileMk(filepath.Join(path, "build-all.sh"), buildAllSh)
-	writeFileMk(filepath.Join(path, "bundle.sh"), bundleShFor(appName))
-	writeFileMk(filepath.Join(path, ".env.example"), envExample)
-	writeFileMk(filepath.Join(path, "deploy/"+appName+".service"), systemdUnitFor(appName))
-	writeFileMk(filepath.Join(path, "deploy/run.sh"), runSh)
+	return errors.Join(
+		writeFileMk(filepath.Join(path, "VERSION"), "0.1.0\n"),
+		writeFileMk(filepath.Join(path, "build-all.sh"), buildAllSh),
+		writeFileMk(filepath.Join(path, "bundle.sh"), bundleShFor(appName)),
+		writeFileMk(filepath.Join(path, ".env.example"), envExample),
+		writeFileMk(filepath.Join(path, "deploy/"+appName+".service"), systemdUnitFor(appName)),
+		writeFileMk(filepath.Join(path, "deploy/run.sh"), runSh),
+	)
 }
 
 const buildAllSh = `#!/usr/bin/env bash

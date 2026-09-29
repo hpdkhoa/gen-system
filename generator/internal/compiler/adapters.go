@@ -67,8 +67,15 @@ func toBuildPlanIR(ir SchemaIR) buildplan.SchemaIR {
 	var entities []buildplan.EntityIR
 
 	for _, e := range ir.Entities {
+		// v26.58 (D072): pass the fields so buildplan.Plan can tell a changed
+		// entity from an unchanged one.
+		var fields []buildplan.FieldIR
+		for _, f := range e.Fields {
+			fields = append(fields, buildplan.FieldIR{Name: f.Name, Type: f.Type})
+		}
 		entities = append(entities, buildplan.EntityIR{
-			Name: e.Name,
+			Name:   e.Name,
+			Fields: fields,
 		})
 	}
 

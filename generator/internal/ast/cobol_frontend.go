@@ -315,6 +315,11 @@ func (p *cobolParser) expandCopybooks(in []cobolLine) []cobolLine {
 			bookLines := tokenizeCOBOL(content)
 			// Recursively expand nested COPYs in the copybook.
 			bookLines = p.expandCopybooks(bookLines)
+			// v26.58 (D056): the mark stayed set after this expansion, so a
+			// second COPY of the same book (e.g. with another REPLACING) was
+			// dropped as copy_cycle. A cycle only exists while the book is on
+			// the current expansion path, so clear the mark once it returns.
+			delete(p.visitedBooks, resolvedPath)
 			// Apply REPLACING substitutions.
 			for j := range bookLines {
 				bookLines[j].lineNo = l.lineNo
@@ -816,14 +821,33 @@ func (p *cobolParser) parseProcedureDivision(m *Module) {
 		loop      *Node // v24: the NodeLoop for an inline PERFORM UNTIL … END-PERFORM
 		inElse    bool  // statements now go into Else, not Children
 		endsAtDot bool  // period-terminated (no END-IF) → pop on next period
+		eval      *Node // v26.58 (D064): the EVALUATE root for an EVALUATE scope
+		when      *Node // v26.58 (D064): the open WHEN of that EVALUATE, if any
 	}
 	var scopes []*ifScope
+	// innermostEval returns the index of the innermost open EVALUATE scope, or -1.
+	innermostEval := func() int {
+		for i := len(scopes) - 1; i >= 0; i-- {
+			if scopes[i].eval != nil {
+				return i
+			}
+		}
+		return -1
+	}
 	// add() appends a child to the right place: an open loop's Children, an open
 	// IF's Else list when in the else arm, otherwise the branch Children; falls
 	// back to the paragraph/module when no scope is open (mirrors appendChild).
 	add := func(child *Node) {
 		if len(scopes) > 0 {
 			s := scopes[len(scopes)-1]
+			if s.eval != nil {
+				host := s.when
+				if host == nil {
+					host = s.eval
+				}
+				host.Children = append(host.Children, child)
+				return
+			}
 			if s.loop != nil {
 				s.loop.Children = append(s.loop.Children, child)
 				return
@@ -843,9 +867,24 @@ func (p *cobolParser) parseProcedureDivision(m *Module) {
 			scopes = scopes[:len(scopes)-1]
 		}
 	}
+	// v26.58 (D062): only some branches checked for a closing period, so an IF
+	// stayed open past "PERFORM P UNTIL C.", "END-IF." or "END-EXEC.". A period
+	// ends the sentence after any statement, so every branch that consumes a
+	// statement calls this on the last line it consumed.
+	endSentence := func() {
+		if p.pos > 0 && strings.HasSuffix(strings.TrimRight(p.lines[p.pos-1].raw, " \t\r\n"), ".") {
+			popDotScopes()
+		}
+	}
 	clearScopes := func() { scopes = scopes[:0] }
 
 	flush := func() {
+		// an EVALUATE left open (no END-EVALUATE) ends with its paragraph
+		for _, s := range scopes {
+			if s.eval != nil {
+				s.eval.Span.End = Pos{Line: p.lastLine()}
+			}
+		}
 		clearScopes()
 		if current != nil {
 			current.Span.End = Pos{Line: p.lastLine()}
@@ -895,10 +934,64 @@ func (p *cobolParser) parseProcedureDivision(m *Module) {
 			continue
 		}
 
-		// EVALUATE block → NodeBranch (handled specially because it can
-		// span many lines and includes WHEN clauses).
+		// EVALUATE block → NodeBranch with one NodeBranch child per WHEN clause
+		// (named "WHEN" or "WHEN_OTHER").
+		// v26.58 (D061): parseEvaluate attached the block to the paragraph, so an
+		// EVALUATE inside an open IF or inline PERFORM became a sibling after it.
+		// add() puts it in the innermost open scope.
+		// v26.58 (D064): parseEvaluate ended at the first END-EVALUATE, even a
+		// nested one, and kept only CALL, PERFORM, EXEC CICS and STOP under a
+		// WHEN, so MOVE, IF, EXEC SQL and nested EVALUATE left no node or the
+		// wrong one. EVALUATE is now a scope on the same stack as IF and loops:
+		// the statements under a WHEN go through this loop like a paragraph body,
+		// and each END-EVALUATE closes its own EVALUATE.
 		if l.tokens[0] == "EVALUATE" {
-			p.parseEvaluate(m, current, l.lineNo)
+			// v23.41 — the selector (e.g. "TRUE", "WS-CODE") labels the decision.
+			root := &Node{
+				Kind:      NodeBranch,
+				Name:      "EVALUATE",
+				Language:  LangCOBOL,
+				RawSource: strings.Join(l.tokens[1:], " "),
+				Span:      Span{Start: Pos{Line: l.lineNo}},
+			}
+			add(root)
+			scopes = append(scopes, &ifScope{eval: root})
+			p.consume()
+			continue
+		}
+		// WHEN → a new arm of the innermost EVALUATE. It closes any scope still
+		// open inside the previous arm.
+		if l.tokens[0] == "WHEN" {
+			if i := innermostEval(); i >= 0 {
+				scopes = scopes[:i+1]
+				s := scopes[i]
+				name := "WHEN"
+				// v23.41 — the WHEN value (e.g. "TXN-DEBIT") becomes the decision text.
+				whenVal := strings.Join(l.tokens[1:], " ")
+				if len(l.tokens) >= 2 && l.tokens[1] == "OTHER" {
+					name = "WHEN_OTHER"
+					whenVal = "OTHER"
+				}
+				s.when = &Node{
+					Kind:      NodeBranch,
+					Name:      name,
+					Language:  LangCOBOL,
+					RawSource: whenVal,
+					Span:      Span{Start: Pos{Line: l.lineNo}},
+				}
+				s.eval.Children = append(s.eval.Children, s.when)
+				p.consume()
+				continue
+			}
+		}
+		// END-EVALUATE → close the innermost EVALUATE and anything open in it.
+		if l.tokens[0] == "END-EVALUATE" || l.tokens[0] == "END-EVALUATE." {
+			if i := innermostEval(); i >= 0 {
+				scopes[i].eval.Span.End = Pos{Line: l.lineNo}
+				scopes = scopes[:i]
+			}
+			p.consume()
+			endSentence()
 			continue
 		}
 
@@ -954,9 +1047,11 @@ func (p *cobolParser) parseProcedureDivision(m *Module) {
 			switch l.tokens[1] {
 			case "CICS":
 				add(p.parseCICSBlock(m, l.lineNo))
+				endSentence()
 				continue
 			case "SQL":
 				add(p.parseSQLBlock(m, l.lineNo))
+				endSentence()
 				continue
 			}
 		}
@@ -978,6 +1073,27 @@ func (p *cobolParser) parseProcedureDivision(m *Module) {
 			// scope-stack path below via the loop's own scope (future work).
 			isParaCall := target != "UNTIL" && target != "VARYING" &&
 				target != "THROUGH" && target != "THRU" && target != "TIMES"
+			// v26.58 (D063): "PERFORM 5 TIMES" (or "PERFORM WS-N TIMES") took the
+			// count as a paragraph name, pushed no loop scope, and left the body
+			// outside the loop; its END-PERFORM then closed the enclosing IF. With
+			// TIMES as the third token there is no paragraph: it is an inline loop.
+			if len(l.tokens) >= 3 && strings.TrimSuffix(l.tokens[2], ".") == "TIMES" {
+				isParaCall = false
+			}
+			// v26.58 (F6): "PERFORM WITH TEST AFTER UNTIL C" took WITH as the
+			// paragraph, so the inline body landed outside the loop. WITH TEST
+			// BEFORE or AFTER (WITH is optional) is a phrase of the loop: with it
+			// right after PERFORM there is no paragraph, it is an inline loop.
+			// After a paragraph name the phrase is already harmless.
+			ti := 1
+			if strings.TrimSuffix(l.tokens[ti], ".") == "WITH" && len(l.tokens) > 2 {
+				ti = 2
+			}
+			if l.tokens[ti] == "TEST" && ti+1 < len(l.tokens) {
+				if w := strings.TrimSuffix(l.tokens[ti+1], "."); w == "BEFORE" || w == "AFTER" {
+					isParaCall = false
+				}
+			}
 			if isLoop {
 				loopCond := ""
 				for i, tok := range l.tokens {
@@ -1017,6 +1133,7 @@ func (p *cobolParser) parseProcedureDivision(m *Module) {
 					scopes = append(scopes, &ifScope{loop: loop})
 				}
 				p.consume()
+				endSentence()
 				continue
 			} else if isParaCall {
 				// plain PERFORM <para> (no loop) → a call
@@ -1045,10 +1162,16 @@ func (p *cobolParser) parseProcedureDivision(m *Module) {
 		// period-style IF. We attach the branch to the CURRENT target first, then
 		// push it, so nested IFs stack correctly.
 		if l.tokens[0] == "IF" {
+			// v26.58 (D062): "IF A = 1 MOVE 1 TO X." kept the statement in the
+			// condition text and gave it no node. Split the line into the IF and
+			// its statement parts first, so each part is parsed on its own.
+			p.splitInlineIF()
+			l = p.peek()
 			cond := strings.Join(l.tokens[1:], " ")
 			cond = strings.TrimSpace(strings.TrimSuffix(strings.TrimSpace(cond), "THEN"))
-			// strip a trailing period from the condition text if present
+			// strip a trailing period (or the comma of "IF A = 1,") from the condition
 			cond = strings.TrimSpace(strings.TrimSuffix(cond, "."))
+			cond = strings.TrimSpace(strings.TrimSuffix(cond, ","))
 			br := &Node{
 				Kind:      NodeBranch,
 				Language:  LangCOBOL,
@@ -1057,17 +1180,23 @@ func (p *cobolParser) parseProcedureDivision(m *Module) {
 				Span:      Span{Start: Pos{Line: l.lineNo}},
 			}
 			add(br) // attach to enclosing scope/paragraph BEFORE pushing
-			// period-style IF only if the line ends with '.' AND has no THEN/body
-			// continuation; default to END-IF style (endsAtDot=false) which is
-			// what generated COBOL uses.
-			endsDot := strings.HasSuffix(strings.TrimRight(l.raw, " \t\r\n"), ".")
-			scopes = append(scopes, &ifScope{branch: br, endsAtDot: endsDot})
+			// v26.58 (D062): endsAtDot was set only when the IF line itself ended
+			// with a period, so "IF A = 1," followed by "MOVE 2 TO Y." stayed open
+			// to the paragraph end. COBOL closes an IF at END-IF or at the first
+			// period, whichever comes first, so every IF scope closes at a period.
+			scopes = append(scopes, &ifScope{branch: br, endsAtDot: true})
 			p.consume()
 			continue
 		}
 
 		// ELSE → switch the innermost IF scope to its Else arm.
 		if l.tokens[0] == "ELSE" || l.tokens[0] == "ELSE." {
+			// v26.58 (F5): "ELSE CALL 'SUB-ELSE'" consumed the whole line, so the
+			// statement after ELSE left no node and an END-IF on the line did not
+			// close the IF. Split the line as the one line IF split does: ELSE,
+			// the statement and each END-IF become their own lines, and the loop
+			// parses the statement as the first one of the else arm.
+			p.splitElseLine()
 			if len(scopes) > 0 {
 				scopes[len(scopes)-1].inElse = true
 			}
@@ -1081,6 +1210,7 @@ func (p *cobolParser) parseProcedureDivision(m *Module) {
 				scopes = scopes[:len(scopes)-1]
 			}
 			p.consume()
+			endSentence()
 			continue
 		}
 
@@ -1096,6 +1226,7 @@ func (p *cobolParser) parseProcedureDivision(m *Module) {
 				}
 			}
 			p.consume()
+			endSentence()
 			continue
 		}
 
@@ -1132,6 +1263,119 @@ func (p *cobolParser) parseProcedureDivision(m *Module) {
 	flush()
 }
 
+// cobolStatementVerbs are words that start a statement, beside cobolDataVerbs.
+// splitInlineIF uses both to find where the condition of a one-line IF ends.
+var cobolStatementVerbs = map[string]bool{
+	"CALL": true, "PERFORM": true, "EXEC": true, "EVALUATE": true, "IF": true,
+	"GO": true, "GOBACK": true, "STOP": true, "EXIT": true, "CONTINUE": true,
+	"NEXT": true, "OPEN": true, "CLOSE": true, "READ": true, "WRITE": true,
+	"REWRITE": true, "DELETE": true,
+}
+
+// splitInlineIF splits the IF line at p.pos when it carries statements, as in
+// "IF A = 1 MOVE 1 TO X." or "IF A = 1 THEN MOVE 1 TO X ELSE MOVE 2 TO X END-IF".
+// The IF keeps the condition. Each statement, ELSE and END-IF becomes its own
+// line with the same line number, so the main loop parses it like any other
+// line (a nested IF in a part is split again when the loop reaches it). The
+// condition ends at THEN or at the first statement verb outside a literal.
+func (p *cobolParser) splitInlineIF() {
+	l := p.lines[p.pos]
+	var cuts []int // token indexes where a new line starts
+	cut := func(i int) {
+		if i < len(l.tokens) && (len(cuts) == 0 || cuts[len(cuts)-1] < i) {
+			cuts = append(cuts, i)
+		}
+	}
+	quote := byte(0)
+	for i := 1; i < len(l.tokens); i++ {
+		tok := l.tokens[i]
+		if quote == 0 {
+			switch {
+			case len(cuts) == 0 && tok == "THEN":
+				cut(i + 1)
+			case len(cuts) == 0 && i >= 2 && (cobolStatementVerbs[tok] || cobolDataVerbs[tok]):
+				cut(i)
+			case len(cuts) > 0 && (tok == "ELSE" || tok == "END-IF" || tok == "END-IF."):
+				cut(i)
+				cut(i + 1)
+			}
+		}
+		for j := 0; j < len(tok); j++ {
+			c := tok[j]
+			if quote == 0 && (c == '\'' || c == '"') {
+				quote = c
+			} else if c == quote {
+				quote = 0
+			}
+		}
+	}
+	p.splitLineAt(cuts)
+}
+
+// splitElseLine splits the ELSE line at p.pos when it carries a statement, as
+// in "ELSE CALL 'SUB-ELSE'" or "ELSE MOVE 2 TO X END-IF". ELSE, the statement
+// and each END-IF outside a literal become their own lines with the same line
+// number. A nested IF after ELSE is split again when the loop reaches it.
+// v26.58 (F5).
+func (p *cobolParser) splitElseLine() {
+	l := p.lines[p.pos]
+	if len(l.tokens) < 2 || l.tokens[0] != "ELSE" {
+		return
+	}
+	cuts := []int{1}
+	quote := byte(0)
+	for i := 1; i < len(l.tokens); i++ {
+		tok := l.tokens[i]
+		if quote == 0 && i >= 2 && (tok == "END-IF" || tok == "END-IF.") {
+			if cuts[len(cuts)-1] < i {
+				cuts = append(cuts, i)
+			}
+			if i+1 < len(l.tokens) {
+				cuts = append(cuts, i+1)
+			}
+		}
+		for j := 0; j < len(tok); j++ {
+			c := tok[j]
+			if quote == 0 && (c == '\'' || c == '"') {
+				quote = c
+			} else if c == quote {
+				quote = 0
+			}
+		}
+	}
+	p.splitLineAt(cuts)
+}
+
+// splitLineAt replaces the line at p.pos with its parts, cut before each token
+// index in cuts (ascending, each above 0 and below the token count). Each part
+// keeps the line number. Shared by splitInlineIF and splitElseLine.
+func (p *cobolParser) splitLineAt(cuts []int) {
+	if len(cuts) == 0 {
+		return
+	}
+	l := p.lines[p.pos]
+	words := strings.Fields(l.text)
+	if len(words) != len(l.tokens) {
+		words = l.tokens
+	}
+	bounds := append(append([]int{0}, cuts...), len(l.tokens))
+	parts := make([]cobolLine, 0, len(bounds)-1)
+	for k := 0; k+1 < len(bounds); k++ {
+		lo, hi := bounds[k], bounds[k+1]
+		text := strings.Join(words[lo:hi], " ")
+		toks := append([]string(nil), l.tokens[lo:hi]...)
+		parts = append(parts, cobolLine{
+			lineNo: l.lineNo,
+			raw:    text,
+			text:   text,
+			upper:  strings.Join(toks, " "),
+			tokens: toks,
+		})
+	}
+	rest := append(parts, p.lines[p.pos+1:]...)
+	p.lines = append(p.lines[:p.pos], rest...)
+}
+
 // cobolDataVerbs are COBOL statements that mutate data (not control flow, not
 // calls). v23.41: emitted as NodeAssign so they show as CFG process steps.
 var cobolDataVerbs = map[string]bool{
@@ -1149,139 +1393,6 @@ func appendChild(current *Node, m *Module, child *Node) {
 	} else {
 		m.Nodes = append(m.Nodes, child)
 	}
-}
-
-// parseEvaluate handles the multi-line EVALUATE / WHEN / END-EVALUATE
-// construct. It emits one NodeBranch with one NodeBranch child per WHEN
-// clause (named "WHEN" or "WHEN_OTHER"). Sub-statements inside each WHEN
-// are scanned for nested NodeCall/NodeReturn to keep call graphs accurate.
-func (p *cobolParser) parseEvaluate(m *Module, current *Node, startLine int) {
-	// v23.41 — capture the EVALUATE selector (e.g. "TRUE", "WS-CODE") so the CFG
-	// decision node can show what is being evaluated instead of a bare "decision".
-	evalSelector := ""
-	if first := p.peek(); first != nil && len(first.tokens) >= 2 {
-		evalSelector = strings.Join(first.tokens[1:], " ")
-	}
-	root := &Node{
-		Kind:      NodeBranch,
-		Name:      "EVALUATE",
-		Language:  LangCOBOL,
-		RawSource: evalSelector,
-		Span:      Span{Start: Pos{Line: startLine}},
-	}
-
-	p.consume() // EVALUATE <selector> line
-
-	var currentWhen *Node
-	for p.pos < len(p.lines) {
-		l := p.peek()
-		if l == nil {
-			break
-		}
-		// End of EVALUATE block
-		if l.tokens[0] == "END-EVALUATE" || l.tokens[0] == "END-EVALUATE." {
-			p.consume()
-			break
-		}
-		// Next paragraph/section → stop (EVALUATE not properly closed)
-		if isParagraphHeader(l) || isSection(l) || isDivision(l) {
-			break
-		}
-
-		if l.tokens[0] == "WHEN" {
-			name := "WHEN"
-			// v23.41 — the WHEN value (e.g. "TXN-DEBIT") becomes the decision text.
-			whenVal := strings.Join(l.tokens[1:], " ")
-			if len(l.tokens) >= 2 && l.tokens[1] == "OTHER" {
-				name = "WHEN_OTHER"
-				whenVal = "OTHER"
-			}
-			currentWhen = &Node{
-				Kind:      NodeBranch,
-				Name:      name,
-				Language:  LangCOBOL,
-				RawSource: whenVal,
-				Span:      Span{Start: Pos{Line: l.lineNo}},
-			}
-			root.Children = append(root.Children, currentWhen)
-			p.consume()
-			continue
-		}
-
-		// Inside a WHEN: surface CALL / PERFORM / EXEC CICS / RETURN.
-		host := currentWhen
-		if host == nil {
-			host = root
-		}
-		switch l.tokens[0] {
-		case "CALL":
-			if len(l.tokens) >= 2 {
-				callee := strings.Trim(strings.TrimRight(l.tokens[1], "."), `"'`)
-				host.Children = append(host.Children, &Node{
-					Kind:     NodeCall,
-					Callee:   callee,
-					Language: LangCOBOL,
-					Span:     Span{Start: Pos{Line: l.lineNo}},
-				})
-			}
-		case "PERFORM":
-			if len(l.tokens) >= 2 {
-				target := strings.TrimSuffix(l.tokens[1], ".")
-				if target != "UNTIL" && target != "VARYING" && target != "THROUGH" && target != "THRU" {
-					host.Children = append(host.Children, &Node{
-						Kind:     NodeCall,
-						Callee:   target,
-						Language: LangCOBOL,
-						Span:     Span{Start: Pos{Line: l.lineNo}},
-					})
-				}
-			}
-		case "EXEC":
-			if len(l.tokens) >= 2 && l.tokens[1] == "CICS" {
-				// Inline mini-parser for CICS verb under WHEN.
-				command := ""
-				if len(l.tokens) >= 3 {
-					command = l.tokens[2]
-				}
-				host.Children = append(host.Children, &Node{
-					Kind:     NodeCall,
-					Callee:   "CICS." + command,
-					Language: LangCOBOL,
-					Span:     Span{Start: Pos{Line: l.lineNo}},
-				})
-				// Skip the body until END-EXEC.
-				p.consume()
-				// v26.57 (D009): a one-line EXEC CICS ... END-EXEC is complete on
-				// its start line, as parseCICSBlock already knows. Scanning on
-				// swallowed every line up to the NEXT END-EXEC: the rest of the
-				// EVALUATE and whole paragraphs after it.
-				if strings.Contains(l.upper, "END-EXEC") {
-					continue
-				}
-				for p.pos < len(p.lines) {
-					next := p.peek()
-					if next == nil || strings.Contains(next.upper, "END-EXEC") {
-						if next != nil {
-							p.consume()
-						}
-						break
-					}
-					p.consume()
-				}
-				continue
-			}
-		case "STOP", "GOBACK":
-			host.Children = append(host.Children, &Node{
-				Kind:     NodeReturn,
-				Language: LangCOBOL,
-				Span:     Span{Start: Pos{Line: l.lineNo}},
-			})
-		}
-		p.consume()
-	}
-
-	root.Span.End = Pos{Line: p.lastLine()}
-	appendChild(current, m, root)
 }
 
 // parseCICSBlock parses EXEC CICS … END-EXEC as a single NodeCall and RETURNS
@@ -1460,12 +1571,17 @@ func parseLevel(s string) int {
 // extractPIC finds the PIC/PICTURE clause value. Recognises the full
 // PIC string including all edit characters until the next clause keyword
 // (USAGE, VALUE, OCCURS, REDEFINES, PIC, ".") is encountered.
+//
+// v26.58 (D065): the four clause extractors used strings.Index on the whole
+// clause, so a keyword inside the field name matched (WS-PIC gave type "?",
+// WS-VALUE gave value=PIC). They now use clauseWordIndex, which only matches
+// a whole word. A legal data name is never a reserved word, so the field name
+// can no longer match.
 func extractPIC(upper string) string {
-	keywords := []string{"PICTURE IS ", "PICTURE ", "PIC IS ", "PIC "}
 	var start int = -1
 	var keyLen int
-	for _, k := range keywords {
-		if idx := strings.Index(upper, k); idx >= 0 {
+	for _, k := range []string{"PICTURE", "PIC"} {
+		if idx := clauseWordIndex(upper, k); idx >= 0 {
 			start = idx
 			keyLen = len(k)
 			break
@@ -1474,7 +1590,8 @@ func extractPIC(upper string) string {
 	if start < 0 {
 		return "?"
 	}
-	rest := upper[start+keyLen:]
+	rest := strings.TrimSpace(upper[start+keyLen:])
+	rest = strings.TrimPrefix(rest, "IS ")
 	// Read until whitespace+next-keyword or end-of-clause period.
 	// PIC strings can contain X 9 A Z $ , . / S V P + - CR DB ( )
 	// We stop at the first whitespace-separated token that is a clause
@@ -1497,7 +1614,7 @@ func extractPIC(upper string) string {
 		out += toks[1]
 	}
 	out = strings.TrimSuffix(out, ".")
-	if stopWords[out] {
+	if stopWords[out] || out == "" { // "" for a bare "PIC." (v26.58 D065)
 		return "?"
 	}
 	return out
@@ -1528,7 +1645,7 @@ func extractUsage(upper string) string {
 //	OCCURS 1 TO 100 TIMES DEPENDING ON CNT  → (100, "CNT")
 //	OCCURS 5 TIMES INDEXED BY X             → (5, "")
 func extractOccurs(upper string) (int, string) {
-	idx := strings.Index(upper, "OCCURS")
+	idx := clauseWordIndex(upper, "OCCURS")
 	if idx < 0 {
 		return 0, ""
 	}
@@ -1536,22 +1653,16 @@ func extractOccurs(upper string) (int, string) {
 	if len(rest) < 2 {
 		return 0, ""
 	}
-	count := 0
-	// rest[0] = "OCCURS"; rest[1] = number or "1"
-	// Look for the maximum number in the clause.
-	maxNum := 0
-	for i, t := range rest {
-		if n := parseIntLoose(t); n > 0 {
-			if n > maxNum {
-				maxNum = n
-			}
-			_ = i
-		}
-		if t == "TIMES" {
-			break
+	// v26.58 (D066): the old loop kept the largest number up to TIMES, and
+	// TIMES is optional, so "OCCURS 10 PIC 9(3) VALUE 100" gave 100. The count
+	// is the number right after OCCURS, or for "OCCURS m TO n" the n after TO.
+	// rest[0] = "OCCURS"; rest[1] = the count or the minimum.
+	count := parseIntLoose(rest[1])
+	if len(rest) >= 4 && rest[2] == "TO" {
+		if n := parseIntLoose(rest[3]); n > 0 {
+			count = n
 		}
 	}
-	count = maxNum
 
 	// DEPENDING ON <name>
 	dep := ""
@@ -1567,7 +1678,7 @@ func extractOccurs(upper string) (int, string) {
 //
 //	05 NEW-VIEW REDEFINES OLD-RECORD PIC X(80).
 func extractRedefines(upper string) string {
-	idx := strings.Index(upper, "REDEFINES")
+	idx := clauseWordIndex(upper, "REDEFINES")
 	if idx < 0 {
 		return ""
 	}
@@ -1582,7 +1693,7 @@ func extractRedefines(upper string) string {
 //
 //	VALUE 'Y'  /  VALUE ZEROS  /  VALUE 100  /  VALUE IS SPACES
 func extractValue(upper string) string {
-	idx := strings.Index(upper, "VALUE")
+	idx := clauseWordIndex(upper, "VALUE")
 	if idx < 0 {
 		return ""
 	}
@@ -1649,6 +1760,24 @@ func containsWord(upper, word string) bool {
 		idx = idx + 1 + next
 	}
 	return false
+}
+
+// clauseWordIndex returns the byte index of the first whole-word occurrence of
+// word in upper, or -1. Word boundaries follow containsWord. v26.58 (D065).
+func clauseWordIndex(upper, word string) int {
+	from := 0
+	for {
+		i := strings.Index(upper[from:], word)
+		if i < 0 {
+			return -1
+		}
+		idx := from + i
+		end := idx + len(word)
+		if (idx == 0 || !isWordChar(upper[idx-1])) && (end == len(upper) || !isWordChar(upper[end])) {
+			return idx
+		}
+		from = idx + 1
+	}
 }
 
 func isWordChar(c byte) bool {

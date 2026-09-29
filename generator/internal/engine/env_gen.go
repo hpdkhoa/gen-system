@@ -43,7 +43,7 @@ func GenerateEnvFiles(entities []schema.Entity, rootPath string, components []st
 
 	env.WriteString("# Application\n")
 	env.WriteString("APP_ENV=development\n")
-	env.WriteString("PORT=28080\n")
+	env.WriteString("PORT=" + schema.DefaultBackendPort + "\n") // v26.58: the port main.go listens on
 	env.WriteString(fmt.Sprintf("APP_SECRET=%s\n\n", appSecret))
 
 	env.WriteString("# Database\n")
@@ -83,7 +83,7 @@ func GenerateEnvFiles(entities []schema.Entity, rootPath string, components []st
 	ex.WriteString("# Copy this to .env and fill in real values.\n")
 	ex.WriteString("# Commit .env.example, NOT .env.\n\n")
 	ex.WriteString("APP_ENV=development\n")
-	ex.WriteString("PORT=28080\n")
+	ex.WriteString("PORT=" + schema.DefaultBackendPort + "\n")
 	ex.WriteString("APP_SECRET=your-32-char-secret-here\n\n")
 	ex.WriteString(fmt.Sprintf(
 		"DATABASE_URL=postgres://user:password@localhost:5432/%s?sslmode=disable\n",

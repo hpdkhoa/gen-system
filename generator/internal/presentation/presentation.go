@@ -36,6 +36,7 @@ package presentation
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -175,8 +176,8 @@ type Server struct {
 
 	// v20: project root for the read-only file browser (/api/present/files)
 	// and copybook search path so on-demand COBOL parsing resolves COPY books.
-	root         string
-	copybookPath string
+	root          string
+	copybookPaths []string // v26.58 (D082): one entry per folder of the list
 	// v20.3: browseRoot bounds the file browser. Defaults to root, but can be
 	// set wider (e.g. a parent dir holding both the engine and a COBOL demo)
 	// so the Understand tab can reach sibling projects without a restart.
@@ -266,7 +267,13 @@ func (s *Server) SetRoot(root, copybookPath, browseRoot string) {
 	} else {
 		s.root = root
 	}
-	s.copybookPath = copybookPath
+	// v26.58 (D082): copybookPath is the raw --copybooks text, a list in the
+	// OS path list form. It was stored whole and used as one folder, so a list
+	// of two folders resolved no COPY. Split it the way the loader does.
+	s.copybookPaths = nil
+	if copybookPath != "" {
+		s.copybookPaths = filepath.SplitList(copybookPath)
+	}
 	// Rebind the belief store to <root>/.gen so corrections belong to THIS
 	// project rather than the process working directory (the old CWD-relative
 	// path meant corrections for project A reappeared while viewing project B).
@@ -298,6 +305,21 @@ func (s *Server) index() *symbols.Index {
 	return s.idx
 }
 
+// roots returns the project root, the browse root and the copybook folders
+// under the read lock. v26.58 (D085): handlers read these through this
+// accessor, as they read the index through index(), because SetRoot writes
+// them under s.mu while requests are in flight. The browse root falls back to
+// the project root here, so callers need no second read.
+func (s *Server) roots() (root, browseRoot string, copybookPaths []string) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	browseRoot = s.browseRoot
+	if browseRoot == "" {
+		browseRoot = s.root
+	}
+	return s.root, browseRoot, append([]string(nil), s.copybookPaths...)
+}
+
 // ReplaceContext atomically swaps the entire analysis context — symbol index,
 // CFGs, and effects — for a freshly loaded project. v24: this is the backend of
 // the Studio "load / clear project" (dynamic --root) feature. Everything is
@@ -324,7 +346,9 @@ func (s *Server) ReplaceContext(idx *symbols.Index, cfgs map[string]flow.CFGSet,
 	s.mu.Unlock()
 	// Rebuild beliefs from the new index outside the lock; rebuildFromIndex takes
 	// its own synchronization and reads a fresh efx copy.
-	s.beliefs.RebuildFromIndex(s.index(), s.safeEfxCopy())
+	// v26.58 (D086): the store is read through the locked accessor. SetRoot
+	// replaces s.beliefs under s.mu, so the direct read was a data race.
+	s.BeliefStore().RebuildFromIndex(s.index(), s.safeEfxCopy())
 }
 
 // OnFileChanged is the hook called by the file watcher after it has
@@ -338,8 +362,11 @@ func (s *Server) OnFileChanged(path string, cfgSet flow.CFGSet, effects map[stri
 	if deleted {
 		delete(s.cfgs, path)
 		// Remove per-symbol effects whose key starts with path (best-effort).
+		// v26.58 (D088): a symbol ID is filePath + "#" + kind + ":" + name, so
+		// the prefix must end at the "#". A bare path prefix also matched
+		// sibling files such as x.tsx when x.ts was deleted.
 		for id := range s.efx {
-			if strings.HasPrefix(id, path) {
+			if strings.HasPrefix(id, path+"#") {
 				delete(s.efx, id)
 			}
 		}
@@ -352,7 +379,8 @@ func (s *Server) OnFileChanged(path string, cfgSet flow.CFGSet, effects map[stri
 	s.mu.Unlock()
 
 	// Rebuild beliefs from the (now-updated) index.
-	s.beliefs.RebuildFromIndex(s.index(), s.safeEfxCopy())
+	// v26.58 (D086): locked read of the store, as in ReplaceContext.
+	s.BeliefStore().RebuildFromIndex(s.index(), s.safeEfxCopy())
 
 	if s.broker != nil {
 		s.broker.Publish("file_changed", map[string]interface{}{
@@ -405,6 +433,7 @@ func (s *Server) handleSymbols(w http.ResponseWriter, r *http.Request) {
 
 	idx := s.index() // v24: guarded snapshot; consistent within this request
 	t, ok := idx.TableFor(filePath)
+	var parsed *ast.Module // v26.58 (D087): the module of an on demand parse
 	if !ok {
 		// v26.57 (D013): a file the project load did not index is parsed on
 		// demand only when it lies inside the browse root, the same rule
@@ -430,8 +459,8 @@ func (s *Server) handleSymbols(w http.ResponseWriter, r *http.Request) {
 		var err error
 		if isCobolPath(filePath) {
 			fe := &ast.CobolFrontend{}
-			if s.copybookPath != "" {
-				fe.CopybookPath = []string{s.copybookPath}
+			if _, _, books := s.roots(); len(books) > 0 {
+				fe.CopybookPath = books
 			} else {
 				// default: look beside the file for copybooks
 				fe.CopybookPath = []string{filepath.Dir(filePath)}
@@ -455,6 +484,7 @@ func (s *Server) handleSymbols(w http.ResponseWriter, r *http.Request) {
 		}
 		idx.AddModule(m)
 		t, _ = idx.TableFor(filePath)
+		parsed = m
 	}
 
 	resp := SymbolMapResponse{
@@ -484,8 +514,19 @@ func (s *Server) handleSymbols(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// Surface unknown nodes from the cached module
-	if m, ok2 := ast.DefaultCache.Get(filePath, ast.ChecksumFile(filePath)); ok2 {
+	// Surface unknown nodes from the cached module.
+	// v26.58 (D087): the COBOL branch above parses with its own frontend and
+	// never puts the module in ast.DefaultCache, so the cache lookup found
+	// nothing and a COPY with no copybook showed no unknown. The module of an
+	// on demand parse is used directly; the cache is read only when the table
+	// came from the index.
+	m := parsed
+	if m == nil {
+		if cm, ok2 := ast.DefaultCache.Get(filePath, ast.ChecksumFile(filePath)); ok2 {
+			m = cm
+		}
+	}
+	if m != nil {
 		for _, un := range m.UnknownNodes() {
 			resp.Unknowns = append(resp.Unknowns, UnknownEntry{
 				Reason:    un.UnknownReason,
@@ -503,10 +544,7 @@ func (s *Server) handleSymbols(w http.ResponseWriter, r *http.Request) {
 // sides, so a link inside the root that points outside it is refused. With no
 // root at all nothing is inside. v26.57 (D013).
 func (s *Server) insideBrowseRoot(path string) bool {
-	base := s.browseRoot
-	if base == "" {
-		base = s.root
-	}
+	_, base, _ := s.roots() // v26.58 (D085): locked read of the roots
 	if base == "" {
 		return false
 	}
@@ -558,10 +596,7 @@ type fileEntry struct {
 // Path traversal outside root is rejected. Hidden dirs and node_modules /
 // vendor / .git are skipped to keep the tree usable.
 func (s *Server) handleFiles(w http.ResponseWriter, r *http.Request) {
-	base := s.browseRoot
-	if base == "" {
-		base = s.root
-	}
+	_, base, _ := s.roots() // v26.58 (D085): locked read of the roots
 	if base == "" {
 		http.Error(w, "server started without a project root", http.StatusServiceUnavailable)
 		return
@@ -898,15 +933,20 @@ func (s *Server) handleSource(w http.ResponseWriter, r *http.Request) {
 // ─── Belief View ──────────────────────────────────────────────
 
 func (s *Server) handleBeliefs(w http.ResponseWriter, r *http.Request) {
-	s.beliefs.RebuildFromIndex(s.index(), s.safeEfxCopy())
-	beliefs := s.beliefs.All()
+	// v26.58 (D086): read the store once through the locked accessor and use
+	// it for the whole request. The direct reads raced with SetRoot, and a
+	// project load in the middle rebuilt the old store and then read All,
+	// Warnings and Summaries from the new one, which had no beliefs yet.
+	bs := s.BeliefStore()
+	bs.RebuildFromIndex(s.index(), s.safeEfxCopy())
+	beliefs := bs.All()
 	pending := 0
 	for _, b := range beliefs {
 		if !b.HumanVerified {
 			pending++
 		}
 	}
-	warnings := s.beliefs.Warnings()
+	warnings := bs.Warnings()
 	resp := BeliefViewResponse{
 		Beliefs:       beliefs,
 		ArchSummary:   s.buildArchSummary(),
@@ -914,7 +954,7 @@ func (s *Server) handleBeliefs(w http.ResponseWriter, r *http.Request) {
 		TotalBeliefs:  len(beliefs),
 		Warnings:      warnings,
 		StaleCount:    len(warnings),
-		Summaries:     s.beliefs.Summaries(),
+		Summaries:     bs.Summaries(),
 	}
 	writeJSON(w, resp)
 }
@@ -929,8 +969,16 @@ func (s *Server) handleCorrect(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "invalid JSON: "+err.Error(), http.StatusBadRequest)
 		return
 	}
-	if err := s.beliefs.Correct(correction); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+	// v26.58 (D086): locked read of the store, so the correction lands in the
+	// store of the project that is loaded now.
+	if err := s.BeliefStore().Correct(correction); err != nil {
+		// v26.58 (follow up of D020): an unknown belief is a bad request; a
+		// correction that could not be saved is a server fault.
+		status := http.StatusInternalServerError
+		if errors.Is(err, belief.ErrBeliefNotFound) {
+			status = http.StatusBadRequest
+		}
+		http.Error(w, err.Error(), status)
 		return
 	}
 	writeJSON(w, map[string]string{"status": "ok"})
@@ -940,11 +988,12 @@ func (s *Server) handleCorrect(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) handleDiff(w http.ResponseWriter, r *http.Request) {
 	since := r.URL.Query().Get("since")
-	changes := s.beliefs.DiffSince(since)
+	bs := s.BeliefStore() // v26.58 (D086): one locked read for the whole request
+	changes := bs.DiffSince(since)
 	resp := DiffViewResponse{
 		Changes: changes,
 		Since:   since,
-		Now:     s.beliefs.CurrentChecksum(),
+		Now:     bs.CurrentChecksum(),
 	}
 	writeJSON(w, resp)
 }

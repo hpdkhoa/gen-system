@@ -49,7 +49,10 @@ JSON:`, strings.TrimSpace(goal))
 
 	start := strings.Index(resp, "{")
 	end := strings.LastIndex(resp, "}")
-	if start == -1 || end == -1 {
+	// v26.58 (D067): the guard tested only for -1, so a closing bracket before the
+	// opening one sliced resp[start:end+1] with end < start and panicked. end <= start
+	// means there is no JSON, so return the parse error the callers handle.
+	if start == -1 || end == -1 || end <= start {
 		return nil, fmt.Errorf("ExtractFeatures: no JSON in response")
 	}
 
@@ -102,7 +105,10 @@ JSON:`, strings.Join(features, "\n- "))
 
 	start := strings.Index(resp, "{")
 	end := strings.LastIndex(resp, "}")
-	if start == -1 || end == -1 {
+	// v26.58 (D067): the guard tested only for -1, so a closing bracket before the
+	// opening one sliced resp[start:end+1] with end < start and panicked. end <= start
+	// means there is no JSON, so return the parse error the callers handle.
+	if start == -1 || end == -1 || end <= start {
 		return "monolith", []string{"api", "database"}, nil,
 			fmt.Errorf("PlanArchitecture: no JSON in response")
 	}
@@ -232,7 +238,10 @@ JSON:`,
 
 	start := strings.Index(resp, "[")
 	end := strings.LastIndex(resp, "]")
-	if start == -1 || end == -1 {
+	// v26.58 (D067): the guard tested only for -1, so a closing bracket before the
+	// opening one sliced resp[start:end+1] with end < start and panicked. end <= start
+	// means there is no JSON, so return the parse error the callers handle.
+	if start == -1 || end == -1 || end <= start {
 		return nil, fmt.Errorf("PlanEntities: no JSON array in response")
 	}
 

@@ -34,17 +34,20 @@ func writeFile(path string, fset *token.FileSet, node *ast.File) error {
 // =========================================================
 // ENSURE IMPORT (NO DUPLICATE)
 // =========================================================
-func EnsureImport(path, pkg string) {
+//
+// v26.58 (D077): EnsureImport returns the parse or write error. It dropped
+// both, so a failed write left the file with no import and no message.
+func EnsureImport(path, pkg string) error {
 	// v26.57 (D012): accept a path with or without quote marks.
 	pkg = strings.Trim(pkg, "`\"")
 	node, fset, err := parseFile(path)
 	if err != nil {
-		return
+		return fmt.Errorf("ensure import %s: %w", pkg, err)
 	}
 
 	for _, im := range node.Imports {
 		if im.Path.Value == `"`+pkg+`"` {
-			return
+			return nil
 		}
 	}
 
@@ -72,8 +75,10 @@ func EnsureImport(path, pkg string) {
 		}
 	}
 
-	writeFile(path, fset, node)
-
+	if err := writeFile(path, fset, node); err != nil {
+		return fmt.Errorf("ensure import %s: %w", pkg, err)
+	}
+	return nil
 }
 
 // =========================================================

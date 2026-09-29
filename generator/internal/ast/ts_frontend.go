@@ -666,12 +666,20 @@ func (p *tsParser) parseTopLevel(m *Module) {
 				if tok.kind == tsIdent && tok.text == "type" {
 					// might be "export type { Foo }" or "export type Foo = ..."
 					// peek further
-					next := p.peek()
+					// v26.58 (D054): peek() returned the word "type" itself, so the
+					// brace check never held and "export type { X }" became an alias
+					// named "{". peekAt(1) looks past "type"; the word is consumed
+					// before skipBraces, and skipUntilStmtEnd stops at the newline so
+					// a re-export without semicolon keeps the next statements.
+					next := p.peekAt(1)
 					if next.kind == tsLBrace {
 						// re-export block: export type { X, Y }
+						p.consume() // 'type'
 						p.skipBraces()
-						p.skipUntil(tsSemicolon, tsEOF)
-						p.consume()
+						p.skipUntilStmtEnd()
+						if p.peek().kind == tsSemicolon {
+							p.consume()
+						}
 						continue
 					}
 					// fall through to type alias
@@ -1334,8 +1342,17 @@ func (p *tsParser) parseVarDecl(exported bool, line, col, off int) []*Node {
 				Span:          p.makeSpan(tok.line, tok.col, tok.off),
 				UnknownReason: "destructuring_declaration",
 			})
-			p.skipBraces()
-			p.skipUntil(tsSemicolon, tsEOF)
+			// v26.58 (D055): skipUntil(tsSemicolon, tsEOF) goes through peek,
+			// which drops newlines, so a destructuring line without semicolon
+			// swallowed every later statement. skipBraces also ignored "[".
+			// Skip the pattern with the matching helper, then stop at the
+			// statement end, where a newline at depth 0 counts.
+			if tok.kind == tsLBracket {
+				p.skipBrackets()
+			} else {
+				p.skipBraces()
+			}
+			p.skipUntilStmtEnd()
 			if p.peek().kind == tsSemicolon {
 				p.consume()
 			}
