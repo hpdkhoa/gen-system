@@ -421,6 +421,10 @@ func (c *goConverter) convertStmt(s goast.Stmt) []*Node {
 			n.Children = append(n.Children, c.callsIn(st.Cond)...)
 		}
 		n.Children = append(n.Children, c.convertStmtList(st.Body.List)...)
+		// v26.59 (N09): the Post calls were dropped, so `i = next(i)` left next
+		// out of the call graph. Post runs after each pass of the body, so its
+		// calls follow the body statements. callsIn returns nil for a nil Post.
+		n.Children = append(n.Children, c.callsIn(st.Post)...)
 		return []*Node{n}
 
 	case *goast.RangeStmt:

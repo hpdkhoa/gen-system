@@ -37,6 +37,12 @@ func SnapshotProject(root string) (string, error) {
 			}
 			return nil
 		}
+		// v26.59 (N02): version control and dependency folders belong to git
+		// and the package manager, not to the snapshot. Copying them made a
+		// restore put back old refs and packages and delete newer objects.
+		if info.IsDir() && path != root && isForeignDir(info.Name()) {
+			return filepath.SkipDir
+		}
 
 		target := filepath.Join(snapDir, rel)
 
@@ -49,6 +55,12 @@ func SnapshotProject(root string) (string, error) {
 
 	return snapDir, err
 
+}
+
+// isForeignDir reports a folder that neither the snapshot nor the restore
+// owns, at any depth: .git and node_modules.
+func isForeignDir(name string) bool {
+	return name == ".git" || name == "node_modules"
 }
 
 func copyFile(src, dst string) error {

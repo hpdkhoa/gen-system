@@ -252,13 +252,30 @@ func (s *StagingService) Commit() (int, error) {
 	}
 	type touched struct{ dst, backup string } // backup "" when dst was absent
 	var done []touched
+	// v26.59 (N01): fail ignored every restore error and then deleted the
+	// backup, so a live file that could not be put back lost its only copy
+	// while the error said live was unchanged. It also left the folders the
+	// commit created. Now it collects the paths it could not restore, keeps
+	// the backup and names both when any is left, and removes each folder the
+	// commit created that is empty after the rollback.
+	var createdDirs []string // folders missing in live before a copy, parents first
 	fail := func(path string, err error) (int, error) {
+		var unrestored []string
 		for i := len(done) - 1; i >= 0; i-- {
 			if done[i].backup != "" {
-				_ = copyFileStaging(done[i].backup, done[i].dst)
-			} else {
-				_ = os.Remove(done[i].dst)
+				if rerr := restoreStagingFile(done[i].backup, done[i].dst); rerr != nil {
+					unrestored = append(unrestored, done[i].dst)
+				}
+			} else if rerr := os.Remove(done[i].dst); rerr != nil && !os.IsNotExist(rerr) {
+				unrestored = append(unrestored, done[i].dst)
 			}
+		}
+		for i := len(createdDirs) - 1; i >= 0; i-- {
+			_ = os.Remove(createdDirs[i]) // fails, as wanted, when not empty
+		}
+		if len(unrestored) > 0 {
+			return 0, fmt.Errorf("committing %s: %w; rollback could not restore %s; the original files are kept in %s",
+				path, err, strings.Join(unrestored, ", "), backupRoot)
 		}
 		_ = os.RemoveAll(backupRoot)
 		return 0, fmt.Errorf("committing %s: %w (live left unchanged)", path, err)
@@ -284,6 +301,7 @@ func (s *StagingService) Commit() (int, error) {
 			n++
 			continue
 		}
+		createdDirs = append(createdDirs, missingDirs(s.root, filepath.Dir(dst))...)
 		if err := copyFileStaging(src, dst); err != nil {
 			return fail(f.Path, err)
 		}
@@ -395,6 +413,25 @@ func lineDiff(a, b string) string {
 	}
 	return out
 }
+
+// missingDirs lists dir and its parents below root that do not exist yet,
+// parents first (v26.59, N01).
+func missingDirs(root, dir string) []string {
+	var out []string
+	for dir != root && len(dir) > len(root) {
+		if _, err := os.Lstat(dir); !os.IsNotExist(err) {
+			break
+		}
+		out = append([]string{dir}, out...)
+		dir = filepath.Dir(dir)
+	}
+	return out
+}
+
+// restoreStagingFile copies a backup file back over live in a Commit
+// rollback. It is a variable so a test can make one restore fail, as a locked
+// or read only live file does.
+var restoreStagingFile = copyFileStaging
 
 func copyFileStaging(src, dst string) error {
 	if err := os.MkdirAll(filepath.Dir(dst), 0755); err != nil {

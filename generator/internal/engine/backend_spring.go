@@ -19,6 +19,7 @@
 package engine
 
 import (
+	"errors"
 	"os"
 	"strings"
 
@@ -117,18 +118,28 @@ var javaReserved = map[string]bool{
 // GenerateSpringApp writes the whole Spring Boot project for the entity set.
 // Called from GenerateBackendApp when springEnabled(). It does NOT emit the Go
 // files (the caller gates those out in Spring mode).
-func GenerateSpringApp(entities []schema.Entity, path string) {
-	writeFileMk(path+"/backend/pom.xml", springPOM())
-	writeFileMk(path+"/"+springPkgPath+"/Application.java", springApplicationJava())
-	writeFileMk(path+"/backend/src/main/resources/application.properties", springAppProps())
-	for _, e := range entities {
-		genSpringEntity(e, path)
-		genSpringRepository(e, path)
-		genSpringDTO(e, path)
-		genSpringService(e, path)
-		genSpringController(e, path)
+//
+// v26.59 (N07): every writeFileMk error was dropped, so a file that could not
+// be written was missing and the run still reported success. The function now
+// tries every write and returns the errors joined, as D029 did for the Go
+// backend.
+func GenerateSpringApp(entities []schema.Entity, path string) error {
+	errs := []error{
+		writeFileMk(path+"/backend/pom.xml", springPOM()),
+		writeFileMk(path+"/"+springPkgPath+"/Application.java", springApplicationJava()),
+		writeFileMk(path+"/backend/src/main/resources/application.properties", springAppProps()),
 	}
-	genSpringErrorHandler(path)
+	for _, e := range entities {
+		errs = append(errs,
+			genSpringEntity(e, path),
+			genSpringRepository(e, path),
+			genSpringDTO(e, path),
+			genSpringService(e, path),
+			genSpringController(e, path),
+		)
+	}
+	errs = append(errs, genSpringErrorHandler(path))
+	return errors.Join(errs...)
 }
 
 func springPOM() string {
@@ -236,7 +247,7 @@ server.port=8080
 
 // ─── per-entity: JPA @Entity ─────────────────────────────────
 
-func genSpringEntity(e schema.Entity, path string) {
+func genSpringEntity(e schema.Entity, path string) error {
 	cls := javaClassName(e.Name)
 	table := tableName(e)
 	var sb strings.Builder
@@ -269,12 +280,12 @@ func genSpringEntity(e schema.Entity, path string) {
 		sb.WriteString("    public void " + javaSetter(fn) + "(" + jt + " " + fn + ") { this." + fn + " = " + fn + "; }\n\n")
 	}
 	sb.WriteString("}\n")
-	writeFileMk(path+"/"+springPkgPath+"/"+cls+".java", sb.String())
+	return writeFileMk(path+"/"+springPkgPath+"/"+cls+".java", sb.String())
 }
 
 // ─── per-entity: Spring Data repository ──────────────────────
 
-func genSpringRepository(e schema.Entity, path string) {
+func genSpringRepository(e schema.Entity, path string) error {
 	cls := javaClassName(e.Name)
 	var sb strings.Builder
 	sb.WriteString("package com.gensystem.app;\n\n")
@@ -283,12 +294,12 @@ func genSpringRepository(e schema.Entity, path string) {
 	sb.WriteString("@Repository\n")
 	sb.WriteString("public interface " + cls + "Repository extends JpaRepository<" + cls + ", Long> {\n")
 	sb.WriteString("}\n")
-	writeFileMk(path+"/"+springPkgPath+"/"+cls+"Repository.java", sb.String())
+	return writeFileMk(path+"/"+springPkgPath+"/"+cls+"Repository.java", sb.String())
 }
 
 // ─── per-entity: request DTO with validation ─────────────────
 
-func genSpringDTO(e schema.Entity, path string) {
+func genSpringDTO(e schema.Entity, path string) error {
 	cls := javaClassName(e.Name)
 	var sb strings.Builder
 	sb.WriteString("package com.gensystem.app;\n\n")
@@ -311,12 +322,12 @@ func genSpringDTO(e schema.Entity, path string) {
 		sb.WriteString("    public void " + javaSetter(fn) + "(" + jt + " " + fn + ") { this." + fn + " = " + fn + "; }\n\n")
 	}
 	sb.WriteString("}\n")
-	writeFileMk(path+"/"+springPkgPath+"/"+cls+"Request.java", sb.String())
+	return writeFileMk(path+"/"+springPkgPath+"/"+cls+"Request.java", sb.String())
 }
 
 // ─── per-entity: service ─────────────────────────────────────
 
-func genSpringService(e schema.Entity, path string) {
+func genSpringService(e schema.Entity, path string) error {
 	cls := javaClassName(e.Name)
 	repo := lowerFirstSpring(cls) + "Repository"
 	var sb strings.Builder
@@ -356,7 +367,7 @@ func genSpringService(e schema.Entity, path string) {
 	sb.WriteString("        return true;\n")
 	sb.WriteString("    }\n")
 	sb.WriteString("}\n")
-	writeFileMk(path+"/"+springPkgPath+"/"+cls+"Service.java", sb.String())
+	return writeFileMk(path+"/"+springPkgPath+"/"+cls+"Service.java", sb.String())
 }
 
 func applyRequestToEntity(e schema.Entity) string {
@@ -379,7 +390,7 @@ func applyRequestToEntityIndented(e schema.Entity) string {
 
 // ─── per-entity: REST controller ─────────────────────────────
 
-func genSpringController(e schema.Entity, path string) {
+func genSpringController(e schema.Entity, path string) error {
 	cls := javaClassName(e.Name)
 	svc := lowerFirstSpring(cls) + "Service"
 	coll := plural(routeName(e.Name)) // e.g. "orders"
@@ -427,12 +438,12 @@ func genSpringController(e schema.Entity, path string) {
 	sb.WriteString("            : ResponseEntity.notFound().build();\n")
 	sb.WriteString("    }\n")
 	sb.WriteString("}\n")
-	writeFileMk(path+"/"+springPkgPath+"/"+cls+"Controller.java", sb.String())
+	return writeFileMk(path+"/"+springPkgPath+"/"+cls+"Controller.java", sb.String())
 }
 
 // ─── global validation error handler (400 on @Valid failure) ─
 
-func genSpringErrorHandler(path string) {
+func genSpringErrorHandler(path string) error {
 	var sb strings.Builder
 	sb.WriteString("package com.gensystem.app;\n\n")
 	sb.WriteString("import org.springframework.http.HttpStatus;\n")
@@ -452,7 +463,7 @@ func genSpringErrorHandler(path string) {
 	sb.WriteString("        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);\n")
 	sb.WriteString("    }\n")
 	sb.WriteString("}\n")
-	writeFileMk(path+"/"+springPkgPath+"/ValidationErrorHandler.java", sb.String())
+	return writeFileMk(path+"/"+springPkgPath+"/ValidationErrorHandler.java", sb.String())
 }
 
 func lowerFirstSpring(s string) string {
@@ -468,13 +479,17 @@ func lowerFirstSpring(s string) string {
 // `go build`. The actual `mvn package` (which resolves Spring Boot from Maven
 // Central) is a verify-on-box step; the scripts are written + syntax-checkable
 // here. Produces an executable Spring Boot fat-jar.
-func writeSpringShipScripts(path string) {
-	writeFileMk(path+"/VERSION", "0.1.0\n")
-	writeFileMk(path+"/build-all.sh", springBuildAllSh)
-	writeFileMk(path+"/bundle.sh", springBundleSh)
-	writeFileMk(path+"/.env.example", springEnvExample)
-	writeFileMk(path+"/deploy/generated-backend.service", springSystemdUnit)
-	writeFileMk(path+"/deploy/run.sh", springRunSh)
+//
+// v26.59 (N07): returns the joined write errors instead of dropping them.
+func writeSpringShipScripts(path string) error {
+	return errors.Join(
+		writeFileMk(path+"/VERSION", "0.1.0\n"),
+		writeFileMk(path+"/build-all.sh", springBuildAllSh),
+		writeFileMk(path+"/bundle.sh", springBundleSh),
+		writeEnvExampleIfAbsent(path+"/.env.example", springEnvExample), // v26.59 (N08): GenerateEnvFiles owns .env.example
+		writeFileMk(path+"/deploy/generated-backend.service", springSystemdUnit),
+		writeFileMk(path+"/deploy/run.sh", springRunSh),
+	)
 }
 
 const springBuildAllSh = `#!/usr/bin/env bash
@@ -573,9 +588,13 @@ exec java -jar ./server.jar
 
 // GenerateSpringDockerfile writes a multi-stage Dockerfile that builds the jar
 // with Maven and runs it on a JRE base. docker build is verify-on-box.
-func GenerateSpringDockerfile(path string) {
-	writeFileMk(path+"/Dockerfile", springDockerfile)
-	writeFileMk(path+"/.dockerignore", "dist/\nbackend/target/\nweb/node_modules/\n*.tar.gz\n.git/\n")
+//
+// v26.59 (N07): returns the joined write errors instead of dropping them.
+func GenerateSpringDockerfile(path string) error {
+	return errors.Join(
+		writeFileMk(path+"/Dockerfile", springDockerfile),
+		writeFileMk(path+"/.dockerignore", "dist/\nbackend/target/\nweb/node_modules/\n*.tar.gz\n.git/\n"),
+	)
 }
 
 const springDockerfile = `# Multi-stage build for the generated Spring Boot backend (Java 17).

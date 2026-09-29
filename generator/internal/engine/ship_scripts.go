@@ -18,6 +18,7 @@ package engine
 
 import (
 	"errors"
+	"os"
 	"path/filepath"
 )
 
@@ -30,10 +31,25 @@ func writeShipScripts(appName, path string) error {
 		writeFileMk(filepath.Join(path, "VERSION"), "0.1.0\n"),
 		writeFileMk(filepath.Join(path, "build-all.sh"), buildAllSh),
 		writeFileMk(filepath.Join(path, "bundle.sh"), bundleShFor(appName)),
-		writeFileMk(filepath.Join(path, ".env.example"), envExample),
+		writeEnvExampleIfAbsent(filepath.Join(path, ".env.example"), envExample),
 		writeFileMk(filepath.Join(path, "deploy/"+appName+".service"), systemdUnitFor(appName)),
 		writeFileMk(filepath.Join(path, "deploy/run.sh"), runSh),
 	)
+}
+
+// writeEnvExampleIfAbsent writes the fixed .env.example of the ship scripts
+// only when no .env.example exists yet.
+//
+// v26.59 (N08): GenerateEnvFiles and the ship scripts both wrote .env.example
+// and whichever ran last won, so the schema based file was lost when the ship
+// scripts ran after it. GenerateEnvFiles owns the file: it always writes it,
+// and the ship scripts only fill the gap, whatever the order. A folder at that
+// path is not a file, so writeFileMk still reports it.
+func writeEnvExampleIfAbsent(p, content string) error {
+	if fi, err := os.Stat(p); err == nil && fi.Mode().IsRegular() {
+		return nil
+	}
+	return writeFileMk(p, content)
 }
 
 const buildAllSh = `#!/usr/bin/env bash

@@ -130,9 +130,13 @@ def rewrite_text(source, func_name, new_body_src):
     if start_line == -1:
         return None, f"function '{func_name}' not found (text mode)"
 
+    # v26.59 (N10): each line was written with l.strip(), which removed its own
+    # indent, so the lines of an if or loop body sat at the depth of the if line.
+    # dedent removes only the indent common to the whole body, as rewrite_ast
+    # does, and each line keeps its depth relative to the body.
     new_lines = []
-    for l in new_body_src.splitlines():
-        new_lines.append(body_indent + l.strip() + "\n")
+    for l in textwrap.dedent(new_body_src).splitlines():
+        new_lines.append(body_indent + l.rstrip() + "\n")
     if not new_lines:
         new_lines = [body_indent + "pass\n"]
 

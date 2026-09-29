@@ -22,9 +22,14 @@ func LoadIRAt(root string) (SchemaIR, error) {
 	var ir SchemaIR
 
 	data, err := os.ReadFile(filepath.Join(root, irSnapshotFile))
-	if err != nil {
+	if os.IsNotExist(err) {
 		// first run → no previous state
 		return SchemaIR{}, nil
+	}
+	// v26.59 (N11): every read failure used to count as a first run. A
+	// snapshot that exists but cannot be read is an error for the caller.
+	if err != nil {
+		return SchemaIR{}, err
 	}
 
 	err = json.Unmarshal(data, &ir)

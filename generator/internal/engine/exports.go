@@ -70,10 +70,13 @@ func GenerateBackendApp(entities []schema.Entity, path string) error {
 	if springEnabled() {
 		// Phase 6: emit a Spring Boot 3.x / Java 17 Maven project instead of the
 		// Go backend. Ship scripts + Dockerfile are Spring-aware (Maven build).
-		GenerateSpringApp(entities, path)
-		writeSpringShipScripts(path)
-		GenerateSpringDockerfile(path)
-		return nil
+		// v26.59 (N07): the Spring write errors were dropped and this returned
+		// nil; every part is still tried and the errors are joined.
+		return errors.Join(
+			GenerateSpringApp(entities, path),
+			writeSpringShipScripts(path),
+			GenerateSpringDockerfile(path),
+		)
 	}
 	// v23.15: scrub stale artifacts from a reused output directory BEFORE
 	// emitting anything, so an older run's files can't poison this build (a

@@ -264,7 +264,9 @@ func ExecuteTask(task planner.Task, entityMap map[string]interface{}, rootPath s
 			return err // v26.58 (D030): a web project that cannot be written fails the task
 		}
 		if _, err := os.Stat(filepath.Join(rootPath, "mobile")); err == nil {
-			engine.GenerateMobileProject(entities, rootPath)
+			if err := engine.GenerateMobileProject(entities, rootPath); err != nil {
+				return err // v26.59 (N07): a mobile project that cannot be written fails the task
+			}
 		}
 		return nil
 

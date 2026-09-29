@@ -89,14 +89,33 @@ func orderedObjectFields(raw json.RawMessage) ([]Field, error) {
 			return nil, err
 		}
 		key, _ := keyTok.(string)
+		// v26.59 (N05): a failed dec.Decode(&typ) had already consumed the value,
+		// so the fallback decode met the next ',' or '}' and always failed. Read
+		// the value once as raw bytes, then try the string and the generic value
+		// from the same bytes.
+		var val json.RawMessage
+		if err := dec.Decode(&val); err != nil {
+			return nil, err
+		}
 		var typ string
-		if err := dec.Decode(&typ); err != nil {
+		if err := json.Unmarshal(val, &typ); err != nil {
 			// value might be a nested object/number; capture as string-ish
 			var any interface{}
-			if err2 := dec.Decode(&any); err2 != nil {
+			if err2 := json.Unmarshal(val, &any); err2 != nil {
 				return nil, err
 			}
-			typ = fmt.Sprintf("%v", any)
+			// v26.59 (N05): an object value like {"type":"int"} gave the type
+			// text map[type:int], which no generator knows. Use its string
+			// "type" key; keep %v only for other values.
+			if obj, ok := any.(map[string]interface{}); ok {
+				if s, ok := obj["type"].(string); ok {
+					typ = s
+				} else {
+					typ = fmt.Sprintf("%v", any)
+				}
+			} else {
+				typ = fmt.Sprintf("%v", any)
+			}
 		}
 		out = append(out, Field{Name: key, Type: typ})
 	}

@@ -2,6 +2,7 @@ package engine
 
 import (
 	"fmt"
+	"path/filepath"
 
 	"github.com/hpdkhoa/gen-system/generator/internal/compiler"
 	"github.com/hpdkhoa/gen-system/generator/internal/frontend"
@@ -27,7 +28,15 @@ func RunAll(entities []schema.Entity, path string) {
 	// v26.58 (follow up 7): the snapshot of the OUTPUT folder. It came from the
 	// working directory, so a stale snapshot there skipped entities in a fresh
 	// output folder, and every run overwrote the caller's own snapshot.
-	oldIR, _ := compiler.LoadIRAt(path)
+	// v26.59 (N11): the error was dropped, so a broken snapshot read as a first
+	// run. RunAll regenerated every entity of an existing app and then wrote a
+	// new snapshot over the broken one. Stop before writing anything instead.
+	oldIR, err := compiler.LoadIRAt(path)
+	if err != nil {
+		fmt.Printf("❌ Cannot read the IR snapshot %s: %v\n", filepath.Join(path, ".gen", "ir_snapshot.json"), err)
+		fmt.Println("   Generation stopped and nothing was written. Fix the file, or delete it to regenerate every entity.")
+		return
+	}
 
 	// Build schema file from entities slice
 	sf := schema.SchemaFile{Entities: entities}
@@ -49,8 +58,12 @@ func RunAll(entities []schema.Entity, path string) {
 	for _, name := range buildPlan.Changed {
 		changedSet[name] = true
 	}
-	// First run: changedSet is empty — treat ALL as new
-	firstRun := len(changedSet) == 0
+	// v26.59 (N06): a first run is a folder with no previous IR. It was an
+	// empty change set, but since D072 a rerun with an unchanged schema also
+	// gives one, so every rerun regenerated every entity. The snapshot is
+	// saved only after the entity loop, so a run that stopped before that
+	// still counts as a first run next time.
+	firstRun := len(oldIR.Entities) == 0
 
 	for _, e := range entities {
 

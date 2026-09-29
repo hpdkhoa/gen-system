@@ -338,6 +338,15 @@ func (b *cfgBuilder) processNode(n *ast.Node) {
 					b.edge(b.current, mergeBlock)
 				}
 			}
+			// v26.59 (N03): a Go switch or type switch with no default clause
+			// runs no case when no value matches and goes on after the switch,
+			// so the deciding block flows into the merge. Without this edge the
+			// code after a switch whose cases all return was reported as
+			// dead_code. A select with no default blocks until a case runs, so
+			// it gets no such edge.
+			if n.Language == ast.LangGo && (n.Name == "switch" || n.Name == "type-switch") && !hasDefaultCase(n) {
+				b.edge(pred, mergeBlock)
+			}
 			b.current = mergeBlock
 			return
 		}
@@ -467,6 +476,16 @@ func buildProcedureCFG(id string, n *ast.Node) *CFG {
 		b.current.Label += "+exit"
 		cfg.Exits = []int{b.current.ID}
 	}
+
+	// v26.59 (N04): an IF whose THEN and ELSE both end in EXIT or ESCAPE
+	// leaves an if_merge block that nothing reaches and that holds nothing.
+	// This builder never pruned, so AnalyzeDataFlow reported the empty block
+	// as dead_code. pruneUnreachable drops only empty orphans, as in the Go
+	// builder; a block with statements after such an IF stays and is still
+	// reported. It runs after the exit fallback: an orphan exists only when
+	// some arm exited, and then cfg.Exits is not empty, so the fallback never
+	// names a block that pruning removes.
+	pruneUnreachable(cfg)
 
 	return cfg
 }
@@ -737,6 +756,18 @@ func isMultiWayBranch(n *ast.Node) bool {
 	}
 	for _, ch := range n.Children {
 		if ch != nil && ch.Kind == ast.NodeBranch {
+			return true
+		}
+	}
+	return false
+}
+
+// hasDefaultCase reports whether a Go switch or type switch has a default
+// clause. The Go frontend (caseClauses) labels that clause "default" in its
+// RawSource; a case value can never be the keyword itself. v26.59 (N03).
+func hasDefaultCase(n *ast.Node) bool {
+	for _, ch := range n.Children {
+		if ch != nil && ch.Kind == ast.NodeBranch && ch.RawSource == "default" {
 			return true
 		}
 	}

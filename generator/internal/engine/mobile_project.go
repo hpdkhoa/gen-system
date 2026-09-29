@@ -8,6 +8,7 @@
 package engine
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 	"strings"
@@ -17,18 +18,25 @@ import (
 
 // GenerateMobileProject writes package.json, an entry point, and an App that
 // renders the generated screens, so the mobile/ tree can be bundled.
-func GenerateMobileProject(entities []schema.Entity, rootPath string) {
+//
+// v26.59 (N07): the MkdirAll error returned without a message and every
+// writeFileMk error was dropped, so the task counted as a success with the
+// mobile project missing. The function now returns the MkdirAll error, or the
+// joined write errors, as GenerateWebProject does since D030.
+func GenerateMobileProject(entities []schema.Entity, rootPath string) error {
 	mDir := filepath.Join(rootPath, "mobile")
 	if err := os.MkdirAll(mDir, 0755); err != nil {
-		return
+		return err
 	}
-	writeFileMk(filepath.Join(mDir, "package.json"), mobilePackageJSON)
-	writeFileMk(filepath.Join(mDir, "index.js"), mobileIndexJS)
-	writeFileMk(filepath.Join(mDir, "app.json"), mobileAppJSON)
-	writeFileMk(filepath.Join(mDir, "App.js"), mobileAppJS(entities))
-	writeFileMk(filepath.Join(mDir, "metro.config.js"), mobileMetroConfig)
-	writeFileMk(filepath.Join(mDir, "babel.config.js"), mobileBabelConfig)
-	writeFileMk(filepath.Join(mDir, "BUNDLE_ONLY.md"), mobileBoundaryNote)
+	return errors.Join(
+		writeFileMk(filepath.Join(mDir, "package.json"), mobilePackageJSON),
+		writeFileMk(filepath.Join(mDir, "index.js"), mobileIndexJS),
+		writeFileMk(filepath.Join(mDir, "app.json"), mobileAppJSON),
+		writeFileMk(filepath.Join(mDir, "App.js"), mobileAppJS(entities)),
+		writeFileMk(filepath.Join(mDir, "metro.config.js"), mobileMetroConfig),
+		writeFileMk(filepath.Join(mDir, "babel.config.js"), mobileBabelConfig),
+		writeFileMk(filepath.Join(mDir, "BUNDLE_ONLY.md"), mobileBoundaryNote),
+	)
 }
 
 const mobilePackageJSON = `{

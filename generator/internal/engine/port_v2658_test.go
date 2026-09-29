@@ -3,8 +3,9 @@
 // GenerateEnvFiles wrote PORT=28080 while main.go listened on the fixed
 // address :8080 and read no PORT at all, so the .env value was a lie, and the
 // mobile client (now on mobile.BackendPort) could not follow a changed port.
-// Two generators write .env.example (GenerateEnvFiles and the ship scripts);
-// the second writes the line as a comment, so both forms count.
+// v26.59 (N08): GenerateEnvFiles owns .env.example and the ship scripts no
+// longer write over it, so the PORT line must be a real setting, not the
+// commented line of the ship scripts.
 package engine
 
 import (
@@ -30,7 +31,7 @@ func TestPort_EnvMainAndMobileAgree(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if m := regexp.MustCompile(`(?m)^(?:# )?PORT=(\d+)$`).FindStringSubmatch(string(b)); m == nil || m[1] != mobile.BackendPort {
+		if m := regexp.MustCompile(`(?m)^PORT=(\d+)$`).FindStringSubmatch(string(b)); m == nil || m[1] != mobile.BackendPort {
 			t.Errorf("%s: PORT line %v, want PORT=%s", name, m, mobile.BackendPort)
 		}
 	}
