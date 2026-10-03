@@ -55,9 +55,6 @@ flowchart as retrieval data. Whether it would help is an open experiment, listed
 
 ## Quickstart
 
-<https://gen-system.500kv.co/> walks through one change, with the belief correction and the
-compile gate, and needs no GPU.
-
 ```bash
 git clone https://github.com/hpdkhoa/gen-system.git
 cd gen-system
