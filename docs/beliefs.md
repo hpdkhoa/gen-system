@@ -32,7 +32,7 @@ imports only `ast`, `flow`, and `symbols`, so both halves of the system can depe
 `Object` and `CorrectedTo` coexist on purpose. The machine's answer is never overwritten by the
 human's; both are on the record, which is what makes the staleness check below possible.
 
-One honest note: `Confidence` (`belief.go:117`) has a JSON tag and is never assigned anywhere in
+`Confidence` (`belief.go:117`) has a JSON tag and is never assigned anywhere in
 the shipping code. It always serializes as `0`. It is retained for wire compatibility and should
 not be read as a probability.
 
@@ -69,8 +69,8 @@ action:internal/order/service.go#method:OrderService.Checkout
 ```
 
 The action is a shallow guess from the name (`shallowAction`, `belief.go:686`, splits the leading
-verb: `Checkout` becomes `checkout`, `AdjustStock` becomes `adjust stock`). It is honest about
-being shallow. The effect is inferred conservatively from callee names.
+verb: `Checkout` becomes `checkout`, `AdjustStock` becomes `adjust stock`). The predicate
+`appears_to` marks it as a guess. The parser infers the effect conservatively from callee names.
 
 **Step 2. The model proposes more, and gets checked.** Run `gen-enrich` and a local model reads the
 body and proposes richer claims. Each one is validated against the parser's facts before it is
@@ -97,8 +97,8 @@ if assertsPurity(text) && (f.hasDBWrite || f.hasFSWrite) {
 ```
 
 Say the model claims "persists the order to the database" about a routine with no db or fs effect.
-That claim is marked `contradicts` and carries the reason. The parser is the oracle. The model does
-not get to overrule it.
+`validateEnrich` marks that claim `contradicts` with the reason. The parser's facts decide every
+such conflict.
 
 The persistence detector (`validate.go:96`) is deliberately conservative. It vetoes on
 `in-memory`, `cache`, `temporary` before it starts, and it requires a whole-word verb plus a
@@ -119,8 +119,8 @@ enrich:precondition:...OrderService.Checkout
 Had the parser seen no db effect, the first claim would read `contradicts` instead, with the note
 saying exactly which observation it failed against.
 
-**Step 3. Contradicting claims never steer generation.** This is stronger than it sounds, and it
-is worth being precise about the mechanism. There is a guard method,
+**Step 3. Contradicting claims never steer generation.** This is stronger than it sounds.
+There is a guard method,
 `Belief.IsBlockedForSteering()` (`validate.go:179`), which returns true for enrich beliefs marked
 `contradicts`. It has no caller in the shipping code, and its own comment says so.
 
@@ -135,9 +135,9 @@ for id, b := range bs.beliefs {
 }
 ```
 
-Only human verified beliefs steer. Every parser belief and every enrich belief, contradicting or
-not, is excluded structurally rather than by a rule that could be forgotten. The model's own
-proposals cannot reach the generator unless a person adopted them.
+Only human verified beliefs steer. The filter excludes every parser belief and every enrich
+belief, contradicting or not. The exclusion lives in that filter condition, so there is no
+separate rule that someone could forget.
 
 **Step 4. The human corrects.** You read the action belief, and it is wrong. `Checkout` also
 reserves stock, and that matters. You correct it through the Studio, or:
@@ -166,7 +166,7 @@ case c.DerivedAt != freshDerived:
     b.SourceNow = freshDerived
 ```
 
-The system does not quietly keep your answer, and it does not quietly replace it. It flags the
+The system keeps your answer and stores the fresh derived value in `SourceNow`. It flags the
 belief and shows **both values**. `Warnings()` (`belief.go:894`) surfaces them as:
 
 ```
@@ -197,7 +197,7 @@ deliberately, since a module's fingerprint is computed over its service summarie
 be current first. A moved fingerprint marks the summary stale with "a member changed since this
 summary was written, re-summarize".
 
-**Current limitation, stated plainly:** only service-level summaries are ever produced. The sole
+**Current limitation:** only service-level summaries are ever produced. The sole
 caller of `UpsertSummary` is `SummarizeServices` (`enrich/enrich.go:243`), which hardcodes the
 service scope and does not set `Parent`. The module and project cascade is implemented and tested
 but unreachable from the shipping CLI. Do not describe it as a working feature until a
@@ -225,5 +225,5 @@ GET  /api/present/beliefs              # beliefs, warnings, stale count, summari
 POST /api/present/beliefs/correct      # record a correction
 ```
 
-The design in one line: the parser is the oracle, the model is a proposer that gets checked
-against it, and only a human's judgment is allowed to steer what gets generated.
+The parser is the oracle. The model proposes claims, and gen-system checks them against it.
+Only a human's judgment steers what gets generated.

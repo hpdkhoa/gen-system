@@ -4,8 +4,8 @@
 // Phase 3.3 — Private Fine-Tuning:
 //
 //	gen-system accumulates repair knowledge in .gen/memory.json every time
-//	the healer successfully fixes a build error. This data is valuable:
-//	it's real code + real errors + real fixes from your own codebase.
+//	the healer successfully fixes a build error. The data is valuable because
+//	each record pairs real code and a real error with its fix, from your own codebase.
 //
 //	ExportTrainingData() reads that memory and formats it as JSONL pairs
 //	compatible with:

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- studio-v23.html — v26.6: (1) mixed-language stdlib-root WARNING — Architecture flags a single --stdlib root that physically contains more than one language (it cannot be import-scoped correctly), with an amber callout carrying the exact per-language split command and a "mixed" badge + per-language file breakdown on the row. (2) Python CFG is now FAITHFUL and EXPRESSION-LEVEL: the frontend emits nested then/else/merge + loop back-edges + try/except/finally (was flattened), plus short-circuit and/or, ternary if-expr, comprehension for+if filters, and match/case as a multi-way fan-out (v26.1 lane-column layout, for free). Prior v26.5: Architecture "Runtime resolution" table — which stdlib roots attached, which were skipped/missing, and the exact reason (e.g. "JAVA_HOME not set — pass --stdlib java=<dir>"). This makes the edge-resolution % self-diagnosing rather than a mystery number. Backed by v26.5 engine work: the stdlib language is now PER ROOT (multi-language projects are finally expressible) and roots AUTO-DETECT from the languages actually present in the project. Prior v26.4: IDE-style syntax colouring for CFG code. Each statement line in a process node is now tokenised (a lightweight language-agnostic lexer covering Go / Java / Python / TS / COBOL) and each token drawn in its own coloured <tspan> — keywords, strings, numbers, comments, function calls, and types get distinct theme-aware colours (--syn-* vars, defined for both dark and light). Purely presentational; layout/positions unchanged (still pure-math, headless == browser). Prior v26.3: CFG terminating-call + guard-layout fix (os.Exit/panic/STOP RUN ends at its own End, phantom forward edge dropped; guard peels to side lane, continuation stays on spine). Prior v26.2: graph/CFG zoom range widened & shared (adaptive max from graph size, effective-scale % label, true 1:1 button). Prior v26.1: CFG multi-way layout fix. A Go switch / COBOL EVALUATE / select with 3+ arms no longer overlaps — each arm gets its own lane column (packed by measured subtree width so nested if/switch inside a case gets real room), arms rejoin at their merge back on the decision's spine, and a final per-row overlap-resolution sweep guarantees no two boxes in any depth-row collide (all languages). Prior v23.35: orientation now round-trips through the URL hash (shareable); clicking empty graph canvas clears the find filter (drag-guarded). Prior v23.34: graph-view UX overhaul — (1) orientation-aware
+<!-- studio-v23.html — v26.6: (1) mixed-language stdlib-root WARNING — Architecture flags a single --stdlib root that physically contains more than one language (it cannot be import-scoped correctly), with an amber callout carrying the exact per-language split command and a "mixed" badge + per-language file breakdown on the row. (2) Python CFG is now FAITHFUL and EXPRESSION-LEVEL: the frontend emits nested then/else/merge + loop back-edges + try/except/finally (was flattened), plus short-circuit and/or, ternary if-expr, comprehension for+if filters, and match/case as a multi-way fan-out (v26.1 lane-column layout, for free). Prior v26.5: Architecture "Runtime resolution" table — which stdlib roots attached, which were skipped/missing, and the exact reason (e.g. "JAVA_HOME not set — pass --stdlib java=<dir>"). With this table, the edge-resolution % shows its own cause. Backed by v26.5 engine work: the stdlib language is now PER ROOT (multi-language projects are finally expressible) and roots AUTO-DETECT from the languages actually present in the project. Prior v26.4: IDE-style syntax colouring for CFG code. Each statement line in a process node is now tokenised (a lightweight language-agnostic lexer covering Go / Java / Python / TS / COBOL) and each token drawn in its own coloured <tspan> — keywords, strings, numbers, comments, function calls, and types get distinct theme-aware colours (--syn-* vars, defined for both dark and light). Purely presentational; layout/positions unchanged (still pure-math, headless == browser). Prior v26.3: CFG terminating-call + guard-layout fix (os.Exit/panic/STOP RUN ends at its own End, phantom forward edge dropped; guard peels to side lane, continuation stays on spine). Prior v26.2: graph/CFG zoom range widened & shared (adaptive max from graph size, effective-scale % label, true 1:1 button). Prior v26.1: CFG multi-way layout fix. A Go switch / COBOL EVALUATE / select with 3+ arms no longer overlaps — each arm gets its own lane column (packed by measured subtree width so nested if/switch inside a case gets real room), arms rejoin at their merge back on the decision's spine, and a final per-row overlap-resolution sweep guarantees no two boxes in any depth-row collide (all languages). Prior v23.35: orientation now round-trips through the URL hash (shareable); clicking empty graph canvas clears the find filter (drag-guarded). Prior v23.34: graph-view UX overhaul — (1) orientation-aware
      layout, default Left→Right so deep call trees grow in depth instead of
      stretching horizontally (toggle ⇄ L→R / ⇅ T→B); compact cross-axis spacing.
      (2) Actual-size (1:1) zoom button so you're never stuck at an unreadable
@@ -952,9 +952,9 @@ async function renderArchitecture() {
   // v26.5 — RUNTIME RESOLUTION. The edge-resolution % above is only meaningful
   // if you can see WHICH runtimes were attached and which were not: an
   // unresolved-heavy project is usually just a project whose stdlib wasn't
-  // ingested. This section renders the loader's report — what attached, what was
-  // skipped, and the exact reason — so the number diagnoses itself instead of
-  // sending the reader to guess at flags. This is the "report, don't prompt"
+  // ingested. This section renders the loader's report: what attached, what was
+  // skipped, and the exact reason. The number then carries its own cause, and
+  // the reader does not have to guess at flags. This is the "report, don't prompt"
   // half of the v26.5 design: detection runs automatically, and the outcome is
   // shown after the fact (when it is actually known) rather than gated behind a
   // confirmation dialog before it (when it can only be guessed at).
@@ -1733,8 +1733,8 @@ function attachZoom(svg, body) {
     // v25.9.3 — clamp at the point of truth. Every writer *should* go through
     // clampScale, but a single unclamped assignment anywhere (now or later) used
     // to leak straight into the transform and the label — which is how a CFG
-    // ended up rendered at 2073% and scrolled off-screen. Enforcing it here makes
-    // that class of bug impossible rather than merely unlikely.
+    // ended up rendered at 2073% and scrolled off-screen. The clamp here catches
+    // every such assignment, so that class of bug cannot happen.
     if (!(z.scale > 0) || !isFinite(z.scale)) z.scale = 1;
     z.scale = Math.max(z.min, Math.min(z.max, z.scale));
     if (!isFinite(z.tx)) z.tx = 0;
@@ -1836,8 +1836,8 @@ function attachZoom(svg, body) {
   // v23.34 / v26.2 — actual size (1:1): show the graph at its SOURCE-pixel size,
   // centered on the current view. Because "fit" is the viewBox (scale 1 = whole
   // graph fits the pane), true 1:1 on screen is transform-scale = 1/fitScale.
-  // This is the button that makes a huge switch legible: it jumps straight to
-  // readable text instead of the tiny fit.
+  // This button makes a huge switch legible. It jumps from the tiny fit view
+  // directly to readable text.
   z._actual  = () => {
     z._recalcMax();
     const rect = body.getBoundingClientRect();
@@ -2360,7 +2360,7 @@ function renderCFG(flow) {
   // arm's subtree, (2) lay each subtree out LOCALLY to learn how many lanes it
   // spans (its [minLane,maxLane] about 0), then (3) pack the arms left→right,
   // giving each a lane BASE so its span never intersects the next arm's span.
-  // The result is fully general: nested decisions inside a case get real room.
+  // Nested decisions inside a case therefore get their own lanes.
   //
   // armBaseLane[armKey] = the lane offset (relative to the decision) applied to
   //   the whole arm subtree. armSubtreeLane[armKey][node] = that node's LOCAL lane
@@ -2901,7 +2901,7 @@ async function renderBeliefs() {
   page.innerHTML = '';
   page.appendChild(el('div', { class: 'page-header' }, [
     el('div', { class: 'page-title' }, 'Belief inbox'),
-    el('div', { class: 'page-subtitle' }, 'What the system understands about your code, in plain terms — review, verify, correct.'),
+    el('div', { class: 'page-subtitle' }, 'What the system understands about your code, in plain terms. Verify or correct each claim.'),
     el('div', { class: 'page-actions' }, [
       el('button', { class: 'btn', onclick: () => { state.beliefs = null; renderBeliefs(); } }, 'Refresh'),
     ]),

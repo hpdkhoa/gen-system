@@ -69,7 +69,7 @@ func main() {
 	// claims; the parser-validation gate runs during a rebuild. Without this pass
 	// the persisted beliefs.json carries "validated": null and a reader can't see
 	// whether a claim contradicts the code until something else happens to reload
-	// the project. Running it here means the artifact on disk is self-describing.
+	// the project. After this pass, beliefs.json on disk shows each validation result.
 	store.RebuildFromIndex(ctx.Index, ctx.Effects)
 	reportValidation(store)
 

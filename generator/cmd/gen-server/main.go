@@ -129,7 +129,7 @@ func main() {
 		// already drifted — it never handled the 'cobol' synthetic catalog, so a
 		// COBOL project loaded through the Studio's 📂 picker silently got no
 		// runtime while the same project passed via --stdlib on the command line
-		// did. One parser, one behaviour. A dynamically loaded project with no
+		// did. A dynamically loaded project with no
 		// stdlib spec now AUTO-detects, matching the boot default.
 		sroots, sauto := agentctx.ParseStdlibSpec(o.Stdlib, o.StdlibLang)
 		lo.StdlibRoots = sroots

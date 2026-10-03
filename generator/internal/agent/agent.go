@@ -241,7 +241,7 @@ func runValidationLoop(rootPath, backendPath string, ctx agentctx.Context, round
 					return nil
 				}
 				// A failing test means a runtime defect in a generated op. Surface
-				// it and attempt repair on the implicated SERVICE file(s). Note we
+				// it and attempt repair on the implicated SERVICE file(s). We
 				// must NOT feed extractBrokenFiles here: it would return the
 				// *_test.go file (which has a .go: line), and repairing the test
 				// is wrong — the defect is in the service body the test exercises.
@@ -269,8 +269,8 @@ func runValidationLoop(rootPath, backendPath string, ctx agentctx.Context, round
 }
 
 // runFrontendGates runs the Phase 5 web/mobile/docker build gates. v25.5: the
-// WEB gate is now default-ON for internal builds — "fully executable" should mean
-// the frontend builds, not just the backend. It is opt-OUT via GEN_WEB_GATE=0
+// WEB gate is now default-ON for internal builds. "Fully executable" should mean
+// that the backend and the frontend both build. It is opt-OUT via GEN_WEB_GATE=0
 // (and still explicitly opt-in-able with =1). It remains ADVISORY (warns, never
 // aborts) and a NO-OP when there is no generated frontend or Node is unavailable,
 // so a Node-less offline box is unaffected. Mobile/docker stay opt-IN (heavier,

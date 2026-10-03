@@ -231,7 +231,7 @@ func (s *Server) handleArchitectureV23(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// v26.5: attach the stdlib outcome so the UI can explain the resolution %.
-	// Note this is read through the Server's own lock (StdlibReport()), so a
+	// The report is read through the Server's own lock (StdlibReport()), so a
 	// dynamic project swap can replace it safely while requests are in flight.
 	resp.Stdlib = s.StdlibReport()
 

@@ -1,7 +1,7 @@
 // generator/internal/style/analyze.go — v26.33: the shared view of a Go tree
 // that both Derive and Check read. Everything comes from the Understand engine
 // (symbols, spans, control flow graphs) plus the file text it already holds;
-// nothing here re-parses Go with a second toolchain. That is the point: the
+// nothing here re-parses Go with a second toolchain. As a result the
 // same graph that answers "what calls what" also answers "what does this team's
 // code look like", and the gate and the prompt read one snapshot.
 package style

@@ -14,7 +14,7 @@ the output is wrong, which is the most expensive moment to find out.
 
 gen-system writes the assumptions down and checks them. It grounds the model in a deterministic
 graph of the code. Then it verifies the output with machinery that shares none of the model's
-assumptions. That is the whole idea. The steps:
+assumptions. It works in five steps:
 
 1. **Understand** the source deterministically: AST, symbol index, call graph, control flow graph,
    down to standard library level. Six hand written offline parsers. No model involved. This graph
@@ -49,7 +49,7 @@ prove it.
 | Hardware target | Whatever you have | One 16 GB consumer GPU, on purpose |
 | Team conventions | A system prompt, unchecked | A style profile: the rules go into the prompt, and the parser, not a model, checks the same rules on the output |
 
-One clarification, because the first draft of this README got it wrong: gen-system draws the
+The first draft of this README got this point wrong. gen-system draws the
 flowcharts **for you**; it does not feed them to the model. Nothing today uses a rendered
 flowchart as retrieval data. Whether it would help is an open experiment, listed under Future work.
 
@@ -152,7 +152,7 @@ What the campaign measures:
 - The Understand half against four public repositories pinned to a commit, including 30,000 lines
   of third party COBOL.
 
-On the quality metric, stated plainly: **"the generated service compiles" is close to worthless as
+On the quality metric: **"the generated service compiles" is close to worthless as
 a metric here.** When an operation body fails the compile gate twice, the gate replaces it with an
 explicit `not implemented` stub, and stubs compile. The numbers worth reading are the stub rate
 and the repair counts.
@@ -184,8 +184,8 @@ the other, with Ollama's keep alive holding a model resident between calls.
 
 **There is no scheduler in this repository.** "Sequential with keep alive" means Ollama's own
 keep alive, two model roles, and measurement of what the swap costs. If you are looking for
-scheduling code, there is none to find, and the benchmarks measure the swap rather than claiming
-it away.
+scheduling code, there is none to find. The benchmarks measure the swap and report what it
+costs.
 
 An architecture test (`internal/archtest`) forbids the Understand server from linking any
 generation package, so the read only half cannot acquire a model dependency by accident.
@@ -199,8 +199,8 @@ The pieces exist elsewhere. Here is where, and how this differs.
   AST graphs give more reliable and cheaper grounding. gen-system builds on that finding.
   gen-system's first release was November 2025. It covers six languages with hand written parsers,
   rather than Tree-sitter on one. And it goes past retrieval into correctable beliefs, grounded
-  generation, and verification of the output from outside. The idea arrived independently, and
-  the execution went further.
+  generation, and verification of the output from outside. gen-system arrived at the idea
+  independently.
 - **PRAXIS** (arXiv 2608.19784, August 2026) stores knowledge the model extracted on a code
   dependency graph and surfaces it during generation. That is the same move as gen-system's
   generation half. The difference is the trust model. PRAXIS accumulates what the model derived.
@@ -240,7 +240,7 @@ on public repositories is what exists instead.
 - Body rewriting works for Go and Python only. Other languages return an explicit
   not implemented error rather than letting the repair loop mutate source it cannot parse back.
 - After two failed repairs an operation degrades to a `not implemented` stub. The service builds;
-  that operation does not work. This is deliberate, and the stub rate counts it instead of hiding it.
+  that operation does not work. This is deliberate. The stub rate counts every such stub.
 - The model's security review is advisory. It warns and never blocks.
 - The code for module level and project level belief summaries exists, but the shipping CLI does
   not produce them yet; it summarizes at service level only.

@@ -2,7 +2,7 @@
 # install.sh — gen-system installation script for a fresh Linux server.
 # v23.11 (Phase 0): added --with-toolchains to provision the full-stack
 #   verification toolchain (Node 20 LTS, JDK 17 + Maven, Docker engine) so the
-#   box can build/verify the web, mobile, Java(17) and Docker layers — not just
+#   box can build/verify the web, mobile, Java(17) and Docker layers as well as
 #   the Go backend. Purely additive: a new p0_* function block + one call site
 #   after Go install; existing 8 steps and the enterprise/--understand path are
 #   untouched (toolchains are auto-skipped under --understand).

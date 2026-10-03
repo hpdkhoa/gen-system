@@ -18,7 +18,7 @@
 // The Java method path goes buildFuncCFG → hasStructuralNodes → buildStructuralCFG
 // → extractStructuralNodes → processNode. That is the same path TS/Python/CA Gen
 // take, so a green result here means the try/loop/branch split works for every
-// non-Go language, not just Java.
+// non-Go language, Java included.
 package flow
 
 import (

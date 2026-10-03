@@ -881,7 +881,7 @@ func correctionSentence(b *Belief) string {
 // BuildCorrectionContext is a convenience for generation callers: it constructs a
 // root-scoped store, rebuilds beliefs from the given index/effects so corrections
 // re-apply and match, and returns the correction block. It performs parser-eval
-// only (no enricher) — a fast, offline, side-effect-free read of the persisted
+// only (no enricher), so it is fast and has no side effects. It works offline on the persisted
 // human corrections. Returns "" when the project has no corrections.
 func BuildCorrectionContext(root string, idx *symbols.Index, efx map[string]*flow.FuncEffects) string {
 	bs := NewStore(root)

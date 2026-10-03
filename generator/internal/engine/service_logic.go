@@ -6,8 +6,8 @@
 // instead of a fixed errors/model/store block, fixing "undefined: fmt|time";
 // (2) sanitizeOperations now does a REAL per-op `go build` against the store/
 // model contract (not just gofmt), so a body that misuses the (T,bool) store
-// API or won't type-check is dropped to a not-implemented stub — guaranteeing
-// the service layer always builds green regardless of model output.
+// API or won't type-check becomes a not-implemented stub. So the service
+// layer builds green whatever the model returns.
 // (v23.14 Phase 6) Spring-mode guard added: when GEN_BACKEND=spring this Go generator is a no-op; the Spring Boot project is emitted by backend_spring.go.
 // generator/internal/engine/service_logic.go — v23.10 (Phase 4-B): generates a
 // business-logic SERVICE layer whose method bodies come from a LogicProvider
@@ -171,7 +171,7 @@ func isExportedIdent(s string) bool {
 // gets). An operation whose body does not type-check — wrong store contract
 // (e.g. treating Get's bool as an error), undefined identifiers, bad imports — is
 // dropped to a `return nil, errors.New("not implemented: <Name>")` stub. This is
-// the containment guarantee: whatever the model emits, the service builds green.
+// the containment guarantee.
 //
 // v23.18: upgraded from a syntax-only gofmt check (which passed bodies that used
 // fmt/time without importing them, or misused the (T,bool) store contract) to a

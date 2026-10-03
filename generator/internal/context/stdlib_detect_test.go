@@ -62,7 +62,7 @@ func TestParseStdlibSpec_AutoAndNone_v265(t *testing.T) {
 	if auto || len(roots) != 0 {
 		t.Errorf("'none' must opt out entirely: roots=%d auto=%v", len(roots), auto)
 	}
-	// 'none' wins even when combined — an explicit opt-out is not a suggestion.
+	// 'none' wins even when combined with other entries: an explicit opt-out always applies.
 	roots, auto = ParseStdlibSpec("go,none", "")
 	if auto || len(roots) != 0 {
 		t.Errorf("'none' must win over other entries: roots=%d auto=%v", len(roots), auto)

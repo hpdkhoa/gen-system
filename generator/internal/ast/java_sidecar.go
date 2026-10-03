@@ -22,9 +22,9 @@
 //     flag wiring RegisterJavaSidecar). This keeps "offline single static
 //     binary, no surprises" literally true for the default build.
 //
-// Because it is unregistered and Available()==false, this type is inert today:
-// it compiles, documents the boundary, and lets later sidecar work be a drop-in
-// rather than a refactor. It deliberately does NOT claim LangJava (the pure-Go
+// Because it is unregistered and Available()==false, this type is inert today.
+// It compiles and documents the boundary. Later sidecar work can drop in here
+// without a refactor. It deliberately does NOT claim LangJava (the pure-Go
 // JavaFrontend owns that language and the .java extension); registering a second
 // frontend for LangJava would panic. The sidecar, when real, will either replace
 // the pure-Go registration behind the opt-in flag or claim a distinct language

@@ -53,7 +53,7 @@ byte identical requests to the pre-v26.24 client:
 | `OLLAMA_STREAM` | `1` or `true` enables streaming reads. Default off |
 | `GEN_LOGIC` | `ollama` uses the live model for business logic. Anything else uses the replay provider |
 
-The 600 second default timeout is not padding. Two 14B-class models share one card, so a cold load
+The 600 second default timeout leaves room for model loads. Two 14B-class models share one card, so a cold load
 of 30 to 90 seconds can land in the middle of a run on top of generation time.
 
 ## The two roles
@@ -93,7 +93,7 @@ name, parameters, and return types come from the deterministic generator and sta
 
 Rewriters exist only for Go and Python. Every other language returns
 `ErrRewriterNotImplemented`, so the heal loop cannot mutate source it is unable to parse back and
-verify. A language without a rewriter fails loudly instead of being edited blindly.
+verify.
 
 ## What happens to a model written operation
 
@@ -109,7 +109,7 @@ That last step is why "the generated service always compiles" is a near-worthles
 a stub compiles. The metrics that matter are `ops_stubbed` and the repair counts, which the
 `gen_pipeline` benchmark reports.
 
-Note the two different caps, which are easy to conflate: **2** repair attempts at the operation
+Two different caps are easy to conflate: **2** repair attempts at the operation
 level (`engine.maxRepairAttempts`), and **3** at the task level in the self-heal loop
 (`agent.maxHealAttempts`). Any document saying "3 repairs then a stub" is describing the wrong one.
 
@@ -144,7 +144,7 @@ This is what makes the pipeline testable. The offline `gen_pipeline` benchmark e
 generate, compile gate, heal, and Understand verify end to end without a GPU. Its unit test asserts
 that nothing gets stubbed, because the fixtures compile as written.
 
-The planner degrades differently and it is worth knowing. Its entity step has no deterministic
+The planner degrades differently. Its entity step has no deterministic
 fallback, so with no reachable model it returns zero entities. The benchmark falls back to a fixed
 schema and **counts it** in a `planner_fallbacks` metric that appears in the output. An offline run
 can never be mistaken for a measured one.
@@ -172,5 +172,5 @@ prompt built from typed inputs (pure string assembly, no I/O)
    Understand re-parses the result ──▶ unresolved calls, orphan ops, effect mismatches
 ```
 
-The model is a proposer at every one of those arrows. Nothing it returns is trusted until
-something deterministic has checked it.
+The model only proposes. Extraction, validation, the compile gate, vet, build, test and the
+Understand pass are deterministic, and each checks the model's output before the next stage uses it.

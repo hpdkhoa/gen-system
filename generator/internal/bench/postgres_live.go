@@ -13,7 +13,7 @@
 // is performed by the companion runner verify-postgres.sh, which builds the
 // generated app and runs it against a live Postgres. This suite is the
 // regression gate for the generator; the script is the regression gate for the
-// live behaviour. Together they close the Phase 1 gap.
+// live behaviour. Phase 1 left a gap here, and these two close it.
 package bench
 
 import (

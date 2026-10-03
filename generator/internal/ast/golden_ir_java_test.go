@@ -19,7 +19,7 @@
 //
 // SCOPE. Structural/IR-shape only — it asserts what the frontend EMITS. The
 // companion golden_cfg_java_test.go (package flow) asserts what flow.Build then
-// BUILDS from this IR. Together they cover both sides of the contract line.
+// BUILDS from this IR.
 package ast
 
 import "testing"

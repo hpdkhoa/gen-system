@@ -21,7 +21,7 @@
 // via WithPhase(ctx, "phase-name"). Every log call inside that ctx auto-tags
 // with phase=<name>, letting humans grep one phase out of a noisy run.
 //
-// Errors are logged AND returned. The logger does not replace error returns.
+// Errors are logged AND returned.
 package trace
 
 import (

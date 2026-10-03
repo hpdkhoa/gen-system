@@ -1,6 +1,6 @@
 // http_smoke.go — v25.5 (step 4): optional HTTP liveness smoke INSIDE the loop.
 //
-// "Fully executable" should mean the generated app actually SERVES, not just that
+// "Fully executable" should mean the generated app SERVES, beyond the check that
 // it compiles and its no-panic contract test passes. When GEN_HTTP_SMOKE=1, after
 // the validation loop (and Understand-verify) pass, this:
 //  1. builds the backend binary,

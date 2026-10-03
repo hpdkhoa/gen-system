@@ -4,9 +4,9 @@
 # The genbench `postgres_generation` suite proves the generator EMITS the right
 # migration + store + FK artifacts (pure Go, no DB). This script proves the
 # generated app actually WORKS against a real PostgreSQL: it applies the
-# migrations, exercises CRUD over HTTP, and — the point of the whole exercise —
-# confirms the FK constraint REJECTS an orphaned child row. Together they close
-# the Phase-1 "build-verified → live-verified" gap.
+# migrations, exercises CRUD over HTTP, and, as its main check,
+# confirms the FK constraint REJECTS an orphaned child row. The suite and this
+# script together take Phase 1 from "build-verified" to "live-verified".
 #
 # Run this on YOUR box (the one with a Postgres you can write to).
 #

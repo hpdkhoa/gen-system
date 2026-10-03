@@ -256,7 +256,7 @@ JSON:`,
 
 // CompileIdea converts a product idea string into a schema JSON string.
 // Previously lived in compiler/idea/compiler.go — moved here because
-// it is fundamentally an AI call, not a compiler transformation.
+// it is an AI call. It performs no compiler transformation.
 func CompileIdea(input string) (string, error) {
 	prompt := `You are a schema compiler.
 

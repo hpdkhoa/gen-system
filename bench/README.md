@@ -61,7 +61,7 @@ boundary in full and every result prints it.
 Every table `summarise.py` writes carries `_provenance` (date, gen-system
 commit, task set, GPU) and per-row `n` plus min/max where the raw data has
 them. A config with no raw data gets no row. If a value is null, the harness
-did not measure it. That is intended behaviour, not a bug to paper over.
+did not measure it. This is intended. The harness keeps the null and does not fill it in.
 
 **Runs that measured nothing are dropped, not averaged (v26.32).** A `genpipe` run in
 live mode that completed zero model requests carries build and test results from the

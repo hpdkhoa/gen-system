@@ -1,4 +1,4 @@
-// java_frontend.go — v23.12 (Phase 4): native, pure-Go, offline Java 17
+// java_frontend.go, v23.12 (Phase 4). This pure-Go code works offline. It is the native Java 17
 // understanding frontend. Hand-rolled lexer + recursive-descent-ish structural
 // parser (no external deps, no Tree-sitter), mirroring cobol_frontend.go's
 // shape. Resolves package/imports/classes/interfaces/enums/records/methods and

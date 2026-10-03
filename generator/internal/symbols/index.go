@@ -468,9 +468,9 @@ func (idx *Index) resolveByNameLocked(name string) *Symbol {
 	// The prior version ranged over idx.allSymbols and took the first match in
 	// each tier. idx.allSymbols is a map, so Go randomizes that order: when two
 	// symbols in the SAME tier shared a bare name, which one won varied between
-	// runs on identical input. That is a direct breach of the determinism
-	// contract the rest of the system is built on, and it silently produced a
-	// different call graph run to run. Candidates are now sorted by their unique,
+	// runs on identical input. That broke the determinism contract that the
+	// rest of the system relies on, and the call graph changed from run to run
+	// with no warning. The code now sorts candidates by their unique,
 	// stable SymbolID before the tier preference is applied, so the winner is a
 	// function of the input alone. Tier order is unchanged.
 	var candidates []*Symbol

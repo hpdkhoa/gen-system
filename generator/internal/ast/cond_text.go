@@ -7,12 +7,12 @@
 //
 //	let i = 0 ; i < arr . length ; i + +
 //
-// where the source said `let i = 0; i < arr.length; i++`. That is not a
-// cosmetic nit: "renders the control-flow graph as a flowchart for human
+// where the source said `let i = 0; i < arr.length; i++`. The label matters.
+// The phrase "renders the control-flow graph as a flowchart for human
 // review" is a load-bearing claim, and a label a reader has to mentally
 // re-assemble undercuts it.
 //
-// This is deliberately a RENDERER, not a re-parse: it applies spacing
+// This is deliberately a RENDERER. It does not parse again. It applies spacing
 // conventions to tokens, so it can never fail or change the node structure.
 package ast
 

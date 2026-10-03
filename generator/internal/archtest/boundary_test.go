@@ -1,6 +1,6 @@
 // generator/internal/archtest/boundary_test.go — v23.9 (Phase 1 + Phase 3
 // acceptance). Architecture guardrail tests that make the two-product split
-// PERMANENT: a future edit that re-couples the halves fails CI, not a demo.
+// PERMANENT: a future edit that re-couples the halves fails CI, so it never reaches a demo.
 //
 //	TestCoreHasNoGenerationDeps        — the shared CORE packages (ast, symbols,
 //	                                      flow, compiler, objgraph, context,

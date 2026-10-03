@@ -188,7 +188,7 @@ sudo systemctl restart gen-server
 
 **Ollama is running but generation is slow.**
 The models need GPU acceleration for reasonable speed on real workloads.
-Without a GPU, the studio still parses code and shows intelligence — only the
+Without a GPU, the studio still parses code and shows intelligence. Only the
 generation features will be slow. For NVIDIA GPUs, install CUDA drivers before
 running `ollama pull` and Ollama will detect and use them automatically.
 

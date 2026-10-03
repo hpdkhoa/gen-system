@@ -11,7 +11,7 @@
 //     Approve → generate the held plan (compile-gate + repair as usual).
 //     Reject  → discard, nothing staged.
 //     With autoApprove=true, step 1 proceeds straight to generation (scripted/CI).
-//     Otherwise it ALWAYS holds for Approve/Reject — the review is a true gate.
+//     Otherwise it ALWAYS holds for Approve/Reject. The review blocks generation.
 //
 // Reuses the exact conflict rules the CLI gate uses (planner_v2), so CLI and
 // Studio push back identically. Lives in services (generation surface);
@@ -136,8 +136,8 @@ func (s *BuildService) runContinue(job *BuildJob, idea, target string, autoAppro
 	// Always publish the review so the UI can show what will happen.
 	s.broker.Publish("continue_review", review)
 
-	// v25.8.2: ALWAYS hold for the user's decision — the review is a true gate,
-	// not a post-hoc receipt. Nothing is generated until Approve arrives. The only
+	// v25.8.2: ALWAYS hold for the user's decision. The review is a gate that
+	// runs before generation. Nothing generates until Approve arrives. The only
 	// bypass is an explicit autoApprove (e.g. scripted/CI callers that opt in).
 	if !autoApprove {
 		s.mu.Lock()

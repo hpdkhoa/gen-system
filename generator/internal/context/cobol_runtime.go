@@ -20,10 +20,10 @@
 // reading as "unknown program worth investigating". It reuses the exact v23.32
 // provenance machinery: the synthetic module is added with ProvStdlib, the
 // resolver links CALL/FUNCTION names to it, and the Understand UI hides it by
-// default behind the same stdlib toggle. The win is analytic clarity — a known
-// runtime service is not a missing program — not new source.
+// default behind the same stdlib toggle. It adds no new source. It makes the
+// analysis clearer, since a known runtime service no longer reads as a missing program.
 //
-// Honesty note: these are SIGNATURE-LEVEL stubs (name + provenance, no body),
+// Fidelity: these are SIGNATURE-LEVEL stubs (name + provenance, no body),
 // the same fidelity level as the Java JDK signature tree. They mark "this call
 // targets a known runtime service", nothing more. The list is curated and
 // conservative; an unrecognised CALL still resolves to nothing and stays

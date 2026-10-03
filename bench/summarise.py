@@ -19,7 +19,7 @@ and writes rows into the portfolio's measured.json:
 
 Every table gets a "_provenance" object: {date, gen_system_commit, task_set,
 env}. Every value comes from the raw files; a config with no raw data writes
-no row. Never invents numbers.
+no row.
 
 Usage:
   python3 bench/summarise.py --results results/2026-08-30 \

@@ -6,7 +6,7 @@
 // documents fed to the AI repair/generation pipeline.
 //
 // Key differences vs .md docs:
-//   - Machine-readable (JSON serialisable), not prose.
+//   - Machine-readable: the graph serialises to JSON. The .md docs are prose.
 //   - Topology-aware: nodes, edges, layers, and effect metadata are explicit.
 //   - Built from the live symbol index and flow data — always fresh.
 //   - Compact: the NIT serialiser is used for node content, not raw source.

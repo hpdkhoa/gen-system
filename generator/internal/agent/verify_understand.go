@@ -21,8 +21,8 @@
 //   - VerifyAutofix: route each fixable finding through the existing repair loop
 //     (dispatchRepairs), then re-report.
 //
-// Both modes ALWAYS report to the human (emit + structured record). This honours
-// the hard constraint: the human stays in the loop before acting on beliefs.
+// Both modes ALWAYS report to the human (emit + structured record), so a human
+// sees the findings before the system acts on beliefs. That is a hard constraint.
 //
 // BOUNDARY. This lives in the agent (generation) package and uses agentctx —
 // which agent already imports. understand-server never links agent, so the

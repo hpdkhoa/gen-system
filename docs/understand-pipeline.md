@@ -120,7 +120,7 @@ to decide when a body is opaque (`flow/cfg_ts_py.go:59`).
 This policy has outside support. A 2026 review of 87 graph based vulnerability studies
 (Information 17(8):730) lists graph construction errors as a main reason reported results do not
 hold up. It also asks for uncertainty aware graph construction. An unknown node that carries its
-reason is the honest form of that. The graph records what it could not model, instead of guessing
+reason applies that idea. The graph records what it could not model. It does not guess
 a structure that looks plausible.
 
 ## Symbol IDs
@@ -176,7 +176,7 @@ call in a generated backend as an unresolved project symbol: 234 of 287 edges, a
 standard library. It now loads with stdlib auto detection (`agent.LoadOpts`, `--stdlib` on the
 gen CLI, `GEN_STDLIB`), the same detection understand-server uses.
 
-**A determinism bug lived here, and it is worth knowing what it was.** Until v26.25 this function
+**A determinism bug lived here.** Until v26.25 this function
 ranged over `idx.allSymbols` directly and kept the first match in each tier. `allSymbols` is a map
 and Go randomizes map iteration. So when two symbols in the *same* tier shared a bare name, the
 winner varied between runs on identical input. The call graph varied with it. Everything else in
@@ -194,7 +194,7 @@ tier at all**, so a standard library symbol could capture a project call there. 
 the defect the v23.32 comment above describes as fixed. It had been fixed in one of the two paths.
 
 The first round of tests did not catch it because they went through `ResolveAll`, which uses the
-fixed resolver. A test can pass, prove nothing, and read as reassuring, which is the more useful
+fixed resolver. A passing test can prove nothing and still look reassuring. That is a more useful
 lesson than the bug itself.
 
 v26.26 removes the second resolver outright rather than repairing it: `resolveCallEdges` now takes
@@ -209,7 +209,7 @@ through **both** `ResolveAll` and `BuildFromModules`, plus a stable `ByName` ord
 fails against the code it replaced, which is the only reason to trust any of them.
 
 **A footnote on the dead branch.** `projectExported` was declared and never assigned, so its arm of
-the final switch could not execute. The reason is worth stating because it is the same shape of
+the final switch could not execute. The cause is the same shape of
 mistake as the map ordering: an earlier edit added the tier variables, then optimized the
 project-exported case into an early `return` inside the loop and left the now-unreachable branch
 behind. The code read as though it implemented a four-way preference while implementing three. Both
@@ -227,11 +227,11 @@ Three lanes (`flow.go:97`): Go bodies with children get the full builder, non-Go
 structural nodes get `buildStructuralCFG`, and anything else collapses to a single block.
 
 Unreachable blocks are pruned by `pruneUnreachable` (`flow.go:159`) with survivors renumbered so
-that index-based block lookup stays valid. Note that pruning is called **only** from the Go path
+that index-based block lookup stays valid. Pruning is called **only** from the Go path
 (`flow.go:140`).
 
 Dead code is reported separately by `AnalyzeDataFlow` (`flow.go:504`), which flags any non-entry
-block with no predecessors. Two honest caveats. It is not part of `LoadContext` at all. Its only caller is the
+block with no predecessors. It is not part of `LoadContext` at all. Its only caller is the
 `/api/present/flow` handler. And because Go CFGs are already pruned, it can only fire on the
 structural languages. The `DataFlowIssue` doc comment mentions `use_before_def` and
 `unread_var` kinds; no analysis produces them.
@@ -303,7 +303,7 @@ configuration routes plus the unconfigured negative control.
 
 ## Why it is built this way
 
-Every step above is deterministic and offline, with one narrow exception recorded honestly under
+Every step above is deterministic and offline, except one narrow case that this page records under
 resolution. That is what lets the same engine verify the generated code afterwards: the Generate
 half writes a backend, and the Understand half re-parses it and reports unresolved calls, orphan
 operations, and read-named operations that write. A checker that shared the generator's

@@ -9,7 +9,7 @@ the hidden tests pass.
 gen-system cannot produce that number, and this folder does not try. gen-system has no issue
 to patch pipeline. Its generation half builds new Go applications from an idea. Its repair loop
 rewrites one function body at a time in code it generated itself. Turning that into an
-issue to patch agent is a new product, not a script.
+issue to patch agent is a new product.
 
 What gen-system can measure on the same benchmark is the part DeepDiscovery reports in its
 first two evaluations: **localization**. Given the issue text and the repository at the task

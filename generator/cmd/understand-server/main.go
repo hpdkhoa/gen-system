@@ -5,8 +5,8 @@
 // api.RegisterUnderstandRoutes — so it links NONE of the generation stack
 // (no ai/Ollama, no engine, no planner, no agent). This is enforced by
 // understand_deps_test.go (acceptance test: go list -deps shows no generation
-// package). The air-gapped posture is therefore structural: the shipped binary
-// physically cannot generate code or call a model, because that code is absent.
+// package). The air gap comes from the build itself: the shipped binary
+// has no code that generates code or calls a model, so it can do neither.
 package main
 
 import (
@@ -91,9 +91,9 @@ func main() {
 		addr, len(ctx.Index.AllSymbols()))
 	fmt.Printf("   Mode:  understanding only — no generation, no model, no network egress\n")
 	fmt.Printf("   Watch: incremental rebuild active (poll 500ms)\n")
-	// v26.5: say what runtimes attached and — crucially — what did NOT and why,
-	// so the Architecture edge-resolution % is self-diagnosing instead of a
-	// mystery number. This is the report-not-prompt half of the design.
+	// v26.5: say what runtimes attached, and also what did NOT attach and why,
+	// so the Architecture edge-resolution % shows its own cause, and a reader
+	// does not have to guess at flags. This is the report-not-prompt half of the design.
 	for _, line := range agentctx.FormatStdlibReport(ctx.StdlibReport) {
 		fmt.Println(line)
 	}

@@ -63,9 +63,9 @@ footer{border-top:1px solid var(--rule);margin-top:44px;padding-top:18px;color:v
   <li>Không "luôn đúng". Nó từ chối giấu phần nào nó không chứng minh được.</li>
 </ul>
 
-<h2>Giới hạn, nói thẳng</h2>
+<h2>Giới hạn</h2>
 <ul>
-  <li>44.4% operation sinh ra kết thúc thành stub với model production. Đó là con số thật.</li>
+  <li>44.4% operation sinh ra kết thúc thành stub với model production.</li>
   <li>Bộ suite đo tính determinism khi sinh code; không ai hứa điều đó. Parser thì deterministic, và test của nó chứng minh điều đó.</li>
   <li>Parser Python gọi ra <code>python3</code>. Năm parser còn lại là Go thuần.</li>
   <li>Parser Java chưa mô hình hóa lambda, và nói rõ điều đó trong node nó phát ra.</li>
@@ -98,7 +98,7 @@ gen idea --out ./app "a library lending service with members, books and loans"</
 <p class="muted" style="font-size:15px;margin-top:10px"><code>./install.sh --understand</code> cài nửa chỉ đọc, không có model, để review trong môi trường air gapped.</p>
 
 <h2>Nhớ nó thế này</h2>
-<p><b>Nó ghi lại giả định của mình, đối chiếu model với parser, cho bạn sửa bất kỳ dòng nào, và không ship thứ gì chưa compile.</b></p>
+<p><b>Nó ghi lại giả định của mình và đối chiếu model với parser. Bạn sửa được bất kỳ dòng nào, và nó chỉ ship code đã compile được.</b></p>
 </div>
 </div>
 

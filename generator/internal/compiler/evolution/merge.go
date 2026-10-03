@@ -84,8 +84,8 @@ func Merge(oldIR, newIR Schema) Schema {
 //  1. Start with additive Merge (safe base)
 //  2. Apply DiffIntent removals (explicit, user-signaled)
 //
-// This keeps the "non-destructive by default" guarantee while
-// enabling intentional deletions when the user asks for them.
+// MergeWithDiff stays non-destructive by default. It removes an item
+// only when the user asks for that removal in DiffIntent.
 // ------------------------------------------
 func MergeWithDiff(oldIR, newIR Schema, intent DiffIntent) Schema {
 	// Start with standard safe merge

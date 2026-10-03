@@ -8,12 +8,12 @@ package ast
 // Every language frontend (Go, TypeScript, Python, CA Gen) must
 // convert its native parse tree into this canonical IR.
 //
-// Design principles:
-//  1. Lossless: parse → IR → emit must produce byte-identical
+// This IR follows three design principles.
+//  1. Lossless. Parse → IR → emit must produce byte-identical
 //     output for regions the parser understands.
-//  2. Explicit ignorance: constructs outside the supported subset
-//     become NodeUnknown with an UnknownReason — never silent drop.
-//  3. Human-verifiable: every Node carries a Span so the
+//  2. Explicit ignorance. A construct outside the supported subset
+//     becomes NodeUnknown with an UnknownReason. The IR never drops it silently.
+//  3. Human-verifiable. Every Node carries a Span so the
 //     presentation layer can highlight it in the source viewer.
 // ─────────────────────────────────────────────────────────────
 

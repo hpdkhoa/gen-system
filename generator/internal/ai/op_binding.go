@@ -229,7 +229,7 @@ func appendUniqueCI(s []string, v string) []string {
 // it returns true only when (a) the op's verb is found in the idea, (b) that
 // verb binds to some entity, and (c) that entity is not target AND target is
 // not also a plausible owner of the same verb. On any ambiguity it returns
-// false (keep the op) — this is a backstop, not a gatekeeper. No model call.
+// false (keep the op), so it acts only as a backstop. No model call.
 //
 // v23.25 (task B). Pairs with bindOperationsToEntities (the positive hint used
 // in the prompt); this is the negative post-filter applied after generation.

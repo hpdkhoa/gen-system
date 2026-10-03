@@ -10,7 +10,7 @@ Seed extraction is deterministic and has no model in it. It keeps an identifier 
 issue text when it looks like code rather than English: it is inside backticks, or it
 contains an underscore, or it has camel case, or it is followed by an opening parenthesis,
 or it is a segment of a dotted path. Plain lowercase words are dropped. This is deliberately
-crude. The point is a fixed, explainable rule, not the best possible retriever.
+crude. It trades retrieval quality for a fixed rule that anyone can explain.
 
 Usage:  python3 bench/swebench/prep_task.py <instance_id> <outdir>
 """

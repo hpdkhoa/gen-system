@@ -14,9 +14,9 @@
 //	Line 1 (header):  {"skill_version":1,"project_root":"...","written_at":"...","constraints":[...]}
 //	Lines 2..N:       {"kind":"node"|"edge"|"constraint", ...}
 //
-// Human-readable: every line is valid JSON, no special tooling needed.
-// Greppable by symbol name, layer, or edge kind.
-// Version field allows future format changes to be detected.
+// Every line is valid JSON, so a person can read the file without special tools.
+// A grep by symbol name, layer or edge kind finds the matching lines.
+// The version field lets a reader detect a future format change.
 package objgraph
 
 import (

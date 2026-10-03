@@ -5,8 +5,8 @@
 // style: a body that compiles but breaks a team rule is sent back to the
 // model with the rule named, the same way a build error is, and under the
 // same repair cap. Style never stubs an operation; a body that compiles but
-// is off style is kept and reported. Correctness and style are separate
-// gates, and only the first one can turn logic into a stub.
+// is off style stays, and the gate reports it. Correctness has its own gate,
+// and only that gate can replace a body with a stub.
 package style
 
 import (
