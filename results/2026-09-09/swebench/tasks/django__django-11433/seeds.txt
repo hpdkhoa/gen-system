@@ -1,4 +1,0 @@
-cleaned_data
-github
-self
-some_field

@@ -1,3 +1,0 @@
-ModelAdmin
-get_inlines
-get_inline_instances

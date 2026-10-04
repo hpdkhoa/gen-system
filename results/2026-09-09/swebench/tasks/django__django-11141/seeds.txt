@@ -1,5 +1,0 @@
-__init__
-pkgutil
-iter_modules
-__file__
-__path__

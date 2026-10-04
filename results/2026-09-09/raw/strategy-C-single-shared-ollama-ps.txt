@@ -1,2 +1,0 @@
-NAME                 ID              SIZE      PROCESSOR    CONTEXT    UNTIL               
-qwen2.5-coder:14b    9ec8897f747e    9.7 GB    100% GPU     4096       29 minutes from now    
