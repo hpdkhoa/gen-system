@@ -1,4 +1,4 @@
-// cagen_multiply_v2658_test.go — v26.58 (D057): tokenizeCAGen cut every line
+// cagen_multiply_v2658_test.go (v26.58, D057): tokenizeCAGen cut every line
 // at the first " * ", as if it started an inline comment. A multiplication
 // such as "SET ORDER.TOTAL TO ORDER.QTY * ORDER.PRICE" lost the rest of the
 // expression. A "*" starts a comment only at the start of a line.

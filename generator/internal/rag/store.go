@@ -60,7 +60,7 @@ func (s *EmbeddingStore) Save() error {
 	return os.WriteFile(storePath, data, 0644)
 }
 
-// Add appends a chunk to the store (does not save — call Save() when done).
+// Add appends a chunk to the store (does not save; call Save() when done).
 func (s *EmbeddingStore) Add(source, text string, embedding []float64) {
 	// v26.58 (D053): removeFile can shrink the store, so len(s.Chunks) may name
 	// an ID that a kept chunk already has. Step past IDs in use.

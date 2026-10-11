@@ -8,12 +8,12 @@ import (
 )
 
 // RenderToFile renders a .tmpl file to outputPath.
-// If outputPath already exists, it is NOT overwritten — this
+// If outputPath already exists, it is not overwritten. This
 // preserves any custom logic a developer has added.
 // To force regeneration, delete the output file first.
 func RenderToFile(templatePath string, outputPath string, data interface{}) error {
 
-	// Skip if file already exists — protect developer edits
+	// Skip if file already exists, to protect developer edits
 	if _, err := os.Stat(outputPath); err == nil {
 		return nil
 	}

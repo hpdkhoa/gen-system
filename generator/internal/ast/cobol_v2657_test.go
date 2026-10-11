@@ -1,4 +1,4 @@
-// cobol_v2657_test.go — v26.57: two COBOL procedure-division defects.
+// cobol_v2657_test.go (v26.57): two COBOL procedure-division defects.
 //
 // D008: a line holding only a scope terminator such as "END-PERFORM." or the
 // verb "CONTINUE." looked like a paragraph header (one token ending in "."),
@@ -6,7 +6,7 @@
 // or CONTINUE; every later statement landed in that false function.
 //
 // D009: a one-line "EXEC CICS ... END-EXEC" under WHEN made parseEvaluate scan
-// for END-EXEC on the FOLLOWING lines, so it swallowed everything up to the
+// for END-EXEC on the following lines, so it swallowed everything up to the
 // next END-EXEC: the rest of the EVALUATE and whole paragraphs after it.
 package ast
 

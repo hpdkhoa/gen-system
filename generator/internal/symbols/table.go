@@ -1,7 +1,7 @@
 package symbols
 
 // ─────────────────────────────────────────────────────────────
-// table.go — Per-file symbol table
+// table.go: per-file symbol table
 //
 // A Table holds all symbols defined in one source file.
 // It is produced by walking a unified ast.Module.
@@ -277,10 +277,10 @@ func extractNode(t *Table, n *ast.Node, filePath string, lang ast.Language, laye
 
 	// Calls embedded in function bodies
 	case ast.NodeCall:
-		// Not a definition — skip (handled by resolver)
+		// Not a definition: skip (handled by resolver)
 
 	case ast.NodeUnknown:
-		// Not a definition — skip (surfaced via Module.UnknownNodes)
+		// Not a definition: skip (surfaced via Module.UnknownNodes)
 	}
 }
 

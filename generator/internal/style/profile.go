@@ -1,6 +1,6 @@
-// generator/internal/style/profile.go — v26.33: a team style profile.
+// generator/internal/style/profile.go (v26.33): a team style profile.
 //
-// A profile is what a team believes its code should look like: naming, folder
+// A profile is how a team wants its code to look: naming, folder
 // layout, the patterns it wants and the ones it bans, size limits, and free
 // text for the model. It is loaded from JSON (gen-style.json), or derived from
 // an existing repository through the Understand graph (derive.go). Both roads

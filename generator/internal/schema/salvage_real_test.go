@@ -1,11 +1,11 @@
-// generator/internal/schema/salvage_real_test.go — v23.1 (round 3): the EXACT
+// generator/internal/schema/salvage_real_test.go (v23.1, round 3): the exact
 // deepseek-coder schema.raw.json from the user's run; asserts salvage now
-// recovers BOTH User and Task (round 2 dropped Task).
+// recovers both User and Task (round 2 dropped Task).
 package schema
 
 import "testing"
 
-// realBroken is the EXACT schema.raw.json deepseek-coder produced in the user's
+// realBroken is the exact schema.raw.json deepseek-coder produced in the user's
 // run (the one where round-2 salvage only recovered User, not Task).
 const realBroken = "{\n  \"entities\": [\n    {\n      \"name\":\"User\",\n      \"fields\" : {\"userId\":\"INT\",\"username\":\"STRING\",\"password\":\"STRING\"}\n    },  \t    \t\t\t      \t\t\t\t\t\t\t\t\t         \t   \t     \t       \t\t        \t{\n       \t\"parentEntities\":[\"Project\"],              \t\t\t\t\t\t\t          \t\t\t\t\t\t\t\t                   }],                                                    ],                                                                  {\n            \"name\":\"Task\",             \n             \"fields\" : {\"task_id\":\"INT\",\"title\":\"STRING\",\"status\":\"BOOL\",\"due date\":\"TIME\"} ,  \t    \t\t\t     \t\t\t\t\t\t\t\t\t         \t \t   \t     \t       \t\t        \t{   \t\"parentEntities\":[\"Project\"]}\t}}]  }]}}}}}"
 

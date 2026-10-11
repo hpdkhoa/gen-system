@@ -1,6 +1,6 @@
-// generator/internal/agent/target_resolve.go — v23.15: robust resolution of the
+// generator/internal/agent/target_resolve.go (v23.15): resolution of the
 // generated file a heal/repair task targets. The previous resolveTargetFile
-// lowercased the entity name for EVERY layer and used a "repository" dir, but
+// lowercased the entity name for every layer and used a "repository" dir, but
 // the generator actually writes:
 //
 //	model      backend/internal/model/<lower>.go            (e.g. order.go)
@@ -10,12 +10,12 @@
 //	validation backend/internal/validation/<Entity>_validation.go (CAPITALIZED)
 //
 // so the healer kept building paths like .../handler/customer_handler.go that do
-// not exist, and every AST rewrite failed with "no such file or directory" —
+// not exist. Every AST rewrite failed with "no such file or directory", and
 // the self-heal loop could never repair a handler or validation file.
 //
-// This resolver (a) builds the path with the CORRECT per-layer convention, and
+// This resolver (a) builds the path with the correct per-layer convention, and
 // (b) if that exact path is missing, falls back to a case-insensitive scan of
-// the layer directory matching the expected suffix — so a future casing/naming
+// the layer directory matching the expected suffix. So a future casing/naming
 // drift in the generator degrades to "still finds the file" instead of silently
 // breaking healing again.
 package agent
@@ -90,12 +90,12 @@ func sanitizeIdent(s string) string {
 }
 
 // pruneOrphanEntityFiles deletes generated per-entity files left in the backend
-// layer directories by a PREVIOUS run whose entity set differed from the current
+// layer directories by a previous run whose entity set differed from the current
 // plan. The planner (especially V2) is non-deterministic, so regenerating into
 // the same directory can leave e.g. service/user_service.go from an old run while
-// the current run never generates a User store — the orphan then fails the build
+// the current run never generates a User store. The orphan then fails the build
 // with "undefined: store.UserCRUD". Wiping is surgical: only files whose stem
-// matches the <entity><suffix> pattern for an entity NOT in the current plan are
+// matches the <entity><suffix> pattern for an entity not in the current plan are
 // removed; shared files (interfaces.go, handler.go, require.go, main.go, etc.)
 // and current-entity files are left untouched. All generated files are rewritten
 // by the run, so this never deletes anything that won't be reproduced.
@@ -114,7 +114,7 @@ func pruneOrphanEntityFiles(rootPath string, validEntities []string) {
 		validLower[strings.ToLower(exp)] = true
 	}
 
-	// Each layer: dir + the per-entity suffix. Files NOT ending in the suffix
+	// Each layer: dir + the per-entity suffix. Files not ending in the suffix
 	// (e.g. interfaces.go, handler.go, require.go) are shared and never pruned.
 	layers := []struct {
 		dir, suffix string
@@ -129,14 +129,14 @@ func pruneOrphanEntityFiles(rootPath string, validEntities []string) {
 		{"backend/internal/validation", "_validation.go"},
 	}
 
-	// Shared/per-layer files that happen to end in ".go" but are NOT per-entity;
+	// Shared/per-layer files that happen to end in ".go" but are not per-entity;
 	// must never be pruned by the ".go" layers (model/store).
 	sharedBase := map[string]bool{
 		"interfaces.go": true, "handler.go": true, "require.go": true,
 		"main.go": true, "router.go": true, "routes.go": true,
 	}
 
-	// v26.57 (D001): group the suffixes by directory and judge each file ONCE, by
+	// v26.57 (D001): group the suffixes by directory and judge each file once, by
 	// the longest suffix it ends in. Before, every row ran on its own, so
 	// Order_service_handler.go also matched the "_handler.go" row, got the stem
 	// "order_service", and was deleted although Order is a current entity.
@@ -233,7 +233,7 @@ func targetFileFor(entity, taskType, rootPath string) string {
 			continue
 		}
 		stem := strings.TrimSuffix(nameLower, wantSuffix)
-		// For the ".go" layers the stem IS the entity; for suffixed layers the
+		// For the ".go" layers the stem is the entity; for suffixed layers the
 		// stem is the entity too (suffix already stripped). Exclude *_test.go.
 		if strings.HasSuffix(stem, "_test") {
 			continue

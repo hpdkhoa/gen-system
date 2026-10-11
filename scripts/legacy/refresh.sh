@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# refresh.sh — v24: rebuild + restart in one command (install-kit open item #9).
+# refresh.sh (v24): rebuild + restart in one command (install-kit open item #9).
 #
 # Auto-detects how gen-system is running and does the right thing:
 #   • systemd service present  → rebuild, then `systemctl restart`
 #   • otherwise (manual run)   → rebuild, then re-exec the server in the foreground
 #
-# After a PARSER change the on-disk AST cache (<root>/.gen/ast_cache) is keyed on
-# file checksum, NOT parser version, so a stale parse can survive a rebuild. This
+# After a parser change the on-disk AST cache (<root>/.gen/ast_cache) is keyed on
+# file checksum, not parser version, so a stale parse can survive a rebuild. This
 # script clears it by default; pass --keep-cache to preserve it.
 #
 # Usage:

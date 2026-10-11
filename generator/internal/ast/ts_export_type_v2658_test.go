@@ -1,4 +1,4 @@
-// ts_export_type_v2658_test.go — v26.58 (D054): "export type { X, Y } from './x'"
+// ts_export_type_v2658_test.go (v26.58, D054): "export type { X, Y } from './x'"
 // became a NodeTypeAlias named "{" plus two unrecognized_top_level_statement
 // nodes. The check for the brace looked at the word "type" itself, so the
 // re-export branch never ran.

@@ -1,4 +1,4 @@
-// generator/internal/ai/op_checkout_v2658_test.go — v26.58.
+// generator/internal/ai/op_checkout_v2658_test.go (v26.58).
 //
 // D070: opVerb kept "checkout" for Checkout, and OpMisplaced compared it with
 // the phrase "check out an order", so it missed a Checkout op put on the wrong

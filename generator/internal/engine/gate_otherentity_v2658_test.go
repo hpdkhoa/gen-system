@@ -1,4 +1,4 @@
-// generator/internal/engine/gate_otherentity_v2658_test.go — v26.58 (D073):
+// generator/internal/engine/gate_otherentity_v2658_test.go, v26.58 (D073):
 // operationCompiles held a stand-in model for one entity only and replaced the
 // prefix model.Order inside longer names, so a body for Order that used
 // model.OrderItem failed the gate with "undefined: model_OrderItem" and ended as

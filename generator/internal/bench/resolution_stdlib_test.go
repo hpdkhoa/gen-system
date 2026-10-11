@@ -1,8 +1,8 @@
-// generator/internal/bench/resolution_stdlib_test.go — v23.32 (stdlib
+// generator/internal/bench/resolution_stdlib_test.go, v23.32 (stdlib
 // provenance): behavioural test for ResolutionRecallWithStdlib. The invariant
 // under test is the whole point of the provenance tier: ingesting a stdlib must
-// NOT change the project's internal-recall number. It also asserts that when a
-// stdlib IS ingested, stdlib symbols actually appear and project calls resolve
+// not change the project's internal-recall number. It also asserts that when a
+// stdlib is ingested, stdlib symbols actually appear and project calls resolve
 // into them. Skips cleanly when GOROOT/src is unavailable so CI without Go
 // source still passes.
 package bench
@@ -49,7 +49,7 @@ func TestResolutionRecall_StdlibInvariant(t *testing.T) {
 	stdSyms := metricValue(withStd, "symbols_stdlib")
 	intoStd := metricValue(withStd, "call_edges_into_stdlib")
 
-	// THE invariant: project internal recall is unchanged by stdlib ingest.
+	// The invariant: project internal recall is unchanged by stdlib ingest.
 	if baseInternal != stdInternal {
 		t.Errorf("internal recall changed by stdlib ingest: base=%.4f with-stdlib=%.4f (must be equal)",
 			baseInternal, stdInternal)

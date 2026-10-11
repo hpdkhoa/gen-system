@@ -1,9 +1,9 @@
-// generator/internal/bench/webgate.go — v23.13 (Phase 5): a benchmark suite for
-// the generated WEB layer's build gate. It generates the Vite+React+TS project
+// generator/internal/bench/webgate.go, v23.13 (Phase 5): a benchmark suite for
+// the generated web layer's build gate. It generates the Vite+React+TS project
 // for a fixed schema, then asserts structural correctness (the buildable files
-// exist) and, IF a Node toolchain is present, runs `tsc --noEmit` as the real
+// exist) and, if a Node toolchain is present, runs `tsc --noEmit` as the real
 // type-check gate. Where Node is absent (e.g. an air-gapped bench box) the
-// toolchain cases are recorded as skipped notes rather than hard failures —
+// toolchain cases are recorded as skipped notes rather than hard failures, the
 // same graceful-degradation posture as the postgres_live suite when no DB is up.
 package bench
 
@@ -75,7 +75,7 @@ func WebGate() Suite {
 		})
 	}
 
-	// App.tsx should consume the typed client (orderApi.list()) — proves the
+	// App.tsx should consume the typed client (orderApi.list()). This proves the
 	// web layer is wired to the contract, not orphaned fragments.
 	if app, e := os.ReadFile(filepath.Join(web, "src", "App.tsx")); e == nil {
 		wired := strings.Contains(string(app), "orderApi.list()") &&
@@ -91,7 +91,7 @@ func WebGate() Suite {
 	// ── toolchain gate: tsc --noEmit (only if Node present) ─────────
 	npm, npmErr := exec.LookPath("npm")
 	if npmErr != nil {
-		s.Notes = "npm not found — tsc/build gate skipped (verify on a box with Node). Structural cases above still apply."
+		s.Notes = "npm not found; tsc/build gate skipped (verify on a box with Node). Structural cases above still apply."
 		s.Duration = time.Since(t0)
 		return s
 	}
@@ -105,7 +105,7 @@ func WebGate() Suite {
 			Pass: false,
 			Note: "install failed (offline bench box?): " + firstLine(out),
 		})
-		s.Notes = "dependency install failed — tsc gate could not run here; verify on a connected box."
+		s.Notes = "dependency install failed, so the tsc gate could not run here; verify on a connected box."
 		s.Duration = time.Since(t0)
 		return s
 	}

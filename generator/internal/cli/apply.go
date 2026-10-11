@@ -40,7 +40,7 @@ func Apply(schemaFile string) {
 
 	fmt.Printf("📦 Applying schema: %d entities\n", len(s.Entities))
 
-	// Build a plan directly from the schema (bypass AI — schema is already known)
+	// Build a plan directly from the schema (bypass AI: the schema is already known)
 	tasks := planner.TaskGraphFromSchema(s)
 	plan := planner.Plan{
 		Goal:     "apply:" + schemaFile,

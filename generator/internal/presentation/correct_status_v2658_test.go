@@ -1,4 +1,4 @@
-// correct_status_v2658_test.go — v26.58 (follow up of D020): since D020,
+// correct_status_v2658_test.go (v26.58, follow up of D020): since D020,
 // Correct returns an error when the correction cannot be saved. handleCorrect
 // answered every error with 400, which tells the client its request was bad.
 // A failed save is a server fault: it must answer 500. An unknown belief ID

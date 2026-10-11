@@ -1,4 +1,4 @@
-// generator/internal/bench/effects.go — v19.7: precision/recall on inferred
+// generator/internal/bench/effects.go (v19.7): precision/recall on inferred
 // side-effects against a hand-labelled ground-truth file.
 //
 // The labels file is JSON of the form:
@@ -145,7 +145,7 @@ func EffectPrecisionRecall(root string, copybookPath []string, labelsPath string
 		}
 		predicted := efx.Effects
 
-		// Score the four real effect kinds (skip Unknown — it's an
+		// Score the four real effect kinds (skip Unknown, because it's an
 		// abstention, not a prediction).
 		for k := range stats {
 			t := truth[k]

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# install.sh — gen-system installation script for a fresh Linux server.
+# install.sh: gen-system installation script for a fresh Linux server.
 # v23.11 (Phase 0): added --with-toolchains to provision the full-stack
 #   verification toolchain (Node 20 LTS, JDK 17 + Maven, Docker engine) so the
 #   box can build/verify the web, mobile, Java(17) and Docker layers as well as
@@ -11,8 +11,8 @@
 #
 # Handles:
 #   1. System packages   (curl, git, build-essential, ca-certificates, jq)
-#   2. Go 1.25.0         (downloaded from go.dev — apt versions are too old)
-#   3. Ollama            (local LLM runtime — official installer)
+#   2. Go 1.25.0         (downloaded from go.dev; apt versions are too old)
+#   3. Ollama            (local LLM runtime, official installer)
 #   4. Ollama models    (qwen3:14b + qwen2.5-coder:14b by default; ~9 GB each)
 #   5. PostgreSQL 15     (apt + initial database/role; optional, skip with --no-postgres)
 #   6. Build gen + gen-server (from the source tree this script lives next to)
@@ -24,9 +24,9 @@
 #
 # Usage:
 #   sudo ./install.sh                      # default install (full/internal)
-#   sudo ./install.sh --understand         # ENTERPRISE: only understand-server
+#   sudo ./install.sh --understand         # enterprise: only understand-server
 #                                          #   (UI embedded). Forces no Ollama /
-#                                          #   no model / no Postgres — a clean
+#                                          #   no model / no Postgres: a clean
 #                                          #   air-gapped appliance.
 #   sudo ./install.sh --no-postgres        # skip Postgres (using external DB)
 #   sudo ./install.sh --no-ollama          # skip Ollama (offline reinstall)
@@ -34,7 +34,7 @@
 #   sudo ./install.sh --skip-model         # don't pull any model (do it later)
 #   sudo ./install.sh --plan-model=NAME    # planner model (default qwen3:14b)
 #   sudo ./install.sh --code-model=NAME    # code model (default qwen2.5-coder:14b)
-#   sudo ./install.sh --model=NAME         # legacy: one model for BOTH roles
+#   sudo ./install.sh --model=NAME         # legacy: one model for both roles
 #   sudo ./install.sh --extra-models="a b" # also pull these (space-separated)
 #   sudo ./install.sh --with-toolchains    # ALSO install Node 20 + JDK 17 +
 #                                          #   Maven + Docker for verifying the
@@ -54,7 +54,7 @@ GO_TARBALL="go${GO_VERSION}.linux-amd64.tar.gz"
 GO_URL="https://go.dev/dl/${GO_TARBALL}"
 
 OLLAMA_MODEL="${OLLAMA_MODEL:-}"   # legacy single-model override (back-compat).
-                                   # If set, it is used for BOTH roles unless a
+                                   # If set, it is used for both roles unless a
                                    # role-specific model below is also set.
 # v23.20: per-task (role-based) model selection. The planner (idea analysis,
 # architecture, entity design) wants a reasoning model; code generation wants a
@@ -77,7 +77,7 @@ SKIP_POSTGRES=0
 SKIP_OLLAMA=0
 SKIP_MODEL=0
 WITH_TOOLCHAINS=0   # v23.11 (Phase 0): provision Node/JDK17/Maven/Docker
-UNDERSTAND_ONLY=0   # v23.9 (Phase 5): enterprise mode — ship only understand-server
+UNDERSTAND_ONLY=0   # v23.9 (Phase 5): enterprise mode: ship only understand-server
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --understand)   UNDERSTAND_ONLY=1; shift ;;
@@ -99,21 +99,21 @@ while [[ $# -gt 0 ]]; do
 done
 
 # Enterprise mode: the shippable appliance is understanding-only. It must not
-# install a model runtime or Postgres-for-generation — those belong to the
+# install a model runtime or Postgres-for-generation; those belong to the
 # internal build. Force them off so `--understand` alone yields a clean,
 # air-gapped install with no LLM present on the box.
 if [[ $UNDERSTAND_ONLY -eq 1 ]]; then
     SKIP_OLLAMA=1
     SKIP_MODEL=1
     SKIP_POSTGRES=1
-    # The enterprise appliance never builds web/mobile/Java/Docker layers —
+    # The enterprise appliance never builds web/mobile/Java/Docker layers;
     # it only reads code. Provisioning those toolchains would defeat the
     # air-gapped, minimal-surface goal, so force them off too.
     WITH_TOOLCHAINS=0
 fi
 
 # ─── Resolve effective models (v23.20) ─────────────────────────────────────
-# Legacy --model=/OLLAMA_MODEL, if given, wins for BOTH roles (back-compat:
+# Legacy --model=/OLLAMA_MODEL, if given, wins for both roles (back-compat:
 # someone who only knows the old flag gets one model everywhere). Otherwise the
 # role-specific PLAN_MODEL / CODE_MODEL (defaulting to the 16 GB-friendly pair)
 # are used. The runtime resolves OLLAMA_MODEL_PLAN/_CODE → OLLAMA_MODEL →
@@ -146,7 +146,7 @@ if [[ $EUID -ne 0 ]]; then
     exit 1
 fi
 
-# Detect arch — we only ship the amd64 Go tarball. arm64 fallback handled below.
+# Detect arch. We only ship the amd64 Go tarball; the code below handles the arm64 fallback.
 ARCH="$(uname -m)"
 case "$ARCH" in
     x86_64|amd64) GO_TARBALL="go${GO_VERSION}.linux-amd64.tar.gz" ;;
@@ -182,7 +182,7 @@ case "$DISTRO_ID" in
         ;;
 esac
 
-# Where this script lives — used to locate the project source tree.
+# Where this script lives. The code uses it to locate the project source tree.
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_SRC="${SCRIPT_DIR}"
 if [[ ! -f "${PROJECT_SRC}/go.mod" ]]; then
@@ -375,7 +375,7 @@ if [[ $SKIP_OLLAMA -eq 0 ]]; then
         echo "      installed"
     fi
 
-    # Ollama install script sets up a systemd unit on most distros — start it.
+    # Ollama install script sets up a systemd unit on most distros. Start it.
     if command -v systemctl >/dev/null 2>&1; then
         systemctl enable ollama 2>/dev/null || true
         systemctl start ollama 2>/dev/null || true

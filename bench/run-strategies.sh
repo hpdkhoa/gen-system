@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
-# bench/run-strategies.sh — WP3: measure all three two-model serving strategies
-# on the SAME frozen task set (bench/tasks.json), n runs each.
+# bench/run-strategies.sh (WP3): measure all three two-model serving strategies
+# on the same frozen task set (bench/tasks.json), n runs each.
 #
-#   A  sequential + keep-alive  — production pair (qwen3:14b plan,
+#   A  sequential + keep-alive: production pair (qwen3:14b plan,
 #      qwen2.5-coder:14b code), models swap in and out; keep-alive absorbs the
 #      reload. Swap cost = doctor first/second load delta.
-#   B  both resident            — OLLAMA_KEEP_ALIVE=-1, both models warmed and
+#   B  both resident: OLLAMA_KEEP_ALIVE=-1, both models warmed and
 #      kept on the GPU. Measures whether they fit (peak VRAM + `ollama ps`),
 #      swap cost ~0, and tok/s under contention (alternating calls).
-#   C  one shared model         — qwen2.5-coder:14b for BOTH roles. No swap at
+#   C  one shared model: qwen2.5-coder:14b for both roles. No swap at
 #      all; genpipe shows what planning quality costs (stubs, heals, entity
 #      over-generation show up in ops/entities metrics).
 #

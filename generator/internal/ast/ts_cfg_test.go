@@ -1,4 +1,4 @@
-// ast/ts_cfg_test.go — TASK 2 (v19): tests for parseFuncBody structural
+// ast/ts_cfg_test.go (TASK 2, v19): tests for parseFuncBody structural
 // node emission. Verifies that NodeBranch/NodeLoop/NodeReturn/NodeCall
 // are emitted alongside the opaque body_not_parsed wrapper.
 package ast
@@ -204,7 +204,7 @@ func TestTSFrontend_ParseFunction_StructuralDoesNotBreakSignature(t *testing.T) 
 	}
 }
 
-// v23.49 — TS for/while loops capture the parenthesised condition into RawSource.
+// v23.49: TS for/while loops capture the parenthesised condition into RawSource.
 func TestTSFrontend_LoopConditionCaptured_v2349(t *testing.T) {
 	src := `function scan(arr: number[]): number {
   let sum = 0

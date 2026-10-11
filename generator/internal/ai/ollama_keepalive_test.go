@@ -1,4 +1,4 @@
-// ollama_keepalive_test.go — v26.32: OLLAMA_KEEP_ALIVE encoding and the
+// ollama_keepalive_test.go (v26.32): OLLAMA_KEEP_ALIVE encoding and the
 // request error counter. Both came out of reading the 2026-09-04 campaign
 // results: strategy B set OLLAMA_KEEP_ALIVE=-1, the door sent it as the string
 // "-1", Ollama rejected every request with HTTP 400, and nothing counted the

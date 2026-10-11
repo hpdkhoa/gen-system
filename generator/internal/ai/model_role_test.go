@@ -1,4 +1,4 @@
-// generator/internal/ai/model_role_test.go — v23.35: all-unset now yields the
+// generator/internal/ai/model_role_test.go (v23.35): all-unset now yields the
 // per-role installer defaults (qwen3:14b plan / qwen2.5-coder:14b code) instead
 // of one shared default. Other cases (legacy single model, role override,
 // partial split) are unchanged and still locked.

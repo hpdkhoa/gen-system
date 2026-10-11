@@ -1,16 +1,16 @@
-// generator/internal/bench/postgres_live.go — v23.26 (task E): fk_references_users
-// asserts "author_id" — now CONSISTENT across CREATE TABLE + FK + store after
+// generator/internal/bench/postgres_live.go, v23.26 (task E): fk_references_users
+// asserts "author_id", now consistent across CREATE TABLE + FK + store after
 // the FK column-resolution fix in backend_postgres.go (resolveFKColumn). Also now
-// generator/internal/bench/postgres_live.go — v23.11 (Phase 1): the Postgres
+// generator/internal/bench/postgres_live.go, v23.11 (Phase 1): the Postgres
 // suite. It promotes Postgres from "build- and SQL-verified" toward
 // "live-verified" by checking the two things that are checkable in pure Go
 // without a database: that GEN_BACKEND=postgres generation emits the expected
 // migration + store artifacts, and that the FK-constraint migration is present,
 // well-formed, and idempotent (DROP CONSTRAINT IF EXISTS + ADD CONSTRAINT).
 //
-// The part that genuinely needs a running database — applying the migrations,
-// exercising CRUD, and confirming the FK constraint REJECTS an orphaned row —
-// is performed by the companion runner verify-postgres.sh, which builds the
+// The part that needs a running database (applying the migrations,
+// exercising CRUD, and confirming the FK constraint rejects an orphaned row)
+// belongs to the companion runner bench/verify-postgres.sh, which builds the
 // generated app and runs it against a live Postgres. This suite is the
 // regression gate for the generator; the script is the regression gate for the
 // live behaviour. Phase 1 left a gap here, and these two close it.
@@ -71,13 +71,13 @@ func PostgresGeneration() Suite {
 	// NOTE: RunAll emits the per-entity layers + router, but the app-shell
 	// files (go.mod, main.go, the Postgres connector, the per-table
 	// migrations and the 900_foreign_keys.sql) are emitted by
-	// GenerateBackendApp — which on the real pipeline is invoked by the
-	// agent's generate_router task. We call it directly here to reproduce the
+	// GenerateBackendApp, which the agent's generate_router task invokes on the
+	// real pipeline. We call it directly here to reproduce the
 	// complete generated project exactly as `gen apply` produces it.
 	engine.RunAll(entities, tmp)
 	// v23.26 (task E): RunAll emits model/table/repo-query/validation/handler but
-	// NOT the store layer — in the real pipeline the agent's generate_repo task
-	// calls engine.GenerateRepo, which is what emits the in-mem AND (under
+	// not the store layer. In the real pipeline the agent's generate_repo task
+	// calls engine.GenerateRepo, which emits the in-mem and (under
 	// GEN_BACKEND=postgres) the *_pg.go database/sql store. The bench previously
 	// skipped this, so postgres_store_emitted falsely failed even though
 	// `gen apply` produces the store correctly. Call it here to match the pipeline.
@@ -155,7 +155,7 @@ func PostgresGeneration() Suite {
 	})
 
 	// ── case: offline build inputs (v23.11 fix) ────────────────────
-	// go.mod must pin lib/pq v1.12.3 AND a matching go.sum must be present,
+	// go.mod must pin lib/pq v1.12.3 and a matching go.sum must be present,
 	// or the generated app fails `go vet`/`go build` offline with
 	// "missing go.sum entry". This regression-guards the bug seen in the field.
 	goMod, _ := os.ReadFile(filepath.Join(tmp, "go.mod"))
@@ -174,7 +174,7 @@ func PostgresGeneration() Suite {
 	})
 
 	s.Notes = "Pure-Go generation gate. Live-DB apply/CRUD/FK-rejection is " +
-		"verified by verify-postgres.sh against a running Postgres."
+		"verified by bench/verify-postgres.sh against a running Postgres."
 	s.Duration = time.Since(t0)
 	return s
 }

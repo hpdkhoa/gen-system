@@ -1,9 +1,9 @@
-// generator/internal/bench/cfg_correctness.go — v19.7: validates that every
+// generator/internal/bench/cfg_correctness.go (v19.7): validates that every
 // CFG produced by `flow.Build` is structurally sound. The four invariants:
 //
 //  1. exactly one entry block, and Entry must index into Blocks
 //  2. every Exits[i] must index into Blocks
-//  3. no orphan blocks — every block (except Entry) must have ≥1 predecessor
+//  3. no orphan blocks: every block (except Entry) must have ≥1 predecessor
 //  4. every successor ID referenced from any block must index into Blocks
 //
 // These properties have to hold for the graph view in the Studio to render
@@ -36,7 +36,7 @@ func CFGCorrectness(root string, copybookPath []string) Suite {
 	if ctx.CFGs == nil || len(ctx.CFGs) == 0 {
 		suite.Cases = append(suite.Cases, Case{
 			Name: "has_cfgs", Pass: false,
-			Note: "ctx.CFGs is empty — nothing to validate",
+			Note: "ctx.CFGs is empty; nothing to validate",
 		})
 		suite.Duration = time.Since(t0)
 		return suite

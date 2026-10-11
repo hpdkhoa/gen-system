@@ -1,4 +1,4 @@
-// generator/internal/style/gate.go — v26.33: check a generated tree against a
+// generator/internal/style/gate.go (v26.33): check a generated tree against a
 // profile. Deterministic: same tree, same profile, same findings in the same
 // order. The gate reads the Understand snapshot (analyze.go); it does not run
 // the model and it does not modify anything. Acting on findings belongs to

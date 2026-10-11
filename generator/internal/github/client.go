@@ -1,7 +1,7 @@
 // Package github provides a minimal GitHub REST API client for gen-system.
-// Intentionally avoids external dependencies — uses only net/http + encoding/json.
+// It avoids external dependencies on purpose and uses only net/http + encoding/json.
 //
-// Phase 3.1 — HITL CI/CD:
+// Phase 3.1, HITL CI/CD:
 //
 //	After a successful build, gen-system can open a GitHub PR so a human
 //	can review and approve the generated code before it lands on main.
@@ -29,7 +29,7 @@ const apiBase = "https://api.github.com"
 // Config holds GitHub integration settings.
 // Loaded from env vars; overrideable at runtime via /api/github/config.
 type Config struct {
-	Token string `json:"token"` // GH_TOKEN — never logged
+	Token string `json:"token"` // GH_TOKEN; never logged
 	Owner string `json:"owner"` // GH_OWNER
 	Repo  string `json:"repo"`  // GH_REPO
 	Base  string `json:"base"`  // GH_BASE, default "main"

@@ -50,14 +50,14 @@ const logicHint = "Semantic error: either a variable is declared but never used,
 // ClassifyError reads a Go compiler error string and returns a
 // typed classification with a repair strategy and prompt hint.
 //
-// Pattern matching is intentionally broad — substring matching is
+// Pattern matching is broad on purpose. Substring matching is
 // sufficient because Go compiler output is highly structured.
 func ClassifyError(errLog string) ClassificationResult {
 	lower := strings.ToLower(errLog)
 
 	switch {
 
-	// ── IMPORT ERRORS (check before undefined — overlaps) ──
+	// ── IMPORT ERRORS (check before undefined; they overlap) ──
 	case strings.Contains(lower, "imported and not used"):
 		return ClassificationResult{
 			ErrorType: ImportError,

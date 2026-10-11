@@ -1,16 +1,16 @@
-// generator/internal/belief/validate.go — v26.13 (session 7): the parser-validation
+// generator/internal/belief/validate.go, v26.13 (session 7): the parser-validation
 // gate for enrich (model-written) beliefs.
 //
-// The principle (settled with the owner): validate enrich claims against PARSER-EVAL,
-// not raw source — the parser is already the trustworthy distillation of the source,
-// so comparing to it is deterministic and free. Only STRUCTURAL claims are
-// mechanically checkable (effect / data-change / calls). SEMANTIC claims
+// The principle (settled with the owner): validate enrich claims against parser-eval,
+// not raw source. The parser output is already a checked distillation of the source,
+// so comparing to it is deterministic and needs no model call. Only structural claims
+// are mechanically checkable (effect / data-change / calls). Semantic claims
 // (computation / precondition) cannot be checked without the very reasoning the LLM
 // was brought in to do, so they are routed to a human ("needs-human"), never
 // auto-blessed. A claim that positively contradicts a parser fact is flagged
 // "contradicts" and (via the existing Source gate) never steers generation.
 //
-// This is DETECTION. Prevention (feeding parser facts into the prompt as hard
+// This is detection. Prevention (feeding parser facts into the prompt as hard
 // constraints) is session 8. The two compose: prevention lowers the error rate,
 // detection catches the structurally-checkable errors that slip through, and human
 // verification is the only validator for the semantic claims.
@@ -58,7 +58,7 @@ func factsFromParserBeliefs(parserBeliefs []*Belief) parserFacts {
 func validateEnrich(b *Belief, f parserFacts) {
 	switch b.Kind {
 	case KindComputation, KindPrecondition:
-		// Semantic — not mechanically checkable. A human is the only validator.
+		// Semantic: not mechanically checkable. A human is the only validator.
 		b.Validated = "needs-human"
 		b.ValidationNote = "semantic claim: verify against the source by hand"
 		return
@@ -73,7 +73,7 @@ func validateEnrich(b *Belief, f parserFacts) {
 		b.ValidationNote = "claims it writes/saves data, but the parser observed no db/fs effect"
 		return
 	}
-	// Claim it performs no writes when the parser DID see one.
+	// Claim it performs no writes when the parser did see one.
 	if assertsPurity(text) && (f.hasDBWrite || f.hasFSWrite) {
 		b.Validated = "contradicts"
 		b.ValidationNote = "claims no state change, but the parser observed: " + f.effects
@@ -85,17 +85,17 @@ func validateEnrich(b *Belief, f parserFacts) {
 
 // assertsPersistence detects language claiming the routine persists state.
 // Two lessons are encoded here, both found by real runs:
-//  1. The phrasing test must tolerate words BETWEEN verb and target — "saves the
+//  1. The phrasing test must tolerate words between verb and target: "saves the
 //     order to the database" is a persistence claim that a naive "saves to"
 //     substring misses.
-//  2. It must NOT fire on incidental nouns. "creates a handler with an in-memory
+//  2. It must not fire on incidental nouns. "creates a handler with an in-memory
 //     store" mentions "store" but claims no persistence, and an explicit
-//     in-memory/cache qualifier is a positive signal of NON-persistence.
+//     in-memory/cache qualifier is a positive signal of non-persistence.
 //
-// So: an unambiguous phrase, OR (a persistence VERB + a durable-storage TARGET),
+// So: an unambiguous phrase, or (a persistence verb + a durable-storage target),
 // with in-memory phrasing vetoing the match.
 func assertsPersistence(text string) bool {
-	// Explicit non-persistence beats everything — the claim itself says it's not durable.
+	// Explicit non-persistence beats everything. The claim itself says it's not durable.
 	for _, neg := range []string{"in-memory", "in memory", "memory-only", "temporary", "cache"} {
 		if strings.Contains(text, neg) {
 			return false
@@ -173,7 +173,7 @@ func joinNonEmpty(a, b string) string {
 	return a + ", " + b
 }
 
-// IsBlockedForSteering reports whether a belief must NOT influence generation. A
+// IsBlockedForSteering reports whether a belief must not influence generation. A
 // contradicting enrich belief is blocked even if something tried to promote it;
 // belief steering already gates on Source==human, so this is a belt-and-braces
 // guard for any future path that reads enrich beliefs directly.

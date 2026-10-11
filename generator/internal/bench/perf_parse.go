@@ -1,4 +1,4 @@
-// generator/internal/bench/perf_parse.go — v19.7: cold parse throughput per
+// generator/internal/bench/perf_parse.go (v19.7): cold parse throughput per
 // language. Walks the project root, groups files by frontend, parses each
 // group sequentially with a fresh in-memory ast.Cache (no disk persistence)
 // to remove disk noise from the GPU-era runs.

@@ -1,4 +1,4 @@
-// effects_else_v2657_test.go — v26.57 (D014): a call in an else (or catch)
+// effects_else_v2657_test.go (v26.57, D014): a call in an else (or catch)
 // body must count toward the effects of its function, and a COBOL SECTION must
 // get a CFG block for its ELSE body.
 //

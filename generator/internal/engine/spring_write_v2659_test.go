@@ -1,4 +1,4 @@
-// spring_write_v2659_test.go — N07: in Spring mode GenerateBackendApp called
+// spring_write_v2659_test.go (N07): in Spring mode GenerateBackendApp called
 // GenerateSpringApp, writeSpringShipScripts and GenerateSpringDockerfile, which
 // dropped every writeFileMk error, and then returned nil. A file that could not
 // be written was missing and the task still counted as a success.

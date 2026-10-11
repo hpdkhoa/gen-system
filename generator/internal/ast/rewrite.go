@@ -12,7 +12,7 @@ import (
 	"strings"
 )
 
-// RewriteFunctionBody preserves signature and replaces ONLY body
+// RewriteFunctionBody preserves signature and replaces only body
 //
 // v26.58 (OPEN-REWRITE): the new body was parsed in a second file set and
 // printed with the file's positions, so line breaks inside a statement moved
@@ -217,7 +217,7 @@ func ExtractFunctionSignature(path, funcName string) string {
 
 			var buf bytes.Buffer
 
-			// clone function WITHOUT body
+			// clone function without body
 			tmp := *fn
 			tmp.Body = nil
 

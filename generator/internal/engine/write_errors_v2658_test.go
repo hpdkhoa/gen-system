@@ -1,4 +1,4 @@
-// generator/internal/engine/write_errors_v2658_test.go — v26.58 (D029):
+// generator/internal/engine/write_errors_v2658_test.go, v26.58 (D029):
 // writeFileMk, emitGoMod and cleanStaleBackend dropped every file system error
 // and the exported generators returned nothing, so a folder that could not be
 // written left no message and the generate task counted as a success. The
@@ -56,7 +56,7 @@ func TestEmitGoMod_ReportsWriteFailure(t *testing.T) {
 }
 
 // backend/go.mod is a folder that is not empty: cleanStaleBackend cannot
-// remove it. A stale file that is simply absent is not an error.
+// remove it. A stale file that is already absent is not an error.
 func TestCleanStaleBackend_ReportsRemoveFailure(t *testing.T) {
 	t.Setenv("GEN_BACKEND", "")
 	clean := t.TempDir()

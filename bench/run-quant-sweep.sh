@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# bench/run-quant-sweep.sh — WP1: quantization sweep, n=3 per config, same seed.
+# bench/run-quant-sweep.sh (WP1): quantization sweep, n=3 per config, same seed.
 #
 # For each quant of the study model (deepseek-coder-v2 16B lite at Q4_K_M /
-# Q5_K_M / Q8_0) ON THE CODER ROLE, planner fixed at qwen3:14b:
+# Q5_K_M / Q8_0) on the coder role, planner fixed at qwen3:14b:
 #   - genbench genpipe (5 frozen ideas, live model): ops_stubbed, repairs,
 #     heals, go_test_pass, verify findings, prompt tokens  ← the headline
 #   - genbench gen (raw tokens/sec)

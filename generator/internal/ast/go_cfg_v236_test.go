@@ -1,10 +1,10 @@
-// go_cfg_v236_test.go — v23.6: convertBody preserves control flow
+// go_cfg_v236_test.go (v23.6): convertBody preserves control flow
 // (if/for/switch -> NodeBranch/NodeLoop, return -> NodeReturn).
 package ast
 
 import "testing"
 
-// v23.6 — convertBody must preserve control structure: if/for/switch become
+// v23.6: convertBody must preserve control structure: if/for/switch become
 // NodeBranch/NodeLoop with nested Children, and return becomes NodeReturn.
 func TestGoBody_PreservesControlFlow(t *testing.T) {
 	src := `package p

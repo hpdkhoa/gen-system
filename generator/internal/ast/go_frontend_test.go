@@ -314,7 +314,7 @@ func assertNoError(t *testing.T, err error) {
 	}
 }
 
-// v23.49 — Go for/range loops capture their condition into RawSource so the CFG
+// v23.49: Go for/range loops capture their condition into RawSource so the CFG
 // loop decision shows the real test (uniform loop rendering across languages).
 func TestGoFrontend_LoopConditionCaptured_v2349(t *testing.T) {
 	src := `package p

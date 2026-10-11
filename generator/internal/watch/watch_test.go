@@ -1,4 +1,4 @@
-// watch/watch_test.go — TASK 1 (v19): integration test for incremental watcher.
+// watch/watch_test.go (TASK 1, v19): integration test for incremental watcher.
 // Creates a temp dir, starts the watcher, writes/modifies/deletes a Go file,
 // and asserts the symbol index reflects each change within 500ms.
 package watch
@@ -58,7 +58,7 @@ func HelloWorld() string { return "hello" }
 	}
 	t.Log("✓ symbol appeared after file create")
 
-	// ── 2. Modify the file — rename the function ─────────────────
+	// ── 2. Modify the file: rename the function ─────────────────
 	src2 := []byte(`package testpkg
 
 func GoodbyeWorld() string { return "bye" }
@@ -78,7 +78,7 @@ func GoodbyeWorld() string { return "bye" }
 	}
 	t.Log("✓ symbol updated after file modify")
 
-	// ── 3. Delete the file — symbol must vanish ───────────────────
+	// ── 3. Delete the file: symbol must vanish ───────────────────
 	if err := os.Remove(goFile); err != nil {
 		t.Fatalf("remove: %v", err)
 	}
@@ -100,7 +100,7 @@ func TestWatcher_SkipsBlockedDirectories(t *testing.T) {
 	defer w.Stop()
 	time.Sleep(60 * time.Millisecond)
 
-	// Write a Go file under .git/ — should be skipped.
+	// Write a Go file under .git/. The watcher should skip it.
 	gitDir := filepath.Join(dir, ".git")
 	if err := os.MkdirAll(gitDir, 0755); err != nil {
 		t.Fatal(err)

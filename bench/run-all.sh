@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
-# bench/run-all.sh — the whole measurement campaign, in dependency order.
+# bench/run-all.sh: the whole measurement campaign, in dependency order.
 # Run on the benchmark box (RTX 4060 Ti, Ollama up, quant tags pulled).
 #
-#   0. freeze-env  (WP0 — must be committed before this script runs)
-#   1. understand  (deterministic, no model — fastest feedback)
+#   0. freeze-env  (WP0; commit its output before this script runs)
+#   1. understand  (deterministic, no model, fastest feedback)
 #   2. stream      (WP2)
 #   3. offload     (WP2)
-#   4. quant sweep (WP1, n=3 — the long one)
+#   4. quant sweep (WP1, n=3; the long one)
 #   5. strategies  (WP3, n=3)
 #   6. swebench    (localization recall, SWEBENCH_LIMIT tasks; v26.33)
-#   7. summarise   (WP4 — rows with provenance) + attest
+#   7. summarise   (WP4: rows with provenance) + attest
 #
 # Set MEASURED=/path/to/my-portfolio/benchmarks/results/measured.json to merge
 # rows directly; omit it to review results/<date>/measured.rows.json first.
@@ -42,7 +42,7 @@ fi
 "${HERE}/run-quant-sweep.sh"
 "${HERE}/run-strategies.sh"
 
-# v26.33: SWE-bench Verified localization recall (NOT a solve rate; see
+# v26.33: SWE-bench Verified localization recall (not a solve rate; see
 # bench/swebench/README.md). SWEBENCH_LIMIT tasks, default 60; 0 = all 500
 # (hours). SWEBENCH_LIMIT=skip leaves it out.
 SWEBENCH_LIMIT="${SWEBENCH_LIMIT:-60}"

@@ -1,19 +1,19 @@
-// manifest.go — v25.6: the DESIGN MANIFEST — every output of the planning phase,
+// manifest.go (v25.6): the design manifest, every output of the planning phase,
 // captured before a single line of the app is generated.
 //
 // WHY. A build turns a plain-English idea into a running product across six
-// layers, but until now the intermediate DESIGN — the entities, their fields and
-// relations, the extracted features, and the task graph — existed only as an
+// layers, but until now the intermediate design (the entities, their fields and
+// relations, the extracted features, and the task graph) existed only as an
 // in-memory *planner.Plan that vanished after the build. This writes that whole
-// pre-code design into a `design-manifest/` folder INSIDE the generated output so
-// it can be reviewed and kept as a first-class artifact:
+// pre-code design into a `design-manifest/` folder inside the generated output so
+// a person can review it and keep it as a standalone artifact:
 //
 //	<outDir>/design-manifest/
-//	  design-manifest.html   — a single self-contained reviewable document
-//	  plan.json              — the raw Plan (goal, features, entities, tasks)
-//	  schema.json            — just the entities, in the schema-file shape
+//	  design-manifest.html:    a single self-contained reviewable document
+//	  plan.json:               the raw Plan (goal, features, entities, tasks)
+//	  schema.json:             just the entities, in the schema-file shape
 //
-// The manifest is a SIDE-ARTIFACT: the build proceeds by default (no pause). It
+// The manifest is a side artifact: the build proceeds by default (no pause). It
 // is written right after planning succeeds, so even if generation later fails the
 // design is preserved. Deterministic, offline, no model call.
 package services
@@ -43,20 +43,20 @@ type ManifestPaths struct {
 // WriteDesignManifest renders plan into <outDir>/design-manifest/ and returns the
 // paths written. goal is the raw idea text (plan.Goal may be normalized). Errors
 // are returned but a caller should treat manifest failure as non-fatal to the
-// build — the design doc is valuable, not load-bearing.
+// build. The design doc is useful, but the build does not depend on it.
 func WriteDesignManifest(outDir, goal string, plan planner.Plan) (ManifestPaths, error) {
 	dir := filepath.Join(outDir, "design-manifest")
 	if err := os.MkdirAll(dir, 0755); err != nil {
 		return ManifestPaths{}, fmt.Errorf("create manifest dir: %w", err)
 	}
 
-	// Raw plan.json — the complete intermediate representation.
+	// Raw plan.json: the complete intermediate representation.
 	planPath := filepath.Join(dir, "plan.json")
 	if b, err := json.MarshalIndent(plan, "", "  "); err == nil {
 		_ = os.WriteFile(planPath, b, 0644)
 	}
 
-	// schema.json — just the entities, in the schema-file shape the engine reads,
+	// schema.json: just the entities, in the schema-file shape the engine reads,
 	// so the design can be replayed deterministically with `gen apply schema.json`.
 	schemaPath := filepath.Join(dir, "schema.json")
 	sf := schema.SchemaFile{Entities: plan.Entities}
@@ -64,7 +64,7 @@ func WriteDesignManifest(outDir, goal string, plan planner.Plan) (ManifestPaths,
 		_ = os.WriteFile(schemaPath, b, 0644)
 	}
 
-	// design-manifest.html — the reviewable document.
+	// design-manifest.html: the reviewable document.
 	htmlPath := filepath.Join(dir, "design-manifest.html")
 	doc := renderManifestHTML(goal, plan)
 	if err := os.WriteFile(htmlPath, []byte(doc), 0644); err != nil {
@@ -80,7 +80,7 @@ func WriteDesignManifest(outDir, goal string, plan planner.Plan) (ManifestPaths,
 }
 
 // renderManifestHTML builds the standalone review document from the plan. No
-// external assets, no build step — matches the project's document conventions
+// external assets, no build step. It matches the project's document conventions
 // (dark editorial). Everything is escaped; the plan is model-derived text.
 func renderManifestHTML(goal string, plan planner.Plan) string {
 	var b strings.Builder

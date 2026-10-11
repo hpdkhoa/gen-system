@@ -1,8 +1,8 @@
-// generator/internal/bench/diff_correctness.go — v19.7: regression bench for
+// generator/internal/bench/diff_correctness.go (v19.7): regression bench for
 // the schema diff. Locks down the v19 ghost-entry fix and the basic add /
 // remove / type-change behaviours.
 //
-// This is a unit-style scenario — it does not need a project root.
+// This is a unit-style scenario. It does not need a project root.
 package bench
 
 import (

@@ -1,4 +1,4 @@
-// java_params_v2658_test.go — v26.58 (F4): parseParamList looped forever when
+// java_params_v2658_test.go (v26.58, F4): parseParamList looped forever when
 // a parameter held a token it did not expect, such as the "=" of a default
 // value "void f(int x = 1)". A loop round consumed nothing, so Parse never
 // returned. The parse runs in a goroutine with a timeout (parseJavaWithin), so

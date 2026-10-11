@@ -1,10 +1,10 @@
-// generator/cmd/understand-server/main.go — v23.9 (Phase 3): the ENTERPRISE
+// generator/cmd/understand-server/main.go, v23.9 (Phase 3): the enterprise
 // server. Serves the read-only code-intelligence Studio (Architecture, Graph,
 // Beliefs, Search) for an existing codebase, with the embedded UI. It constructs
-// ONLY the presentation server + SSE broker + incremental watcher and calls
-// api.RegisterUnderstandRoutes — so it links NONE of the generation stack
-// (no ai/Ollama, no engine, no planner, no agent). This is enforced by
-// understand_deps_test.go (acceptance test: go list -deps shows no generation
+// only the presentation server, the SSE broker and the incremental watcher, and
+// calls api.RegisterUnderstandRoutes. So it links none of the generation stack
+// (no ai/Ollama, no engine, no planner, no agent). understand_deps_test.go
+// enforces this (acceptance test: go list -deps shows no generation
 // package). The air gap comes from the build itself: the shipped binary
 // has no code that generates code or calls a model, so it can do neither.
 package main
@@ -37,21 +37,21 @@ func main() {
 
 	// Full initial parse (idempotent, authoritative first load).
 	//
-	// v26.5 — TWO REAL BUGS FIXED HERE. The enterprise binary called the bare
-	// LoadContext(root), which takes NO options. That meant:
+	// v26.5: this block fixes two bugs. The enterprise binary called the bare
+	// LoadContext(root), which takes no options. That meant:
 	//   1. It had no --stdlib flag at all, so cross-boundary calls (fmt.Println,
-	//      os.Exit, every JDK/COBOL runtime call) could never resolve — this is
+	//      os.Exit, every JDK/COBOL runtime call) could never resolve. This is
 	//      what pinned the Architecture "edge resolution" number so low. There
 	//      was no way to fix it from the command line because the flag did not
 	//      exist.
 	//   2. --copybooks was accepted but only forwarded to SetRoot (the file
-	//      browser). It never reached the PARSER, so COBOL COPY resolution was
+	//      browser). It never reached the parser, so COBOL COPY resolution was
 	//      silently off in the shipped binary even when the flag was passed.
-	// Both now go through LoadContextWithOpts. Stdlib defaults to AUTO: the
+	// Both now go through LoadContextWithOpts. Stdlib defaults to auto: the
 	// languages actually present in the project decide which runtimes attach,
 	// and every root is import-scoped, so this is cheap and safe. The outcome is
-	// printed below rather than gated behind a prompt — a wrong guess is free,
-	// an unhelpful prompt in an air-gapped/CI context is not.
+	// printed below rather than gated behind a prompt. A wrong guess costs nothing,
+	// but an unhelpful prompt in an air-gapped/CI context does cost something.
 	loadOpts := agentctx.LoadContextOpts{}
 	if *copybooks != "" {
 		loadOpts.CopybookPath = filepath.SplitList(*copybooks)
@@ -73,7 +73,7 @@ func main() {
 	// Embedded Studio UI (no loose web/ dir on disk; single self-contained binary).
 	mux.Handle("/", webui.Handler())
 
-	// Incremental watcher — keeps the symbol index live as files change.
+	// Incremental watcher: keeps the symbol index live as files change.
 	w := watch.New(ctx.Index, *root, 500*time.Millisecond)
 	go w.Run()
 	go func() {
@@ -89,9 +89,9 @@ func main() {
 	fmt.Printf("   Root:  %s\n", *root)
 	fmt.Printf("   Studio: http://localhost%s/  (embedded; %d symbols indexed)\n",
 		addr, len(ctx.Index.AllSymbols()))
-	fmt.Printf("   Mode:  understanding only — no generation, no model, no network egress\n")
+	fmt.Printf("   Mode:  understanding only (no generation, no model, no network egress)\n")
 	fmt.Printf("   Watch: incremental rebuild active (poll 500ms)\n")
-	// v26.5: say what runtimes attached, and also what did NOT attach and why,
+	// v26.5: say what runtimes attached, and also what did not attach and why,
 	// so the Architecture edge-resolution % shows its own cause, and a reader
 	// does not have to guess at flags. This is the report-not-prompt half of the design.
 	for _, line := range agentctx.FormatStdlibReport(ctx.StdlibReport) {
@@ -104,9 +104,9 @@ func main() {
 }
 
 // stdlibReportView mirrors the loader's StdlibReport into the presentation
-// layer's DTO. The conversion lives HERE (in the binary, which already imports
+// layer's DTO. The conversion lives here (in the binary, which already imports
 // both) rather than in either package, so presentation keeps zero dependency on
-// internal/context — the understand-server boundary test walks those imports and
+// internal/context. The understand-server boundary test walks those imports, and
 // the air-gapped posture depends on the view layer staying loader-free.
 func stdlibReportView(r agentctx.StdlibReport) presentation.StdlibReportView {
 	out := presentation.StdlibReportView{Mode: r.Mode, Warnings: r.Warnings}

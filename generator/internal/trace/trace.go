@@ -6,10 +6,10 @@
 //   - LevelTrace: verbose engine internals (per-symbol, per-block, per-cache-hit).
 //     Off by default. Enabled with --trace or trace.SetLevel(LevelTrace).
 //   - LevelInfo:  phase boundaries and meaningful state transitions.
-//     On by default. Sparse — a normal run produces 20-40 lines.
+//     On by default. Sparse: a normal run produces 20-40 lines.
 //   - LevelError: recoverable failures with full context. Always on.
 //
-// No WARN level — warnings get ignored. Recoverable+notable becomes
+// No WARN level, because people ignore warnings. Recoverable+notable becomes
 // Info with outcome=degraded; broken becomes Error.
 //
 // Output:

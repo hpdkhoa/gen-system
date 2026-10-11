@@ -1,4 +1,4 @@
-// filechanged_v2658_test.go — v26.58 (D088): OnFileChanged dropped the effects
+// filechanged_v2658_test.go (v26.58, D088): OnFileChanged dropped the effects
 // of every symbol whose ID started with the deleted path. A symbol ID is
 // filePath + "#" + kind + ":" + name, so deleting x.ts also dropped the
 // effects of x.tsx in the same folder.

@@ -1,20 +1,20 @@
-// generator/internal/belief/summarize.go — v26.16 (session 10): hierarchical
-// summaries. A summary belief describes a SCOPE — a service, a module/package, or
-// the whole project — by rolling up the BELIEFS of its members, not raw source.
+// generator/internal/belief/summarize.go, v26.16 (session 10): hierarchical
+// summaries. A summary belief describes a scope (a service, a module/package, or
+// the whole project) by rolling up the beliefs of its members, not raw source.
 // That keeps every summary prompt small (a handful of one-line child claims) and
 // makes cascading staleness cheap: each summary fingerprints its members, so a
 // change anywhere below re-flags the summaries above it.
 //
 // Scope levels:
 //
-//	service — members are the routine beliefs whose Subject shares a receiver
-//	          (OrderService.Checkout, OrderService.Refund → service "OrderService").
-//	module  — members are service summaries in the same package/layer (the caller,
-//	          which has the index, supplies the grouping via UpsertSummary members).
-//	project — members are the module summaries.
+//	service: members are the routine beliefs whose Subject shares a receiver
+//	         (OrderService.Checkout, OrderService.Refund → service "OrderService").
+//	module:  members are service summaries in the same package/layer (the caller,
+//	         which has the index, supplies the grouping via UpsertSummary members).
+//	project: members are the module summaries.
 //
-// The belief package can derive SERVICE membership itself from qualified names.
-// MODULE/PROJECT grouping needs package/layer info the beliefs don't carry, so the
+// The belief package can derive service membership itself from qualified names.
+// Module/project grouping needs package/layer info the beliefs don't carry, so the
 // caller (gen-enrich, which has the index) passes explicit member IDs for those.
 package belief
 
@@ -165,11 +165,11 @@ func (bs *Store) UpsertSummary(in SummaryInput) error {
 }
 
 // reattachSummariesLocked folds persisted summaries into the live belief set,
-// recomputing each one's child fingerprint and flagging it stale on a mismatch —
-// the cascade. Caller holds mu. Must run AFTER parser + enrich beliefs are in
+// recomputing each one's child fingerprint and flagging it stale on a mismatch
+// (the cascade). Caller holds mu. Must run after parser + enrich beliefs are in
 // bs.beliefs so the fingerprint sees current member values.
 func (bs *Store) reattachSummariesLocked() {
-	// Process BOTTOM-UP (service -> module -> project), not in map order (v26.22).
+	// Process bottom-up (service -> module -> project), not in map order (v26.22).
 	// A module's fingerprint is computed over its service summaries, so those must
 	// already be attached and up to date; iterating the map at random could
 	// fingerprint a parent before its children, making the cascade order-dependent.
@@ -206,7 +206,7 @@ func (bs *Store) reattachSummariesLocked() {
 
 // staleSummaryNote is the note a summary carries while a member differs from the
 // value it summarized.
-const staleSummaryNote = "a member changed since this summary was written — re-summarize"
+const staleSummaryNote = "a member changed since this summary was written, re-summarize"
 
 // resetSummaryStale clears the stale state a previous rebuild left on a summary,
 // so each rebuild decides it again (v26.58, D019).
@@ -221,7 +221,7 @@ func resetSummaryStale(sm *Belief) {
 // membersForScopeLocked recovers the current member IDs for a summary. For a
 // service scope it re-derives from qualified names (so it tracks member add/remove);
 // for module/project it uses the member set stored at upsert time (recomputed
-// against current values, so a child's CONTENT change still cascades — a child's
+// against current values, so a child's content change still cascades; a child's
 // add/remove for those scopes requires a re-summarize with fresh members).
 func (bs *Store) membersForScopeLocked(sm *Belief) []string {
 	if sm.Scope == ScopeService {
@@ -241,14 +241,14 @@ func (bs *Store) membersForScopeLocked(sm *Belief) []string {
 		sort.Strings(ids)
 		return ids
 	}
-	// Module / project (v26.22): RE-DERIVE membership from the summary hierarchy so
-	// these scopes cascade when a child is ADDED or REMOVED, not merely when a
+	// Module / project (v26.22): re-derive membership from the summary hierarchy so
+	// these scopes cascade when a child is added or removed, not merely when a
 	// child's content changes. A module's members are the service summaries whose
 	// Parent names it; the project's members are the module summaries.
 	//
 	// Previously this replayed the stored MemberIDs, which meant a brand-new service
-	// (or a deleted one) left the module summary looking fresh — the one hierarchy
-	// gap called out in the v26.16 notes.
+	// (or a deleted one) left the module summary looking fresh. That was the one
+	// hierarchy gap called out in the v26.16 notes.
 	childScope := ""
 	switch sm.Scope {
 	case ScopeModule:
@@ -270,7 +270,7 @@ func (bs *Store) membersForScopeLocked(sm *Belief) []string {
 	}
 	if len(ids) == 0 {
 		// No children re-derivable (e.g. a module summarised before its services
-		// existed) — fall back to the stored set rather than reporting "no members",
+		// existed): fall back to the stored set rather than reporting "no members",
 		// which would wrongly fingerprint as empty and flag a false change.
 		return append([]string(nil), sm.MemberIDs...)
 	}
@@ -291,7 +291,7 @@ func (bs *Store) childFingerprintLocked(memberIDs []string) string {
 	for _, id := range ids {
 		b := bs.beliefs[id]
 		if b == nil {
-			// Members may be SUMMARY beliefs (module/project scopes) that live in
+			// Members may be summary beliefs (module/project scopes) that live in
 			// bs.summaries; check there before declaring a member gone (v26.22).
 			b = bs.summaries[id]
 		}
@@ -309,7 +309,7 @@ func (bs *Store) childFingerprintLocked(memberIDs []string) string {
 }
 
 // DeleteSummary removes a scope summary (v26.22). Needed when a service or module
-// disappears from the codebase — without it a stale scope would linger forever, and
+// disappears from the codebase. Without it a stale scope would linger forever, and
 // its parent could never notice the child was gone.
 func (bs *Store) DeleteSummary(scope, name string) {
 	bs.mu.Lock()

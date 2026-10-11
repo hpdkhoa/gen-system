@@ -1,4 +1,4 @@
-// objgraph/skillfile_test.go — TASK 4 (v19): SkillFile round-trip tests.
+// objgraph/skillfile_test.go (TASK 4, v19): SkillFile round-trip tests.
 package objgraph
 
 import (

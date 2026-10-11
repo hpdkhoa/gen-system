@@ -1,10 +1,10 @@
-// context/stdlib_detect.go — v26.5 (NEW): multi-language stdlib resolution.
+// context/stdlib_detect.go (v26.5, NEW): multi-language stdlib resolution.
 //
 // WHY THIS EXISTS
-// Before v26.5 the stdlib surface was a single `--stdlib <paths>` plus ONE
-// `--stdlib-lang <lang>` applied to EVERY path in that list. A genuinely
+// Before v26.5 the stdlib surface was a single `--stdlib <paths>` plus one
+// `--stdlib-lang <lang>` applied to every path in that list. A
 // multi-language project therefore could not be expressed at all: the language
-// was a property of the FLAG, not of the ROOT, so `--stdlib go:/opt/jdk/java.base
+// was a property of the flag, not of the root, so `--stdlib go:/opt/jdk/java.base
 // --stdlib-lang java` mislabelled the Go root (only the literal "go" and "cobol"
 // words self-corrected, because they were special-cased inline in each binary).
 // That inline special-casing was also duplicated in gen-server, understand-server
@@ -12,7 +12,7 @@
 //
 // This file fixes both problems with one shared entry point:
 //
-//  1. ParseStdlibSpec — the language is now PER ROOT. Each comma-separated entry
+//  1. ParseStdlibSpec: the language is now per root. Each comma-separated entry
 //     may carry its own optional "lang=" prefix:
 //
 //     --stdlib go                              → Go, GOROOT/src, import-scoped
@@ -22,24 +22,24 @@
 //     --stdlib auto                            → detect from the project (default)
 //     --stdlib none                            → ingest nothing
 //
-//  2. DetectStdlibRoots — "auto" resolves the roots from the PROJECT ITSELF: the
+//  2. DetectStdlibRoots: "auto" resolves the roots from the project itself: the
 //     languages actually present in the index decide which runtimes to attach.
 //     This is safe (not a guess we have to gate on) because every non-synthetic
 //     root is AutoScope: the loader restricts ingest to the packages the project
 //     genuinely imports, so attaching a root the project doesn't use costs one
-//     emptyScopeSkipped++ and nothing else. A wrong-but-harmless guess is FREE,
+//     emptyScopeSkipped++ and nothing else. A wrong-but-harmless guess costs nothing,
 //     which is precisely why auto-detection does not need a confirmation prompt.
 //
 // REPORTING, NOT PROMPTING
-// The cost of a wrong stdlib decision is never destructive — worst case is "we
+// The cost of a wrong stdlib decision is never destructive. The worst case is "we
 // ingested nothing and recall stays low", which is recoverable and observable.
 // So instead of a blocking review step (hostile to CI, scripting and the
 // air-gapped single-binary story), the loader records a StdlibReport: what was
-// attached, what was skipped, and WHY. The caller prints it and the Understand
+// attached, what was skipped, and why. The caller prints it and the Understand
 // Architecture page surfaces it, turning the edge-resolution % into a
 // self-diagnosing number ("java skipped: JAVA_HOME not set" tells the user
-// exactly what to pass). The one operation that DOES deserve a gate is whole-tree
-// ingest (AutoScope=false), which can OOM the flat resolver — that stays opt-in.
+// exactly what to pass). The one operation that does deserve a gate is whole-tree
+// ingest (AutoScope=false), which can OOM the flat resolver. That stays opt-in.
 package context
 
 import (
@@ -98,11 +98,11 @@ type StdlibRootReport struct {
 	Symbols  int              `json:"symbols"`
 	Auto     bool             `json:"auto"` // true when this root came from detection, not an explicit flag
 
-	// v26.6: LangBreakdown counts the source files SEEN under this root by
+	// v26.6: LangBreakdown counts the source files seen under this root by
 	// language (keyed by extension family: "go", "python", "java", …). It is how
 	// the mixed-language-root warning is detected: a single root that carries a
 	// blank Lang label yet contains more than one language cannot be import-scoped
-	// correctly, because one root maps imports with ONE convention against ONE
+	// correctly, because one root maps imports with one convention against one
 	// directory. Empty for synthetic roots.
 	LangBreakdown map[string]int `json:"lang_breakdown,omitempty"`
 }
@@ -112,7 +112,7 @@ type StdlibReport struct {
 	Mode  string             `json:"mode"` // "auto" | "explicit" | "auto+explicit" | "none"
 	Roots []StdlibRootReport `json:"roots"`
 
-	// v26.6: boot-time warnings that are not tied to a single root's status —
+	// v26.6: boot-time warnings that are not tied to a single root's status,
 	// chiefly the mixed-language-root case (one unlabeled --stdlib path that
 	// physically contains more than one language). Printed by the CLIs and shown
 	// as a callout on the Architecture page. Advisory, never fatal.
@@ -142,14 +142,14 @@ func (r StdlibReport) Attached() bool {
 //	                  --stdlib-lang flag), else it is left empty and the loader
 //	                  goes purely by file extension (which is what it does anyway)
 //
-// An empty spec returns (nil, true): auto is the DEFAULT, so a caller that passes
+// An empty spec returns (nil, true): auto is the default, so a caller that passes
 // no flag gets detection. Pass "none" to opt out.
 func ParseStdlibSpec(spec string, fallbackLang string) (roots []StdlibRoot, auto bool) {
 	spec = strings.TrimSpace(spec)
 	if spec == "" {
 		return nil, true // default: auto-detect
 	}
-	// Accept BOTH the new comma form and the legacy OS path-list separator
+	// Accept both the new comma form and the legacy OS path-list separator
 	// (':' on Unix, ';' on Windows) that gen-server/genbench used, so existing
 	// invocations keep working. A Windows drive letter ("C:\jdk") would be split
 	// by ';' there, not ':', so this is safe on both platforms.
@@ -167,7 +167,7 @@ func ParseStdlibSpec(spec string, fallbackLang string) (roots []StdlibRoot, auto
 			auto = true
 			continue
 		}
-		// optional "lang=" prefix — the language is a property of THIS root.
+		// optional "lang=" prefix. The language is a property of this root.
 		lang := fallbackLang
 		path := entry
 		if i := strings.Index(entry, "="); i > 0 {
@@ -195,7 +195,7 @@ func stdlibRootFor(lang, path string) (StdlibRoot, bool) {
 		return StdlibRoot{Path: src, Lang: genast.LangGo, AutoScope: true}, true
 	case "cobol":
 		// Synthetic: a built-in catalog of ISO intrinsics + runtime services.
-		// No directory is walked, so it is essentially free and never scoped.
+		// No directory is walked, so it costs almost nothing and is never scoped.
 		return StdlibRoot{Path: "cobol", Lang: genast.LangCOBOL, Synthetic: true, AutoScope: false}, true
 	}
 	if path == "" {
@@ -206,7 +206,7 @@ func stdlibRootFor(lang, path string) (StdlibRoot, bool) {
 
 // gorootSrc locates GOROOT/src.
 //
-// Deliberately does NOT shell out to `go env GOROOT`. understand-server is the
+// Deliberately does not shell out to `go env GOROOT`. understand-server is the
 // air-gapped enterprise binary; spawning a subprocess from it to answer a
 // configuration question is the kind of thing that has to be justified to a bank's
 // security review, and it buys little: runtime.GOROOT() is the compiled-in path
@@ -228,24 +228,24 @@ func gorootSrc() string {
 }
 
 // javaStdlibTree locates a Java signature/source tree to ingest, or "" with a
-// reason. We deliberately do NOT guess wildly: an unlabelled directory that
+// reason. We deliberately do not guess wildly: an unlabelled directory that
 // happens to contain .java files is not necessarily a JDK.
 func javaStdlibTree() (path string, detail string) {
 	home := strings.TrimSpace(os.Getenv("JAVA_HOME"))
 	if home == "" {
-		return "", "JAVA_HOME not set — pass --stdlib java=<jdk signature tree> to resolve Java calls"
+		return "", "JAVA_HOME not set; pass --stdlib java=<jdk signature tree> to resolve Java calls"
 	}
 	// A signature tree laid out as <home>/java.base (the JDK module layout the
 	// v23.32 Java proof used) is the ingestible shape.
 	if p := filepath.Join(home, "java.base"); isDir(p) {
 		return p, ""
 	}
-	// Some distributions ship sources under <home>/lib/src.zip — an archive we
+	// Some distributions ship sources under <home>/lib/src.zip, an archive we
 	// cannot walk. Report it precisely rather than silently ingesting nothing.
 	if isFile(filepath.Join(home, "lib", "src.zip")) {
-		return "", "JAVA_HOME has lib/src.zip (archive, not walkable) — extract it and pass --stdlib java=<dir>"
+		return "", "JAVA_HOME has lib/src.zip (an archive gen-system cannot walk); extract it and pass --stdlib java=<dir>"
 	}
-	return "", "no java.base signature tree under JAVA_HOME — pass --stdlib java=<dir>"
+	return "", "no java.base signature tree under JAVA_HOME; pass --stdlib java=<dir>"
 }
 
 func isDir(p string) bool {
@@ -258,8 +258,8 @@ func isFile(p string) bool {
 	return err == nil && !fi.IsDir()
 }
 
-// projectLanguages returns the distinct languages of the PROJECT's own symbols
-// (stdlib/third-party tiers excluded — they are what we are about to attach, so
+// projectLanguages returns the distinct languages of the project's own symbols
+// (stdlib/third-party tiers excluded: they are what we are about to attach, so
 // counting them would be circular).
 func projectLanguages(idx *symbols.Index) map[genast.Language]int {
 	out := map[genast.Language]int{}
@@ -281,20 +281,20 @@ func projectLanguages(idx *symbols.Index) map[genast.Language]int {
 // DetectStdlibRoots derives the stdlib roots from the project itself: for every
 // language actually present in the index, attach that language's runtime if we
 // can locate one. Returns the roots to ingest plus a pre-filled report carrying
-// the roots we could NOT attach (with the reason), so the caller can tell the
+// the roots we could not attach (with the reason), so the caller can tell the
 // user exactly what to pass to close the gap.
 //
 // Safe by construction: every returned non-synthetic root is AutoScope, so the
 // loader ingests only the packages the project actually imports. Attaching a
 // runtime the project turns out not to use costs one skipped-scope counter.
 //
-// Languages we deliberately do NOT auto-attach:
-//   - python / typescript — the loader handles their extensions, but no root has
+// Languages we deliberately do not auto-attach:
+//   - python / typescript: the loader handles their extensions, but no root has
 //     been validated for them (see the v23.32 follow-ups); auto-attaching an
 //     unvalidated tree would be the one case where a wrong guess is expensive.
-//   - cagen — no external runtime; CA Gen action diagrams are self-contained.
+//   - cagen: no external runtime; CA Gen action diagrams are self-contained.
 //
-// Both remain reachable EXPLICITLY via `--stdlib python=<dir>` etc.
+// Both remain reachable explicitly via `--stdlib python=<dir>` etc.
 func DetectStdlibRoots(idx *symbols.Index) ([]StdlibRoot, StdlibReport) {
 	rep := StdlibReport{Mode: "auto"}
 	langs := projectLanguages(idx)
@@ -317,7 +317,7 @@ func DetectStdlibRoots(idx *symbols.Index) ([]StdlibRoot, StdlibReport) {
 			if src == "" {
 				rep.Roots = append(rep.Roots, StdlibRootReport{
 					Lang: name, Status: StdlibMissing, Auto: true,
-					Detail: "GOROOT not found — install Go or pass --stdlib go=<GOROOT/src>",
+					Detail: "GOROOT not found; install Go or pass --stdlib go=<GOROOT/src>",
 				})
 				continue
 			}
@@ -344,7 +344,7 @@ func DetectStdlibRoots(idx *symbols.Index) ([]StdlibRoot, StdlibReport) {
 			// python / typescript / cagen and anything new: not auto-attached.
 			rep.Roots = append(rep.Roots, StdlibRootReport{
 				Lang: name, Status: StdlibSkipped, Auto: true,
-				Detail: "no auto-detected runtime for this language — pass --stdlib " + name + "=<dir> to attach one",
+				Detail: "no auto-detected runtime for this language; pass --stdlib " + name + "=<dir> to attach one",
 			})
 		}
 	}
@@ -352,12 +352,12 @@ func DetectStdlibRoots(idx *symbols.Index) ([]StdlibRoot, StdlibReport) {
 }
 
 // mixedLanguageWarnings inspects each walked root's language breakdown and warns
-// when a SINGLE root contains more than one language. Such a root cannot be
+// when a single root contains more than one language. Such a root cannot be
 // import-scoped correctly: the loader maps the project's import paths to
 // subdirectories with one convention (dots→slashes) against one directory, so a
 // tree holding, say, Java and Python resolves only the language whose layout
-// matches and silently misses the other. The fix is always the same — split it
-// into one labelled root per language — so the warning says exactly that.
+// matches and silently misses the other. The fix is always the same: split it
+// into one labelled root per language. So the warning says exactly that.
 //
 // Detected (auto) roots are single-language by construction (each comes from one
 // language's detector), so in practice this only fires on an explicit --stdlib
@@ -398,7 +398,7 @@ func mixedLanguageWarnings(roots []StdlibRootReport) []string {
 		if r.Lang != "" {
 			where += " (labelled " + r.Lang + ")"
 		}
-		out = append(out, "stdlib root "+where+" contains multiple languages — "+
+		out = append(out, "stdlib root "+where+" contains multiple languages: "+
 			strings.Join(parts, ", ")+". A single root is import-scoped with one "+
 			"convention, so only one language resolves. Split it into per-language "+
 			"roots, e.g. --stdlib "+strings.Join(suggest, ",")+

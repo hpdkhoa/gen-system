@@ -1,4 +1,4 @@
-// generator/internal/style/opcheck.go — v26.33: the operation level check.
+// generator/internal/style/opcheck.go (v26.33): the operation level check.
 //
 // The compile gate in engine/service_logic.go sees one model written method
 // body at a time, before it becomes a file. This is the same moment for

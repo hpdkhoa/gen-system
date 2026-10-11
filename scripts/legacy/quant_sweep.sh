@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# quant_sweep.sh — run genbench across quantization levels, sampling peak VRAM,
+# quant_sweep.sh: run genbench across quantization levels, sampling peak VRAM,
 # and record each as a quantization_sweep row in the portfolio's measured.json.
 #
 # Usage (from the gen-system repo root):

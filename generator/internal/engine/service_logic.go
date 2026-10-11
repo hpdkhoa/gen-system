@@ -1,25 +1,25 @@
-// generator/internal/engine/service_logic.go — v23.25 (task B): sanitizeOperations
+// generator/internal/engine/service_logic.go, v23.25 (task B): sanitizeOperations
 // drops an op the idea confidently binds to a different entity (ai.OpMisplaced)
 // before the compile gate. Conservative; ambiguity keeps the op.
-// generator/internal/engine/service_logic.go — v23.18: (1) service file imports
+// generator/internal/engine/service_logic.go (v23.18): (1) service file imports
 // are now auto-derived from what the model bodies reference (fmt/time/strconv/…)
 // instead of a fixed errors/model/store block, fixing "undefined: fmt|time";
-// (2) sanitizeOperations now does a REAL per-op `go build` against the store/
-// model contract (not just gofmt), so a body that misuses the (T,bool) store
+// (2) sanitizeOperations now does a real per-op `go build` against the store/
+// model contract (gofmt alone is not enough), so a body that misuses the (T,bool) store
 // API or won't type-check becomes a not-implemented stub. So the service
 // layer builds green whatever the model returns.
 // (v23.14 Phase 6) Spring-mode guard added: when GEN_BACKEND=spring this Go generator is a no-op; the Spring Boot project is emitted by backend_spring.go.
-// generator/internal/engine/service_logic.go — v23.10 (Phase 4-B): generates a
-// business-logic SERVICE layer whose method bodies come from a LogicProvider
+// generator/internal/engine/service_logic.go, v23.10 (Phase 4-B): generates a
+// business-logic service layer whose method bodies come from a LogicProvider
 // (live Ollama or deterministic replay). CRUD handlers are left untouched; the
-// service is additive. Each operation is injected into a FIXED signature so
+// service is additive. Each operation is injected into a fixed signature so
 // injection is mechanical:
 //
 //	func (s *<E>Service) <Name>(id int, in map[string]any) (any, error) { <body> }
 //
-// Trust/containment: bodies are gofmt-checked; an operation whose body fails to
+// Containment: bodies are gofmt-checked; an operation whose body fails to
 // format is dropped to a safe `return nil, errors.New("not implemented: <Name>")`
-// stub so the service ALWAYS compiles. The backend's existing go vet/go build
+// stub so the service always compiles. The backend's existing go vet/go build
 // self-heal loop is the final gate. A generated service test calls each op with a
 // nil payload and asserts it honors the (any,error) contract without panicking.
 package engine
@@ -61,7 +61,7 @@ func GenerateServiceLogic(idea string, e schema.Entity, all []schema.Entity, pro
 
 	// Preserve existing operations. When regenerating a service that already has
 	// a file (e.g. `gen continue` adds Order.Refund), the provider only proposes
-	// the DELTA ops for this run; overwriting would drop the entity's existing
+	// the delta ops for this run; overwriting would drop the entity's existing
 	// Checkout/ApplyDiscount and leave the generated test referencing methods
 	// that no longer exist (go vet fails). Merge: newly-proposed ops win on a
 	// name collision; any existing op not re-proposed is carried forward.
@@ -164,14 +164,14 @@ func isExportedIdent(s string) bool {
 	return s != "" && s[0] >= 'A' && s[0] <= 'Z'
 }
 
-// sanitizeOperations validates each operation so the emitted file ALWAYS
+// sanitizeOperations validates each operation so the emitted file always
 // compiles: it requires a Go-identifier name + non-empty body, dedups names, and
-// COMPILE-CHECKS the assembled method against a realistic service context (the
+// compile-checks the assembled method against a realistic service context (the
 // store interface + model type + the same auto-derived imports the real file
-// gets). An operation whose body does not type-check — wrong store contract
-// (e.g. treating Get's bool as an error), undefined identifiers, bad imports — is
-// dropped to a `return nil, errors.New("not implemented: <Name>")` stub. This is
-// the containment guarantee.
+// gets). An operation whose body does not type-check is dropped to a
+// `return nil, errors.New("not implemented: <Name>")` stub. Causes include a
+// wrong store contract (e.g. treating Get's bool as an error), undefined
+// identifiers and bad imports. This is the containment guarantee.
 //
 // v23.18: upgraded from a syntax-only gofmt check (which passed bodies that used
 // fmt/time without importing them, or misused the (T,bool) store contract) to a
@@ -194,10 +194,10 @@ func sanitizeOperations(idea string, e schema.Entity, all []schema.Entity, ops [
 			continue
 		}
 		// v23.25 (task B): conservative misplacement post-filter. If the idea
-		// confidently binds this op's verb to a DIFFERENT entity (and not to
+		// confidently binds this op's verb to a different entity (and not to
 		// this one), drop it here rather than emit a method on the wrong entity.
 		if ai.OpMisplaced(idea, e.Name, name, all) {
-			fmt.Printf("     ⚠️  dropping op %q from %s — idea binds it to another entity\n", name, e.Name)
+			fmt.Printf("     ⚠️  dropping op %q from %s: the idea binds it to another entity\n", name, e.Name)
 			continue
 		}
 		seen[strings.ToLower(name)] = true
@@ -222,7 +222,7 @@ func sanitizeOperations(idea string, e schema.Entity, all []schema.Entity, ops [
 			op.Subpath = deriveSubpath(name)
 		}
 
-		// Compile gate (v23.22: real-field stand-in). v23.23: if it fails AND
+		// Compile gate (v23.22: real-field stand-in). v23.23: if it fails and
 		// the provider can repair, feed the build error back to the model and
 		// retry up to maxRepairAttempts before stubbing. The more real the
 		// logic, the more likely a near-miss (e.g. a missing type assertion on
@@ -234,7 +234,7 @@ func sanitizeOperations(idea string, e schema.Entity, all []schema.Entity, ops [
 					e.Name, name, attempt, maxRepairAttempts)
 				fixed, rerr := repairer.RepairOperation(idea, e, all, op, buildErr)
 				if rerr != nil {
-					break // model/transport failure — stop trying, stub below
+					break // model/transport failure: stop trying, stub below
 				}
 				fixed.Name = name // keep route/name stable
 				if strings.TrimSpace(fixed.HTTPMethod) == "" {
@@ -259,7 +259,7 @@ func sanitizeOperations(idea string, e schema.Entity, all []schema.Entity, ops [
 		}
 		recordOpOutcome(!ok) // WP1: emitted op, stubbed or real
 
-		// v26.33 style gate. Only a body that COMPILES is checked: style is a
+		// v26.33 style gate. Only a body that compiles is checked: style is a
 		// second, separate gate that can never turn logic into a stub. A
 		// violation is sent back to the model the way a build error is, with
 		// the rules named, under its own cap (StyleMaxRepairs, at most 2). A
@@ -319,8 +319,8 @@ func indent(s string) string {
 }
 
 // standInModelStruct emits a `model_<Struct>` type for the compile gate that
-// carries the SAME fields the real generated model gets (ID + fieldsForEntity,
-// deduped by identifier/json-tag), with the SAME goType mapping. This is what
+// carries the same fields the real generated model gets (ID + fieldsForEntity,
+// deduped by identifier/json-tag), with the same goType mapping. This is what
 // lets a model-written body that reads o.Total / p.Stock type-check in the gate
 // exactly as it does in the real package. v23.22.
 func standInModelStruct(e schema.Entity, structName string) string {
@@ -382,14 +382,14 @@ func operationCompiles(e schema.Entity, all []schema.Entity, structName string, 
 	// + the op under its real signature + imports.
 	var b strings.Builder
 	b.WriteString("package service\n\n")
-	// Build imports from the op body AND the payload helpers (so strconv, used by
+	// Build imports from the op body and the payload helpers (so strconv, used by
 	// the helpers, is imported). The helpers are appended to the source the
 	// import-detector scans.
 	helperFuncs := payloadHelperFuncs()
 	b.WriteString(buildServiceImportsWith([]ai.Operation{op}, helperFuncs))
 	// Local stand-ins for app/backend/internal/model and store so the temp pkg
 	// is self-contained (the real packages are not on the temp module path).
-	// v23.22: the stand-in struct carries the entity's REAL fields (same ID +
+	// v23.22: the stand-in struct carries the entity's real fields (same ID +
 	// fieldsForEntity loop as genModelInMem), so a body referencing a real
 	// field type-checks here identically to the real package.
 	b.WriteString(standInModelStruct(e, structName))
@@ -425,7 +425,7 @@ func operationCompiles(e schema.Entity, all []schema.Entity, structName string, 
 		b.WriteString("\n\n")
 	}
 
-	// Rewrite the references the method makes to the REAL packages onto the
+	// Rewrite the references the method makes to the real packages onto the
 	// local stand-ins so the temp package is self-contained.
 	src := b.String()
 	for _, mn := range modelNames {
@@ -487,7 +487,7 @@ func renderMethod(structName string, op ai.Operation) string {
 }
 
 // servicePayloadHelpers is the body of the shared service/payload.go file (one
-// per generated app, NOT per entity — they live in package service and would
+// per generated app, not per entity: they live in package service and would
 // redeclare if emitted per-entity). Operation bodies read payload values via
 // these helpers instead of type assertions (which panic on the float64 that
 // JSON numbers always decode to). The prompt mandates their use.
@@ -574,8 +574,8 @@ func genServiceFile(e schema.Entity, ops []ai.Operation, path string) error {
 	b.WriteString("// Code generated by gen-system (business logic). DO NOT EDIT.\n")
 	b.WriteString("package service\n\n")
 	// v23.18: derive the import set from what the operation bodies + helpers
-	// actually reference, instead of a fixed errors/model/store block. Model-
-	// written bodies routinely use fmt/time/strconv/sort/strings/math/etc.; a
+	// actually reference, instead of a fixed errors/model/store block. Bodies
+	// that the model writes routinely use fmt/time/strconv/sort/strings/math/etc.; a
 	// fixed import block left those undefined ("undefined: fmt") and broke the
 	// build. errors/model/store are always included (the struct + stub use them).
 	b.WriteString(buildServiceImports(ops))
@@ -732,14 +732,14 @@ func genServiceRoutes(e schema.Entity, ops []ai.Operation, path string) error {
 	}
 	n := typeName(e.Name)
 	coll := collPath(e)         // e.g. "/orders"
-	opsPrefix := coll + "-ops/" // e.g. "/orders-ops/"  — distinct from the CRUD "/orders/" so net/http's mux does not collide
+	opsPrefix := coll + "-ops/" // e.g. "/orders-ops/", distinct from the CRUD "/orders/" so net/http's mux does not collide
 	var b strings.Builder
 	b.WriteString("// Code generated by gen-system (business routes). DO NOT EDIT.\n")
 	b.WriteString("package handler\n\n")
 	b.WriteString("import (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"strconv\"\n\t\"strings\"\n\n\t\"app/backend/internal/store\"\n\t\"app/backend/internal/service\"\n)\n\n")
 	fmt.Fprintf(&b, "type %sServiceHandler struct{ svc *service.%sService }\n\n", n, n)
 	fmt.Fprintf(&b, "func New%sServiceHandler(s store.%sCRUD) *%sServiceHandler {\n\treturn &%sServiceHandler{svc: service.New%sService(s)}\n}\n\n", n, n, n, n, n)
-	// A SINGLE dispatcher owns the ops prefix and routes by the trailing segment,
+	// A single dispatcher owns the ops prefix and routes by the trailing segment,
 	// so multiple operations never register conflicting mux patterns.
 	fmt.Fprintf(&b, "// Register mounts business operations at %s{id}/{op}.\n", opsPrefix)
 	fmt.Fprintf(&b, "func (h *%sServiceHandler) Register(mux *http.ServeMux) {\n", n)
@@ -837,8 +837,8 @@ func memModeHasAnyServiceHandler(path string, names []string) bool {
 // genServiceTest writes a runtime contract test that calls each generated
 // operation with several payloads (empty, and populated with common numeric/
 // string keys) against a store that already contains one record, asserting the
-// op never panics. Exercising a POPULATED payload against a PRESENT record is
-// essential: many panics (unchecked type assertions on in[...] values) only fire
+// op never panics. Exercising a populated payload against a present record
+// matters: many panics (unchecked type assertions on in[...] values) only fire
 // on the value-processing path, which an empty payload skips. v23.24.
 func genServiceTest(e schema.Entity, ops []ai.Operation, path string) error {
 	if len(ops) == 0 {

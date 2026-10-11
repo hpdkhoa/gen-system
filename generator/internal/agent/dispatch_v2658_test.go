@@ -1,4 +1,4 @@
-// dispatch_v2658_test.go — v26.58: the repair dispatch of the validation loop
+// dispatch_v2658_test.go (v26.58): the repair dispatch of the validation loop
 // and of the verify stage.
 //
 // D080: dispatchRepairs sent the fixed text "compilation error in <file>

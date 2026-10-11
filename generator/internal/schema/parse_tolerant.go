@@ -1,6 +1,6 @@
-// generator/internal/schema/parse_tolerant.go — v23.1 planner fix.
+// generator/internal/schema/parse_tolerant.go (v23.1 planner fix).
 // WHAT: tolerant schema JSON parsing. WHY: the planner's plan->schema prompt
-// asks the model for "fields" as an OBJECT ({"name":"type"}), but Entity.Fields
+// asks the model for "fields" as an object ({"name":"type"}), but Entity.Fields
 // is a []Field array, so a strict json.Unmarshal failed and ParseFile silently
 // returned zero entities ("generated schema has no entities"). This accepts
 // either shape, strips markdown fences, and exposes the parse error so callers
@@ -52,7 +52,7 @@ func stripFence(s string) string {
 //	{ "id":"int", "title":"string" }               (object the prompts ask for)
 //
 // Object form does not guarantee key order, so we keep insertion order stable
-// by sorting? No — Go map order is random, which would make generation
+// by sorting? No. Go map order is random, which would make generation
 // non-deterministic. To preserve determinism we decode the object into an
 // ordered slice by re-parsing the raw bytes in textual order.
 func fieldsFromRaw(raw json.RawMessage) ([]Field, error) {

@@ -1,4 +1,4 @@
-// objgraph/objgraph.go — ObjectGraph format for skill files
+// objgraph/objgraph.go: ObjectGraph format for skill files
 // Added for open item 5: ObjectGraph replaces .md context docs.
 //
 // An ObjectGraph is a structured, queryable representation of a project's
@@ -8,8 +8,8 @@
 // Key differences vs .md docs:
 //   - Machine-readable: the graph serialises to JSON. The .md docs are prose.
 //   - Topology-aware: nodes, edges, layers, and effect metadata are explicit.
-//   - Built from the live symbol index and flow data — always fresh.
-//   - Compact: the NIT serialiser is used for node content, not raw source.
+//   - Built from the live symbol index and flow data, so it is always fresh.
+//   - Compact: node content uses the NIT serialiser, not raw source.
 //
 // Typical use: build an ObjectGraph for a project, serialise it to JSON,
 // include a compact rendering in the AI repair prompt in place of the
@@ -17,12 +17,12 @@
 //
 // Package layout (all in one file, no sub-packages):
 //
-//	ObjectGraph      — the graph type
-//	ObjectNode       — one symbol in the graph
-//	ObjectEdge       — a directed relationship between two nodes
-//	Build()          — constructs the graph from symbols.Index + flow data
-//	Render()         — compact text form for LLM consumption
-//	JSON marshalling — for persistence / transport
+//	ObjectGraph:       the graph type
+//	ObjectNode:        one symbol in the graph
+//	ObjectEdge:        a directed relationship between two nodes
+//	Build():           constructs the graph from symbols.Index + flow data
+//	Render():          compact text form for LLM consumption
+//	JSON marshalling:  for persistence / transport
 package objgraph
 
 import (

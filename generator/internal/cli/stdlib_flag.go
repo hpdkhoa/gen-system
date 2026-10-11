@@ -1,4 +1,4 @@
-// stdlib_flag.go — v26.34: `--stdlib <spec>` (or GEN_STDLIB) for generation
+// stdlib_flag.go (v26.34): `--stdlib <spec>` (or GEN_STDLIB) for generation
 // runs, the same spec understand-server takes: empty or "auto" detects a
 // runtime for every language in the project (the default), "none" opts out,
 // "go" is GOROOT/src, "java=/opt/jdk/java.base" is explicit, entries are

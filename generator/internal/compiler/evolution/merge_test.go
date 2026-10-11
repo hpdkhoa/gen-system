@@ -113,7 +113,7 @@ func TestMerge_ExistingEntityFieldsUpserted(t *testing.T) {
 }
 
 // TestMerge_NonDestructive_FieldNotInNewIRIsKept is the "Safe Evolution" guarantee:
-// if a field doesn't appear in the new IR, it must NOT be deleted.
+// if a field doesn't appear in the new IR, it must not be deleted.
 func TestMerge_NonDestructive_FieldNotInNewIRIsKept(t *testing.T) {
 	old := evolution.Schema{
 		Entities: []evolution.Entity{

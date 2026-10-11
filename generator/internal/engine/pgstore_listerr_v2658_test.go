@@ -1,4 +1,4 @@
-// generator/internal/engine/pgstore_listerr_v2658_test.go — v26.58 (D027): the
+// generator/internal/engine/pgstore_listerr_v2658_test.go, v26.58 (D027): the
 // generated PGStore.List returned the rows it had when s.db.Query failed and
 // skipped rows that failed to scan, and the CRUD interface gave List no error
 // result, so GET on the collection answered 200 with an empty or short list when

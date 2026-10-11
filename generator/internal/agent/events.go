@@ -1,4 +1,4 @@
-// events.go — v25.5 (self-healing observability, step 1 / foundation).
+// events.go, v25.5 (self-healing observability, step 1 / foundation).
 //
 // WHAT & WHY. Until now the agent surfaced progress two ways: plain fmt.Print
 // (via emit) and the HealObserver callback (via emitHeal). Neither was
@@ -6,14 +6,14 @@
 // Studio over SSE, or (b) capture a machine-readable repair trace for the
 // fine-tune pipeline (open item #6, explicitly blocked on repair-trace data).
 //
-// This file adds ONE structured event type (AgentEvent) and a package-level
+// This file adds one structured event type (AgentEvent) and a package-level
 // Recorder that fans an event out to any number of registered sinks. It changes
 // no behaviour on its own: with no sinks registered it is inert, and emit/
 // emitHeal keep their existing fmt.Print + HealObserver paths untouched. A CLI
 // run opts in a JSONL file sink (Path A); the Studio opts in a broker sink
-// (Path B) — the agent code is identical for both.
+// (Path B). The agent code is identical for both.
 //
-// BOUNDARY SAFETY. Everything here is package-level state and plain funcs, NOT a
+// BOUNDARY SAFETY. Everything here is package-level state and plain funcs, not a
 // constructor dependency. understand-server never links the agent package, so
 // the archtest boundary (TestUnderstandServerHasNoGenDeps) is unaffected. Sinks
 // must not block; the JSONL sink serialises under its own mutex.
@@ -32,7 +32,7 @@ import (
 type AgentEventKind string
 
 const (
-	// KindLifecycle covers start/validate/warn/done free-text milestones — the
+	// KindLifecycle covers start/validate/warn/done free-text milestones: the
 	// same strings emit() already prints, now also structured.
 	KindLifecycle AgentEventKind = "lifecycle"
 	// KindHeal covers one step of the self-healing loop (mirrors HealEvent).
@@ -63,7 +63,7 @@ type AgentEvent struct {
 	Strategy string `json:"strategy,omitempty"`
 }
 
-// AgentSink receives structured events. Implementations MUST NOT block; a slow
+// AgentSink receives structured events. Implementations must not block; a slow
 // or hung sink would stall generation. The JSONL and broker sinks both return
 // immediately (buffered / best-effort).
 type AgentSink interface {
@@ -79,7 +79,7 @@ var (
 
 // AddAgentSink registers a sink to receive every subsequent AgentEvent. Safe to
 // call from CLI setup (JSONL) or server setup (broker). Multiple sinks compose:
-// a run can write a JSONL trace AND publish to the Studio at once.
+// a run can write a JSONL trace and publish to the Studio at once.
 func AddAgentSink(s AgentSink) {
 	if s == nil {
 		return
@@ -190,7 +190,7 @@ func (s *JSONLSink) Close() error {
 
 // FuncSink adapts a plain callback into an AgentSink. The Studio wiring uses it
 // to publish each event to the SSE broker without the agent package importing
-// the api/sse package (which would be a needless coupling — the server passes a
+// the api/sse package (that would be a needless coupling; the server passes a
 // closure). Tests use it to capture events.
 type FuncSink struct{ Fn func(AgentEvent) }
 

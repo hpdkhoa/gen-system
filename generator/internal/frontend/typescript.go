@@ -1,13 +1,13 @@
-// typescript.go — v23.13 (Phase 5): tsconfig sets jsx:react-jsx for the .tsx tree; generated interface always includes id:number (backend guarantees it) so Omit<E,'id'> is well-formed and the web project type-checks.
-// generator/internal/frontend/typescript.go — v23.11 (Phase 2): TypeScript is
-// now the SHARED CONTRACT for the web and mobile layers, not a loose side
+// typescript.go (v23.13, Phase 5): tsconfig sets jsx:react-jsx for the .tsx tree; generated interface always includes id:number (backend guarantees it) so Omit<E,'id'> is well-formed and the web project type-checks.
+// generator/internal/frontend/typescript.go (v23.11, Phase 2): TypeScript is
+// now the shared contract for the web and mobile layers, not a loose side
 // artifact. Changes vs v23.10:
 //   - belongsTo relations now also emit the FK scalar (e.g. authorId: number)
-//     that the JSON API actually returns — previously only the nested object
+//     that the JSON API actually returns. Before, only the nested object
 //     was typed, so client code reading the FK failed to type-check.
 //   - New GenerateAPIClient(): a dependency-free, fully-typed fetch client
 //     (one typed function per entity CRUD op) generated from the same schema,
-//     so web/mobile import ONE source of truth instead of redefining shapes.
+//     so web/mobile import one shared definition instead of redefining shapes.
 //   - New GenerateTSConfig(): emits a strict tsconfig.json so the whole
 //     frontend/ tree is gated by `tsc --noEmit` (the Phase 2 contract gate).
 //
@@ -80,7 +80,7 @@ func GenerateTypeScript(e schema.Entity, rootPath string) {
 	// Property names already emitted, so a navigation field never repeats one.
 	emitted := map[string]bool{"id": true}
 
-	// v26.57 (D004): the interface lists EXACTLY the JSON keys the generated Go
+	// v26.57 (D004): the interface lists exactly the JSON keys the generated Go
 	// model writes, with the TypeScript form of the Go type it declares. Both
 	// sides take the key set from schema.ModelFields and the key from
 	// schema.JSONKey. Before, this file built camelCase names of its own
@@ -194,13 +194,13 @@ func GenerateTypesBarrel(entities []schema.Entity, rootPath string) {
 //
 // Emits frontend/src/api/client.ts: a zero-dependency, fully-typed fetch
 // wrapper with one function per entity CRUD operation, all typed against the
-// generated interfaces. This is what makes TS the shared contract — web and
+// generated interfaces. This is what makes TS the shared contract: web and
 // mobile call these typed functions instead of hand-writing fetch calls and
 // re-declaring request/response shapes.
 //
 // Routes match the generated Go backend: collection /<entity>s ,
 // item /<entity>s/{id}. (Business-op routes live under /<entity>s-ops/{id}/{op}
-// and are intentionally not auto-generated here — their signatures are
+// and are intentionally not auto-generated here. Their signatures are
 // model-written and entity-specific.)
 // ─────────────────────────────────────────────
 func GenerateAPIClient(entities []schema.Entity, rootPath string) {

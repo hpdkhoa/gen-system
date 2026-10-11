@@ -1,4 +1,4 @@
-// generator/internal/ai/reviewer_v2658_test.go — v26.58.
+// generator/internal/ai/reviewer_v2658_test.go (v26.58).
 //
 // D046: ReviewCode sliced resp[start:end+1] when the last } stood before the
 // first {, so an answer such as "done} now {" panicked with slice bounds out

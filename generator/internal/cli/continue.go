@@ -1,8 +1,8 @@
-// generator/internal/cli/continue.go — v23.24 (task 4A): `gen continue` — take
-// an EXISTING codebase plus a free-text idea and continue building it. It loads
+// generator/internal/cli/continue.go, v23.24 (task 4A): `gen continue` takes
+// an existing codebase plus a free-text idea and continues building it. It loads
 // the existing code through gen-system's own Understand engine
 // (context.LoadContext → compiler-accurate entities/fields/ops), asks the
-// planner for a DELTA grounded in what already exists, stages the result via the
+// planner for a delta grounded in what already exists, stages the result via the
 // v23.19 evolve-review safety path (source untouched until --apply), and runs
 // the same agent loop (compile-gate + per-operation repair) as every other
 // generating command.
@@ -13,7 +13,7 @@
 //	             [--force|--yes] [--allow-remove]
 //	gen idea --from <path> "<idea>"        # thin alias → same code path
 //
-// GENERATE-side only; understand-server must never link this (archtest enforces).
+// Generate side only; understand-server must never link this (archtest enforces).
 package cli
 
 import (
@@ -72,7 +72,7 @@ func ContinueFromInput(path, idea string) {
 	}
 	fmt.Println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
 
-	// ── 1. UNDERSTAND the existing code ──────────────────────────
+	// ── 1. Understand the existing code ──────────────────────────
 	fmt.Println("🔬 Understanding existing code…")
 	ctx := context.LoadContextWithOpts(path, loadOpts()) // v26.34: stdlib auto detected
 	pct, nSyms, nEdges := resolutionStats(ctx.Index)
@@ -85,15 +85,15 @@ func ContinueFromInput(path, idea string) {
 	// Steer the delta with any human belief corrections for this project. A person
 	// who corrected the machine's understanding in the Understand UI has their
 	// corrections appended to the "what exists" block, so the planner honors them
-	// (session 5). Empty when the project has no corrections — no-op then.
+	// (session 5). Empty when the project has no corrections, so it is a no-op then.
 	if cc := belief.BuildCorrectionContext(ctx.Root, ctx.Index, ctx.Effects); cc != "" {
 		existingSummary += "\n\n" + cc
 		fmt.Println("   applied human belief corrections to the plan context")
 	}
 
-	// The authoritative existing entity set comes from the TARGET codebase's
+	// The authoritative existing entity set comes from the target codebase's
 	// own model structs (the deterministic inverse of what the generator wrote).
-	// We deliberately do NOT trust a .gen IR snapshot here: it lives in the
+	// We deliberately do not use a .gen IR snapshot here: it lives in the
 	// working directory, not the target, so for an arbitrary <path> it is stale
 	// or unrelated. Model recovery is the only source tied to the actual target.
 	existingEntities := planner_v2.RecoverEntitiesFromModels(ctx.Root)
@@ -110,7 +110,7 @@ func ContinueFromInput(path, idea string) {
 	}
 	_ = inPlace
 
-	// ── 3. Plan the DELTA grounded in what exists ────────────────
+	// ── 3. Plan the delta grounded in what exists ────────────────
 	fmt.Println("🧠 Planning the delta (model call)…")
 	result, err := planner_v2.BuildContinuePlan(existingEntities, existingSummary, idea, writeDir, allowRemove)
 	if err != nil {
@@ -119,13 +119,13 @@ func ContinueFromInput(path, idea string) {
 	}
 	fmt.Println("   change set:", result.Summary)
 	if len(result.ChangedSet) == 0 {
-		fmt.Println("✅ Nothing to do — the existing code already satisfies the idea.")
+		fmt.Println("✅ Nothing to do. The existing code already satisfies the idea.")
 		return
 	}
 	fmt.Printf("   regenerating %d entit%s; merged schema has %d total\n",
 		len(result.ChangedSet), plural1(len(result.ChangedSet)), len(result.Merged.Entities))
 
-	// ── 3.5 CONSENT GATE (v25.7) ─────────────────────────────────
+	// ── 3.5 Consent gate (v25.7) ─────────────────────────────────
 	// Before staging/generating, show what exists + what the delta changes, push
 	// back on conflicts with the existing code's purpose, and wait for
 	// confirmation. Default on; --no-gate restores the old silent behaviour;
@@ -154,7 +154,7 @@ func ContinueFromInput(path, idea string) {
 	// artifact alongside the untouched staged output.
 	WriteVerifyFindingsIfHalted(writeDir)
 
-	// Note: we deliberately do NOT write a .gen IR snapshot here. continue's
+	// Note: we deliberately do not write a .gen IR snapshot here. continue's
 	// merge base is recovered from the target's model structs, not from an IR
 	// snapshot, and writing one into the working directory would poison a later
 	// continue/evolve run that happens to share the cwd.

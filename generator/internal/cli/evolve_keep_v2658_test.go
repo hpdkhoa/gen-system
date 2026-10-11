@@ -1,4 +1,4 @@
-// evolve_keep_v2658_test.go — v26.58, the user's decision on follow up 8:
+// evolve_keep_v2658_test.go (v26.58), the user's decision on follow up 8:
 // gen evolve never drops a field that disappears from the schema. It keeps the
 // field in the generated code and in .gen/ir_snapshot.json, and warns on every
 // run. Before, the field stayed only while its entity was not regenerated: as

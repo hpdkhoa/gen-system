@@ -1,4 +1,4 @@
-// broken_v2658_test.go — v26.58 (follow up of D050): once the healer records the
+// broken_v2658_test.go (v26.58, follow up of D050): once the healer records the
 // body that failed, the training example shows it under "Broken Code" again,
 // and it is never the fix itself.
 package finetune

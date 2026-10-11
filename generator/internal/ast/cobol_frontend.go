@@ -1,13 +1,13 @@
 // v23.39: COBOL IF NodeBranch now preserves the condition text in RawSource for the flow-chart decision node.
-// cobol_frontend.go — v23.33 (COBOL runtime catalog): emits a NodeCall for each
+// cobol_frontend.go (v23.33, COBOL runtime catalog): emits a NodeCall for each
 // FUNCTION <name> intrinsic reference so intrinsic usage is visible in the call
 // graph and resolvable against the synthetic COBOL runtime catalog. Prior:
-// cobol_frontend.go — v23.9 (Phase 6): fixed two pre-existing test failures —
-// single-line EXEC CICS/SQL no longer swallows the next statement (parseCICSBlock
+// cobol_frontend.go (v23.9, Phase 6): fixed two pre-existing test failures.
+// Single-line EXEC CICS/SQL no longer swallows the next statement (parseCICSBlock
 // /parseSQLBlock guard on END-EXEC already on the start line), and COPY REPLACING
 // now does pseudo-text substring substitution (applyReplacing) so PREFIX-RECORD
 // becomes WS-CUSTOMER-RECORD.
-// cobol_frontend.go — COBOL/CICS language frontend (v19, feature-complete)
+// cobol_frontend.go: COBOL/CICS language frontend (v19, feature-complete)
 //
 // v19.6 hotfix: Node has no Path or Tag fields. SELECT entries now use
 // ImportPath for the ASSIGN target; Node-level COBOL metadata (FD marker,
@@ -97,7 +97,7 @@ func (c *CobolFrontend) Parse(filePath string, source []byte) (*Module, error) {
 		copybookExtensions: c.copybookExtensionsOrDefault(),
 		visitedBooks:       map[string]bool{},
 	}
-	// Resolve COPY directives once before structural parsing — this keeps
+	// Resolve COPY directives once before structural parsing. This keeps
 	// the line numbering simple (copybook lines are inlined as if they
 	// had appeared at the COPY site).
 	p.lines = p.expandCopybooks(p.lines)
@@ -118,7 +118,7 @@ func (c *CobolFrontend) Parse(filePath string, source []byte) (*Module, error) {
 	return m, nil
 }
 
-// Emit returns source unchanged — COBOL reformatting is out of scope.
+// Emit returns source unchanged. COBOL reformatting is out of scope.
 func (c *CobolFrontend) Emit(module *Module) ([]byte, error) {
 	return module.RawSource, nil
 }
@@ -136,7 +136,7 @@ func (c *CobolFrontend) copybookExtensionsOrDefault() []string {
 type cobolLine struct {
 	lineNo int
 	raw    string   // original text (preserved for RawSource fields)
-	text   string   // content area (cols 7-72 for fixed, whole line for free)
+	text   string   // content area (cols 7 to 72 for fixed format, whole line for free format)
 	upper  string   // upper-cased content for keyword matching
 	tokens []string // whitespace-split tokens (upper-cased)
 }
@@ -395,8 +395,8 @@ func parseCopyReplacing(tokens []string) []copyReplacement {
 
 // applyReplacing substitutes the REPLACING patterns in a line's tokens.
 //
-// v23.9 (Phase 6) — COBOL pseudo-text replacing (`==PREFIX== BY ==WS-CUSTOMER==`)
-// is SUBSTRING substitution within the copybook text, not whole-token equality.
+// v23.9 (Phase 6): COBOL pseudo-text replacing (`==PREFIX== BY ==WS-CUSTOMER==`)
+// is substring substitution within the copybook text, not whole-token equality.
 // A copybook field `PREFIX-RECORD` must become `WS-CUSTOMER-RECORD`. The previous
 // `tok == r.from` test only matched a token that equalled the pattern exactly, so
 // hyphenated names like `PREFIX-RECORD`/`PREFIX-ID` were never rewritten and the
@@ -490,7 +490,7 @@ func (p *cobolParser) parseIdentificationDivision(m *Module) {
 	}
 }
 
-// ─── Environment Division — FILE-CONTROL / SELECT ─────────────
+// ─── Environment Division: FILE-CONTROL / SELECT ──────────────
 
 // parseEnvironmentDivision handles FILE-CONTROL paragraph specifically.
 // SELECT ... ASSIGN TO ... entries become NodeImport with Path=assignment.
@@ -501,7 +501,7 @@ func (p *cobolParser) parseEnvironmentDivision(m *Module) {
 		if l == nil || isDivision(l) {
 			break
 		}
-		// CONFIGURATION SECTION / INPUT-OUTPUT SECTION — skip header line, recurse.
+		// CONFIGURATION SECTION / INPUT-OUTPUT SECTION: skip header line, recurse.
 		if isSection(l) {
 			p.consume()
 			continue
@@ -627,7 +627,7 @@ func (p *cobolParser) parseDataDivision(m *Module) {
 			p.consume()
 			continue
 		}
-		// FD <file-name> — file descriptor entry.
+		// FD <file-name>: file descriptor entry.
 		if l.tokens[0] == "FD" && len(l.tokens) >= 2 {
 			p.parseFD(m)
 			continue
@@ -809,13 +809,13 @@ func (p *cobolParser) parseProcedureDivision(m *Module) {
 
 	var current *Node // current paragraph/section node
 
-	// v23.46 — IF body nesting. COBOL previously emitted a flat NodeBranch with
-	// the then-body as SIBLINGS, so the CFG built empty then-blocks and pushed
+	// v23.46: IF body nesting. COBOL previously emitted a flat NodeBranch with
+	// the then-body as siblings, so the CFG built empty then-blocks and pushed
 	// the real statements into the merge/exit (the "no End on branch / condition
 	// on wrong block" bugs). We now track an IF scope stack: statements between
 	// IF [THEN] and its matching END-IF (or scope-terminating period) become
-	// CHILDREN of the branch (or its Else after an ELSE). `tgt()` is the current
-	// append target — the innermost open IF branch, else the paragraph.
+	// children of the branch (or its Else after an ELSE). `tgt()` is the current
+	// append target: the innermost open IF branch, else the paragraph.
 	type ifScope struct {
 		branch    *Node // the NodeBranch (nil for a loop scope)
 		loop      *Node // v24: the NodeLoop for an inline PERFORM UNTIL … END-PERFORM
@@ -946,7 +946,7 @@ func (p *cobolParser) parseProcedureDivision(m *Module) {
 		// the statements under a WHEN go through this loop like a paragraph body,
 		// and each END-EVALUATE closes its own EVALUATE.
 		if l.tokens[0] == "EVALUATE" {
-			// v23.41 — the selector (e.g. "TRUE", "WS-CODE") labels the decision.
+			// v23.41: the selector (e.g. "TRUE", "WS-CODE") labels the decision.
 			root := &Node{
 				Kind:      NodeBranch,
 				Name:      "EVALUATE",
@@ -966,7 +966,7 @@ func (p *cobolParser) parseProcedureDivision(m *Module) {
 				scopes = scopes[:i+1]
 				s := scopes[i]
 				name := "WHEN"
-				// v23.41 — the WHEN value (e.g. "TXN-DEBIT") becomes the decision text.
+				// v23.41: the WHEN value (e.g. "TXN-DEBIT") becomes the decision text.
 				whenVal := strings.Join(l.tokens[1:], " ")
 				if len(l.tokens) >= 2 && l.tokens[1] == "OTHER" {
 					name = "WHEN_OTHER"
@@ -1014,11 +1014,11 @@ func (p *cobolParser) parseProcedureDivision(m *Module) {
 
 		// FUNCTION <name>(...) → NodeCall (v23.33). Intrinsic-function uses
 		// appear anywhere in a statement (COMPUTE, MOVE, IF, …), not as their
-		// own verb, so we scan the whole line's tokens rather than just the
+		// own verb, so we scan all the tokens of the line, not only the
 		// first. Each "FUNCTION" token is followed by the intrinsic name. This
 		// makes intrinsic usage visible in the call graph and resolvable
-		// against the synthetic COBOL runtime catalog. The statement is NOT
-		// consumed here — it still falls through to whatever verb owns the line.
+		// against the synthetic COBOL runtime catalog. This code does not
+		// consume the statement. It still falls through to whatever verb owns the line.
 		for ti := 0; ti+1 < len(l.tokens); ti++ {
 			if l.tokens[ti] == "FUNCTION" {
 				fn := strings.TrimRight(l.tokens[ti+1], ".")
@@ -1066,8 +1066,8 @@ func (p *cobolParser) parseProcedureDivision(m *Module) {
 					break
 				}
 			}
-			// v23.47 — build the loop node with the performed paragraph as its
-			// BODY, so the CFG shows the action inside the loop instead of an
+			// v23.47: build the loop node with the performed paragraph as its
+			// body, so the CFG shows the action inside the loop instead of an
 			// empty "until …" diamond. `PERFORM <para> UNTIL <cond>` = loop over a
 			// call; `PERFORM UNTIL <cond> … END-PERFORM` (inline body) keeps the
 			// scope-stack path below via the loop's own scope (future work).
@@ -1157,9 +1157,9 @@ func (p *cobolParser) parseProcedureDivision(m *Module) {
 		}
 
 		// IF → NodeBranch. v23.39: condition text in RawSource. v23.46: push an
-		// IF scope so the then-body nests as CHILDREN (not flat siblings). The
+		// IF scope so the then-body nests as children (not flat siblings). The
 		// scope is closed by END-IF, or by a scope-terminating period for the
-		// period-style IF. We attach the branch to the CURRENT target first, then
+		// period-style IF. We attach the branch to the current target first, then
 		// push it, so nested IFs stack correctly.
 		if l.tokens[0] == "IF" {
 			// v26.58 (D062): "IF A = 1 MOVE 1 TO X." kept the statement in the
@@ -1179,7 +1179,7 @@ func (p *cobolParser) parseProcedureDivision(m *Module) {
 				RawSource: cond,
 				Span:      Span{Start: Pos{Line: l.lineNo}},
 			}
-			add(br) // attach to enclosing scope/paragraph BEFORE pushing
+			add(br) // attach to enclosing scope/paragraph before pushing
 			// v26.58 (D062): endsAtDot was set only when the IF line itself ended
 			// with a period, so "IF A = 1," followed by "MOVE 2 TO Y." stayed open
 			// to the paragraph end. COBOL closes an IF at END-IF or at the first
@@ -1230,8 +1230,8 @@ func (p *cobolParser) parseProcedureDivision(m *Module) {
 			continue
 		}
 
-		// v23.41 — data / arithmetic statements (SUBTRACT, ADD, MOVE, COMPUTE, …)
-		// previously produced NO node, so they were invisible in the CFG (the
+		// v23.41: data / arithmetic statements (SUBTRACT, ADD, MOVE, COMPUTE, …)
+		// previously produced no node, so they were invisible in the CFG (the
 		// reported "missing SUBTRACT"). Emit a NodeAssign carrying the full
 		// statement text in RawSource so it renders as a process step. Guarded to
 		// the verbs below and only when the line wasn't already consumed as a
@@ -1395,9 +1395,9 @@ func appendChild(current *Node, m *Module, child *Node) {
 	}
 }
 
-// parseCICSBlock parses EXEC CICS … END-EXEC as a single NodeCall and RETURNS
+// parseCICSBlock parses EXEC CICS … END-EXEC as a single NodeCall and returns
 // it (v23.47) so the caller can attach it to the correct scope (an open IF's
-// then/else body, not always the paragraph — the "IF/ELSE collapse" bug).
+// then/else body, not always the paragraph; this was the "IF/ELSE collapse" bug).
 func (p *cobolParser) parseCICSBlock(m *Module, startLineNo int) *Node {
 	startLine := p.consume()
 	command := ""
@@ -1407,9 +1407,9 @@ func (p *cobolParser) parseCICSBlock(m *Module, startLineNo int) *Node {
 	var rawParts []string
 	rawParts = append(rawParts, startLine.raw)
 
-	// v23.9 (Phase 6) — single-line `EXEC CICS <verb> ... END-EXEC` is complete
+	// v23.9 (Phase 6): single-line `EXEC CICS <verb> ... END-EXEC` is complete
 	// on the start line. Previously the continuation loop below always ran and
-	// consumed the FOLLOWING line while hunting for END-EXEC, swallowing every
+	// consumed the following line while hunting for END-EXEC, swallowing every
 	// other CICS statement (WRITE kept, REWRITE eaten, DELETE kept, LINK eaten…).
 	// Only scan continuation lines when END-EXEC is not already on the start line.
 	if !strings.Contains(startLine.upper, "END-EXEC") {
@@ -1440,7 +1440,7 @@ func (p *cobolParser) parseCICSBlock(m *Module, startLineNo int) *Node {
 }
 
 // parseSQLBlock parses EXEC SQL … END-EXEC as a single NodeCall with
-// Callee="SQL.<verb>" and RETURNS it (v23.47) for scope-correct attachment.
+// Callee="SQL.<verb>" and returns it (v23.47) for scope-correct attachment.
 func (p *cobolParser) parseSQLBlock(m *Module, startLineNo int) *Node {
 	startLine := p.consume()
 	verb := ""
@@ -1450,7 +1450,7 @@ func (p *cobolParser) parseSQLBlock(m *Module, startLineNo int) *Node {
 	var rawParts []string
 	rawParts = append(rawParts, startLine.raw)
 
-	// v23.9 (Phase 6) — same single-line guard as parseCICSBlock: a one-line
+	// v23.9 (Phase 6): same single-line guard as parseCICSBlock. A one-line
 	// `EXEC SQL ... END-EXEC` must not consume the following statement.
 	if !strings.Contains(startLine.upper, "END-EXEC") {
 		for p.pos < len(p.lines) {
@@ -1609,7 +1609,7 @@ func extractPIC(upper string) string {
 		"PACKED-DECIMAL": true,
 	}
 	out := toks[0]
-	// If the PIC has parentheses split across tokens like "X (10)" — join.
+	// If the PIC has parentheses split across tokens like "X (10)", join them.
 	if len(toks) > 1 && strings.HasPrefix(toks[1], "(") {
 		out += toks[1]
 	}

@@ -1,19 +1,19 @@
 #!/usr/bin/env bash
-# freeze-cobol-baseline.sh — v23.25 (task F): reproduce / verify the frozen
+# freeze-cobol-baseline.sh, v23.25 (task F): reproduce / verify the frozen
 # genbench baseline on the public MIT-licensed CobolCraft corpus.
 #
 # Two modes:
-#   ./freeze-cobol-baseline.sh verify   (default) — regenerate a fresh run and
+#   ./freeze-cobol-baseline.sh verify (default): regenerate a fresh run and
 #       diff it against the committed baseline via `genbench regression --baseline`.
 #       Exits non-zero (via --strict) if any content metric drifted.
-#   ./freeze-cobol-baseline.sh freeze   — overwrite the committed baseline JSON
-#       with a freshly canonicalized run. Use only when you intend to MOVE the
+#   ./freeze-cobol-baseline.sh freeze: overwrite the committed baseline JSON
+#       with a freshly canonicalized run. Use only when you intend to move the
 #       baseline (e.g. after a deliberate parser improvement).
 #
 # Requires: git, go (or a prebuilt genbench on PATH), python3.
 # Network: clones github.com/meyfa/CobolCraft at the pinned commit.
 #
-# The corpus is NOT vendored into this repo (it is third-party MIT code); this
+# The corpus is not vendored into this repo (it is third-party MIT code); this
 # script fetches it on demand so the baseline stays reproducible from source.
 
 set -euo pipefail

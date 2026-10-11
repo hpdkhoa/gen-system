@@ -1,4 +1,4 @@
-// generator/internal/bench/perf_loadctx.go — v19.7: LoadContext end-to-end
+// generator/internal/bench/perf_loadctx.go (v19.7): LoadContext end-to-end
 // latency for the four practical configurations:
 //
 //	plain:           LoadContext(root)
@@ -50,7 +50,7 @@ func LoadContextLatency(root string, copybookPath []string, skillPath string) Su
 	bench("with_copybook", func() agentctx.Context {
 		return agentctx.LoadContextWithOpts(root, agentctx.LoadContextOpts{CopybookPath: copybookPath})
 	})
-	// Run plain again — DefaultCache should make this faster.
+	// Run plain again. DefaultCache should make this faster.
 	bench("warm_cache", func() agentctx.Context { return agentctx.LoadContext(root) })
 
 	if skillPath != "" {

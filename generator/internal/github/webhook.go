@@ -57,7 +57,7 @@ func WebhookHandler(onEvent func(WebhookEvent)) http.HandlerFunc {
 				return
 			}
 		} else {
-			fmt.Println("  [github/webhook] ⚠️  GH_WEBHOOK_SECRET not set — skipping signature check")
+			fmt.Println("  [github/webhook] ⚠️  GH_WEBHOOK_SECRET not set; skipping the signature check")
 		}
 
 		var event WebhookEvent

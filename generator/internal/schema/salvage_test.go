@@ -1,4 +1,4 @@
-// generator/internal/schema/salvage_test.go — v23.1: repair+salvage unit
+// generator/internal/schema/salvage_test.go (v23.1): repair+salvage unit
 // tests (small fixture + trailing-comma repair).
 package schema
 

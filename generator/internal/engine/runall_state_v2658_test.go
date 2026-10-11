@@ -1,4 +1,4 @@
-// runall_state_v2658_test.go — v26.58 (follow up 7): RunAll must read and write
+// runall_state_v2658_test.go, v26.58 (follow up 7): RunAll must read and write
 // its IR snapshot in the output folder it generates into. It used the working
 // directory, so a stale snapshot there made RunAll treat entities as unchanged
 // and skip them when it wrote into a fresh folder (bench/postgres_live.go does

@@ -1,4 +1,4 @@
-// generator/internal/planner/planner.go — v23.1 (round 2): BuildPlan saves raw
+// generator/internal/planner/planner.go, v23.1 (round 2): BuildPlan saves raw
 // model output to plan.raw.json / schema.raw.json (always, for inspection) and
 // escalates parsing through ParseFileChecked → RepairJSON → SalvageEntities so
 // a structurally noisy model response still yields a usable schema instead of
@@ -22,7 +22,7 @@ import (
 //  2. AI converts plan JSON → schema JSON
 //  3. Schema is parsed into schema.SchemaFile
 //  4. Task graph is built from the schema
-//  5. Plan returned — ready for user review before execution
+//  5. Plan returned, ready for user review before execution
 //
 // ─────────────────────────────────────────────
 func BuildPlan(goal string) (Plan, error) {
@@ -30,18 +30,18 @@ func BuildPlan(goal string) (Plan, error) {
 		return Plan{}, fmt.Errorf("goal cannot be empty")
 	}
 
-	fmt.Println("🧠 Step 1/3 — Generating structured plan from goal...")
+	fmt.Println("🧠 Step 1/3: generating a structured plan from the goal...")
 
 	// Step 1: goal → plan JSON (feature/entity/action breakdown)
 	planJSON := ai.GeneratePlan(goal)
 	if planJSON == "" || planJSON == "{}" {
-		return Plan{}, fmt.Errorf("AI failed to generate a plan — is Ollama running?")
+		return Plan{}, fmt.Errorf("the model returned no plan; is Ollama running?")
 	}
 
 	// Parse feature list from plan JSON for the Plan struct
 	features := extractFeatures(planJSON)
 
-	fmt.Println("🧠 Step 2/3 — Converting plan to schema...")
+	fmt.Println("🧠 Step 2/3: converting the plan to a schema...")
 
 	// Save the raw plan for inspection (always, before anything can fail).
 	saveRaw("plan.raw.json", planJSON)
@@ -66,7 +66,7 @@ func BuildPlan(goal string) (Plan, error) {
 
 	// Step 3: parse schema, escalating through a repair/salvage ladder so a
 	// structurally noisy model response (trailing commas, doubled brackets,
-	// junk objects, tab storms — all seen from deepseek-coder) still yields a
+	// junk objects, tab storms; all seen from deepseek-coder) still yields a
 	// usable schema instead of dead-ending. v23.1 planner fix (round 2).
 	sf, perr := schema.ParseFileChecked(schemaJSON)
 	if perr != nil || len(sf.Entities) == 0 {
@@ -82,7 +82,7 @@ func BuildPlan(goal string) (Plan, error) {
 				fmt.Printf("ℹ️  salvaged %d entities from a malformed response\n", len(sf3.Entities))
 				sf = sf3
 			} else {
-				// give up — but leave the artifact and a precise message
+				// give up, but leave the artifact and a precise message
 				if perr == nil {
 					perr = fmt.Errorf("no usable entities found")
 				}
@@ -95,7 +95,7 @@ func BuildPlan(goal string) (Plan, error) {
 	}
 
 	fmt.Printf("✅ Schema generated: %d entities\n", len(sf.Entities))
-	fmt.Println("🧠 Step 3/3 — Building task execution graph...")
+	fmt.Println("🧠 Step 3/3: building the task graph...")
 
 	// Step 4: build task dependency graph
 	tasks := TaskGraphFromSchema(sf)

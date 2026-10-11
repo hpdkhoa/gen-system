@@ -1,4 +1,4 @@
-// context/skip_generated_test.go — v25.6.1: pins the freeze fix. Loading a
+// context/skip_generated_test.go (v25.6.1): pins the freeze fix. Loading a
 // generated project root used to walk into the dense generated frontend/mobile
 // TS/JSX trees and parse them synchronously in the load handler, freezing the
 // Studio. shouldSkip now excludes those generated sibling layers while still
@@ -36,7 +36,7 @@ func TestShouldSkip_GeneratedLayers(t *testing.T) {
 
 func TestShouldSkip_KeepsRealSource(t *testing.T) {
 	keep := []string{
-		// backend Go is the whole point — must still parse
+		// backend Go is the whole point; it must still parse
 		filepath.Join("backend", "main.go"),
 		filepath.Join("backend", "internal", "service", "order.go"),
 		// legacy source at the root
@@ -45,7 +45,7 @@ func TestShouldSkip_KeepsRealSource(t *testing.T) {
 		"handler.py",
 		// a hand-written db/*.sql at the db root (not under migrations/)
 		filepath.Join("db", "seed.sql"),
-		// a dir merely CONTAINING the substring must not be skipped
+		// a dir that only contains the substring must not be skipped
 		filepath.Join("myfrontendlib", "x.go"),
 	}
 	for _, rel := range keep {

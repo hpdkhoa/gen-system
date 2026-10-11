@@ -1,4 +1,4 @@
-// nit/nit_test.go — tests for the AST-NIT serialiser
+// nit/nit_test.go: tests for the AST-NIT serialiser
 package nit
 
 import (
@@ -313,8 +313,8 @@ func TestSerialize_Procedure(t *testing.T) {
 	if len(proLines) == 0 {
 		t.Fatalf("no PRO line; all: %v", lines)
 	}
-	// Also defensively skip any line that happens to start with "PKG " —
-	// it can never be a procedure record. This keeps the test correct
+	// Also defensively skip any line that happens to start with "PKG ".
+	// It can never be a procedure record. This keeps the test correct
 	// even if someone changes the NIT prefix format later.
 	proLine := ""
 	for _, l := range proLines {

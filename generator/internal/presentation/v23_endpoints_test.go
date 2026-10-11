@@ -1,4 +1,4 @@
-// v23_endpoints_test.go — v24: constructor detection for the call-graph relabel.
+// v23_endpoints_test.go (v24): constructor detection for the call-graph relabel.
 package presentation
 
 import (

@@ -1,7 +1,7 @@
-// backend_inmem.go — v23.27 (task E): store Create returns (model,error); the
+// backend_inmem.go, v23.27 (task E): store Create returns (model,error); the
 // collection POST handler now returns 409 when Create fails (e.g. FK violation),
 // instead of swallowing the DB error and falsely returning 201.
-// generator/internal/engine/backend_inmem.go — v23.15: emitGoMod now ALWAYS
+// generator/internal/engine/backend_inmem.go (v23.15): emitGoMod now always
 // (re)writes go.mod for the current mode instead of early-returning on a
 // pre-existing file, and removes a stale go.sum in memory mode; NEW
 // cleanStaleBackend() scrubs obsolete artifacts (stale backend/go.mod+go.sum,
@@ -10,12 +10,12 @@
 // the wrong-import-path cmd/main.go that aborted generation when regenerating
 // into a directory a previous (postgres-mode) run had written.
 // v23.11 (Phase 1): postgres mode
-// now pins lib/pq v1.12.3 (was v1.10.9 — a version with no go.sum anywhere on
-// the box) AND emits a matching go.sum next to go.mod, so the generated app
-// builds OFFLINE without `go mod download`. This fixes the "missing go.sum
+// now pins lib/pq v1.12.3. It was v1.10.9, a version with no go.sum anywhere on
+// the box. It also emits a matching go.sum next to go.mod, so the generated app
+// builds offline without `go mod download`. This fixes the "missing go.sum
 // entry for go.mod file" failure that aborted generation in postgres mode.
 // v23.10 (Phase 4-B): emitMain now
-// constructs ONE store per entity and injects it into BOTH the CRUD handler and
+// constructs one store per entity and injects it into both the CRUD handler and
 // the business-ops service handler (shared state); GenerateBackendApp also writes
 // the build+bundle ship scripts. v23.8: fieldsForEntity now also
 // folds belongsTo relations into int FK fields (relationFields), so model +
@@ -50,18 +50,18 @@ func emitGoMod(path string) error {
 		return err
 	}
 
-	// v23.15: ALWAYS (re)write go.mod to match the CURRENT mode — never trust a
+	// v23.15: always (re)write go.mod to match the current mode. Never reuse a
 	// pre-existing one. Previously this early-returned if go.mod existed, so a
 	// directory reused across runs (or across modes) kept whatever go.mod the
 	// *earlier* run wrote. A stale postgres-mode go.mod pinning an old lib/pq
-	// (e.g. v1.10.9) with NO matching go.sum then poisoned every later build
-	// with "missing go.sum entry for go.mod file" — exactly the failure seen in
+	// (e.g. v1.10.9) with no matching go.sum then poisoned every later build
+	// with "missing go.sum entry for go.mod file". That is the failure seen in
 	// the field. Rewriting unconditionally keeps go.mod + go.sum in lock-step
 	// with the mode actually being generated.
 	mod := "module app\n\ngo 1.22\n"
 	sumPath := filepath.Join(path, "go.sum")
 	if postgresEnabled() {
-		// v23.11: pin the SAME lib/pq version the gen-system parent module
+		// v23.11: pin the same lib/pq version the gen-system parent module
 		// vendors (v1.12.3). v1.10.9's checksum is on no offline box, so it
 		// failed `go vet`/`go build` with "missing go.sum entry". Keeping
 		// versions in lock-step means the hashes below are guaranteed available
@@ -71,9 +71,9 @@ func emitGoMod(path string) error {
 			return err
 		}
 
-		// v23.11: emit a matching go.sum so the project builds OFFLINE (no
+		// v23.11: emit a matching go.sum so the project builds offline (no
 		// `go mod download`, no proxy). These two lines are the authoritative
-		// hashes for lib/pq v1.12.3 — identical to the gen-system parent go.sum,
+		// hashes for lib/pq v1.12.3, identical to the gen-system parent go.sum,
 		// which builds clean. lib/pq is the sole external dep (postgres mode).
 		sum := "github.com/lib/pq v1.12.3 h1:tTWxr2YLKwIvK90ZXEw8GP7UFHtcbTtty8zsI+YjrfQ=\n" +
 			"github.com/lib/pq v1.12.3/go.mod h1:/p+8NSbOcwzAEI7wiMXFlgydTwcgTr3OSKMsD2BitpA=\n"
@@ -81,9 +81,9 @@ func emitGoMod(path string) error {
 	}
 
 	// Memory mode: no external requires, so go.mod has none and go.sum must be
-	// ABSENT. v23.15: actively remove a stale go.sum left by a prior
-	// postgres-mode run in this same directory — otherwise an orphaned go.sum
-	// referencing lib/pq trips the build even though nothing imports it.
+	// absent. v23.15: actively remove a stale go.sum left by a prior
+	// postgres-mode run in this same directory. An orphaned go.sum that
+	// references lib/pq trips the build even though nothing imports it.
 	if err := os.WriteFile(p, []byte(mod), 0644); err != nil {
 		return err
 	}
@@ -93,8 +93,8 @@ func emitGoMod(path string) error {
 	return nil
 }
 
-// cleanStaleBackend removes backend artifacts that the CURRENT generator no
-// longer produces but an OLDER run (or a different mode) may have left in a
+// cleanStaleBackend removes backend artifacts that the current generator no
+// longer produces but an older run (or a different mode) may have left in a
 // reused output directory. Without this, a directory generated into more than
 // once accumulates conflicting files that break `go vet`/`go build`:
 //
@@ -102,10 +102,10 @@ func emitGoMod(path string) error {
 //     shadows the single project-root go.mod this generator writes. `go vet`
 //     runs inside backend/, finds the stale (possibly v1.10.9, go.sum-less)
 //     module file, and fails before the root module is ever consulted.
-//   - backend/cmd/main.go: an obsolete SECOND `package main` (old convention,
-//     imported "backend/internal/db") — the current generator emits only
+//   - backend/cmd/main.go: an obsolete second `package main` (old convention,
+//     imported "backend/internal/db"). The current generator emits only
 //     backend/main.go, so this is a dangling, wrong-import-path duplicate.
-//   - backend/internal/db/: the postgres connector + migrations. In MEMORY mode
+//   - backend/internal/db/: the postgres connector + migrations. In memory mode
 //     nothing imports it, but it still imports lib/pq and drags the dep into the
 //     build graph; remove it so memory-mode output is truly dependency-free.
 //     (Postgres mode regenerates this tree, so we only prune it when memory.)
@@ -144,7 +144,7 @@ func cleanStaleBackend(path string) error {
 	return errors.Join(errs...)
 }
 
-// genModelInMem writes backend/internal/model/<lower>.go — a plain struct with
+// genModelInMem writes backend/internal/model/<lower>.go: a plain struct with
 // an ID and JSON tags. Deterministic field order (schema order).
 func genModelInMem(e schema.Entity, path string) error {
 	n := typeName(e.Name)
@@ -153,7 +153,7 @@ func genModelInMem(e schema.Entity, path string) error {
 	fmt.Fprintf(&b, "type %s struct {\n", n)
 	fmt.Fprintf(&b, "\tID int `json:\"id\"`\n")
 	// v23.2.2: skip any model-supplied field that collides with the built-in
-	// ID (by identifier OR json tag) or with an earlier field — otherwise
+	// ID (by identifier or json tag) or with an earlier field. Otherwise
 	// `go vet` rejects duplicate struct fields / repeated json tags (the model
 	// often emits its own "id"). Comparison is case-insensitive.
 	usedIdent := map[string]bool{"id": true}
@@ -179,7 +179,7 @@ func genModelInMem(e schema.Entity, path string) error {
 //
 // v23.8: belongsTo relations now contribute an int foreign-key field (e.g.
 // belongsTo User -> UserID int `json:"user_id"`), appended after the explicit
-// fields and run through the SAME dedup so the FK appears exactly once in the
+// fields and run through the same dedup so the FK appears exactly once in the
 // model struct, the in-memory store, the PG store, and the SQL migration.
 func fieldsForEntity(e schema.Entity) []schema.Field { return schema.ModelFields(e) }
 
@@ -194,7 +194,7 @@ func relationFields(e schema.Entity) []schema.Field { return schema.RelationFiel
 
 // fkFieldName is the canonical Go-ish field name for a foreign key, used when
 // synthesizing the relation column field. genTable/genMigration then turn this
-// into the SQL column via jsonTag, so this is the SINGLE point that decides the
+// into the SQL column via jsonTag, so this is the single point that decides the
 // synthesized FK field shape. Kept as splitCamel(name) to preserve the
 // historical column spelling "user_id" for "UserID".
 func fkFieldName(name string) string { return schema.FKFieldName(name) }
@@ -226,7 +226,7 @@ func resolveFKColumn(e schema.Entity, name string) string {
 // (spaces, underscores) pass through unchanged because those delimiters survive.
 func splitCamel(s string) string { return schema.SplitCamel(s) }
 
-// genStoreInMem writes backend/internal/store/<lower>.go — a thread-safe
+// genStoreInMem writes backend/internal/store/<lower>.go: a thread-safe
 // in-memory CRUD store with auto-incrementing IDs.
 func genStoreInMem(e schema.Entity, path string) error {
 	n := typeName(e.Name)
@@ -235,7 +235,7 @@ func genStoreInMem(e schema.Entity, path string) error {
 	fmt.Fprintf(&b, "import (\n\t\"sort\"\n\t\"sync\"\n\n\t\"app/backend/internal/model\"\n)\n\n")
 	fmt.Fprintf(&b, "type %sStore struct {\n\tmu   sync.RWMutex\n\tdata map[int]model.%s\n\tnext int\n}\n\n", n, n)
 	fmt.Fprintf(&b, "func New%sStore() *%sStore {\n\treturn &%sStore{data: map[int]model.%s{}, next: 1}\n}\n\n", n, n, n, n)
-	// Create — v23.27 (task E): returns (model, error) so the pg store can
+	// Create (v23.27, task E) returns (model, error) so the pg store can
 	// surface DB errors (e.g. FK violations) to the handler. In-memory never
 	// errors, so it returns nil.
 	fmt.Fprintf(&b, "func (s *%sStore) Create(m model.%s) (model.%s, error) {\n\ts.mu.Lock()\n\tdefer s.mu.Unlock()\n\tm.ID = s.next\n\ts.next++\n\ts.data[m.ID] = m\n\treturn m, nil\n}\n\n", n, n, n)
@@ -253,7 +253,7 @@ func genStoreInMem(e schema.Entity, path string) error {
 	return writeFileMk(filepath.Join(path, "backend/internal/store/"+routeName(e.Name)+".go"), b.String())
 }
 
-// genHandlerInMem writes backend/internal/handler/<Name>_handler.go — full CRUD
+// genHandlerInMem writes backend/internal/handler/<Name>_handler.go: full CRUD
 // HTTP handlers over the store. Routes are registered via Register<Name>Routes.
 func genHandlerInMem(e schema.Entity, path string) error {
 	n := typeName(e.Name)
@@ -346,7 +346,7 @@ func emitMain(entities []schema.Entity, path string) error {
 	b.WriteString("// Code generated by gen-system. DO NOT EDIT.\npackage main\n\n")
 
 	if !postgresEnabled() {
-		// memory-only main. Phase 4-B: construct ONE store per entity and inject
+		// memory-only main. Phase 4-B: construct one store per entity and inject
 		// it into both the CRUD handler and (if present) the business-ops handler
 		// so they share state. Without this they'd hold separate stores and an
 		// order created via CRUD would be invisible to its service ops.
@@ -412,7 +412,7 @@ func listenBlock(mode string) string {
 	return b.String()
 }
 
-// exportName turns an arbitrary field name into a valid EXPORTED Go identifier.
+// exportName turns an arbitrary field name into a valid exported Go identifier.
 // v23.2.1: the model sometimes emits names with spaces/punctuation (e.g.
 // "due date"), which are not valid Go identifiers and broke the generated
 // model (more-than-one-char rune / unexpected literal). We split on any
@@ -427,7 +427,7 @@ func jsonTag(s string) string { return schema.JSONKey(s) }
 func routeName(s string) string { return schema.RouteName(s) }
 
 // plural appends "s" unless the word already ends in "s" (so "Tasks" stays
-// "tasks", not "taskss"). Deliberately simple — good enough for route/table.
+// "tasks", not "taskss"). Deliberately simple; good enough for route/table.
 func plural(s string) string { return schema.Plural(s) }
 
 // collPath is the REST collection path for an entity, e.g. "/tasks".

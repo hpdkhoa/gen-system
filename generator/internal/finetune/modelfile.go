@@ -12,11 +12,11 @@ type ModelfileConfig struct {
 	Name        string // your custom model name, e.g. "gen-system-repair"
 	DatasetPath string // path to the JSONL dataset (from ExportTrainingData)
 	Temperature float64
-	ContextSize int // num_ctx — larger = more context for repair prompts
+	ContextSize int // num_ctx; larger = more context for repair prompts
 }
 
 // DefaultModelfileConfig returns sensible defaults for a Go code repair model.
-// codellama:7b is a good base — already trained on code, fast on CPU.
+// codellama:7b is a good base: already trained on code, fast on CPU.
 func DefaultModelfileConfig(datasetPath string) ModelfileConfig {
 	return ModelfileConfig{
 		BaseModel:   "codellama",
@@ -97,9 +97,9 @@ Error categories you handle:
 `,
 		time.Now().Format("2006-01-02 15:04:05"),
 		cfg.BaseModel, cfg.Name, cfg.Name,
-		// v18.3: the args list was off by one — the "direct (no fine-tune)"
+		// v18.3: the args list was off by one. The "direct (no fine-tune)"
 		// ollama-create line needs cfg.Name (the model name to create), and
-		// only AFTER that comes FROM cfg.BaseModel and PARAMETER temperature
+		// only after that comes FROM cfg.BaseModel and PARAMETER temperature
 		// cfg.Temperature. Without cfg.Name here, cfg.BaseModel was binding
 		// to the wrong %s and cfg.Temperature (float64) was being formatted
 		// with %s, which is a vet/build error.
@@ -111,7 +111,7 @@ Error categories you handle:
 }
 
 // GenerateTrainScript writes a minimal unsloth/LoRA training script.
-// This is a starting point — users will need to install unsloth and
+// This is a starting point. Users need to install unsloth and
 // adjust hyperparameters for their hardware.
 func GenerateTrainScript(cfg ModelfileConfig, outputPath string) error {
 	// Note: Python's triple quotes """ are fine inside Go backticks.

@@ -1,11 +1,11 @@
-// backend_postgres.go — v23.27 (task E): pg Create checks the INSERT error and
+// backend_postgres.go, v23.27 (task E): pg Create checks the INSERT error and
 // returns it (was discarded with _ =), so FK violations surface as 409. FK
 // migration uses plain DROP/ADD (no DO-block) + per-statement runner.
-// generator/internal/engine/backend_postgres.go — v23.26 (task E fix): the FK
+// generator/internal/engine/backend_postgres.go, v23.26 (task E fix): the FK
 // migration column name now matches the CREATE TABLE / store column (jsonTag,
 // no splitCamel). Was "user_id" vs table "userid" → ALTER TABLE referenced a
 // missing column and FK enforcement silently never applied on a live DB.
-// generator/internal/engine/backend_postgres.go — v23.15: emitDBConnector now
+// generator/internal/engine/backend_postgres.go (v23.15): emitDBConnector now
 // always (re)writes db.go, the generated connector loads .env (dependency-free)
 // and resolves the DSN from DATABASE_URL then DB_URL then a default, so the
 // generated .env actually reaches the running app. v23.8: belongsTo relations
@@ -13,9 +13,9 @@
 // idempotent FK-constraint migration (genForeignKeyMigration -> 900_foreign_keys
 // .sql). v23.2 Option B: optional
 // Postgres backend. WHY: in-memory data resets on restart; real apps need
-// persistence. When GEN_BACKEND=postgres at generation time, we ALSO emit a
+// persistence. When GEN_BACKEND=postgres at generation time, we also emit a
 // database/sql + lib/pq store per entity, a db.go connector, SQL migrations,
-// and a go.mod that requires lib/pq. main.go selects the backend at RUNTIME
+// and a go.mod that requires lib/pq. main.go selects the backend at runtime
 // via STORE_BACKEND (memory|postgres), so memory stays the zero-dependency
 // default and `go test` never needs a database.
 package engine
@@ -51,11 +51,11 @@ func sqlType(t string) string {
 }
 
 // emitDBConnector writes backend/internal/db/db.go: it loads the project .env
-// (no external dependency — a small built-in parser) and opens a *sql.DB from
+// (no external dependency, a small built-in parser) and opens a *sql.DB from
 // the connection string, looking at DATABASE_URL first, then DB_URL (the name
 // the generated .env writes), then a local default.
 //
-// v23.15: ALWAYS (re)write the connector — the old early-return left a stale,
+// v23.15: always (re)write the connector. The old early-return left a stale,
 // possibly older-format db.go (e.g. one reading DB_URL + db.Init()) in a reused
 // dir. v23.15 also adds the .env loader + DB_URL fallback so the value the
 // generated .env actually contains reaches the app (previously .env wrote
@@ -162,7 +162,7 @@ func dsnTarget(conn string) string {
 //
 // v23.8: belongsTo relations contribute an FK column (via fieldsForEntity).
 // The REFERENCES constraint itself is emitted separately by
-// genForeignKeyMigration (a trailing migration) so it runs AFTER every table
+// genForeignKeyMigration (a trailing migration) so it runs after every table
 // exists, regardless of entity declaration order.
 func genPGMigration(e schema.Entity, idx int, path string) error {
 	table := tableName(e)
@@ -193,9 +193,9 @@ func genForeignKeyMigration(entities []schema.Entity, path string) error {
 			if strings.TrimSpace(name) == "" {
 				name = rel.Target + "ID"
 			}
-			// v23.26 (task E fix, corrected): the FK column MUST equal the column
+			// v23.26 (task E fix, corrected): the FK column must equal the column
 			// genTable actually emitted. genTable names columns jsonTag(f.Name)
-			// over fieldsForEntity(e) — which DEDUPES, so if the schema declares
+			// over fieldsForEntity(e), which dedupes. So if the schema declares
 			// an explicit FK field (e.g. "userID") that field wins over the
 			// synthesized relation field and the column follows the explicit
 			// spelling. Re-deriving the column from rel.ForeignKey alone (via
@@ -208,8 +208,8 @@ func genForeignKeyMigration(entities []schema.Entity, path string) error {
 			// v23.27 (task E fix): emit a plain, idempotent two-statement form
 			// instead of an anonymous `DO $$ … $$` block. lib/pq executes an
 			// anonymous dollar-quoted DO block over the extended protocol in a way
-			// that silently NO-OPs (Exec returns no error but the constraint is
-			// never added) — which is why a live orphan insert was accepted even
+			// that silently does nothing (Exec returns no error but the constraint is
+			// never added). That is why a live orphan insert was accepted even
 			// though Migrate() returned nil. DROP CONSTRAINT IF EXISTS is itself
 			// idempotent and needs no procedural block, and ADD CONSTRAINT then
 			// reliably creates the FK. Each statement is run separately by the

@@ -1,4 +1,4 @@
-// generator/internal/agent/style_stage.go — v26.33: the team style profile
+// generator/internal/agent/style_stage.go (v26.33): the team style profile
 // inside one generation run.
 //
 // The profile reaches the model at three moments and the code at two:
@@ -90,13 +90,13 @@ func runStyleStage(backendPath, rootPath string, ctx agentctx.Context) (style.Re
 	if !StyleActive() {
 		return style.Report{}, false
 	}
-	emit("style", fmt.Sprintf("\n📐 Style gate (%s mode) — checking generated output against %q...\n", styleMode, styleProfile.Name))
+	emit("style", fmt.Sprintf("\n📐 Style gate (%s mode): checking generated output against %q...\n", styleMode, styleProfile.Name))
 	rep := style.Check(backendPath, styleProfile)
 	recordLifecycle("style", fmt.Sprintf("%d error, %d warn over %d rules", rep.Errors(), rep.Warnings(), len(rep.RulesChecked)))
 	printStyleFindings(rep)
 
 	if styleMode == style.ModeAutofix && len(rep.FixableFiles()) > 0 {
-		emit("style", "  [style] autofix mode — routing fixable findings to the repair loop\n")
+		emit("style", "  [style] autofix mode: fixable findings go to the repair loop\n")
 		var files []string
 		for _, f := range rep.FixableFiles() {
 			files = append(files, filepath.Join(backendPath, filepath.FromSlash(f)))

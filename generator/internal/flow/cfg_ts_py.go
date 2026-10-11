@@ -1,4 +1,4 @@
-// flow/cfg_ts_py.go — multi-block CFG builder for TS, Python, and CA Gen
+// flow/cfg_ts_py.go: multi-block CFG builder for TS, Python, and CA Gen
 // v25.1: extractStructuralNodes/hasStructuralNodes now recognise NodeTry and
 // preserve Else (catch/finally, branch else-arms) with children extracted, so
 // try/catch survives extraction and reaches the processNode try-split. Prior to
@@ -6,14 +6,14 @@
 // wrapper, rendering as a lone "try {" node → End (the golden-IR CFG symptom).
 // Added for open item 4: TS/Python full CFG.
 // The TS and Python frontends already emit NodeCall, NodeBranch, NodeLoop,
-// and NodeReturn nodes as children of functions; they just happen to be
+// and NodeReturn nodes as children of functions, but they sit
 // wrapped inside a NodeUnknown{reason:"body_not_parsed"} child.
 // This file extracts those structural nodes and feeds them through the
 // same cfgBuilder used for Go, producing real multi-block CFGs instead
 // of the previous single-block stub.
 //
 // CA Gen bodies were already wired through buildProcedureCFG but lacked
-// the ESCAPE/EXIT handling — that is also fixed here.
+// the ESCAPE/EXIT handling. This file fixes that too.
 //
 // Nothing in this file redeclares any symbol from flow.go.
 package flow
@@ -71,11 +71,11 @@ func extractStructuralNodes(children []*ast.Node) []*ast.Node {
 			// v25.1: NodeTry kept so try/catch survives extraction and reaches the
 			// processNode NodeTry case (flow.go) that builds the try-body + catch +
 			// merge split. Before this, NodeTry hit the default arm below, which
-			// FLATTENED its children into the parent block and DROPPED the wrapper —
-			// so a Java/TS/Python try rendered as a lone "try {" node straight to
+			// flattened its children into the parent block and dropped the wrapper.
+			// So a Java/TS/Python try rendered as a lone "try {" node straight to
 			// End, with the body lost (the reported CFG symptom).
 			// Copy with children recursively extracted so nested control flow works.
-			// Else (branch else-arm; try catch/finally) is extracted too — a shallow
+			// Else (branch else-arm; try catch/finally) is extracted too. A shallow
 			// struct copy carries Else by value but leaves its nodes un-extracted,
 			// which would strip nested control flow inside an else/catch body.
 			node := shallowCopyWithChildren(c, extractStructuralNodes(c.Children))
@@ -113,7 +113,7 @@ func hasStructuralNodes(children []*ast.Node) bool {
 		switch c.Kind {
 		case ast.NodeBranch, ast.NodeLoop, ast.NodeReturn, ast.NodeEscape,
 			ast.NodeTry:
-			// v25.1: NodeTry counts as structural so a method whose ONLY control
+			// v25.1: NodeTry counts as structural so a method whose only control
 			// flow is a try/catch still routes to buildStructuralCFG (and thus the
 			// try-split) instead of collapsing to a single opaque block.
 			return true

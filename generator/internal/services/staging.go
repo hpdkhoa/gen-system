@@ -1,9 +1,9 @@
-// staging.go — v21: propose-before-write evolve. Runs an evolve plan against
+// staging.go (v21): propose-before-write evolve. Runs an evolve plan against
 // a staging copy of the project (under .gen/staging), produces a file-level
 // diff of staging vs. live, and commits (copy staging→live) or discards on
 // the user's approval. Engine writes are already rootPath-relative
 // (filepath.Join(path, ...)), so pointing RunFromPlan at staging keeps every
-// write inside staging — no engine-internals change required.
+// write inside staging. No engine-internals change is needed.
 package services
 
 import (
@@ -74,7 +74,7 @@ func (s *StagingService) Pending() *StageResult {
 }
 
 // Stage copies the live project into a fresh staging dir, runs the evolve
-// plan there, and computes the diff. It does NOT modify live files.
+// plan there, and computes the diff. It does not modify live files.
 func (s *StagingService) Stage(change string) (*StageResult, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -118,7 +118,7 @@ func (s *StagingService) Stage(change string) (*StageResult, error) {
 	// .gen (same content we just copied) to enumerate entities.
 	ir, err := loadIRAt(s.root)
 	if err != nil || len(ir.Entities) == 0 {
-		return nil, fmt.Errorf("no IR found — run a full build before evolving")
+		return nil, fmt.Errorf("no IR found; run a full build before evolving")
 	}
 	var tasks []planner.Task
 	for _, e := range ir.Entities {
@@ -150,7 +150,7 @@ func (s *StagingService) Stage(change string) (*StageResult, error) {
 		Files:      files,
 	}
 	s.last = res
-	s.emit("green", fmt.Sprintf("Staged — %d files changed, awaiting approval", len(files)))
+	s.emit("green", fmt.Sprintf("Staged: %d files changed, awaiting approval", len(files)))
 	if s.broker != nil {
 		s.broker.Publish("stage_ready", res)
 	}

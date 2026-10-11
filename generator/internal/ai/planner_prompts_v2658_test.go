@@ -1,4 +1,4 @@
-// generator/internal/ai/planner_prompts_v2658_test.go — v26.58.
+// generator/internal/ai/planner_prompts_v2658_test.go (v26.58).
 //
 // D067: ExtractFeatures, PlanArchitecture and PlanEntities sliced
 // resp[start:end+1] when the closing bracket stood before the opening one, so

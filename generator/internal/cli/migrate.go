@@ -89,7 +89,7 @@ func RunMigrate(args []string) {
 		compiler.ToDiffSchema(newIR),
 	)
 
-	// ✅ FIX 7: MIGRATION LINT — safety gate on breaking changes
+	// ✅ FIX 7: MIGRATION LINT. A safety gate on breaking changes.
 	if migration.HasBreakingChanges(cs) && !force {
 		fmt.Println("")
 		fmt.Println("🚨 BREAKING CHANGES DETECTED:")
@@ -98,7 +98,7 @@ func RunMigrate(args []string) {
 				if !fc.Breaking {
 					continue
 				}
-				fmt.Printf("   ⚠️  %s.%s: %s → %s (TYPE CHANGE — data loss risk)\n",
+				fmt.Printf("   ⚠️  %s.%s: %s → %s (TYPE CHANGE: data loss risk)\n",
 					mod.EntityName, fc.Field, fc.OldType, fc.NewType)
 			}
 			for _, f := range mod.Removed { // v26.57 (D005)
@@ -120,7 +120,7 @@ func RunMigrate(args []string) {
 	downSQLs := migration.GenerateRollbackSQL(mig)
 
 	if len(sqls) == 0 {
-		fmt.Println("✔ No migrations needed — schema is up to date")
+		fmt.Println("✔ No migrations needed; the schema is up to date")
 		return
 	}
 
@@ -162,11 +162,11 @@ func RunMigrate(args []string) {
 		if err := compiler.SaveIR(newIR); err != nil {
 			fmt.Println("⚠️  failed to save IR snapshot:", err)
 		}
-		fmt.Printf("✅ Migration %s applied — %d statements\n", version, len(sqls))
+		fmt.Printf("✅ Migration %s applied: %d statements\n", version, len(sqls))
 		// v26.58 (D039): the down SQL was written before the DB_URL check and
 		// before ApplySQL, with both errors dropped, so a dry or failed run
 		// replaced the down SQL of the migration really applied. runRollback
-		// trusts this file, so write it only here, after a real apply, and say
+		// relies on this file, so write it only here, after a real apply, and say
 		// "saved" only when the write worked.
 		if err := saveLastDown(downSQLs); err != nil {
 			fmt.Println("⚠️  failed to save down SQL to .gen/last_down.sql:", err)

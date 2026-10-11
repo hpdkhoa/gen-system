@@ -1,4 +1,4 @@
-// context/cobol_wiring_test.go — v19.5: verifies LoadContextWithOpts
+// context/cobol_wiring_test.go (v19.5): verifies LoadContextWithOpts
 // resolves COBOL copybooks via opts.CopybookPath and parses .cob/.cbl/.cpy
 // files into the symbol index.
 package context
@@ -51,7 +51,7 @@ func TestLoadContext_CobolFilesAreParsed(t *testing.T) {
 
 	ctx := LoadContext(root)
 
-	// Without copybook configuration, COPY CUSTREC is unresolved — but
+	// Without copybook configuration, COPY CUSTREC is unresolved, but
 	// the program itself is still parsed and its paragraphs indexed.
 	syms := ctx.Index.ByName("MAIN-PARA")
 	if len(syms) == 0 {

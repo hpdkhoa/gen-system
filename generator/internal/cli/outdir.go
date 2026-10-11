@@ -1,11 +1,11 @@
-// generator/internal/cli/outdir.go — v23.19: unified, safe output-directory
+// generator/internal/cli/outdir.go, v23.19: unified, safe output-directory
 // policy for every generating command. Core rules (per project instruction):
-//  1. NEVER write generated output into the gen-system source tree or silently
+//  1. Never write generated output into the gen-system source tree or silently
 //     into the current directory. New generation goes to a clear, reviewable
-//     folder so a human can inspect it before trusting it.
-//  2. EVOLVING existing code stages changes to a separate review dir; the user
+//     folder so a human can inspect it before using it.
+//  2. Evolving existing code stages changes to a separate review dir; the user
 //     applies them to the real source only after reviewing.
-//  3. NO overwrite without notice: if the resolved output dir already contains a
+//  3. No overwrite without notice: if the resolved output dir already contains a
 //     generated app, warn and require confirmation (or --force) before writing.
 package cli
 
@@ -43,7 +43,7 @@ func HasFlag(name string) bool {
 }
 
 // looksLikeGenSourceTree reports whether dir is (or is inside) the gen-system
-// source checkout — the one place generated output must never land. Heuristic:
+// source checkout, the one place generated output must never land. Heuristic:
 // a go.mod whose module is gen-system, or a generator/internal directory.
 func looksLikeGenSourceTree(dir string) bool {
 	abs, err := filepath.Abs(dir)
@@ -104,7 +104,7 @@ type OutDirOptions struct {
 // agent should write into, or ("", false) if the command must abort.
 //
 // Policy:
-//   - If --out names the gen-system source tree → REFUSE (forces a real choice).
+//   - If --out names the gen-system source tree → refuse (forces a real choice).
 //   - If no --out was given → use ./<DefaultName>, never the bare cwd, and never
 //     the source tree; tell the user exactly where output is going.
 //   - If the resolved dir already holds a generated app → warn and require
@@ -149,7 +149,7 @@ func ResolveOutDir(o OutDirOptions) (string, bool) {
 	return dir, true
 }
 
-// confirm asks a yes/no question on stdin. Defaults to NO on EOF/empty so a
+// confirm asks a yes/no question on stdin. Defaults to no on EOF/empty so a
 // non-interactive run never silently overwrites.
 func confirm(prompt string) bool {
 	fmt.Printf("%s [y/N]: ", prompt)
@@ -163,7 +163,7 @@ func confirm(prompt string) bool {
 }
 
 // ResolveEvolveTarget implements the evolve safety rule: evolving existing code
-// must NOT overwrite the source in place unless the user explicitly opts in with
+// must not overwrite the source in place unless the user explicitly opts in with
 // --apply. By default it stages into a review directory (a copy of the target),
 // so the user can diff and verify before applying.
 //
@@ -184,7 +184,7 @@ func ResolveEvolveTarget(target string) (string, bool, bool) {
 	reviewDir := GetFlag("review-dir", "")
 
 	if apply {
-		// In-place evolution — explicit opt-in. Caller already loaded the
+		// In-place evolution: explicit opt-in. Caller already loaded the
 		// target; we only confirm the destructive intent unless --force/--yes.
 		abs, _ := filepath.Abs(target)
 		if !HasFlag("force") && !HasFlag("yes") {

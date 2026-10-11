@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-// ExtractFunction returns ONLY the function BODY (without signature)
+// ExtractFunction returns only the function body (without signature)
 func ExtractFunction(path, funcName string) string {
 	fset := token.NewFileSet()
 

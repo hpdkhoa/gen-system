@@ -1,4 +1,4 @@
-// generator/internal/cli/outdir_test.go — v23.19: lock in the output-safety
+// generator/internal/cli/outdir_test.go, v23.19: lock in the output-safety
 // policy so a refactor can't silently let generation overwrite the source tree
 // or an existing app.
 package cli
@@ -30,7 +30,7 @@ func TestLooksLikeGenSourceTree(t *testing.T) {
 	if !looksLikeGenSourceTree(eng) {
 		t.Error("expected generator/internal/engine marker to be detected")
 	}
-	// An ordinary app dir is NOT the source tree.
+	// An ordinary app dir is not the source tree.
 	app := t.TempDir()
 	os.WriteFile(filepath.Join(app, "go.mod"), []byte("module app\n\ngo 1.22\n"), 0o644)
 	if looksLikeGenSourceTree(app) {

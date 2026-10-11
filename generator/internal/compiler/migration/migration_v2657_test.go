@@ -1,4 +1,4 @@
-// migration_v2657_test.go — v26.57: the migration gate and the CREATE TABLE step.
+// migration_v2657_test.go (v26.57): the migration gate and the CREATE TABLE step.
 //
 // D005: HasBreakingChanges looked only at type changes, so a removed entity
 // produced "DROP TABLE IF EXISTS Post;" without the --force gate, and the down

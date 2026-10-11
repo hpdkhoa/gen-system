@@ -1,9 +1,9 @@
-// generator/internal/cli/evolve_understand.go — v23.11 (Phase 3): the
+// generator/internal/cli/evolve_understand.go, v23.11 (Phase 3): the
 // Understand→Generate loop. `gen evolve <path> --schema f --understand` first
-// reads the EXISTING generated code through gen-system's own compiler
+// reads the existing generated code through gen-system's own compiler
 // frontends (context.LoadContext → resolved symbol index + call graph + CFGs),
 // then uses that structural knowledge to widen evolution: any entity whose
-// code is in the IMPACT SET of a schema-changed entity is also regenerated, so
+// code is in the impact set of a schema-changed entity is also regenerated, so
 // evolution is informed by what already exists instead of blindly diffing
 // schema-to-schema.
 //
@@ -64,7 +64,7 @@ func EvolveWithUnderstanding() {
 		return
 	}
 
-	// ── 1. UNDERSTAND: read the existing code at compiler accuracy ──
+	// ── 1. Understand: read the existing code at compiler accuracy ──
 	fmt.Println("🔬 Understanding existing code at", path, "…")
 	ctx := context.LoadContextWithOpts(path, loadOpts()) // v26.34: stdlib auto detected
 	resolvedPct, nSyms, nEdges := resolutionStats(ctx.Index)
@@ -100,10 +100,10 @@ func EvolveWithUnderstanding() {
 		changedSet[name] = true
 	}
 
-	// ── 3. WIDEN by impact: anything that structurally depends on a ──
-	//      changed entity must be regenerated too. This is the step that
-	//      only the understanding pass can provide — schema-to-schema diff
-	//      alone cannot see code-level dependencies.
+	// ── 3. Widen by impact: anything that structurally depends on a ──
+	//      changed entity must be regenerated too. Only the understanding
+	//      pass can provide this step. A schema-to-schema diff alone
+	//      cannot see code-level dependencies.
 	directly := sortedKeys(changedSet)
 	impacted := impactedEntities(&ctx, sfile.Entities, changedSet)
 	added := 0
@@ -124,7 +124,7 @@ func EvolveWithUnderstanding() {
 	// ── 4. build the task graph for the widened set & run ───────────
 	tasks := planner.TaskGraphDynamic(sfile, writeDir, changedSet)
 	if len(tasks) == 0 {
-		fmt.Println("✅ No changes detected — nothing to evolve")
+		fmt.Println("✅ No changes detected; nothing to evolve")
 		return
 	}
 
@@ -167,7 +167,7 @@ func EvolveWithUnderstanding() {
 // ─────────────────────────────────────────────────────────────
 
 // resolutionStats computes the call-edge resolution percentage from a loaded
-// symbol index — the headline "how well do we understand this code" number.
+// symbol index. It is the headline "how well do we understand this code" number.
 func resolutionStats(idx *symbols.Index) (pct float64, nSyms, nEdges int) {
 	if idx == nil {
 		return 0, 0, 0
@@ -262,7 +262,7 @@ func changedSetOf(names []string) map[string]bool {
 }
 
 // setDiff returns a−b. (v23.12: renamed from diff to avoid collision with the
-// compiler/diff package imported elsewhere in package cli — pre-existing v23.11 bug.)
+// compiler/diff package imported elsewhere in package cli; a pre-existing v23.11 bug.)
 func setDiff(a, b map[string]bool) map[string]bool {
 	out := map[string]bool{}
 	for k := range a {

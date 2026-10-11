@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# bench/run-stream.sh — WP2: time-to-first-token and total latency, stream on
+# bench/run-stream.sh (WP2): time-to-first-token and total latency, stream on
 # vs off, same prompt, n runs each (genbench stream suite, v26.24). Fills the
 # streaming table.
 set -euo pipefail

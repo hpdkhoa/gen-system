@@ -1,4 +1,4 @@
-// cmd/bench/main.go — gen-system v15 capability benchmark
+// cmd/bench/main.go: gen-system v15 capability benchmark
 // Exercises every engine layer (parse, symbol index, CFG, flow, effects)
 // against synthetic and self-hosted source; reports real latency + correctness.
 package main
@@ -53,7 +53,7 @@ func main() {
 		projectRoot = os.Args[1]
 	}
 
-	fmt.Println("gen-system v15 — capability benchmark")
+	fmt.Println("gen-system v15 capability benchmark")
 	fmt.Println(strings.Repeat("─", 60))
 
 	suites := []func() Result{
@@ -140,7 +140,7 @@ func benchFrontendRegistry() Result {
 		})
 	}
 
-	// Unknown extension must return nil — not an error.
+	// An unknown extension must return nil, not an error.
 	fe := ast.ForFile("readme.md")
 	cases = append(cases, CaseResult{
 		Name: "ForFile(.md) = nil", Pass: fe == nil,
@@ -325,7 +325,7 @@ func benchTSParser() Result {
 			"export const getUser = (id: number) => { return id }\n",
 			func(m *ast.Module) (bool, string) {
 				for _, n := range m.Nodes {
-					// v18.3: ast.NodeVar does not exist — the constant is NodeVariable.
+					// v18.3: ast.NodeVar does not exist. The constant is NodeVariable.
 					if (n.Kind == ast.NodeFunction || n.Kind == ast.NodeVariable) && strings.Contains(n.Name, "getUser") {
 						return true, ""
 					}
@@ -385,7 +385,7 @@ func benchPythonParser() Result {
 	}
 
 	avail := fe != nil && fe.Available()
-	availNote := "python3/python not found in PATH — parser unavailable (expected in offline env)"
+	availNote := "python3/python not found in PATH; parser unavailable (expected in an offline env)"
 	if avail {
 		availNote = "runtime available"
 	}
@@ -855,7 +855,7 @@ func benchCacheRoundTrip() Result {
 			Micros: warm.Microseconds(),
 		})
 
-		// Modify file — cache should re-parse.
+		// Modify the file. The cache should parse it again.
 		newSrc := []byte("package p\nfunc Hello() string { return \"updated\" }\n")
 		_ = os.WriteFile(path, newSrc, 0644)
 
@@ -931,7 +931,7 @@ func benchChecksumStability() Result {
 func benchUnknownNodePolicy() Result {
 	start := time.Now()
 
-	// CA Gen with unrecognised construct — must produce NodeUnknown, not error.
+	// CA Gen with an unrecognised construct must produce NodeUnknown, not an error.
 	fe := ast.ForLanguage(ast.LangCAGen)
 	src := "PROCEDURE UNKNOWN-CONSTRUCT\n  ??? MYSTERIOUS KEYWORD ???\nEND\n"
 

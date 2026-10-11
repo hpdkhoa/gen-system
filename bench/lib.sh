@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# bench/lib.sh — shared helpers for the WP1–WP3 benchmark drivers.
+# bench/lib.sh: shared helpers for the WP1 to WP3 benchmark drivers.
 # Source this; do not run it.
 
 BENCH_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

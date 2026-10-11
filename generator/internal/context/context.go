@@ -1,22 +1,22 @@
-// context.go — v25.6.1 (freeze fix): shouldSkip now excludes generated sibling
-// layer dirs (frontend/, mobile/, db/migrations/, design-manifest/) so LOADING A
-// GENERATED PROJECT ROOT no longer walks into the dense generated web/mobile
-// TS/JSX trees and parses them synchronously inside /api/project/load — which
+// context.go (v25.6.1, freeze fix): shouldSkip now excludes generated sibling
+// layer dirs (frontend/, mobile/, db/migrations/, design-manifest/). So loading a
+// generated project root no longer walks into the dense generated web/mobile
+// TS/JSX trees and parses them synchronously inside /api/project/load, which
 // froze the Studio. Backend Go + legacy source at the root still parse.
 // v24b-fix: collectModuleImports uses the genast alias (this file binds `ast` to go/ast).
-// context.go — v23.32 (stdlib provenance): LoadContextOpts gains StdlibRoots;
+// context.go (v23.32, stdlib provenance): LoadContextOpts gains StdlibRoots;
 // after the project walk and before ResolveAll, configured stdlib trees are
 // parsed read-only and added with ProvStdlib so project→stdlib call edges
-// resolve. Language-agnostic — selection is by file extension, like project
+// resolve. Language-agnostic: selection is by file extension, like project
 // source. Prior: v23.12 (Phase 4): isSourceFile recognises .java so LoadContext discovers Java sources.
 // v19.8 (resolve-coldload-edges): call ctx.Index.ResolveAll() after the
 // parse walk completes. Without this every CallEdge produced by the cold
-// load had an empty CalleeID — `genbench resolution` reported 0% recall
+// load had an empty CalleeID, and `genbench resolution` reported 0% recall
 // on a codebase the engine was otherwise parsing cleanly. UpdateFile
 // (watcher path) already resolved per-call, so the bug only manifested
 // on first load; the new method is also exposed publicly as ResolveAll
 // for any future incremental-batch builder.
-// v21.1: shouldSkip now excludes ALL of .gen (was only .gen/snapshots + .gen/entities) so the engine never parses its own ast_cache/staging as source — fixes phantom beliefs from an empty root.
+// v21.1: shouldSkip now excludes all of .gen (was only .gen/snapshots + .gen/entities) so the engine never parses its own ast_cache/staging as source. This fixes phantom beliefs from an empty root.
 // Patched in Phase A: added structured trace logging in LoadContext.
 // Phase markers (load → parse → index → cfg → effects) emit at INFO.
 // Per-file parse failures and skipped files emit at TRACE/ERROR.
@@ -32,12 +32,12 @@
 package context
 
 // ─────────────────────────────────────────────────────────────
-// context.go — runtime project context (v14 base + v15 extensions)
+// context.go: runtime project context (v14 base + v15 extensions)
 //
 // v15 additions (marked with "v15"):
-//   • Context.Index  *symbols.Index        — cross-file symbol database
-//   • Context.CFGs   map[string]flow.CFGSet — per-file control-flow graphs
-//   • Context.Effects map[string]*flow.FuncEffects — inferred side effects
+//   • Context.Index  *symbols.Index        : cross-file symbol database
+//   • Context.CFGs   map[string]flow.CFGSet : per-file control-flow graphs
+//   • Context.Effects map[string]*flow.FuncEffects : inferred side effects
 //   • LoadContext now parses all four supported languages (Go, TS, Python, CA Gen)
 //     via ast.DefaultCache.ParseOrCache and builds the symbol index.
 //   • buildEntityUsage now queries Index.ByName instead of strings.Contains.
@@ -68,7 +68,7 @@ import (
 )
 
 // Context captures the full runtime picture of the project.
-// v3: deep cross-file awareness — import graph, entity usage,
+// v3: deep cross-file awareness: import graph, entity usage,
 //
 //	dependency map, and architecture summary for AI prompts.
 //
@@ -129,20 +129,20 @@ type LoadContextOpts struct {
 
 	// ── v23.32 (stdlib provenance) ────────────────────────────
 	// StdlibRoots are additional directories parsed read-only and tagged
-	// ProvStdlib. They are NOT walked as project source: their symbols are
+	// ProvStdlib. They are not walked as project source: their symbols are
 	// resolvable call targets (so a project call into the stdlib links), but
 	// they never count toward "internal" recall and the Understand UI hides
 	// them by default. Each root is parsed with the frontend its file
 	// extensions select, exactly like project source. Language-agnostic:
 	// the loader does not care whether a root is Go's GOROOT/src or a Java
-	// signature tree — only the file extensions matter.
+	// signature tree. Only the file extensions matter.
 	StdlibRoots []StdlibRoot
 
 	// ── v26.5 (multi-language stdlib) ─────────────────────────
-	// StdlibAuto asks the loader to DETECT the stdlib roots from the project
+	// StdlibAuto asks the loader to detect the stdlib roots from the project
 	// itself (see DetectStdlibRoots): every language actually present in the
 	// index gets its runtime attached, if one can be located. Detected roots
-	// are appended to any explicit StdlibRoots — explicit always wins, auto
+	// are appended to any explicit StdlibRoots. Explicit always wins, auto
 	// only fills gaps. Safe without a confirmation prompt because every
 	// detected root is AutoScope: the loader ingests only the packages the
 	// project genuinely imports, so a root the project turns out not to use
@@ -158,7 +158,7 @@ type StdlibRoot struct {
 
 	// ImportScope restricts ingest to the subpackages the project actually
 	// imports (each entry maps to a subdirectory of Path). Empty means
-	// whole-tree ingest — heavy, explicit opt-in only. The loader populates
+	// whole-tree ingest, which is heavy and explicit opt-in only. The loader populates
 	// this from the project's import graph when the caller leaves it nil and
 	// AutoScope is true.
 	ImportScope []string
@@ -176,8 +176,8 @@ type StdlibRoot struct {
 	Synthetic bool
 
 	// autoDetected marks a root that came from DetectStdlibRoots rather than an
-	// explicit --stdlib entry. Unexported: it is purely a REPORTING flag, never a
-	// behaviour switch — an auto root and an explicit root with the same
+	// explicit --stdlib entry. Unexported: it is only a reporting flag, never a
+	// behaviour switch. An auto root and an explicit root with the same
 	// Path/Lang are ingested identically.
 	autoDetected bool
 }
@@ -281,7 +281,7 @@ func LoadContextWithOpts(root string, opts LoadContextOpts) Context {
 			return nil
 		}
 		if m == nil {
-			// No frontend for this extension (e.g. .sql, .json) — fine.
+			// No frontend for this extension (e.g. .sql, .json). That is fine.
 			filesNoFrontend++
 			return nil
 		}
@@ -289,10 +289,10 @@ func LoadContextWithOpts(root string, opts LoadContextOpts) Context {
 		ctx.Index.AddModule(m)
 		filesParsed++
 		// v24: populate ImportGraph from the unified Module's NodeImport children
-		// so EVERY language contributes its imports — the Go-specific go/ast path
+		// so every language contributes its imports. The Go-specific go/ast path
 		// (buildImportGraph) only covered Go. Without this, Java/TS/Python imports
 		// never reached ImportGraph, so stdlib AutoScope collected nothing and
-		// fell back to walking the ENTIRE stdlib tree (the "gen-server never
+		// fell back to walking the entire stdlib tree (the "gen-server never
 		// starts, parses all ~6000 JDK files" hang). Import paths feed
 		// resolveStdlibScope → only the referenced packages are ingested.
 		if imps := collectModuleImports(m); len(imps) > 0 {
@@ -320,14 +320,14 @@ func LoadContextWithOpts(root string, opts LoadContextOpts) Context {
 
 	// ── v23.32: read-only stdlib ingest ───────────────────────
 	// Parse each configured stdlib root and add its modules tagged
-	// ProvStdlib. Done AFTER the project walk (so project symbols win on
-	// any ID collision via removeFileLocked semantics — though stdlib paths
-	// never collide with project paths in practice) and BEFORE ResolveAll
+	// ProvStdlib. Done after the project walk (so project symbols win on
+	// any ID collision via removeFileLocked semantics, though stdlib paths
+	// never collide with project paths in practice) and before ResolveAll
 	// (so the global sweep links project→stdlib call edges).
 	//
-	// v26.5: the root set may now be DETECTED from the project rather than
+	// v26.5: the root set may now be detected from the project rather than
 	// spelled out. Detection runs here, after the project walk, precisely
-	// because it keys off the languages present in the index — which only
+	// because it keys off the languages present in the index, which only
 	// exist once the walk is done. Explicit roots always win: a detected root
 	// is dropped when an explicit root already covers the same language, so
 	// `--stdlib java=/my/jdk` is never second-guessed by the detector.
@@ -361,9 +361,9 @@ func LoadContextWithOpts(root string, opts LoadContextOpts) Context {
 		// locate a tree" entries the detector already recorded.
 		report.Roots = append(report.Roots, sp.roots...)
 		// v26.6: warn about a root that physically contains more than one
-		// language. One root maps the project's imports with ONE convention
-		// against ONE directory, so a mixed tree resolves only the language that
-		// matches — the rest silently miss. Give the exact split-into-per-root
+		// language. One root maps the project's imports with one convention
+		// against one directory, so a mixed tree resolves only the language that
+		// matches. The rest silently miss. Give the exact split-into-per-root
 		// fix. Detected roots are single-language by construction, so this only
 		// ever fires on an explicit --stdlib path.
 		report.Warnings = append(report.Warnings, mixedLanguageWarnings(sp.roots)...)
@@ -376,7 +376,7 @@ func LoadContextWithOpts(root string, opts LoadContextOpts) Context {
 	}
 	ctx.StdlibReport = report
 
-	// v19.8: AddModule appends CallEdges with empty CalleeID — call
+	// v19.8: AddModule appends CallEdges with empty CalleeID. Call
 	// targets defined in files parsed later can only be resolved once
 	// the full symbol set is in. Do the global sweep now, after every
 	// file has contributed its symbols.
@@ -395,7 +395,7 @@ func LoadContextWithOpts(root string, opts LoadContextOpts) Context {
 }
 
 // ─────────────────────────────────────────────────────────────
-// LoadContextWithSkill — skill-file-seeded context (TASK 4 v19)
+// LoadContextWithSkill: skill-file-seeded context (TASK 4 v19)
 // ─────────────────────────────────────────────────────────────
 
 // LoadContextWithSkill loads a Context seeded from a .skill file rather
@@ -412,10 +412,10 @@ func LoadContextWithOpts(root string, opts LoadContextOpts) Context {
 //   - Files is empty (source text is not loaded).
 //   - ArchSummary is built from the Index as usual.
 //
-// The round-trip guarantee: a .skill file written from project state P
+// Round trip: a .skill file written from project state P
 // and loaded here will reproduce the same Index symbols as parsing P
 // from source (same IDs, names, layers, effects). CFG topology is not
-// round-tripped — that requires a source parse.
+// round-tripped; that requires a source parse.
 func LoadContextWithSkill(root, skillPath string) Context {
 	if skillPath == "" {
 		return LoadContext(root)
@@ -423,7 +423,7 @@ func LoadContextWithSkill(root, skillPath string) Context {
 
 	sf, err := objgraph.ReadSkillFile(skillPath)
 	if err != nil {
-		// File missing or malformed — fall back to full parse.
+		// File missing or malformed: fall back to full parse.
 		return LoadContext(root)
 	}
 
@@ -630,7 +630,7 @@ func (c *Context) FindReferences(name string) []string {
 }
 
 // ImpactSet returns the transitive set of files that could break if
-// the named symbol changes — i.e. all files containing its callers.
+// the named symbol changes, i.e. all files containing its callers.
 func (c *Context) ImpactSet(symbolID string) []string {
 	if c.Index == nil {
 		return nil
@@ -659,7 +659,7 @@ func shouldSkip(rel string) bool {
 		// v25.6.1: a generated app writes these sibling layer dirs next to the
 		// backend. Loading a *generated* project root previously walked into the
 		// dense generated frontend/mobile TS/JSX trees and parsed them
-		// synchronously inside the /api/project/load handler — with no timeout —
+		// synchronously inside the /api/project/load handler (with no timeout),
 		// which froze the Studio. These are generated artifacts, not legacy
 		// source the Understand track exists to analyse, so skip them. Backend
 		// Go + any legacy languages at the root are still parsed.
@@ -750,7 +750,7 @@ func appendUnique(s []string, v string) []string {
 }
 
 // collectModuleImports returns the import paths declared by a unified Module,
-// reading NodeImport children (ImportPath). v24: language-agnostic — Java/TS/
+// reading NodeImport children (ImportPath). v24: language-agnostic. Java/TS/
 // Python frontends emit imports as NodeImport nodes, which the Go-specific
 // go/ast import collector never saw. Feeds ImportGraph so stdlib AutoScope only
 // ingests referenced packages (fixes the whole-JDK-tree ingest hang).
@@ -783,7 +783,7 @@ func collectModuleImports(m *genast.Module) []string {
 }
 
 // relForImportGraph returns a stable key for a file in ImportGraph. The scope
-// resolver reads only the VALUES (import lists), so the key form is not
+// resolver reads only the values (import lists), so the key form is not
 // load-bearing; use the path relative to root when possible, else the abs path.
 func relForImportGraph(root, file string) string {
 	if rel, err := filepath.Rel(root, file); err == nil {

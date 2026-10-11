@@ -1,8 +1,8 @@
-// generator/internal/ai/continue_prompt.go — v23.24 (task 4A): the model
-// contract for `gen continue`. Given a free-text idea AND a compact summary of
+// generator/internal/ai/continue_prompt.go, v23.24 (task 4A): the model
+// contract for `gen continue`. Given a free-text idea and a compact summary of
 // what the existing codebase already contains (entities, their fields, and the
-// service operations already implemented), the model proposes a DELTA — only
-// what should be ADDED or REMOVED — tagged per item so the deterministic merge
+// service operations already implemented), the model proposes a delta: only
+// what should be added or removed. It tags each item so the deterministic merge
 // layer can apply it precisely:
 //
 //	NEW       <Entity>{fields}    → a brand-new entity (additive)
@@ -11,7 +11,7 @@
 //	REMOVE    <Entity>            → drop an existing entity (destructive, gated)
 //	REMOVE    <Entity>.<field>    → drop an existing field (destructive, gated)
 //
-// The model is explicitly told what already exists so it does NOT re-propose an
+// The model is explicitly told what already exists so it does not re-propose an
 // entity/field that is already present. The deterministic post-filter in
 // planner_v2 is the safety net if it does anyway.
 //

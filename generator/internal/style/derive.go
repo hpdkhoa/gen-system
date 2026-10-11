@@ -1,4 +1,4 @@
-// generator/internal/style/derive.go — v26.33: build a profile from what a
+// generator/internal/style/derive.go (v26.33): build a profile from what a
 // team's code already does. This is the "graph as retrieval" half of the
 // feature: instead of asking a model to describe the house style, the
 // Understand index is measured, and every rule that comes out carries the

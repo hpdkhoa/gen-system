@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# gen-verify.sh — gen-system v23.26 end-to-end verification + benchmark harness.
+# gen-verify.sh: gen-system v23.26 end-to-end verification + benchmark harness.
 #
 # v23.25 (task D) changes vs the v23.24 script:
 #   • Step 05 (continue) now FAILS LOUDLY when the continue TASK reports a
 #     failure ("❌ N failed" with N>0, or "N failed" in the agent summary),
 #     instead of marking PASS whenever the staged app merely builds. The bare
-#     success line "✅ 17 done  ❌ 0 failed" is NOT treated as a failure.
+#     success line "✅ 17 done  ❌ 0 failed" is not treated as a failure.
 #   • Step 02 (benchmark) now inspects the "TOTAL: P pass, F fail" line and
 #     fails when F exceeds the known-pre-existing count (the 3 safety
 #     TestValidateBuild_* harness fails), instead of passing just because a
@@ -16,11 +16,11 @@
 # Run this on YOUR box (the one with Ollama + a GPU).
 #
 #   Usage:
-#     ./gen-verify.sh [--root <existing-codebase>] [--copybooks <dir>]
+#     ./scripts/legacy/gen-verify.sh [--root <existing-codebase>] [--copybooks <dir>]
 #                     [--no-ollama] [--plan-model M] [--code-model M]
 #                     [--baseline-check] [--out-dir <dir>]
 #
-# Exit code is 0 iff every REQUIRED step passed.
+# Exit code is 0 iff every required step passed.
 
 set -uo pipefail
 
@@ -36,7 +36,7 @@ CODE_MODEL="${OLLAMA_MODEL_CODE:-qwen2.5-coder:14b}"
 OLLAMA_HOST_DEFAULT="${OLLAMA_HOST:-http://localhost:11434}"
 VERIFY_BASE=""
 
-# Known pre-existing benchmark failures that are NOT ours. As of v23.26 the
+# Known pre-existing benchmark failures that are not ours. As of v23.26 the
 # postgres_generation fail is FIXED (FK column resolution + store-emit fidelity),
 # so genbench `all` is expected fully green: default 0. Override if your tree
 # still carries a known fail.
@@ -57,19 +57,14 @@ while [ $# -gt 0 ]; do
 done
 
 # Resolve repo root = dir containing go.mod with "module gen-system".
-REPO=""
-for d in . .. ./gen-system-v23.25 ./gen-system-v23.24 ./*/ ../*/; do
-  if [ -f "$d/go.mod" ] && grep -q "module gen-system" "$d/go.mod" 2>/dev/null; then
-    REPO="$(cd "$d" && pwd)"; break
-  fi
-done
-if [ -z "$REPO" ]; then
-  echo "❌ Could not find the gen-system source (go.mod with 'module gen-system')."
-  echo "   Run this from the repo root or its parent."
+# This script lives in scripts/legacy/, so the repository root is two folders up.
+REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+if ! grep -q "^module github.com/hpdkhoa/gen-system$" "$REPO/go.mod" 2>/dev/null; then
+  echo "❌ $REPO is not the gen-system source (no go.mod with its module path)."
   exit 2
 fi
 
-# Place scratch + evidence OUTSIDE the source tree (v23.19 source-tree guard).
+# Place scratch + evidence outside the source tree (v23.19 source-tree guard).
 BASE="${VERIFY_BASE:-$(dirname "$REPO")/gen-verify-run}"
 rm -rf "$BASE"; mkdir -p "$BASE"
 OUT="$BASE/gen-verify-out"
@@ -90,7 +85,7 @@ no()   { note "❌ FAIL  $*"; fail=$((fail+1)); }
 sk()   { note "⏭  SKIP  $*"; skip=$((skip+1)); }
 
 # ─────────────────────────────────────────────────────────────
-# 00 — environment
+# 00: environment
 # ─────────────────────────────────────────────────────────────
 step "00 environment"
 {
@@ -115,7 +110,7 @@ if [ "$USE_OLLAMA" = 1 ] && curl -fsS "$OLLAMA_HOST_DEFAULT/api/tags" >/dev/null
 fi
 
 # ─────────────────────────────────────────────────────────────
-# 01 — build all binaries
+# 01: build all binaries
 # ─────────────────────────────────────────────────────────────
 step "01 build"
 (
@@ -136,7 +131,7 @@ fi
 GEN="$WORK/gen"; GENBENCH="$WORK/genbench"
 
 # ─────────────────────────────────────────────────────────────
-# 02 — benchmark (the fundable number)
+# 02: benchmark (the fundable number)
 # ─────────────────────────────────────────────────────────────
 step "02 benchmark"
 BENCH_ROOT="$ROOT"
@@ -160,7 +155,7 @@ else
 fi
 "$GENBENCH" "${BENCH_ARGS[@]}" > "$OUT/02_benchmark.txt" 2>&1
 
-# D: don't pass merely because a JSON was written — read the TOTAL line and
+# D: a written JSON alone does not pass. Read the TOTAL line and
 # fail when fail-count exceeds the known pre-existing safety harness fails.
 BENCH_TOTAL_LINE="$(grep -oE 'TOTAL: [0-9]+ pass, [0-9]+ fail' "$OUT/02_benchmark.txt" | tail -1)"
 BENCH_FAILS="$(echo "$BENCH_TOTAL_LINE" | grep -oE '[0-9]+ fail' | grep -oE '[0-9]+')"
@@ -180,7 +175,7 @@ if [ "$BASELINE_CHECK" = 1 ] && [ -n "$ROOT" ]; then
   step "02b baseline regression (frozen COBOL baseline)"
   "$GENBENCH" regression --baseline --new "$OUT/02_benchmark.json" --root "$REPO" \
       > "$OUT/02b_baseline.txt" 2>&1
-  if grep -q "OK — no metric regressed" "$OUT/02b_baseline.txt"; then
+  if grep -q "OK: no metric regressed" "$OUT/02b_baseline.txt"; then
     ok "baseline — fresh run matches frozen baseline"
   else
     no "baseline — drift vs frozen baseline (see 02b_baseline.txt)"
@@ -189,7 +184,7 @@ if [ "$BASELINE_CHECK" = 1 ] && [ -n "$ROOT" ]; then
 fi
 
 # ─────────────────────────────────────────────────────────────
-# 03 — generate an app WITH real business logic (the scenario)
+# 03: generate an app with real business logic (the scenario)
 # ─────────────────────────────────────────────────────────────
 step "03 generate (orders/products scenario)"
 IDEA='An orders app. An Order has a total and a status. Customers can check out an order (only if it has a total; mark it paid) and apply a discount percentage to an unpaid order. A Product has a name and stock; staff can adjust stock up or down but it can never go negative.'
@@ -223,7 +218,7 @@ else
 fi
 
 # ─────────────────────────────────────────────────────────────
-# 04 — run it and prove the business rules over HTTP
+# 04: run it and prove the business rules over HTTP
 # ─────────────────────────────────────────────────────────────
 step "04 run + curl"
 if [ -f "$GENDIR/backend/main.go" ]; then
@@ -302,7 +297,7 @@ else
 fi
 
 # ─────────────────────────────────────────────────────────────
-# 05 — CONTINUE: add an entity to the generated app (v23.24)
+# 05: continue step, add an entity to the generated app (v23.24)
 # ─────────────────────────────────────────────────────────────
 step "05 continue (add Customer to the generated app)"
 if [ -f "$GENDIR/backend/main.go" ]; then
@@ -322,8 +317,8 @@ JSON
   fi
 
   # D: the continue TASK can report failed ops while the scaffold still
-  # compiles. Scan the task log for a REAL failure BEFORE trusting the build.
-  # The success summary is "✅ N done  ❌ 0 failed" — so a bare ❌ is NOT a
+  # compiles. Scan the task log for a real failure before using the build result.
+  # The success summary is "✅ N done  ❌ 0 failed", so a bare ❌ is not a
   # failure; only "❌ <nonzero>" or "<nonzero> failed" is.
   CONT_FAIL=0
   if grep -qE '❌ [1-9]' "$OUT/05_continue.log"; then CONT_FAIL=1; fi
@@ -355,7 +350,7 @@ else
 fi
 
 # ─────────────────────────────────────────────────────────────
-# 06 — determinism (the offline promise) — model-dependent
+# 06: determinism (the offline claim); depends on the model
 # ─────────────────────────────────────────────────────────────
 step "06 determinism"
 if [ "$MODEL_OK" = 1 ]; then

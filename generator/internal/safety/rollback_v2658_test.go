@@ -1,4 +1,4 @@
-// rollback_v2658_test.go — v26.58.
+// rollback_v2658_test.go (v26.58).
 //
 // D099: RestoreSnapshot copied the snapshot files back but never listed root,
 // so files the failed run created stayed. RunFromPlan then printed "Rolled back

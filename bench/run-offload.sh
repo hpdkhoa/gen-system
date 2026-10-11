@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# bench/run-offload.sh — WP2: tokens/sec and peak VRAM vs GPU offload layers.
+# bench/run-offload.sh (WP2): tokens/sec and peak VRAM vs GPU offload layers.
 #
 # Loops OLLAMA_NUM_GPU over STEPS (default: 20 30 40) plus one run with the
 # knob unset (Ollama's own default = all layers that fit), running

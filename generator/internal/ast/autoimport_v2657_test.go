@@ -1,4 +1,4 @@
-// autoimport_v2657_test.go — v26.57 (D012): AutoResolveImports must add each
+// autoimport_v2657_test.go (v26.57, D012): AutoResolveImports must add each
 // missing import once, with one pair of quote marks. The table stored quoted
 // paths and EnsureImport quoted them again, so a file got the line
 // import ""fmt"" and no longer parsed; with a parenthesized block the write

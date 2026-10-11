@@ -1,4 +1,4 @@
-// diff_test.go — TASK 3 (v19): TestDiff_NoChanges tightened to assert
+// diff_test.go (TASK 3, v19): TestDiff_NoChanges tightened to assert
 // len(cs.Modified)==0 now that the ghost-entry bug is fixed. Regression
 // test added for "one field added, other entities unchanged".
 
@@ -164,7 +164,7 @@ func TestDiff_OneFieldAdded_OtherEntitiesUnchanged(t *testing.T) {
 	if len(cs.Modified[0].Added) != 1 || cs.Modified[0].Added[0].Name != "name" {
 		t.Errorf("User should have 'name' in Added; got %+v", cs.Modified[0].Added)
 	}
-	// Post and Comment must NOT be in Modified.
+	// Post and Comment must not be in Modified.
 	if containsModified(cs, "Post") {
 		t.Error("Post is unchanged; must not appear in Modified")
 	}
@@ -175,7 +175,7 @@ func TestDiff_OneFieldAdded_OtherEntitiesUnchanged(t *testing.T) {
 
 // TestDiff_MigrationUnaffected_ByFix verifies BuildMigration behaviour
 // is identical before and after the fix for the common "one change" case.
-// (Downstream audit — no code change needed in migration/)
+// (Downstream audit: no code change needed in migration/)
 func TestDiff_MigrationDoesNotProduceEmptySteps(t *testing.T) {
 	// Two identical entities + one that gained a field.
 	old := ir(
@@ -195,7 +195,7 @@ func TestDiff_MigrationDoesNotProduceEmptySteps(t *testing.T) {
 	if len(cs.Modified[0].Added) != 1 || cs.Modified[0].Added[0].Name != "name" {
 		t.Errorf("Team.Added should be [name]; got %+v", cs.Modified[0].Added)
 	}
-	// Org must NOT appear (it is unchanged).
+	// Org must not appear (it is unchanged).
 	if containsModified(cs, "Org") {
 		t.Error("Org is unchanged and must not appear in Modified")
 	}

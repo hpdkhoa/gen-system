@@ -1,4 +1,4 @@
-// save_v2658_test.go — v26.58 (follow up of D020): Run ignored the result of
+// save_v2658_test.go (v26.58, follow up of D020): Run ignored the result of
 // UpsertEnrichBeliefs, so a routine whose beliefs could not be saved still
 // counted as enriched and gen-enrich reported them as written.
 package enrich

@@ -1,4 +1,4 @@
-// verify_flag_v2658_test.go — v26.58.
+// verify_flag_v2658_test.go: v26.58.
 //
 // D021: an unknown --verify-understand value ("sotp") turned the Understand
 // pass off without a message, so the user believed the gate ran.

@@ -7,7 +7,7 @@
 # the call graph neighbourhood of the seeds within N hops. That is the file
 # recovery / Full Recall Rate line of DeepDiscovery (arXiv 2606.22906).
 #
-# WHAT THIS IS NOT. It is not a solve rate. gen-system has no issue to patch
+# What this does not measure. It is not a solve rate. gen-system has no issue to patch
 # pipeline. DeepDiscovery's 78.6 percent on SWE-bench Verified is a solve rate
 # and is not comparable to anything written by this script. Do not put the two
 # numbers in the same sentence.

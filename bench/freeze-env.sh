@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# bench/freeze-env.sh — WP0: freeze the ground before any measured run.
+# bench/freeze-env.sh (WP0): freeze the ground before any measured run.
 # Writes bench/env.json with everything a reader needs to compare two runs:
 # gen-system commit (and whether the tree was dirty), GPU + driver, Ollama
 # version + installed models, Go version, date. Every results row produced by
 # summarise.py references this file's commit.
 #
-# Commit bench/env.json and bench/tasks.json BEFORE the first run.
+# Commit bench/env.json and bench/tasks.json before the first run.
 set -euo pipefail
 
 BENCH_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

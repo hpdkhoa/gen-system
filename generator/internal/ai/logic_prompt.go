@@ -1,6 +1,6 @@
-// generator/internal/ai/logic_prompt.go — v23.10 (Phase 4-B): builds the
-// business-logic prompt from the user's IDEA text + the resolved schema. The
-// idea drives WHAT the handlers should do (new), not just which entities exist.
+// generator/internal/ai/logic_prompt.go, v23.10 (Phase 4-B): builds the
+// business-logic prompt from the user's idea text + the resolved schema. The
+// idea drives what the handlers should do (new), as well as which entities exist.
 package ai
 
 import (
@@ -34,7 +34,7 @@ func BuildLogicPrompt(idea string, e schema.Entity, all []schema.Entity) string 
 	}
 
 	// Positive hint: deterministically bind operation phrases from the idea to
-	// THIS entity, so the model is pulled toward the right ops rather than only
+	// this entity, so the model is pulled toward the right ops rather than only
 	// told which to avoid. (Fixes Product receiving no ops because the prompt
 	// was purely prohibitive.)
 	bindings := bindOperationsToEntities(idea, all)

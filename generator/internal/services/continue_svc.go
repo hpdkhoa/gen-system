@@ -1,17 +1,17 @@
-// continue_svc.go — v25.8: server-side `continue` (delta against existing source)
-// with a REVIEW gate the Studio can drive (Approve / Reject), the server analog
+// continue_svc.go (v25.8): server-side `continue` (delta against existing source)
+// with a review gate the Studio can drive (Approve / Reject), the server analog
 // of the CLI consent gate.
 //
 // Flow:
-//  1. Plan(idea, target) — load the target, summarize what exists, plan the
+//  1. Plan(idea, target): load the target, summarize what exists, plan the
 //     delta, detect conflicts (planner_v2.DetectConflicts), and publish a
 //     "continue_review" SSE with existing-purpose + delta + conflicts. The
-//     pending plan is HELD (not generated yet).
+//     service holds the pending plan (not generated yet).
 //  2. The UI shows the review and calls Approve() or Reject().
 //     Approve → generate the held plan (compile-gate + repair as usual).
 //     Reject  → discard, nothing staged.
 //     With autoApprove=true, step 1 proceeds straight to generation (scripted/CI).
-//     Otherwise it ALWAYS holds for Approve/Reject. The review blocks generation.
+//     Otherwise it always holds for Approve/Reject. The review blocks generation.
 //
 // Reuses the exact conflict rules the CLI gate uses (planner_v2), so CLI and
 // Studio push back identically. Lives in services (generation surface);
@@ -125,7 +125,7 @@ func (s *BuildService) runContinue(job *BuildJob, idea, target string, autoAppro
 		job.Status = JobDone
 		job.DoneAt = time.Now().UnixMilli()
 		s.mu.Unlock()
-		emit("green", "Nothing to do — existing code already satisfies the idea.")
+		emit("green", "Nothing to do. The existing code already satisfies the idea.")
 		s.broker.Publish("build_complete", job)
 		return
 	}
@@ -136,7 +136,7 @@ func (s *BuildService) runContinue(job *BuildJob, idea, target string, autoAppro
 	// Always publish the review so the UI can show what will happen.
 	s.broker.Publish("continue_review", review)
 
-	// v25.8.2: ALWAYS hold for the user's decision. The review is a gate that
+	// v25.8.2: always hold for the user's decision. The review is a gate that
 	// runs before generation. Nothing generates until Approve arrives. The only
 	// bypass is an explicit autoApprove (e.g. scripted/CI callers that opt in).
 	if !autoApprove {
@@ -148,9 +148,9 @@ func (s *BuildService) runContinue(job *BuildJob, idea, target string, autoAppro
 		}
 		s.mu.Unlock()
 		if len(conflicts) > 0 {
-			emit("amber", fmt.Sprintf("Review ready — %d conflict(s) to confirm. Waiting for your approval.", len(conflicts)))
+			emit("amber", fmt.Sprintf("Review ready: %d conflict(s) to confirm. Waiting for your approval.", len(conflicts)))
 		} else {
-			emit("cyan", "Review ready — waiting for your approval before generating.")
+			emit("cyan", "Review ready. Waiting for your approval before generating.")
 		}
 		return
 	}
@@ -174,7 +174,7 @@ func (s *BuildService) ApproveContinue() error {
 		s.job = job
 		s.mu.Unlock()
 	}
-	s.broker.Publish("agent_event", map[string]string{"phase": "green", "dot": "green", "text": "Approved — generating."})
+	s.broker.Publish("agent_event", map[string]string{"phase": "green", "dot": "green", "text": "Approved. Generating."})
 	go s.generateContinue(job, p.Result, p.Target)
 	return nil
 }
@@ -198,7 +198,7 @@ func (s *BuildService) RejectContinue() error {
 		s.job.DoneAt = time.Now().UnixMilli()
 	}
 	s.mu.Unlock()
-	s.broker.Publish("agent_event", map[string]string{"phase": "red", "dot": "red", "text": "Rejected — nothing was generated."})
+	s.broker.Publish("agent_event", map[string]string{"phase": "red", "dot": "red", "text": "Rejected. Nothing was generated."})
 	s.broker.Publish("continue_rejected", map[string]string{"idea": p.Idea})
 	return nil
 }

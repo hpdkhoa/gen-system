@@ -1,4 +1,4 @@
-// project_test.go — v24: security tests for dynamic-project root validation.
+// project_test.go (v24): security tests for dynamic-project root validation.
 // The load endpoint must only accept roots inside the configured projects base;
 // path traversal and symlink escapes must be rejected.
 package presentation
@@ -11,7 +11,7 @@ import (
 )
 
 func newTestPM(base string) *ProjectManager {
-	// srv/loader/watcher are nil — validateRoot doesn't touch them.
+	// srv/loader/watcher are nil; validateRoot doesn't touch them.
 	return NewProjectManager(nil, base, nil, nil)
 }
 

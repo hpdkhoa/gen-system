@@ -1,4 +1,4 @@
-// generator/internal/ai/generate_schema_from_plan.go — v23.1 (round 3):
+// generator/internal/ai/generate_schema_from_plan.go, v23.1 (round 3):
 // constrain plan->schema decoding to the entities JSON Schema; prompt now asks
 // for fields as an array of {name,type} to match.
 package ai

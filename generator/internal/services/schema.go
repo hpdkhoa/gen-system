@@ -51,10 +51,10 @@ func (s *SchemaService) CurrentEntities() []map[string]interface{} {
 //
 // Status values per field:
 //
-//	"added"     — in proposed but not in current
-//	"removed"   — in current but not in proposed
-//	"modified"  — in both, type changed
-//	"unchanged" — identical in both
+//	"added":      in proposed but not in current
+//	"removed":    in current but not in proposed
+//	"modified":   in both, type changed
+//	"unchanged":  identical in both
 func (s *SchemaService) EntityDiff(entityName string) *EntityDiff {
 	// Load current IR fields
 	currentFields := map[string]string{}
@@ -92,7 +92,7 @@ func (s *SchemaService) EntityDiff(entityName string) *EntityDiff {
 	}
 
 	// If no proposed schema exists, fall back to current as proposed
-	// (diff will be all "unchanged" — better than a broken response)
+	// (diff will be all "unchanged", which is better than a broken response)
 	if len(proposedFields) == 0 {
 		for name, typ := range currentFields {
 			proposedFields[name] = typ
@@ -195,7 +195,7 @@ func (s *SchemaService) PreviewEntity(entityName string) ([]FilePreview, error) 
 		"frontend/src/types/" + lower + ".ts",
 		// Expo mobile
 		"mobile/screens/" + entityName + "Screen.tsx",
-		// SQL migration (approximate — actual filename includes timestamp)
+		// SQL migration (approximate; the actual filename includes a timestamp)
 		"backend/migrations/YYYYMMDD_create_" + lower + "s.sql",
 	}
 

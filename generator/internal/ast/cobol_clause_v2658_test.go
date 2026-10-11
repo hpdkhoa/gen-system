@@ -1,4 +1,4 @@
-// cobol_clause_v2658_test.go — v26.58: data clause extractor defects.
+// cobol_clause_v2658_test.go (v26.58): data clause extractor defects.
 //
 // D065: extractPIC, extractOccurs, extractRedefines and extractValue searched
 // the clause text with strings.Index, which also matched a keyword inside the

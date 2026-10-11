@@ -1,4 +1,4 @@
-// java_record_v2658_test.go — v26.58 (D058): parseRecordComponents looped
+// java_record_v2658_test.go (v26.58, D058): parseRecordComponents looped
 // forever when a component held a token it did not expect, such as the dots
 // of a varargs component "record R(int... xs) {}" or a stray "=". A loop round
 // consumed nothing, so Parse never returned. Each parse here runs in a

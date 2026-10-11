@@ -1,9 +1,9 @@
-// generator/internal/engine/web_project.go — v23.13 (Phase 5): turns the loose
+// generator/internal/engine/web_project.go, v23.13 (Phase 5): turns the loose
 // generated frontend/ fragments into an actually-buildable Vite + React + TS
 // project, so `tsc --noEmit` and `npm run build` are real, green gates (not a
 // directory of orphan .jsx files that nothing builds). Also emits a multi-stage
 // Dockerfile for the backend (companion to the existing docker-compose.yml from
-// env_gen.go). All offline/deterministic — pinned dep versions, no network at
+// env_gen.go). All offline/deterministic: pinned dep versions, no network at
 // generate time. The npm/docker BUILD steps run on a box with those toolchains;
 // the scaffold itself is what makes those builds possible and is verified here
 // with tsc + npm where Node is present.
@@ -55,7 +55,7 @@ func GenerateWebProject(entities []schema.Entity, rootPath string) error {
 // pinned, dependency-light Vite + React + TS. No router dep (the loose
 // AppRouter.jsx fragment used react-router-dom, but the buildable App below
 // renders entity lists directly so the project type-checks with only react +
-// react-dom + the build toolchain — fewer moving parts, deterministic install).
+// react-dom + the build toolchain: fewer moving parts, deterministic install).
 const webPackageJSON = `{
   "name": "generated-web",
   "private": true,
@@ -125,7 +125,7 @@ if (el) {
 `
 
 // webAppTSX builds a typed App that imports the generated entity types and the
-// typed API client, listing each entity. It matches the EXACT Phase 2 client
+// typed API client, listing each entity. It matches the exact Phase 2 client
 // contract: the client exports a per-entity object `<lcFirst>Api` with a
 // `.list()` method, and the types barrel exports `<Entity>` (original-case
 // name). Verified against frontend/typescript.go GenerateAPIClient.

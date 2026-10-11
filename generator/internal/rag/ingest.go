@@ -40,7 +40,7 @@ func IngestFile(store *EmbeddingStore, source, filePath string) (int, error) {
 		tried++
 		embedding, err := Embed(chunk)
 		if err != nil {
-			fmt.Printf("  [rag] ⚠️  embed failed for chunk — skipping: %v\n", err)
+			fmt.Printf("  [rag] ⚠️  embed failed for a chunk, skipping it: %v\n", err)
 			continue
 		}
 		fresh = append(fresh, embedded{chunk, embedding})

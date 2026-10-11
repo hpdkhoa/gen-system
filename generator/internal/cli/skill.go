@@ -1,4 +1,4 @@
-// cli/skill.go — TASK 4 (v19): 'gen skill' subcommand.
+// cli/skill.go, TASK 4 (v19): 'gen skill' subcommand.
 // Writes a versioned .skill file from the current project state.
 //
 // Usage:

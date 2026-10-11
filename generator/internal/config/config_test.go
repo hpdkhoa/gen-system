@@ -1,4 +1,4 @@
-// generator/internal/config/config_test.go — v23.21: lock the .env loader
+// generator/internal/config/config_test.go (v23.21): lock the .env loader
 // semantics: real-env precedence, profile selection, quoting/comments, masking.
 package config
 
@@ -43,7 +43,7 @@ func TestLoad_RealEnvWins(t *testing.T) {
 	if _, err := Load(p); err != nil {
 		t.Fatal(err)
 	}
-	// The already-exported value must NOT be overwritten by the file.
+	// The already-exported value must not be overwritten by the file.
 	if v := os.Getenv("OLLAMA_MODEL_CODE"); v != "from-real-env" {
 		t.Errorf("real env should win: got %q", v)
 	}

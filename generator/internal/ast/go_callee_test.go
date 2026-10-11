@@ -1,4 +1,4 @@
-// go_callee_test.go — v26.34: callee names come from the shape of the call,
+// go_callee_test.go (v26.34): callee names come from the shape of the call,
 // not from its source text. A function literal called in place is named
 // FuncLiteralCallee; a chained call keeps its receiver chain without the
 // argument lists; a generic instantiation drops the type arguments.

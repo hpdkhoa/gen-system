@@ -1,4 +1,4 @@
-// generator/internal/ai/continue_prompt_v2324_test.go — v23.24 (task 4A):
+// generator/internal/ai/continue_prompt_v2324_test.go, v23.24 (task 4A):
 // parser tolerance tests for the continue-delta contract. No model is involved.
 package ai
 

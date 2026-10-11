@@ -1,11 +1,11 @@
 package ast
 
 // ─────────────────────────────────────────────────────────────
-// frontend.go — Frontend interface + global registry
+// frontend.go: Frontend interface + global registry
 //
 // Every language frontend implements Frontend and registers
-// itself via init() so callers never import frontend packages
-// directly — they go through the registry.
+// itself via init(). Callers never import frontend packages
+// directly; they go through the registry.
 // ─────────────────────────────────────────────────────────────
 
 import (
@@ -25,8 +25,8 @@ type Frontend interface {
 
 	// Available returns true if the frontend can operate on the
 	// current machine (all external dependencies present).
-	// A frontend that returns false must still be registered —
-	// the presentation layer will surface its unavailability.
+	// A frontend that returns false must still be registered.
+	// The presentation layer then shows that it is unavailable.
 	Available() bool
 
 	// Parse converts source bytes at filePath into a Module.

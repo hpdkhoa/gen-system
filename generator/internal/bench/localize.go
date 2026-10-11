@@ -7,7 +7,7 @@
 // the seeds, within N hops?
 //
 // This is the measurement DeepDiscovery (arXiv 2606.22906) reports as file
-// recovery and Full Recall Rate on SWE-bench Verified. It is NOT a solve rate.
+// recovery and Full Recall Rate on SWE-bench Verified. It is not a solve rate.
 // gen-system has no issue to patch pipeline, so nothing produced here is
 // comparable to a SWE-bench solve rate. The driver under bench/swebench/ prints
 // that boundary with every result.
@@ -91,7 +91,7 @@ func LocalizationRecall(root string, seeds, gold []string, maxHops int) Suite {
 		}
 	}
 
-	// Undirected adjacency over RESOLVED edges only.
+	// Undirected adjacency over resolved edges only.
 	adj := map[string][]string{}
 	resolved := 0
 	for _, e := range ctx.Index.AllCallEdges() {

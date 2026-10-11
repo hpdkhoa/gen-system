@@ -1,4 +1,4 @@
-// verify_effect_v2658_test.go — v26.58.
+// verify_effect_v2658_test.go (v26.58).
 //
 // D100: the effect check reported a DB-WRITE finding for every read-named
 // method that touches the database at all. flow sets EffectDB for any callee

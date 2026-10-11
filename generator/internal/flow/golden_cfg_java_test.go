@@ -1,17 +1,17 @@
-// golden_cfg_java_test.go — v25.1 GOLDEN-CFG CONTRACT (flow.Build, Java IR).
+// golden_cfg_java_test.go (v25.1): GOLDEN-CFG CONTRACT (flow.Build, Java IR).
 //
 // PURPOSE. The companion to ast/golden_ir_java_test.go. That file locks what the
-// frontend EMITS; this file locks what flow.Build BUILDS from it — the block
+// frontend emits; this file locks what flow.Build builds from it: the block
 // topology the Studio renderer (renderCFG) then classifies into hexagons,
 // diamonds, and the try-split. It parses real Java through the pure-Go frontend
-// (the reference IR producer) and runs the SHARED, language-agnostic builder, so
+// (the reference IR producer) and runs the shared, language-agnostic builder, so
 // it equally constrains the future JVM sidecar: any IR that satisfies the
 // golden-IR contract must produce this same CFG shape here.
 //
 // WHY THIS EXISTS / WHAT IT CAUGHT. Written to lock the try/loop/branch CFG
 // conventions, it immediately surfaced a real defect: the non-Go structural
-// builder's extractStructuralNodes DROPPED NodeTry (and un-extracted Else),
-// flattening a try body into its parent and losing the wrapper — the exact
+// builder's extractStructuralNodes dropped NodeTry (and un-extracted Else),
+// flattening a try body into its parent and losing the wrapper. That is the exact
 // "lone try { node → End" CFG symptom. The v25.1 fix in cfg_ts_py.go restores
 // NodeTry through extraction; these assertions are its regression guard.
 //
@@ -121,7 +121,7 @@ func containsFold(hay, needle string) bool {
 }
 
 // ── GOLDEN: try/catch builds a body + catch + merge split ─────────────────
-// The defect this locks: try must NOT collapse to a lone node → End. The CFG
+// The defect this locks: try must not collapse to a lone node → End. The CFG
 // must contain the try-body block, the catch block, and a merge where both
 // converge. Both the try-body and catch must carry their body statements.
 func TestGoldenCFG_Java_TrySplit(t *testing.T) {
@@ -185,7 +185,7 @@ public class T {
 	}
 }
 
-// ── GOLDEN: a try whose ONLY control flow is the try still splits ─────────
+// ── GOLDEN: a try whose only control flow is the try still splits ─────────
 // This is the hasStructuralNodes fix: without NodeTry recognised as structural,
 // a try-only method fell to the single-opaque-block path and never split.
 func TestGoldenCFG_Java_TryOnlyStillSplits(t *testing.T) {

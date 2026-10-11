@@ -1,4 +1,4 @@
-// flow/cfg_ts_py_test.go — tests for TS/Python structural CFG builder
+// flow/cfg_ts_py_test.go: tests for TS/Python structural CFG builder
 package flow
 
 import (
@@ -129,7 +129,7 @@ func tsFuncModule(name string, children ...*ast.Node) *ast.Module {
 }
 
 func TestBuild_TS_SingleBlock_OpaqueBody(t *testing.T) {
-	// Function with fully opaque body — no structural nodes.
+	// Function with fully opaque body: no structural nodes.
 	opaque := &ast.Node{
 		Kind:          ast.NodeUnknown,
 		UnknownReason: "body_not_parsed",
@@ -274,8 +274,8 @@ func TestBuildStructuralCFG_Empty(t *testing.T) {
 // ─── v26.6: Python nested + expression-level CFG ──────────────
 // These build the unified IR the Python frontend now emits (nested
 // NodeBranch{Children,Else} / NodeLoop{Children} / multi-way match) and assert
-// the structural CFG builder produces a faithful graph — a real two-arm branch
-// with a merge, a loop with a back-edge, and a match fan-out — rather than the
+// the structural CFG builder produces a faithful graph (a real two-arm branch
+// with a merge, a loop with a back-edge, and a match fan-out) rather than the
 // old flattened single-line stub.
 
 func pyFunc(children ...*ast.Node) *ast.Node {
@@ -329,7 +329,7 @@ func TestPythonCFG_LoopHasBackEdge_v266(t *testing.T) {
 	if cfg == nil || len(cfg.Blocks) < 2 {
 		t.Fatalf("loop should produce multiple blocks, got %d", len(cfg.Blocks))
 	}
-	// some block must point BACK to an earlier block id (the back-edge).
+	// some block must point back to an earlier block id (the back-edge).
 	back := false
 	for i, b := range cfg.Blocks {
 		for _, s := range b.Succs {

@@ -1,4 +1,4 @@
-// multi.go — v23.12 (Phase 4): LangJava added to DetectLanguage + RewriteFunction (parse-only).
+// multi.go (v23.12, Phase 4): LangJava added to DetectLanguage + RewriteFunction (parse-only).
 // Patched in Phase A (revision: includes COBOL detection):
 //   - Added typed error ErrRewriterNotImplemented so callers can distinguish
 //     "we don't know this language" from "we read it but can't write it yet."
@@ -76,7 +76,7 @@ func RewriteFunction(filePath, funcName, newBody string) error {
 		return RewriteFunctionBody(filePath, funcName, newBody)
 	case LangPython:
 		if !CheckPython3Available() {
-			return fmt.Errorf("python3 >= 3.9 required for Python AST rewriting — not found on PATH")
+			return fmt.Errorf("python3 >= 3.9 required for Python AST rewriting: not found on PATH")
 		}
 		return RewritePythonFunction(filePath, funcName, newBody)
 	case LangTS, LangCAGen, LangCOBOL, LangJava:

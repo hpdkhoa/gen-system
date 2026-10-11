@@ -1,5 +1,5 @@
-// generator/internal/engine/fk_column_v2326_test.go — v23.26 (task E): the FK
-// migration column MUST match the column the CREATE TABLE emits and the column
+// generator/internal/engine/fk_column_v2326_test.go, v23.26 (task E): the FK
+// migration column must match the column the CREATE TABLE emits and the column
 // the pg store INSERTs into. Before the fix, genForeignKeyMigration used
 // jsonTag(splitCamel(name)) → "user_id" while genTable used jsonTag(name) →
 // "userid", so ALTER TABLE referenced a missing column and the FK silently
@@ -54,7 +54,7 @@ func TestFKColumnMatchesTableColumn(t *testing.T) {
 	store := string(storeB)
 
 	// The canonical FK column for "UserID" via the shared helper. We assert all
-	// three artifacts agree with it — NOT a hardcoded spelling — so the test
+	// three artifacts agree with it, not with a hardcoded spelling, so the test
 	// stays correct whether the helper yields "user_id" or "userid".
 	col := resolveFKColumn(entities[1], "UserID")
 	if col == "" {
@@ -69,14 +69,14 @@ func TestFKColumnMatchesTableColumn(t *testing.T) {
 	if !strings.Contains(store, col) {
 		t.Errorf("pg store should INSERT/SELECT column %q; got:\n%s", col, store)
 	}
-	// The constraint name is derived from the SAME column, so they must agree.
+	// The constraint name is derived from the same column, so they must agree.
 	if !strings.Contains(fk, "fk_posts_"+col) {
 		t.Errorf("FK constraint name should be fk_posts_%s; got:\n%s", col, fk)
 	}
 }
 
 // TestFKColumnMatches_ExplicitField covers the harder case: the schema declares
-// an EXPLICIT foreign-key field (userID) alongside the relation. fieldsForEntity
+// an explicit foreign-key field (userID) alongside the relation. fieldsForEntity
 // dedupes, so the explicit field's column spelling wins in the table + store;
 // the FK migration must follow it, not the synthesized splitCamel form.
 func TestFKColumnMatches_ExplicitField(t *testing.T) {
@@ -100,7 +100,7 @@ func TestFKColumnMatches_ExplicitField(t *testing.T) {
 		{Name: "User", Fields: []schema.Field{{Name: "Name", Type: "string"}}},
 		{Name: "Post", Fields: []schema.Field{
 			{Name: "Title", Type: "string"},
-			{Name: "userID", Type: "int"}, // EXPLICIT FK field
+			{Name: "userID", Type: "int"}, // explicit FK field
 		}, Relations: []schema.Relation{{Type: "belongsTo", Target: "User", ForeignKey: "userID"}}},
 	}
 	RunAll(entities, tmp)

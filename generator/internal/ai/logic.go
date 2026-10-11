@@ -1,9 +1,9 @@
-// generator/internal/ai/logic.go — v23.10 (Phase 4-B): LLM business-logic
-// generation via a PROVIDER SEAM. The pipeline depends only on LogicProvider, so
+// generator/internal/ai/logic.go, v23.10 (Phase 4-B): LLM business-logic
+// generation via a provider seam. The pipeline depends only on LogicProvider, so
 // the whole generate→inject→compile→test path is verifiable offline with the
 // deterministic replay provider; GEN_LOGIC=ollama opts into the live model
-// (mirrors GEN_BACKEND=postgres). The model fills a SERVICE layer, never the CRUD
-// handlers — a bad response fails one method (caught by the self-heal loop /
+// (mirrors GEN_BACKEND=postgres). The model fills a service layer, never the CRUD
+// handlers. A bad response fails one method (caught by the self-heal loop /
 // dropped to a "not implemented" stub), never the build.
 package ai
 
@@ -37,7 +37,7 @@ type LogicProvider interface {
 // OperationRepairer is an OPTIONAL capability: a provider that can take a single
 // operation whose body failed to compile, plus the build error, and return a
 // fixed operation. The engine type-asserts for this; providers that don't
-// implement it (e.g. the deterministic replay provider) simply get no repair
+// implement it (e.g. the deterministic replay provider) get no repair
 // attempt and fall back to a stub. v23.23.
 type OperationRepairer interface {
 	RepairOperation(idea string, e schema.Entity, all []schema.Entity, op Operation, buildErr string) (Operation, error)
@@ -100,7 +100,7 @@ func (ollamaLogicProvider) Operations(idea string, e schema.Entity, all []schema
 	return ops, nil
 }
 
-// RepairOperation re-prompts the model to fix ONE operation whose body failed to
+// RepairOperation re-prompts the model to fix one operation whose body failed to
 // compile, feeding back the exact go build error. Returns the repaired operation
 // (the engine re-runs the compile gate on it). v23.23.
 func (ollamaLogicProvider) RepairOperation(idea string, e schema.Entity, all []schema.Entity, op Operation, buildErr string) (Operation, error) {

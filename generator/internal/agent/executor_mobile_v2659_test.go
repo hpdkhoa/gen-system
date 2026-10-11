@@ -1,4 +1,4 @@
-// executor_mobile_v2659_test.go — N07: GenerateMobileProject dropped every
+// executor_mobile_v2659_test.go (N07): GenerateMobileProject dropped every
 // write error and the executor ignored it, so generate_types_barrel counted as
 // a success with the mobile project files missing.
 package agent

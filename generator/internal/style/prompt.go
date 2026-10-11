@@ -1,4 +1,4 @@
-// generator/internal/style/prompt.go — v26.33: what the model is told.
+// generator/internal/style/prompt.go (v26.33): what the model is told.
 //
 // Two parts. PromptBlock renders the active rules as short lines, and it is
 // built from the same ActiveRules list the gate checks, so the model is never

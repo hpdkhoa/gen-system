@@ -1,12 +1,12 @@
-// generator/cmd/gen-enrich/main.go — v26.15 (session 9): the INDEPENDENT enrichment
+// generator/cmd/gen-enrich/main.go, v26.15 (session 9): the independent enrichment
 // producer. It loads a project, asks the local model to describe each routine, and
 // writes the results into the project's belief store as persistent enrich beliefs
 // (which then survive parser rebuilds and are stale-checked against the source).
 //
-// This is a SEPARATE binary on purpose. Enrichment is slow and needs the AI stack;
-// keeping it out-of-band means the fast, deterministic parser rebuild never pays the
-// model cost, and — critically — understand-server never links it. Running it is a
-// deliberate, offline batch step: `gen-enrich --root ./myproject`.
+// This is a separate binary on purpose. Enrichment is slow and needs the AI stack.
+// Keeping it out of band means the fast, deterministic parser rebuild never pays the
+// model cost, and understand-server never links it. Running it is a deliberate,
+// offline batch step: `gen-enrich --root ./myproject`.
 package main
 
 import (
@@ -73,7 +73,7 @@ func main() {
 	store.RebuildFromIndex(ctx.Index, ctx.Effects)
 	reportValidation(store)
 
-	fmt.Println("Open the Studio Beliefs page to review — enrich beliefs are marked as model")
+	fmt.Println("Open the Studio Beliefs page to review them. The page marks enrich beliefs as model")
 	fmt.Println("guesses and validated against the parser facts; verify or correct them there.")
 }
 
@@ -102,7 +102,7 @@ func reportValidation(store *belief.Store) {
 	if total == 0 {
 		return
 	}
-	fmt.Printf("Validation against parser facts: %d enrich beliefs — ", total)
+	fmt.Printf("Validation against parser facts: %d enrich beliefs: ", total)
 	parts := make([]string, 0, len(counts))
 	for _, k := range []string{"consistent", "needs-human", "contradicts", "(unvalidated)"} {
 		if n, ok := counts[k]; ok {
@@ -111,7 +111,7 @@ func reportValidation(store *belief.Store) {
 	}
 	fmt.Println(strings.Join(parts, ", "))
 	if counts["contradicts"] > 0 {
-		fmt.Printf("  ⚠ %d claim(s) contradict what the parser observed — review these first.\n", counts["contradicts"])
+		fmt.Printf("  ⚠ %d claim(s) contradict what the parser observed. Review these first.\n", counts["contradicts"])
 	}
 }
 
@@ -153,15 +153,15 @@ func buildRoutines(ctx *gencontext.Context, limit int) []enrich.Routine {
 
 	var out []enrich.Routine
 	// Deterministic ordering (v26.17). AllSymbols() iterates a map, so its order is
-	// randomized per run — with --limit N that meant each run enriched a DIFFERENT
-	// N routines, so repeated bounded runs accumulated beliefs instead of replacing
-	// them. Sorting by symbol ID makes --limit reproducible and re-runnable.
+	// random per run. With --limit N each run enriched a different N routines, so
+	// repeated bounded runs accumulated beliefs instead of replacing them. Sorting
+	// by symbol ID makes --limit reproducible and re-runnable.
 	syms := ctx.Index.AllSymbols()
 	sort.Slice(syms, func(i, j int) bool { return syms[i].ID < syms[j].ID })
 
 	// Per-file sorted routine start lines (v26.20). Frontends that don't record
 	// byte offsets (Java, COBOL, TS, Python) are sliced by line instead; knowing
-	// where the NEXT routine starts lets that slice stop cleanly instead of running
+	// where the next routine starts lets that slice stop cleanly instead of running
 	// a fixed window into the following routine.
 	startsByFile := map[string][]int{}
 	for _, s := range syms {
@@ -228,12 +228,12 @@ func sliceSource(src []byte, start, end int) string {
 }
 
 // sliceByLine extracts a routine body using 1-based line numbers. This is the
-// fallback for frontends that do NOT populate byte offsets (v26.20).
+// fallback for frontends that do not populate byte offsets (v26.20).
 //
-// Only the Go frontend sets Span.*.Offset — it gets them free from go/ast's
+// Only the Go frontend sets Span.*.Offset. It gets them at no cost from go/ast's
 // token.FileSet. The hand-rolled Java, COBOL, TypeScript and Python frontends set
 // Line only, so every routine in those languages had start==end==0 and produced an
-// EMPTY body: enrichment silently fell back to facts-only prose. Slicing by line
+// empty body: enrichment silently fell back to facts-only prose. Slicing by line
 // recovers the real source for them.
 //
 // endLine <= 0 means the frontend recorded no end (common: only Start.Line is set).
@@ -261,7 +261,7 @@ func sliceByLine(src []byte, startLine, endLine int) string {
 
 // bodyFor returns a routine's source, preferring exact byte offsets and falling
 // back to line-based slicing for frontends that don't record offsets. nextLine, if
-// > 0, is the start line of the NEXT routine in the same file — used to stop a
+// > 0, is the start line of the next routine in the same file. It stops a
 // windowed slice before it bleeds into a neighbouring routine.
 func bodyFor(src []byte, sym *symbols.Symbol, nextLine int) string {
 	if b := sliceSource(src, sym.Span.Start.Offset, sym.Span.End.Offset); b != "" {

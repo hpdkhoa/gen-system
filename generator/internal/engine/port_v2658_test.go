@@ -1,4 +1,4 @@
-// port_v2658_test.go — v26.58 (follow up of D036): the generated .env, the
+// port_v2658_test.go, v26.58 (follow up of D036): the generated .env, the
 // generated backend/main.go and the mobile client must name one port.
 // GenerateEnvFiles wrote PORT=28080 while main.go listened on the fixed
 // address :8080 and read no PORT at all, so the .env value was a lie, and the

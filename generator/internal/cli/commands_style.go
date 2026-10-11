@@ -1,4 +1,4 @@
-// commands_style.go — v26.33: `gen style` subcommands.
+// commands_style.go (v26.33): `gen style` subcommands.
 //
 //	gen style print                       the default profile, as JSON
 //	gen style derive <repo> [--out f]     measure a repository, write a profile

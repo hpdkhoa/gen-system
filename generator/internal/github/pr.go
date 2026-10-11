@@ -21,7 +21,7 @@ type GeneratedPR struct {
 // and opens a draft pull request for human review.
 //
 // rootPath is the gen-system project root (contains backend/ and frontend/).
-// goal is the natural-language build goal — used in the PR title/body.
+// goal is the natural-language build goal. The PR title/body use it.
 //
 // Only files under backend/internal/ and frontend/src/ are pushed.
 // The function is intentionally conservative: it skips files that fail
@@ -74,7 +74,7 @@ func CreateBuildPR(rootPath, goal string) (GeneratedPR, error) {
 	pushed := 0
 	for _, dir := range dirs {
 		if _, err := os.Stat(dir); err != nil {
-			continue // directory doesn't exist yet — skip
+			continue // directory doesn't exist yet; skip
 		}
 		err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
 			if err != nil || info.IsDir() {
@@ -115,7 +115,7 @@ func CreateBuildPR(rootPath, goal string) (GeneratedPR, error) {
 	}
 
 	if pushed == 0 {
-		return GeneratedPR{}, fmt.Errorf("no files were pushed — check that the build generated output")
+		return GeneratedPR{}, fmt.Errorf("no files were pushed; check that the build generated output")
 	}
 
 	// 4. Open draft PR

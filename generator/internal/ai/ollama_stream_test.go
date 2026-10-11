@@ -1,7 +1,7 @@
-// ollama_stream_test.go — v26.24 (WP2): the env-driven request options
+// ollama_stream_test.go, v26.24 (WP2): the env-driven request options
 // (OLLAMA_NUM_GPU / OLLAMA_NUM_CTX / OLLAMA_NUM_BATCH), the OLLAMA_STREAM
 // streaming reader, and the usage counters. Every test runs against a local
-// httptest server via OLLAMA_HOST — no Ollama needed.
+// httptest server via OLLAMA_HOST. No Ollama is needed.
 package ai
 
 import (
@@ -80,7 +80,7 @@ func TestOptionsFromEnv(t *testing.T) {
 }
 
 func TestUnparseableEnvKnobIgnored(t *testing.T) {
-	t.Setenv("OLLAMA_NUM_GPU", "all") // not an int — must be ignored, not guessed
+	t.Setenv("OLLAMA_NUM_GPU", "all") // not an int: must be ignored, not guessed
 	if got := envOptInt("OLLAMA_NUM_GPU"); got != nil {
 		t.Errorf("unparseable env value should yield nil, got %d", *got)
 	}
@@ -116,7 +116,7 @@ func TestStreamingReassembly(t *testing.T) {
 }
 
 func TestStreamingDeterminism(t *testing.T) {
-	// Identical streams must reassemble to one unique output across 5 runs —
+	// Identical streams must reassemble to one unique output across 5 runs:
 	// the same invariant the live determinism_check suite asserts on-box.
 	t.Setenv("OLLAMA_STREAM", "1")
 	srv, _ := captureServer(t, func(w http.ResponseWriter, r *http.Request) {

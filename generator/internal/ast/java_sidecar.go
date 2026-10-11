@@ -1,30 +1,30 @@
-// java_sidecar.go — v23.32 (stdlib provenance / Java sidecar seam): PLACEHOLDER.
+// java_sidecar.go (v23.32, stdlib provenance / Java sidecar seam): PLACEHOLDER.
 //
-// This defines — but does not yet implement — the seam a future JVM-side Java
+// This defines, but does not yet implement, the seam a future JVM-side Java
 // analyzer will satisfy. Rationale (decided with the project owner): the pure-Go
 // JavaFrontend stays the default and the thing we demo; it gives signature-level
 // understanding and resolves into a JDK signature tree (see the second-language
-// proof in context/stdlib_java_test.go). Full-fidelity comprehension of COMPILED
-// Java — bytecode-only JARs, real method bodies/CFGs inside the JDK, lambdas and
-// generics the hand-rolled parser pushes to NodeUnknown — is out of scope for the
+// proof in context/stdlib_java_test.go). Full-fidelity comprehension of compiled
+// Java (bytecode-only JARs, real method bodies/CFGs inside the JDK, lambdas and
+// generics the hand-rolled parser pushes to NodeUnknown) is out of scope for the
 // pure-Go reader and belongs to a JVM sidecar.
 //
 // CONTRACT the sidecar must honour when it lands:
-//   - It is a Frontend like any other: it produces a *Module in the SAME unified
+//   - It is a Frontend like any other: it produces a *Module in the same unified
 //     IR, so the symbol index, CFG builder, resolver, provenance tier, skill
 //     export and Understand UI all work on its output with zero new code.
 //   - It runs an external process (a bundled JAR over a vendored JRE). Therefore
-//     Available() probes for that process and returns false when absent — and the
-//     registry/presentation layers already treat a registered-but-unavailable
-//     frontend as a first-class state.
-//   - It is NEVER on the default install path and is NOT registered by init().
+//     Available() probes for that process and returns false when absent. The
+//     registry/presentation layers already handle a registered-but-unavailable
+//     frontend as a normal state.
+//   - It is never on the default install path and is not registered by init().
 //     A caller opts in explicitly (e.g. a future `--java-sidecar <endpoint>`
-//     flag wiring RegisterJavaSidecar). This keeps "offline single static
-//     binary, no surprises" literally true for the default build.
+//     flag wiring RegisterJavaSidecar). So the default build stays one offline
+//     static binary that starts no other process.
 //
 // Because it is unregistered and Available()==false, this type is inert today.
 // It compiles and documents the boundary. Later sidecar work can drop in here
-// without a refactor. It deliberately does NOT claim LangJava (the pure-Go
+// without a refactor. It deliberately does not claim LangJava (the pure-Go
 // JavaFrontend owns that language and the .java extension); registering a second
 // frontend for LangJava would panic. The sidecar, when real, will either replace
 // the pure-Go registration behind the opt-in flag or claim a distinct language
@@ -33,7 +33,7 @@ package ast
 
 import "errors"
 
-// LangJavaSidecar is a DISTINCT language id reserved for the JVM sidecar's
+// LangJavaSidecar is a distinct language id reserved for the JVM sidecar's
 // compiled-Java inputs (.class/.jar). It is intentionally not LangJava so the
 // placeholder can be registered for experimentation without colliding with the
 // pure-Go source frontend. Not used until the sidecar is implemented.
@@ -71,8 +71,8 @@ func (j *JavaSidecarFrontend) Emit(module *Module) ([]byte, error) {
 	return nil, ErrJavaSidecarNotImplemented
 }
 
-// RegisterJavaSidecar wires the placeholder into the registry. It is NOT called
-// from any init() — registration is an explicit, opt-in act reserved for the
+// RegisterJavaSidecar wires the placeholder into the registry. No init() calls
+// it. Registration is an explicit, opt-in act reserved for the
 // change that implements the sidecar. Provided now so that change is a one-line
 // call rather than new plumbing.
 func RegisterJavaSidecar(endpoint string) {

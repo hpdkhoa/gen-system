@@ -1,9 +1,9 @@
-// generator/internal/presentation/v23_endpoints.go — v23.32 (stdlib
+// generator/internal/presentation/v23_endpoints.go (v23.32, stdlib
 // provenance): CallgraphNode carries Provenance; the callgraph BFS hides
 // stdlib/third-party nodes unless include_stdlib=1, so "follow a call into the
 // runtime" is a deliberate toggle rather than the default. ArchitectureResponse
 // reports stdlib symbol/resolution counts. Prior:
-// generator/internal/presentation/v23_endpoints.go — v23: new endpoints that
+// generator/internal/presentation/v23_endpoints.go (v23): new endpoints that
 // power the redesigned Studio (studio-v23.html).
 //
 // Four new routes, all under /api/present/v23/:
@@ -24,7 +24,7 @@
 //	    All inferred function effects, grouped by kind, for the effect-facet
 //	    UI in Wave 4.
 //
-// This file does NOT modify the v15 endpoints in presentation.go.
+// This file does not modify the v15 endpoints in presentation.go.
 // It plugs into the same Server via RegisterV23Routes, which gen-server's
 // api.NewServer wiring calls after the existing RegisterRoutes.
 package presentation
@@ -71,13 +71,13 @@ type ArchitectureResponse struct {
 
 // ProvenanceStats summarises stdlib/third-party ingest separately from the
 // project. The project-facing aggregates above (TotalSymbols, Languages,
-// Packages, …) count PROJECT symbols only, so the landing page stays about the
+// Packages, …) count project symbols only, so the landing page stays about the
 // user's code; ingested stdlib shows up here instead.
 type ProvenanceStats struct {
 	ProjectSymbols int `json:"project_symbols"`
 	StdlibSymbols  int `json:"stdlib_symbols"`
 	// EdgesIntoStdlib is project-caller edges that resolved into a stdlib
-	// symbol — the "calls into the runtime we can follow" number.
+	// symbol: the "calls into the runtime we can follow" number.
 	EdgesIntoStdlib int `json:"edges_into_stdlib"`
 }
 
@@ -211,8 +211,8 @@ func (s *Server) handleArchitectureV23(w http.ResponseWriter, r *http.Request) {
 		return resp.EntryPoints[i].Name < resp.EntryPoints[j].Name
 	})
 
-	// Edge resolution stats — the headline "do we understand this?" number.
-	// v23.32: counted over PROJECT-caller edges only, so ingesting a stdlib
+	// Edge resolution stats: the headline "do we understand this?" number.
+	// v23.32: counted over project-caller edges only, so ingesting a stdlib
 	// (which brings its own internal edges) does not move these numbers. Among
 	// project-caller edges, EdgesIntoStdlib is those resolving into the runtime.
 	edges := idx.AllCallEdges()
@@ -438,7 +438,7 @@ type CallgraphResponse struct {
 
 const callgraphMaxNodes = 200
 
-// isConstructorSym reports whether a symbol is a constructor — a method whose
+// isConstructorSym reports whether a symbol is a constructor: a method whose
 // name equals its receiver type (Java `OrderService.OrderService`, and similar
 // in other OO frontends). v24: used to relabel such nodes as an allocation
 // ("new OrderService") in the call graph instead of the confusing Type.Type form.

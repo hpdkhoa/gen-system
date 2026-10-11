@@ -1,19 +1,19 @@
-// generator/internal/archtest/boundary_test.go — v23.9 (Phase 1 + Phase 3
+// generator/internal/archtest/boundary_test.go (v23.9, Phase 1 + Phase 3
 // acceptance). Architecture guardrail tests that make the two-product split
-// PERMANENT: a future edit that re-couples the halves fails CI, so it never reaches a demo.
+// permanent: a future edit that re-couples the halves fails CI, so it never reaches a demo.
 //
-//	TestCoreHasNoGenerationDeps        — the shared CORE packages (ast, symbols,
+//	TestCoreHasNoGenerationDeps:          the shared core packages (ast, symbols,
 //	                                      flow, compiler, objgraph, context,
-//	                                      trace) must not import any GENERATE
+//	                                      trace) must not import any generate
 //	                                      package.
-//	TestUnderstandServerHasNoGenDeps   — cmd/understand-server (the enterprise
-//	                                      binary) must link NO generation
+//	TestUnderstandServerHasNoGenDeps:     cmd/understand-server (the enterprise
+//	                                      binary) must link no generation
 //	                                      package. This is the acceptance test
 //	                                      for the split: the air-gapped claim is
 //	                                      only structural if the linker agrees.
 //
 // Both shell out to `go list -deps`. If the go toolchain is unavailable (some
-// sandboxes), the tests skip rather than fail — they are guardrails for CI/dev
+// sandboxes), the tests skip rather than fail. They are guardrails for CI/dev
 // boxes where go is present.
 package archtest
 
@@ -24,15 +24,15 @@ import (
 )
 
 // generationPackages are the import-path suffixes that pull in the model,
-// network egress, or code generation — the things that must NEVER ship in the
+// network egress, or code generation: the things that must never ship in the
 // air-gapped enterprise binary. Note: `schema` and `compiler` are deliberately
-// NOT here. They are pure shared leaves (type definitions + parsing / build
+// not here. They are pure shared leaves (type definitions + parsing / build
 // passes) with zero reach into ai/engine/planner/network, verified by
-// `go list -deps`. Treating them as "generation" would be wrong — they are
+// `go list -deps`. Treating them as "generation" would be wrong. They are
 // shared core, used by both products.
 var generationPackages = []string{
-	"generator/internal/ai",         // Ollama client — the model. Must never ship.
-	"generator/internal/enrich",     // LLM belief enrichment — imports ai (v26.22).
+	"generator/internal/ai",         // Ollama client, the model. Must never ship.
+	"generator/internal/enrich",     // LLM belief enrichment; imports ai (v26.22).
 	"generator/internal/engine",     // code generators.
 	"generator/internal/agent",      // the generation task loop.
 	"generator/internal/planner",    // goal → plan.
@@ -44,10 +44,10 @@ var generationPackages = []string{
 	"generator/internal/services",   // build/schema/staging services.
 	"generator/internal/handlers",   // generation HTTP handlers.
 	"generator/internal/intelligence",
-	"generator/internal/github", // PR/push — network egress.
+	"generator/internal/github", // PR/push: network egress.
 }
 
-// coreUnderstandPackages are the shared CORE packages the enterprise product is
+// coreUnderstandPackages are the shared core packages the enterprise product is
 // built from. They must stay free of generation imports.
 var coreUnderstandPackages = []string{
 	"github.com/hpdkhoa/gen-system/generator/internal/ast",

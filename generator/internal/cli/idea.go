@@ -1,4 +1,4 @@
-// generator/internal/cli/idea.go — v23.24 (task 4A): `gen idea --from <path>`
+// generator/internal/cli/idea.go, v23.24 (task 4A): `gen idea --from <path>`
 // now aliases to the continue-from-existing-code path (ContinueViaIdeaFrom).
 package cli
 
@@ -27,9 +27,9 @@ func IdeaFromInput(input string, useV2 bool, outDir string) {
 	fmt.Println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
 	fmt.Println("💡 Idea:", input)
 	if useV2 {
-		fmt.Println("🧠 Planner V2 — multi-step reasoning (no review pause)")
+		fmt.Println("🧠 Planner V2: multi-step planning (no review pause)")
 	} else {
-		fmt.Println("🧠 Planner V1 — standard pipeline (no review pause)")
+		fmt.Println("🧠 Planner V1: standard pipeline (no review pause)")
 	}
 	fmt.Println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
 
@@ -47,7 +47,7 @@ func IdeaFromInput(input string, useV2 bool, outDir string) {
 		return
 	}
 
-	// Save plan + schema INTO the output dir for reference/review (not cwd).
+	// Save plan + schema into the output dir for reference/review (not cwd).
 	planFile := filepath.Join(outDir, "plan.generated.json")
 	_ = planner.SavePlan(plan, planFile)
 
@@ -79,7 +79,7 @@ func IdeaFromInput(input string, useV2 bool, outDir string) {
 		return
 	}
 
-	fmt.Printf("\n✅ Done — generated into %s\n", outDir)
+	fmt.Printf("\n✅ Done. Generated into %s\n", outDir)
 	fmt.Printf("   Review it there, then run it:  cd %s/backend && go run .\n", outDir)
 }
 

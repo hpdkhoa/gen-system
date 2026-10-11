@@ -1,4 +1,4 @@
-// generator/internal/planner_v2/summarize_v2324_test.go — v23.24 (task 4A):
+// generator/internal/planner_v2/summarize_v2324_test.go, v23.24 (task 4A):
 // tests for recovering the entity set directly from generated model structs,
 // the fallback used when no IR snapshot is present in the working dir.
 package planner_v2

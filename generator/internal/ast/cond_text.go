@@ -1,6 +1,6 @@
-// cond_text.go — v26.25: render a token slice back into readable source text.
+// cond_text.go (v26.25): render a token slice back into readable source text.
 //
-// NodeLoop.RawSource and NodeBranch.RawSource are the CONDITION LABEL a human
+// NodeLoop.RawSource and NodeBranch.RawSource are the condition label a human
 // reads on the rendered flowchart (the hexagon / diamond text). The frontends
 // tokenize the condition and previously rejoined it with a plain space, which
 // produced labels like
@@ -12,7 +12,7 @@
 // review" is a load-bearing claim, and a label a reader has to mentally
 // re-assemble undercuts it.
 //
-// This is deliberately a RENDERER. It does not parse again. It applies spacing
+// This is deliberately a renderer. It does not parse again. It applies spacing
 // conventions to tokens, so it can never fail or change the node structure.
 package ast
 

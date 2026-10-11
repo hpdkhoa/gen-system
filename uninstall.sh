@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# uninstall.sh — remove gen-system from the server.
+# uninstall.sh: remove gen-system from the server.
 #
 # By default, removes binaries, service files, and the service user.
 # Pass --purge to also delete data directories.

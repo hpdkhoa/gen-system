@@ -1,4 +1,4 @@
-// generator/internal/engine/preserve_ops_v2324_test.go — v23.24: continue must
+// generator/internal/engine/preserve_ops_v2324_test.go (v23.24): continue must
 // not drop an entity's existing operations when adding a new one.
 package engine
 

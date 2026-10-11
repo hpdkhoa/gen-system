@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# bench/run-understand.sh — the Understand benchmark on public repos (replaces
+# bench/run-understand.sh: the Understand benchmark on public repos (replaces
 # the retired Aider head-to-head, decision 3.6). For each pinned target in
 # bench/tasks.json: clone at the pinned commit, then run the deterministic
 # parser-path suites (parse, resolution, cfg). No model, no GPU.

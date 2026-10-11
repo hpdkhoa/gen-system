@@ -1,9 +1,9 @@
 # gen-system installation kit
 
-Three scripts for installing, registering as a service, and removing
-gen-system on a fresh Linux server.
+Three scripts install gen-system on a fresh Linux server, register it as a service, and
+remove it.
 
-## What gets installed
+## What install.sh installs
 
 | Component       | Version            | Where                          |
 |-----------------|--------------------|--------------------------------|
@@ -17,15 +17,15 @@ gen-system on a fresh Linux server.
 | systemd unit    | gen-server.service | `/etc/systemd/system`          |
 | environment     | gen-system env     | `/etc/gen-system/environment`  |
 
-Tested on Ubuntu 22.04, Ubuntu 24.04, Debian 12. Falls back to dnf/yum on
-RHEL-family distros. AMD64 and ARM64 supported.
+I tested the kit on Ubuntu 22.04, Ubuntu 24.04 and Debian 12. On RHEL-family distros it
+falls back to dnf/yum. It supports AMD64 and ARM64.
 
 ## Prerequisites
 
 - A fresh Linux server with sudo/root access
 - Disk for the Go toolchain, the two Ollama models and your data
 - Internet access at install time (afterwards everything runs offline)
-- Your gen-system source tree (the full project, not just the patches)
+- Your gen-system source tree (the full project; the patches alone are not enough)
 
 ## Quick start
 
@@ -44,7 +44,7 @@ sudo ./install.sh
 # 4. Register as systemd service that auto-starts on boot
 sudo ./install-service.sh
 
-# 5. Open the studio (URL is printed at the end)
+# 5. Open the studio (the script prints the URL at the end)
 firefox http://<server-ip>:28080/intelligence.html
 ```
 
@@ -120,7 +120,7 @@ GEN_DB_URL=postgres://gensystem:...@localhost:5432/gensystem?sslmode=disable
     intelligence.html
     ...
   etc/
-    database.env       (if Postgres was installed)
+    database.env       (if install.sh set up Postgres)
 
 /var/lib/gen-system/   (owned by gensystem)
   .gen/                gen-system's internal state cache
@@ -194,7 +194,7 @@ running `ollama pull` and Ollama will detect and use them automatically.
 
 ## Going offline
 
-Once installed, gen-system runs fully offline. The only network operations are:
+After install, gen-system runs fully offline. The only network operations are:
 - Initial download of Go and Ollama installers
 - `ollama pull qwen3:14b` and `ollama pull qwen2.5-coder:14b` (once)
 

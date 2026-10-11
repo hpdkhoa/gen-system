@@ -1,4 +1,4 @@
-// state_v2659_test.go — N11: LoadIRAt treated every read failure as a first
+// state_v2659_test.go (N11): LoadIRAt treated every read failure as a first
 // run. Only a missing snapshot is a first run; a snapshot that exists but
 // cannot be read must reach the caller as an error.
 package compiler

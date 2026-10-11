@@ -1,9 +1,9 @@
 package ast
 
 // ─────────────────────────────────────────────────────────────
-// cagen_frontend.go — CA Gen (Broadcom Gen) action diagram frontend
+// cagen_frontend.go: CA Gen (Broadcom Gen) action diagram frontend
 //
-// Parses CA Gen action diagrams — the procedural logic layer of
+// Parses CA Gen action diagrams, the procedural logic layer of
 // CA Gen applications used in Tier-1 banking/insurance systems.
 //
 // Supported constructs (the "sufficient subset" for GenSystem):
@@ -280,7 +280,7 @@ func (p *caGenParser) parseStatement() *Node {
 		return p.parseWhere()
 	}
 
-	// Unknown statement — capture raw and continue
+	// Unknown statement: capture raw and continue
 	p.consume()
 	return &Node{
 		Kind:          NodeUnknown,

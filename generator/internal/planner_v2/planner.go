@@ -1,7 +1,7 @@
-// planner.go — v23.25 (task A): BuildPlanV2 runs validateEntities after entity
-// generation — a deterministic noun-trace that drops entities absent from the
+// planner.go, v23.25 (task A): BuildPlanV2 runs validateEntities after entity
+// generation. It is a deterministic noun-trace that drops entities absent from the
 // idea (one re-prompt before dropping). See entity_validation.go.
-// planner.go — v23.10 fix: ProgressHook streams the 5 planning steps to the
+// planner.go (v23.10 fix): ProgressHook streams the 5 planning steps to the
 // caller (gen-server -> SSE) so long model calls no longer look like a stuck UI.
 package planner_v2
 
@@ -18,7 +18,7 @@ import (
 
 // ─────────────────────────────────────────────
 // ProgressHook, if set, receives planner step progress so the caller (gen-server)
-// can stream it to the UI over SSE. Without it, planning is silent to the UI —
+// can stream it to the UI over SSE. Without it, planning is silent to the UI,
 // which made long model calls look like the build was stuck. v23.10 fix.
 var ProgressHook func(dot, message string)
 
@@ -30,7 +30,7 @@ func progress(dot, msg string) {
 }
 
 // ─────────────────────────────────────────────
-// BuildPlanV2 — 5-step multi-step reasoning pipeline.
+// BuildPlanV2: 5-step multi-step reasoning pipeline.
 // ─────────────────────────────────────────────
 func BuildPlanV2(goal string) (planner.Plan, error) {
 	if strings.TrimSpace(goal) == "" {
@@ -38,35 +38,35 @@ func BuildPlanV2(goal string) (planner.Plan, error) {
 	}
 
 	// ── STEP 1: Feature extraction ────────────────────────────────
-	progress("cyan", "Step 1/5 — Extracting features from your idea (model call)…")
+	progress("cyan", "Step 1/5: extracting features from your idea (model call)…")
 	features, err := ai.ExtractFeatures(goal)
 	if err != nil || len(features) == 0 {
-		fmt.Printf("     ⚠️  Feature extraction failed (%v) — using goal as single feature\n", err)
+		fmt.Printf("     ⚠️  Feature extraction failed (%v); using the goal as a single feature\n", err)
 		features = []string{goal}
 	}
 	fmt.Printf("     ✅ %d features: %s\n", len(features), strings.Join(features, ", "))
 
 	// ── STEP 2: Architecture design ───────────────────────────────
-	progress("cyan", "Step 2/5 — Designing architecture (model call)…")
+	progress("cyan", "Step 2/5: designing the architecture (model call)…")
 	archType, components, decisions, err := ai.PlanArchitecture(features)
 	if err != nil {
-		fmt.Printf("     ⚠️  Architecture design failed (%v) — using default\n", err)
+		fmt.Printf("     ⚠️  Architecture design failed (%v); using the default\n", err)
 		archType, components, decisions = "monolith", []string{"api", "database"}, []string{"default"}
 	}
 	arch := Architecture{Type: archType, Components: components, Decisions: decisions}
 	fmt.Printf("     ✅ %s with components: %s\n", archType, strings.Join(components, ", "))
 
 	// ── STEP 3: Entity generation ─────────────────────────────────
-	progress("cyan", "Step 3/5 — Generating entities (model call — slowest step)…")
+	progress("cyan", "Step 3/5: generating entities (model call, the slowest step)…")
 	rawSpecs, err := ai.PlanEntities(goal, features, archType, components)
 	if err != nil || len(rawSpecs) == 0 {
-		fmt.Printf("     ⚠️  Entity generation failed (%v) — entities will be empty\n", err)
+		fmt.Printf("     ⚠️  Entity generation failed (%v); the entity list stays empty\n", err)
 	}
 	specs := make([]EntitySpec, 0, len(rawSpecs))
 	for _, r := range rawSpecs {
 		specs = append(specs, EntitySpec{Name: r.Name, Fields: r.Fields})
 	}
-	// v23.25 (task A): deterministic noun-trace guard — drop entities the idea
+	// v23.25 (task A): deterministic noun-trace guard. Drop entities the idea
 	// never mentioned (with one re-prompt before dropping).
 	specs = validateEntities(specs, goal, features, archType, components)
 	fmt.Printf("     ✅ %d entities defined\n", len(specs))
@@ -76,12 +76,12 @@ func BuildPlanV2(goal string) (planner.Plan, error) {
 	saveProposedSchema(schemaEntities)
 
 	// ── STEP 4: Build architecture-aware task graph ───────────────
-	progress("cyan", "Step 4/5 — Building task graph…")
+	progress("cyan", "Step 4/5: building the task graph…")
 	tasks := buildAgentTasks(schemaEntities, arch)
 	fmt.Printf("     ✅ %d tasks planned\n", len(tasks))
 
 	// ── STEP 5: Assemble planner.Plan ─────────────────────────────
-	progress("cyan", "Step 5/5 — Assembling plan…")
+	progress("cyan", "Step 5/5: assembling the plan…")
 	planFeatures := stringsToFeatures(features)
 	notes := []string{
 		"Planner: V2 multi-step reasoning",
@@ -102,7 +102,7 @@ func BuildPlanV2(goal string) (planner.Plan, error) {
 }
 
 // ─────────────────────────────────────────────
-// buildAgentTasks — architecture-aware task graph builder.
+// buildAgentTasks: architecture-aware task graph builder.
 // Returns []planner.Task with full ID, Dependencies, Status fields
 // so agent.RunFromPlan can topologically sort and execute them.
 //
@@ -122,7 +122,7 @@ func BuildPlanV2(goal string) (planner.Plan, error) {
 func buildAgentTasks(entities []schema.Entity, arch Architecture) []planner.Task {
 	var tasks []planner.Task
 
-	// Pre-generation: auth setup (Phase 3 stub — executor skips gracefully)
+	// Pre-generation: auth setup (Phase 3 stub; executor skips gracefully)
 	if containsStr(arch.Components, "auth") {
 		tasks = append(tasks, planner.Task{
 			ID: "generate_auth", Type: "generate_auth", Status: planner.StatusPending,
@@ -180,7 +180,7 @@ func buildAgentTasks(entities []schema.Entity, arch Architecture) []planner.Task
 			planner.Task{ID: mobileID, Type: "generate_mobile", EntityName: name,
 				Dependencies: []string{handlerID}, Status: planner.StatusPending,
 				Payload: map[string]interface{}{"entity": name}},
-			// Phase 0.3: TypeScript interface — depends on handler (schema is stable by then)
+			// Phase 0.3: TypeScript interface. Depends on handler (schema is stable by then)
 			planner.Task{ID: typesID, Type: "generate_types", EntityName: name,
 				Dependencies: []string{handlerID}, Status: planner.StatusPending,
 				Payload: map[string]interface{}{"entity": name}},
@@ -216,7 +216,7 @@ func buildAgentTasks(entities []schema.Entity, arch Architecture) []planner.Task
 					"components": interfaceSlice(arch.Components),
 				}},
 
-			// Phase 0.3: barrel index — depends on all per-entity generate_types tasks
+			// Phase 0.3: barrel index. Depends on all per-entity generate_types tasks
 			planner.Task{ID: "generate_types_barrel", Type: "generate_types_barrel",
 				Dependencies: append(typesIDs, "generate_router"), Status: planner.StatusPending},
 
@@ -278,7 +278,7 @@ func saveProposedSchema(entities []schema.Entity) {
 // helpers
 // ─────────────────────────────────────────────
 
-// containsStr is defined in architecture.go — same package, no redecl needed.
+// containsStr is defined in architecture.go (same package, no redecl needed).
 
 func entitySpecsToSchema(specs []EntitySpec) []schema.Entity {
 	var entities []schema.Entity

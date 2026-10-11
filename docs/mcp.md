@@ -93,7 +93,7 @@ The server loads the project once at start. Large projects take a moment; it log
 A symbol id looks like `<file>#<kind>:<qualified name>`. Start with `architecture`, find names
 with `search_symbols`, then pass ids to the rest.
 
-A tool result over 200 KB is cut, and the text says how to ask for less.
+The server cuts any tool result over 200 KB, and the text says how to ask for less.
 
 ## Protocol
 

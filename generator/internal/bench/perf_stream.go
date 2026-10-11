@@ -1,8 +1,8 @@
-// generator/internal/bench/perf_stream.go — v26.24 (WP2): streaming latency.
-// Measures time-to-first-token and total latency for the SAME prompt with
+// generator/internal/bench/perf_stream.go, v26.24 (WP2): streaming latency.
+// Measures time-to-first-token and total latency for the same prompt with
 // stream on and stream off, n runs each, so writeup 02's streaming table comes
 // from a run instead of a claim. Self-contained HTTP (bench convention: no
-// internal/ai import), but the request shape — options, pins, knobs — matches
+// internal/ai import), but the request shape (options, pins, knobs) matches
 // production's exactly via benchOpts().
 package bench
 

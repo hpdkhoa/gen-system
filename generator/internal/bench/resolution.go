@@ -1,7 +1,7 @@
-// generator/internal/bench/resolution.go — v19.9: redefine the headline
+// generator/internal/bench/resolution.go (v19.9): redefine the headline
 // metric. The v19.7 version counted "any call edge", which means stdlib
 // calls (fmt.Println, http.ListenAndServe, etc.) sat in the denominator
-// even though they CAN'T resolve — our index intentionally does not
+// even though they can't resolve: our index intentionally does not
 // contain external-package symbols. That gave a misleading 45% ceiling
 // on a real Go codebase where the engine is doing its job.
 //
@@ -17,7 +17,7 @@
 //
 // The internal metric is what the engine can actually be evaluated on.
 // It's the number a reader of the benchmark cares about: "of the calls
-// you COULD resolve in this repo, how many did you?"
+// you could resolve in this repo, how many did you?"
 //
 // Note on cache staleness: if you applied v19.8 with `unzip -o` and then
 // `go build`, Go's content-addressed build cache may have served the old
@@ -65,7 +65,7 @@ func ResolutionRecall(root string, copybookPath []string, passThreshold float64)
 
 	// v26.34: internal versus external is decided by symbols.EdgeClassifier,
 	// the same rule the Understand verify pass uses. An edge is internal when
-	// it resolved to a PROJECT symbol, or when it is unresolved, a project
+	// it resolved to a project symbol, or when it is unresolved, a project
 	// symbol carries its bare name, and no import rules it out. Function
 	// literals called in place are neither. The old rule matched the bare name
 	// against every symbol including stdlib ones, so a stdlib ingest changed
@@ -75,13 +75,13 @@ func ResolutionRecall(root string, copybookPath []string, passThreshold float64)
 	type langStat struct {
 		total    int
 		internal int
-		resolved int // resolved AND internal (the cell that earns recall)
+		resolved int // resolved and internal (the cell that earns recall)
 	}
 	byLang := map[string]*langStat{}
 
 	internal := 0
 	resolved := 0         // resolved overall (CalleeID set)
-	resolvedInternal := 0 // resolved AND internal
+	resolvedInternal := 0 // resolved and internal
 	external := 0         // bare name not in knownNames
 
 	literal := 0
@@ -148,7 +148,7 @@ func ResolutionRecall(root string, copybookPath []string, passThreshold float64)
 		Metric{Name: "call_edges_literal", Value: float64(literal), Unit: "edges"},
 	)
 
-	// Stable per-language breakdown — recall on the INTERNAL slice.
+	// Stable per-language breakdown: recall on the internal slice.
 	langs := make([]string, 0, len(byLang))
 	for k := range byLang {
 		langs = append(langs, k)
@@ -157,7 +157,7 @@ func ResolutionRecall(root string, copybookPath []string, passThreshold float64)
 	for _, lang := range langs {
 		st := byLang[lang]
 		if st.internal == 0 {
-			// Lang has no internal calls — nothing to score, skip case.
+			// Lang has no internal calls, so there is nothing to score. Skip the case.
 			suite.Metrics = append(suite.Metrics, Metric{
 				Name: "recall_internal_" + lang, Value: 0, Unit: "ratio", HigherIsBetter: true,
 			})

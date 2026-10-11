@@ -1,4 +1,4 @@
-// java_frontend_test.go — v23.12 (Phase 4): exercises the Java 17 frontend on a
+// java_frontend_test.go (v23.12, Phase 4): exercises the Java 17 frontend on a
 // Spring controller, a record, a switch expression, control flow, and the
 // hard-cases-to-NodeUnknown discipline (lambdas). Also checks that method calls
 // become resolvable call edges through the symbol index.
@@ -258,7 +258,7 @@ class T {
 	}
 }
 
-// v24 — a method REFERENCE (::) passed as an argument to a normal call must not
+// v24: a method reference (::) passed as an argument to a normal call must not
 // push the whole statement to NodeUnknown; the outer call must still be
 // harvested. Regression for the "stock.merge(...) missing" bug where
 // Integer::sum caused the merge call to vanish into an Unknown node.
@@ -277,7 +277,7 @@ class Inventory {
 	if addM == nil {
 		t.Fatal("add method not found")
 	}
-	// The statement must NOT collapse to Unknown just because it contains '::'.
+	// The statement must not collapse to Unknown only because it contains '::'.
 	if countKind(addM.Children, NodeUnknown) != 0 {
 		t.Error("a bare method reference argument (Integer::sum) should not push the statement to NodeUnknown")
 	}
@@ -293,7 +293,7 @@ class Inventory {
 	}
 }
 
-// v24 — if/for/while conditions must be captured into RawSource so the CFG can
+// v24: the frontend must capture if/for/while conditions into RawSource so the CFG can
 // render a real decision/loop label instead of the literal word "decision".
 func TestJava_BranchAndLoopConditionCaptured_v24(t *testing.T) {
 	src := `
@@ -335,7 +335,7 @@ class C {
 	}
 }
 
-// v24 — a try/catch must produce a try body AND a catch arm (in Else) so the CFG
+// v24: a try/catch must produce a try body and a catch arm (in Else) so the CFG
 // builder can model it as flow, not a lone "try {" node.
 func TestJava_TryCatchArms_v24(t *testing.T) {
 	src := `
@@ -375,7 +375,7 @@ class C {
 	}
 }
 
-// v24 — a plain assignment statement with no call (e.g. a constructor's
+// v24: a plain assignment statement with no call (e.g. a constructor's
 // "this.inv = inv;") must still emit a node so the CFG shows the body instead of
 // collapsing to Start→End.
 func TestJava_AssignmentStatementEmitted_v24(t *testing.T) {

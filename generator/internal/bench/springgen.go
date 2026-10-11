@@ -1,11 +1,11 @@
-// generator/internal/bench/springgen.go — v23.14 (Phase 6): a benchmark suite
+// generator/internal/bench/springgen.go, v23.14 (Phase 6): a benchmark suite
 // for the Spring Boot / Java 17 backend generator. It generates the project for
 // a fixed schema and asserts structural correctness: the expected per-entity
 // files exist (entity, repository, DTO, service, controller), a belongsTo
 // relation becomes an FK field, the controller carries the REST mapping, and
-// the pom targets Java 17 / Spring Boot 3.x. It does NOT run `mvn` (Maven
-// Central isn't reachable from an offline bench box) — the Java sources'
-// compile-correctness is verified separately with javac against stubs; full
+// the pom targets Java 17 / Spring Boot 3.x. It does not run `mvn` (Maven
+// Central isn't reachable from an offline bench box). A separate javac run
+// against stubs checks the Java sources' compile-correctness; full
 // `mvn package` is the documented verify-on-box step.
 package bench
 

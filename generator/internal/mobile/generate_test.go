@@ -1,4 +1,4 @@
-// generate_test.go — v26.57 (D003): GenerateScreen must write the screen file
+// generate_test.go (v26.57, D003): GenerateScreen must write the screen file
 // even when the project has no mobile/ folder yet. In an agent build into a
 // fresh folder nothing created mobile/ before the first generate_mobile task,
 // the write failed without a message, and App.js still imported the missing

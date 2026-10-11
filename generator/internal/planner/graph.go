@@ -10,7 +10,7 @@ import (
 
 // ─────────────────────────────────────────────
 // TaskGraphFromSchema builds an ordered task dependency graph.
-// Static version — used when no existing project context is available.
+// Static version, used when no existing project context is available.
 // ─────────────────────────────────────────────
 func TaskGraphFromSchema(s schema.SchemaFile) []Task {
 	return buildTaskGraph(s, "", nil)

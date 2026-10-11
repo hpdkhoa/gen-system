@@ -75,7 +75,7 @@ func TestCFG_Block(t *testing.T) {
 	}
 }
 
-// ─── Build — Go ───────────────────────────────────────────────
+// ─── Build: Go ────────────────────────────────────────────────
 
 func TestBuild_SimpleGoFunction(t *testing.T) {
 	m := goFuncModule("Simple",
@@ -160,7 +160,7 @@ func TestBuild_ReturnAddsExitBlock(t *testing.T) {
 	}
 }
 
-// ─── Build — CA Gen ───────────────────────────────────────────
+// ─── Build: CA Gen ────────────────────────────────────────────
 
 func TestBuild_CAGenProcedure(t *testing.T) {
 	m := &ast.Module{
@@ -369,7 +369,7 @@ func effectKeys(m map[string]*FuncEffects) []string {
 	return ks
 }
 
-// v23.39 — the branch condition (carried on NodeBranch.RawSource by the Go and
+// v23.39: the branch condition (carried on NodeBranch.RawSource by the Go and
 // COBOL frontends) must survive onto the deciding block's Cond field, so the
 // CFG view can render a real decision node instead of a bare "IF".
 func TestBuild_BranchConditionOnBlock_v2339(t *testing.T) {
@@ -394,8 +394,8 @@ func TestBuild_BranchConditionOnBlock_v2339(t *testing.T) {
 	}
 }
 
-// v23.41 — an EVALUATE branch (Name=="EVALUATE" with WHEN children) builds a
-// MULTI-WAY CFG: the decision block fans out to one case block per WHEN, each
+// v23.41: an EVALUATE branch (Name=="EVALUATE" with WHEN children) builds a
+// multi-way CFG: the decision block fans out to one case block per WHEN, each
 // carrying the WHEN value as its Cond, all rejoining at a merge. Previously the
 // WHENs nested as fake ifs, producing a cascade of unlabeled decisions.
 func TestBuild_EvaluateMultiWay_v2341(t *testing.T) {

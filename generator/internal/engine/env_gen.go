@@ -1,4 +1,4 @@
-// generator/internal/engine/env_gen.go — v23.15: the generated .env/.env.example
+// generator/internal/engine/env_gen.go (v23.15): the generated .env/.env.example
 // now also write DATABASE_URL (the name the generated Go connector reads first),
 // keeping DB_URL for compatibility, so the connection string in .env reaches the app.
 package engine
@@ -16,9 +16,9 @@ import (
 
 // GenerateEnvFiles writes three files to rootPath:
 //
-//	.env             — actual values; add to .gitignore
-//	.env.example     — template with placeholder values; commit this
-//	docker-compose.yml — services derived from architecture components
+//	.env               actual values; add to .gitignore
+//	.env.example       template with placeholder values; commit this
+//	docker-compose.yml services derived from architecture components
 //
 // Components is the arch.Components list from planner_v2:
 //
@@ -48,7 +48,7 @@ func GenerateEnvFiles(entities []schema.Entity, rootPath string, components []st
 
 	env.WriteString("# Database\n")
 	// v23.15: write DATABASE_URL (the name the generated Go connector reads
-	// first) AND keep DB_URL for backward compatibility. Previously only DB_URL
+	// first) and keep DB_URL for backward compatibility. Previously only DB_URL
 	// was written while the app read DATABASE_URL, so the .env value never
 	// reached the running app.
 	env.WriteString(fmt.Sprintf(

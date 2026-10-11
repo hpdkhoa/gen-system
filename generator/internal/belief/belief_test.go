@@ -1,4 +1,4 @@
-// generator/internal/belief/belief_test.go — v26.9: unit tests for the belief
+// generator/internal/belief/belief_test.go, v26.9: unit tests for the belief
 // store. Covers the relocated store (s1), Box1/Box2 staleness (s2), and the
 // behavioral parser-eval kinds (s3).
 //
@@ -140,7 +140,7 @@ func TestCorrectionSurvivesReparse(t *testing.T) {
 }
 
 // ─── Session 2: Box1/Box2 staleness ───────────────────────────
-// We use the EFFECT belief as the value that changes: rebuild with db effects,
+// We use the effect belief as the value that changes: rebuild with db effects,
 // then with fs effects, so the parser-derived Object moves under a correction.
 
 func effectsFor(name string, k flow.EffectKind) map[string]*flow.FuncEffects {
@@ -466,7 +466,7 @@ func TestCorrectionContextRendersHumanCorrections(t *testing.T) {
 }
 
 func TestCorrectionContextOnlyHumanSourced(t *testing.T) {
-	// A parser belief that is NOT human-corrected must not appear.
+	// A parser belief that is not human-corrected must not appear.
 	bs := NewStore(t.TempDir())
 	bs.RebuildFromIndex(funcIndex("CreateUser", nil), map[string]*flow.FuncEffects{})
 	cc := bs.CorrectionContext()
@@ -548,7 +548,7 @@ func TestValidate_SemanticIsNeedsHuman(t *testing.T) {
 }
 
 func TestValidate_ContradictsWhenClaimsWriteButNoEffect(t *testing.T) {
-	// Parser sees NO effects for this routine; enrich claims it persists.
+	// Parser sees no effects for this routine; enrich claims it persists.
 	bs := NewStore(t.TempDir())
 	bs.SetEnricher(enrichWith(EnrichBelief{Kind: KindAction, Object: "saves the order to the database"}))
 	bs.RebuildFromIndex(funcIndex("Checkout", nil), map[string]*flow.FuncEffects{})
@@ -565,7 +565,7 @@ func TestValidate_ContradictsWhenClaimsWriteButNoEffect(t *testing.T) {
 }
 
 func TestValidate_ConsistentWhenWriteMatchesEffect(t *testing.T) {
-	// Parser DOES see a db effect; enrich claiming a write is consistent.
+	// Parser does see a db effect; enrich claiming a write is consistent.
 	bs := NewStore(t.TempDir())
 	bs.SetEnricher(enrichWith(EnrichBelief{Kind: KindAction, Object: "writes the order to the database"}))
 	bs.RebuildFromIndex(funcIndex("Checkout", nil), effectsFor("Checkout", flow.EffectDB))
@@ -641,7 +641,7 @@ func TestUpsertEnrichPersistsAcrossReparse(t *testing.T) {
 		{SymbolID: symID, Subject: "Checkout", Kind: KindAction, Object: "processes an order", Body: "func Checkout(){}"},
 	})
 
-	// A parser rebuild must NOT wipe the enrich belief.
+	// A parser rebuild must not wipe the enrich belief.
 	bs.RebuildFromIndex(idx, map[string]*flow.FuncEffects{})
 	if findBeliefByKindSrc(bs, KindAction, SourceEnrich) == nil {
 		t.Fatal("enrich belief did not survive a parser rebuild")
@@ -670,7 +670,7 @@ func TestEnrichSourceStalenessOnBodyChange(t *testing.T) {
 		{SymbolID: symID, Subject: "Checkout", Kind: KindAction, Object: "does the old thing", Body: body},
 	})
 
-	// Rebuild with the SAME body → not stale.
+	// Rebuild with the same body → not stale.
 	bs.RebuildFromIndex(idx, map[string]*flow.FuncEffects{})
 	b := findBeliefByKindSrc(bs, KindAction, SourceEnrich)
 	if b == nil || b.Stale {
@@ -708,7 +708,7 @@ func TestClearEnrichForSymbol(t *testing.T) {
 }
 
 func TestPersistedFileOmitsParserBeliefs(t *testing.T) {
-	// Parser beliefs are transient — the on-disk file must not carry them, only
+	// Parser beliefs are transient. The on-disk file must not carry them, only
 	// the durable classes (corrections + enrich).
 	root := t.TempDir()
 	idx := funcIndex("CreateUser", nil)
@@ -744,12 +744,12 @@ func TestEnrichRevalidatedOnReparse(t *testing.T) {
 	bs.UpsertEnrichBeliefs([]EnrichInput{
 		{SymbolID: symID, Subject: "Checkout", Kind: KindAction, Object: "writes to the database", Body: "b"},
 	})
-	// First rebuild WITH db effect → consistent.
+	// First rebuild with db effect → consistent.
 	bs.RebuildFromIndex(idx, effectsFor("Checkout", flow.EffectDB))
 	if b := findBeliefByKindSrc(bs, KindAction, SourceEnrich); b == nil || b.Validated != "consistent" {
 		t.Fatalf("expected consistent while db effect present: %+v", b)
 	}
-	// Rebuild WITHOUT the effect → the same stored belief now contradicts.
+	// Rebuild without the effect → the same stored belief now contradicts.
 	bs.RebuildFromIndex(idx, map[string]*flow.FuncEffects{})
 	if b := findBeliefByKindSrc(bs, KindAction, SourceEnrich); b == nil || b.Validated != "contradicts" {
 		t.Fatalf("expected contradicts after effect disappeared: %+v", b)
@@ -759,8 +759,8 @@ func TestEnrichRevalidatedOnReparse(t *testing.T) {
 // ─── Session 10: hierarchical summaries + cascade ─────────────
 
 // twoMethodIndex builds a module with two methods on the same service, so service
-// grouping and roll-up have real members. NOTE: ast.Node has NO QualName field —
-// a method's qualified name is DERIVED by the symbol table from Receiver.Name +
+// grouping and roll-up have real members. NOTE: ast.Node has no QualName field.
+// The symbol table derives a method's qualified name from Receiver.Name +
 // "." + Name, so the fixture must set Receiver the way a real frontend does.
 func twoMethodIndex() *symbols.Index {
 	mk := func(recv, name string) *ast.Node {
@@ -871,19 +871,19 @@ func TestSummaryCascadesStaleOnMemberCorrection(t *testing.T) {
 
 // TestAssertsPersistence_PhrasingAndFalsePositives pins the two lessons from the
 // first on-box test run: the detector must tolerate words between verb and target,
-// and must NOT fire on incidental nouns or explicitly in-memory phrasing.
+// and must not fire on incidental nouns or explicitly in-memory phrasing.
 func TestAssertsPersistence_PhrasingAndFalsePositives(t *testing.T) {
 	cases := []struct {
 		text string
 		want bool
 	}{
-		// Must DETECT — persistence claims with words between verb and target.
+		// Must detect: persistence claims with words between verb and target.
 		{"saves the order to the database", true},
 		{"writes the order to the database", true},
 		{"inserts the row into the users table", true},
 		{"persists the account balance", true},
 		{"writes to disk", true},
-		// Must NOT detect — real claims from a live run over an in-memory app.
+		// Must not detect: real claims from a live run over an in-memory app.
 		{"creates a new bookmarkhandler with an in-memory store.", false},
 		{"newbookmarkhandlerwith creates a new bookmarkhandler instance initialized with the provided bookmarkcrud store.", false},
 		{"registers http handlers for bookmark-related routes on the provided servemux.", false},
@@ -916,7 +916,7 @@ func TestContainsWord_WholeWordOnly(t *testing.T) {
 }
 
 // TestStoreIsolation_NoCrossTestLeak pins the v26.19 fix: a store rooted at a fresh
-// directory must NOT inherit beliefs from any other store. (Before this, tests
+// directory must not inherit beliefs from any other store. (Before this, tests
 // sharing NewStore("") all read/wrote one relative .gen/beliefs.json, so persistent
 // enrich beliefs from one test leaked into the next.)
 func TestStoreIsolation_NoCrossTestLeak(t *testing.T) {
@@ -938,8 +938,8 @@ func TestStoreIsolation_NoCrossTestLeak(t *testing.T) {
 
 // ─── v26.21: flat-language (COBOL) grouping + summary tally ───
 
-// cobolLikeIndex builds a module whose routines have NO receiver and NO dotted
-// qualified name — the shape a COBOL program produces (paragraphs like
+// cobolLikeIndex builds a module whose routines have no receiver and no dotted
+// qualified name. That is the shape a COBOL program produces (paragraphs like
 // APPLY-CREDIT inside PROGRAM-ID CUSTMGMT).
 func cobolLikeIndex(program string, paras ...string) *symbols.Index {
 	var nodes []*ast.Node
@@ -966,7 +966,7 @@ func cobolLikeIndex(program string, paras ...string) *symbols.Index {
 }
 
 // TestCobolParagraphsGroupByProgram pins the v26.21 fix: COBOL paragraph names have
-// no receiver, so before this they grouped into nothing and produced ZERO summaries.
+// no receiver, so before this they grouped into nothing and produced zero summaries.
 // They must now group under the PROGRAM-ID.
 func TestCobolParagraphsGroupByProgram(t *testing.T) {
 	bs := NewStore(t.TempDir())
@@ -1040,10 +1040,10 @@ func keysOf(m map[string][]string) []string {
 	return out
 }
 
-// ─── v26.22: module/project cascade on member ADD/REMOVE ───
+// ─── v26.22: module/project cascade on member add/remove ───
 
 // TestModuleCascadesOnServiceAdded pins the v26.22 fix: a module summary must go
-// stale when a NEW service summary appears beneath it — not only when an existing
+// stale when a new service summary appears beneath it, not only when an existing
 // member's content changes. Before this, module/project scopes replayed their
 // stored member list, so an added or removed child was invisible.
 func TestModuleCascadesOnServiceAdded(t *testing.T) {
@@ -1075,7 +1075,7 @@ func TestModuleCascadesOnServiceAdded(t *testing.T) {
 		t.Fatal("module summary should be fresh before any child is added")
 	}
 
-	// ADD a second service summary under the same module.
+	// Add a second service summary under the same module.
 	bs.UpsertSummary(SummaryInput{
 		Scope: ScopeService, Name: "PaymentService",
 		Object: "takes payments", MemberIDs: nil, Parent: "svc",
@@ -1130,11 +1130,11 @@ func moduleSummary(t *testing.T, bs *Store) Belief {
 	return Belief{}
 }
 
-// ─── v26.23: Warnings must be corrections ONLY ───
+// ─── v26.23: Warnings must be corrections only ───
 
 // TestWarningsExcludeStaleSummaries pins the v26.23 fix. The "N corrections are out
 // of date" banner is about human corrections and shows "you said X / source now Y".
-// A stale SUMMARY has neither value, so including it rendered empty rows under a
+// A stale summary has neither value, so including it rendered empty rows under a
 // misleading heading (seen on a real COBOL project: 3 stale summaries listed as
 // corrections with both fields blank).
 func TestWarningsExcludeStaleSummaries(t *testing.T) {
@@ -1199,7 +1199,7 @@ func TestWarningsIncludeRealStaleCorrection(t *testing.T) {
 	if err := bs.Correct(Correction{BeliefID: id, CorrectedTo: "human value"}); err != nil {
 		t.Fatalf("Correct: %v", err)
 	}
-	// Rebuild with DIFFERENT parameters so the derived inputs value changes and the
+	// Rebuild with different parameters so the derived inputs value changes and the
 	// correction's fingerprint no longer matches.
 	bs.RebuildFromIndex(
 		funcIndex("Checkout", []ast.Parameter{

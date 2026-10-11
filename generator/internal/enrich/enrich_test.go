@@ -1,4 +1,4 @@
-// generator/internal/enrich/enrich_test.go — v26.10: tests the pure parts of the
+// generator/internal/enrich/enrich_test.go (v26.10): tests the pure parts of the
 // enricher (prompt building, kind mapping, response parsing). The live-model path
 // (Enrich → Ollama, Available) is an on-box step; these tests never spawn a model.
 package enrich
@@ -49,7 +49,7 @@ func TestBuildPromptIncludesFacts(t *testing.T) {
 	}
 }
 
-// TestPromptFramesFactsAsConstraints — session 8 prevention: parser facts must be
+// TestPromptFramesFactsAsConstraints covers the session 8 prevention: parser facts must be
 // presented as authoritative constraints with explicit hard rules, not background.
 func TestPromptFramesFactsAsConstraints(t *testing.T) {
 	e := New()
@@ -64,7 +64,7 @@ func TestPromptFramesFactsAsConstraints(t *testing.T) {
 	}
 }
 
-// TestPromptNoEffectStatedExplicitly — when the parser saw no effect, the prompt
+// TestPromptNoEffectStatedExplicitly: when the parser saw no effect, the prompt
 // must say so explicitly, so the model won't invent a write (the #1 contradiction).
 func TestPromptNoEffectStatedExplicitly(t *testing.T) {
 	e := New()
@@ -74,7 +74,7 @@ func TestPromptNoEffectStatedExplicitly(t *testing.T) {
 	}
 }
 
-// TestPromptNoBodyGuidance — with no source body, the model is told to describe
+// TestPromptNoBodyGuidance: with no source body, the model is told to describe
 // only what the facts support (most likely just the action).
 func TestPromptNoBodyGuidance(t *testing.T) {
 	e := New()

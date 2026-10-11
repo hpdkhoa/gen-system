@@ -1,4 +1,4 @@
-// heal_log.go — v25.5 (self-healing observability, step 1 / Path A CLI opt-in).
+// heal_log.go, v25.5 (self-healing observability, step 1 / Path A CLI opt-in).
 //
 // `--heal-log <path>` registers a JSONL agent-event sink so a CLI generation run
 // (gen idea / run / continue / evolve / apply) writes one structured event per
@@ -9,7 +9,7 @@
 //
 // Off by default: with no --heal-log flag, no sink is registered and behaviour
 // is byte-identical to before. The returned cleanup closes the file; callers
-// defer it. Parsing mirrors GetSchemaPath (args.go) — a plain os.Args scan, no
+// defer it. Parsing mirrors GetSchemaPath (args.go): a plain os.Args scan, no
 // flag package, consistent with the rest of the CLI.
 package cli
 

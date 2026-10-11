@@ -1,4 +1,4 @@
-// snapshot_test.go — v26.57 (D015): a snapshot must never copy the snapshot
+// snapshot_test.go (v26.57, D015): a snapshot must never copy the snapshot
 // folder. The skip test compared the path with ".gen/snapshots" and a forward
 // slash; filepath.Walk gives backslashes on Windows, so the walk entered
 // .gen\snapshots, copied the snapshot being written into itself, and nested

@@ -25,7 +25,7 @@ import (
 func RunAll(entities []schema.Entity, path string) {
 
 	// ✅ FIX: Load previous IR snapshot for evolution merge
-	// v26.58 (follow up 7): the snapshot of the OUTPUT folder. It came from the
+	// v26.58 (follow up 7): the snapshot of the output folder. It came from the
 	// working directory, so a stale snapshot there skipped entities in a fresh
 	// output folder, and every run overwrote the caller's own snapshot.
 	// v26.59 (N11): the error was dropped, so a broken snapshot read as a first
@@ -44,7 +44,7 @@ func RunAll(entities []schema.Entity, path string) {
 	// ✅ FIX: Compile new IR
 	newIR, err := compiler.Compile(sf)
 	if err != nil {
-		fmt.Println("⚠️ IR compile warning:", err, "— continuing with RunAll")
+		fmt.Println("⚠️ IR compile warning:", err, "; continuing with RunAll")
 	}
 
 	// ✅ FIX: Evolution merge + incremental build plan
@@ -67,7 +67,7 @@ func RunAll(entities []schema.Entity, path string) {
 
 	for _, e := range entities {
 
-		// ✅ FIX: Incremental — skip unchanged entities on subsequent runs
+		// ✅ FIX: Incremental. Skip unchanged entities on subsequent runs
 		if !firstRun && !changedSet[e.Name] {
 			fmt.Println("⏭  Skipping unchanged entity:", e.Name)
 			continue
@@ -103,7 +103,7 @@ func RunAll(entities []schema.Entity, path string) {
 		genValidation(e, path)
 
 		// ── HANDLER ───────────────────────────────────────────────
-		// GenerateHandler runs FIRST — creates the file with a proper
+		// GenerateHandler runs first. It creates the file with a proper
 		// package declaration and import block. If the file already
 		// exists it does nothing, preserving any existing logic.
 		// The template renderer then fills the body if it is a new file.
@@ -112,7 +112,7 @@ func RunAll(entities []schema.Entity, path string) {
 
 		// ── AST MUTATION ──────────────────────────────────────────
 		// Only runs after the file exists. Safely upserts route.
-		// Skips AI mutation — it runs separately via: gen ai <path>
+		// Skips AI mutation; it runs separately via: gen ai <path>
 		RunMutationLayer(e, path)
 
 		// ── FRONTEND ───────────────────────────────────────────────

@@ -1,4 +1,4 @@
-// ts_destructure_v2658_test.go — v26.58 (D055): a destructuring declaration
+// ts_destructure_v2658_test.go (v26.58, D055): a destructuring declaration
 // without semicolon swallowed every later statement up to the next semicolon.
 // parseVarDecl skipped with skipUntil(tsSemicolon, tsEOF), and peek drops
 // newlines, so the line end never stopped the skip. Array patterns were not

@@ -1,4 +1,4 @@
-// generator/internal/agent/load_opts.go — v26.34: how the agent loads a
+// generator/internal/agent/load_opts.go (v26.34): how the agent loads a
 // project through the Understand engine.
 //
 // Until v26.34 the agent and the verify stage called the plain loader, which

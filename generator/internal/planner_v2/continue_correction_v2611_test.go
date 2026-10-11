@@ -1,7 +1,7 @@
-// generator/internal/planner_v2/continue_correction_v2611_test.go — v26.11
-// (session 5): proves that whatever the caller appends to the existing-summary
-// (specifically, the human belief-correction block) reaches the delta source —
-// i.e. the model that plans the continuation actually sees the corrections.
+// generator/internal/planner_v2/continue_correction_v2611_test.go, v26.11
+// (session 5): checks that whatever the caller appends to the existing-summary
+// (specifically, the human belief-correction block) reaches the delta source.
+// So the model that plans the continuation actually sees the corrections.
 package planner_v2
 
 import (

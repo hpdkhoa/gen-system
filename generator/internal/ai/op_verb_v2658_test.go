@@ -1,4 +1,4 @@
-// generator/internal/ai/op_verb_v2658_test.go — v26.58.
+// generator/internal/ai/op_verb_v2658_test.go (v26.58).
 //
 // D068: opVerb matched by prefix, so CheckStock became "check", ReOpen became
 // "reject" and PaymentStatus became "pay". OpMisplaced then found "check"

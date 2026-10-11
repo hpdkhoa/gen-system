@@ -7,9 +7,9 @@ import (
 // SafeExecute wraps any mutation with snapshot + build verification.
 //
 // Flow:
-//  1. SnapshotProject(root)   — copy the tree to .gen/snapshots/, without .git and node_modules
-//  2. fn()                    — run the mutation
-//  3. ValidateBuild(root)     — go build ./...
+//  1. SnapshotProject(root):    copy the tree to .gen/snapshots/, without .git and node_modules
+//  2. fn():                     run the mutation
+//  3. ValidateBuild(root):      go build ./...
 //  4. On any failure: RestoreSnapshot() and return the error
 //
 // The build error output is now propagated to the caller so it can

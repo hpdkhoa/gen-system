@@ -1,6 +1,6 @@
 // (v23.15) GenerateBackendApp now calls cleanStaleBackend(path) before emitGoMod so a reused output dir can't carry a poisoning stale backend/go.mod, backend/cmd/main.go, or memory-mode backend/internal/db from an earlier run.
 // (v23.14 Phase 6) Spring-mode guard added: when GEN_BACKEND=spring this Go generator is a no-op; the Spring Boot project is emitted by backend_spring.go.
-// generator/internal/engine/exports.go — v23.8: GenerateBackendApp also emits a
+// generator/internal/engine/exports.go (v23.8): GenerateBackendApp also emits a
 // trailing FK-constraint migration (genForeignKeyMigration) in postgres mode.
 // v23.2: exported generators now emit
 // the coherent in-memory CRUD set (backend_inmem.go) instead of the old
@@ -78,7 +78,7 @@ func GenerateBackendApp(entities []schema.Entity, path string) error {
 			GenerateSpringDockerfile(path),
 		)
 	}
-	// v23.15: scrub stale artifacts from a reused output directory BEFORE
+	// v23.15: scrub stale artifacts from a reused output directory before
 	// emitting anything, so an older run's files can't poison this build (a
 	// leftover backend/go.mod pinning an old lib/pq with no go.sum, an obsolete
 	// backend/cmd/main.go, or a memory-mode-irrelevant backend/internal/db).

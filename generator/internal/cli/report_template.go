@@ -1,7 +1,7 @@
-// cli/report_template.go — v23.30 (gen report): the standalone HTML template
+// cli/report_template.go, v23.30 (gen report): the standalone HTML template
 // used by WriteReport. Dark-terminal validation-report style per the project
 // DELIVERABLE FORMAT spec: IBM Plex Mono, two-column tables, file:line
-// evidence. Google Fonts <link> is cosmetic only — the page renders with the
+// evidence. Google Fonts <link> is cosmetic only: the page renders with the
 // monospace fallback when offline (HARD CONSTRAINT: no CDN for layout).
 package cli
 

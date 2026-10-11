@@ -1,4 +1,4 @@
-// cobol_scope_v2658_test.go — v26.58: procedure division scope defects.
+// cobol_scope_v2658_test.go (v26.58): procedure division scope defects.
 //
 // D061: an EVALUATE inside an open IF (or inline PERFORM) was attached to the
 // paragraph, so it became a sibling after the IF instead of a child of it.

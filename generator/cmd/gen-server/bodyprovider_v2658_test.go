@@ -1,4 +1,4 @@
-// bodyprovider_v2658_test.go — v26.58 (D017): bodyProviderFor cached the bytes
+// bodyprovider_v2658_test.go covers v26.58 (D017): bodyProviderFor cached the bytes
 // of each file for the life of the closure and also cached a failed read. With
 // --enrich-inline --watch, an edit to a source file updated the index, but the
 // provider cut the new span from the old bytes, so the enricher got empty or

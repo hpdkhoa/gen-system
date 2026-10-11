@@ -1,10 +1,10 @@
-// ts_frontend.go — TASK 2 (v19): parseFuncBody replaces skipBraces at
+// ts_frontend.go (TASK 2, v19): parseFuncBody replaces skipBraces at
 // function/method sites, emitting NodeBranch/NodeLoop/NodeReturn/NodeCall
 // children so cfg_ts_py.go can build a real multi-block CFG.
 package ast
 
 // ─────────────────────────────────────────────────────────────
-// ts_frontend.go — TypeScript/TSX language frontend
+// ts_frontend.go: TypeScript/TSX language frontend
 //
 // Fully offline, zero external dependencies. Implements a
 // declaration-level recursive-descent parser that covers:
@@ -15,7 +15,7 @@ package ast
 //   • abstract, async, export modifiers
 //   • Generic type parameters (names captured, bodies skipped)
 //
-// Function/method BODIES are scanned by parseFuncBody, which:
+// parseFuncBody scans function/method bodies. It:
 //   - Captures raw source as a NodeUnknown{body_not_parsed} child
 //     (preserving the existing presentation-layer behaviour).
 //   - Also emits NodeBranch / NodeLoop / NodeReturn / NodeCall children
@@ -55,7 +55,7 @@ func (t *TSFrontend) Parse(filePath string, source []byte) (*Module, error) {
 	return m, nil
 }
 
-// Emit returns the raw source (TypeScript files are not reformatted —
+// Emit returns the raw source (TypeScript files are not reformatted;
 // we preserve original bytes for unchanged regions).
 func (t *TSFrontend) Emit(module *Module) ([]byte, error) {
 	return module.RawSource, nil
@@ -418,13 +418,13 @@ func (p *tsParser) skipUntil(kinds ...tsTokenKind) {
 // (TypeScript without semicolons), swallowing every subsequent
 // declaration in the file or class body. A separate helper was needed
 // because skipUntil goes through peek(), and peek() unconditionally
-// skips tsNewline tokens to make lookahead robust against blank lines.
+// skips tsNewline tokens so that blank lines do not break lookahead.
 //
 // Semantics: if there is already a token buffered by an earlier peek(),
-// the current statement has effectively ended — that buffered token
+// the current statement has effectively ended. That buffered token
 // belongs to whatever comes next (and the newline that separates them
 // has already been silently dropped by peek). Do not touch the buffer
-// in that case; just return. Only when the buffer is empty do we drop
+// in that case; return at once. Only when the buffer is empty do we drop
 // down to the raw lexer to consume tokens up to a real terminator,
 // honouring newlines at brace depth 0.
 //
@@ -656,7 +656,7 @@ func (p *tsParser) parseTopLevel(m *Module) {
 				tok = p.peek()
 				if tok.kind == tsIdent && tok.text == "default" {
 					p.consume()
-					// export default — skip to semicolon/newline
+					// export default: skip to semicolon/newline
 					p.skipUntil(tsSemicolon, tsEOF)
 					if p.peek().kind == tsSemicolon {
 						p.consume()
@@ -745,7 +745,7 @@ func (p *tsParser) parseTopLevel(m *Module) {
 				nodes := p.parseVarDecl(exported, tok.line, tok.col, tok.off)
 				m.Nodes = append(m.Nodes, nodes...)
 			default:
-				// Unknown statement — mark and skip to next safe point
+				// Unknown statement: mark and skip to next safe point
 				m.Nodes = append(m.Nodes, &Node{
 					Kind:          NodeUnknown,
 					Language:      LangTS,
@@ -754,7 +754,7 @@ func (p *tsParser) parseTopLevel(m *Module) {
 					UnknownReason: "unrecognized_top_level_statement",
 				})
 				p.consume()
-				p.skipUntilStmtEnd() // v18 (D1#8): was skipUntil(.., tsNewline, ..) — dead
+				p.skipUntilStmtEnd() // v18 (D1#8): was skipUntil(.., tsNewline, ..), dead
 				if p.peek().kind == tsSemicolon {
 					p.consume()
 				}
@@ -777,7 +777,7 @@ func (p *tsParser) parseImport(line, col, off int) *Node {
 		Span:     p.makeSpan(line, col, off),
 	}
 
-	// import type { ... } — treat identically to import { ... }
+	// import type { ... }: treat identically to import { ... }
 	if tok.kind == tsIdent && tok.text == "type" {
 		p.consume()
 		tok = p.peek()
@@ -986,7 +986,7 @@ func (p *tsParser) parseInterfaceBody() []Field {
 				p.consume()
 				typ = p.parseTypeExpr()
 			} else if p.peek().kind == tsLParen {
-				// method signature — skip params and return type
+				// method signature: skip params and return type
 				p.skipParens()
 				if p.peek().kind == tsColon {
 					p.consume()
@@ -1220,7 +1220,7 @@ func (p *tsParser) parseClassBody(className string) ([]Field, []*Node) {
 					p.consume()
 					// v18 (D1#8): the previous skipUntil(.., tsNewline, ..) call
 					// was dead because peek() swallows tsNewline before it can
-					// match — that ran to EOF and consumed every subsequent
+					// match. That ran to EOF and consumed every subsequent
 					// method in the class body, so tests expecting >= 2 method
 					// children always saw 0. skipUntilStmtEnd reads raw tokens
 					// from the lexer and honours newlines at depth 0.
@@ -1335,7 +1335,7 @@ func (p *tsParser) parseVarDecl(exported bool, line, col, off int) []*Node {
 			break
 		}
 		if tok.kind == tsLBrace || tok.kind == tsLBracket {
-			// destructuring — mark as unknown
+			// destructuring: mark as unknown
 			nodes = append(nodes, &Node{
 				Kind:          NodeUnknown,
 				Language:      LangTS,
@@ -1379,7 +1379,7 @@ func (p *tsParser) parseVarDecl(exported bool, line, col, off int) []*Node {
 			// v18 (D1#9): the previous loop only terminated at comma,
 			// semicolon, EOF, or unmatched ')]}'. For TypeScript without
 			// trailing semicolons, two adjacent `export const` declarations
-			// merged into one — the second declaration was consumed as
+			// merged into one. The second declaration was consumed as
 			// part of the first value literal, so we always saw 1 of 2.
 			// Drain p.buf first, then read raw tokens straight from the
 			// lexer so we can honour newlines at depth 0 without changing
@@ -1477,7 +1477,7 @@ func (p *tsParser) parseTypeExpr() TypeRef {
 	if len(parts) == 1 {
 		return parts[0]
 	}
-	// Union or intersection — record the names joined for human readability
+	// Union or intersection: record the names joined for human readability
 	names := make([]string, len(parts))
 	for i, pt := range parts {
 		names[i] = pt.String()
@@ -1592,7 +1592,7 @@ func (p *tsParser) parseTypeParams() []string {
 
 func (p *tsParser) parseParamList() []Parameter {
 	p.skipParens()
-	return nil // params recorded as unknown — body_not_parsed covers them
+	return nil // params recorded as unknown; body_not_parsed covers them
 }
 
 func (p *tsParser) readParamList() string {

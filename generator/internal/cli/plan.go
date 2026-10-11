@@ -15,8 +15,8 @@ const defaultPlanFile = "plan.generated.json"
 
 // Plan handles `gen plan [--v2] "goal"`.
 //
-// Without --v2: V1 pipeline — GeneratePlan() → GenerateSchemaFromPlan() → tasks
-// With --v2:    V2 pipeline — features → architecture → entities → tasks (real AI)
+// Without --v2, the V1 pipeline: GeneratePlan() → GenerateSchemaFromPlan() → tasks
+// With --v2, the V2 pipeline:    features → architecture → entities → tasks (real AI)
 //
 // Both write plan.generated.json compatible with `gen run --plan`.
 func Plan() {
@@ -59,13 +59,13 @@ func Plan() {
 
 	if useV2 {
 		fmt.Printf("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
-		fmt.Printf("🧠 Planner V2 — multi-step reasoning\n")
+		fmt.Printf("🧠 Planner V2: multi-step planning\n")
 		fmt.Printf("   Goal: %s\n", goal)
 		fmt.Printf("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n")
 		plan, err = planner_v2.BuildPlanV2(goal)
 	} else {
 		fmt.Printf("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
-		fmt.Printf("🧠 Planner V1 — standard pipeline\n")
+		fmt.Printf("🧠 Planner V1: standard pipeline\n")
 		fmt.Printf("   Goal: %s\n", goal)
 		fmt.Printf("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n")
 		plan, err = planner.BuildPlan(goal)
@@ -76,7 +76,7 @@ func Plan() {
 		return
 	}
 
-	// Plan is a review artifact, not generated source — but still honour --out
+	// Plan is a review artifact, not generated source. Still honour --out
 	// so it doesn't pollute the cwd/source. Default keeps prior behaviour (cwd).
 	planOut := defaultPlanFile
 	if d := GetFlag("out", ""); d != "" {

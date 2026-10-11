@@ -1,10 +1,10 @@
-// py_frontend.go — TASK 2 (v19): Python analysis script extended to emit
+// py_frontend.go (TASK 2, v19): Python analysis script extended to emit
 // body_nodes (calls, branches, loops, returns, raises) for function bodies.
 // pyParseOutput now converts them to NodeBranch/NodeLoop/NodeReturn/NodeCall.
 package ast
 
 // ─────────────────────────────────────────────────────────────
-// py_frontend.go — Python language frontend
+// py_frontend.go: Python language frontend
 //
 // Offline strategy: spawn python3 (or python) with an embedded
 // analysis script that uses Python's own ast module.  This gives
@@ -462,7 +462,7 @@ func (py *PyFrontend) Parse(filePath string, source []byte) (*Module, error) {
 	cmd := exec.Command(py.pythonBin, "-", filePath)
 	cmd.Stdin = strings.NewReader(pyAnalysisScript + "\n")
 
-	// Feed source to stdin of the python interpreter — but we need the
+	// Feed source to stdin of the python interpreter. But we need the
 	// script to also read from stdin. Work around by writing script to
 	// a temp file approach: embed source in the script call differently.
 	// Better: pipe source via stdin by using -c flag with the script.
@@ -514,7 +514,7 @@ type pyNodeJSON struct {
 }
 
 // pyBodyNodeJSON represents one structural node inside a function body. v26.6:
-// now NESTED — a branch carries its then-body in Body and else-body in Orelse; a
+// now nested. A branch carries its then-body in Body and else-body in Orelse; a
 // loop carries its body in Body; a try carries body + handler/else/finally in
 // Orelse; a match carries its case-arms in Cases. Expr marks nodes that came from
 // expression-level flow (short-circuit / ternary / comprehension) so the CFG can
@@ -590,7 +590,7 @@ func pyBodyToNodes(bns []pyBodyNodeJSON) []*Node {
 			// Children are per-case NodeBranch arms (each RawSource=pattern). This
 			// is exactly the shape isMultiWayBranch/processNode fan out (like Go
 			// switch / COBOL EVALUATE), so match/case gets the v26.1 lane-column
-			// layout for free.
+			// layout with no extra code.
 			arms := make([]*Node, 0, len(bn.Cases))
 			for _, cs := range bn.Cases {
 				arms = append(arms, &Node{
@@ -701,7 +701,7 @@ func pyParseOutput(filePath string, raw []byte) ([]*Node, []ParseError) {
 				})
 			}
 			// Build children: opaque body marker + structural nodes.
-			// v26.6: the conversion is now RECURSIVE — pyBodyToNodes builds the
+			// v26.6: the conversion is now recursive. pyBodyToNodes builds the
 			// nested NodeBranch{Children,Else}/NodeLoop{Children}/NodeTry/multi-way
 			// tree the CFG builder already knows how to walk (the same shape Go and
 			// Java emit), so Python renders a faithful control-flow graph instead of

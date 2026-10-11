@@ -152,7 +152,7 @@ func TestTraceFileWritesJSON(t *testing.T) {
 	ctx := WithPhase(context.Background(), "test")
 	Info(ctx, "hello", "count", 7)
 
-	// Force flush — Close() will sync.
+	// Force flush. Close() will sync.
 	if err := Close(); err != nil {
 		t.Fatalf("Close: %v", err)
 	}

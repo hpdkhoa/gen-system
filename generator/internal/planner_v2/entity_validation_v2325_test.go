@@ -1,6 +1,6 @@
-// generator/internal/planner_v2/entity_validation_v2325_test.go — v23.25
+// generator/internal/planner_v2/entity_validation_v2325_test.go, v23.25
 // (task A): the deterministic noun-trace keeps idea entities and flags the
-// hallucinated ones. Pure (no model) — exercises partitionByAnchor/ideaTokens.
+// hallucinated ones. Pure (no model): exercises partitionByAnchor/ideaTokens.
 package planner_v2
 
 import "testing"

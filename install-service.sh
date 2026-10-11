@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# install-service.sh — register gen-server as a systemd service that starts
+# install-service.sh: register gen-server as a systemd service that starts
 # automatically on boot.
 #
-# Run AFTER install.sh has completed successfully.
+# Run after install.sh has completed successfully.
 #
 # Usage:
 #   sudo ./install-service.sh
@@ -176,7 +176,7 @@ RestartSec=5s
 StartLimitBurst=5
 StartLimitIntervalSec=60
 
-# Security hardening — gen-server is offline and read-only by default.
+# Security hardening. gen-server is offline and read-only by default.
 NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=full
@@ -190,7 +190,7 @@ RestrictNamespaces=true
 RestrictSUIDSGID=true
 LockPersonality=true
 
-# Resource limits — adjust to your hardware.
+# Resource limits. Adjust them to your hardware.
 LimitNOFILE=65536
 MemoryMax=4G
 

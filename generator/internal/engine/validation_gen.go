@@ -1,9 +1,9 @@
-// generator/internal/engine/validation_gen.go — v23.8: validation is now TYPED
-// and ACTUALLY CALLED. genValidation emits Validate<Type>(m model.<Type>) error
-// over the SAME field set the model/store use (fieldsForEntity), and the
+// generator/internal/engine/validation_gen.go (v23.8): validation is now typed
+// and actually called. genValidation emits Validate<Type>(m model.<Type>) error
+// over the same field set the model/store use (fieldsForEntity), and the
 // in-memory handler calls it in Create/Update (see genHandlerInMem). WHY: the
 // previous Validate<Name>(map[string]interface{}) keyed on raw field names,
-// never matched decoded JSON, and was never invoked — dead code. v23.1 (round
+// never matched decoded JSON, and was never invoked: dead code. v23.1 (round
 // 3) history: shipped a Require helper into the generated validation package so
 // it built (was "undefined: Require"); that build fix is preserved.
 package engine
@@ -54,8 +54,8 @@ func writeRequireHelper(path string) error {
 
 // genValidation writes backend/internal/validation/<route>_validation.go with a
 // typed Validate<Type>(m model.<Type>) error. It checks each generated field
-// (fieldsForEntity — same set as model/store, so FK and sanitized names line
-// up) for its zero value. Synthetic FK fields are NOT required (a child may be
+// (fieldsForEntity, the same set as model/store, so FK and sanitized names line
+// up) for its zero value. Synthetic FK fields are not required (a child may be
 // created before being linked). If there are no checkable fields the validator
 // is still emitted (returns nil) so the handler call always compiles.
 //

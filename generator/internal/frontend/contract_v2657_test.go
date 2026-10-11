@@ -1,6 +1,6 @@
-// contract_v2657_test.go — v26.57 (D002, D004): the generated TypeScript client
+// contract_v2657_test.go (v26.57, D002, D004): the generated TypeScript client
 // must call the routes the generated Go backend serves and read the JSON keys
-// the generated model writes. The test runs BOTH generators on one entity and
+// the generated model writes. The test runs both generators on one entity and
 // compares their output files, so any future drift between the two fails here.
 //
 // Before v26.57 the client called /blogPosts while the backend served

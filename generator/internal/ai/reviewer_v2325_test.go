@@ -1,4 +1,4 @@
-// generator/internal/ai/reviewer_v2325_test.go — v23.25 (task C): proves the
+// generator/internal/ai/reviewer_v2325_test.go, v23.25 (task C): checks the
 // backend-scoped severity tiers. SQL-injection / unvalidated-input findings are
 // INFO on the in-memory backend (no SQL) and WARN on the postgres path; the
 // scaffold ignored-error idiom is INFO; "no hardcoded secrets" style non-

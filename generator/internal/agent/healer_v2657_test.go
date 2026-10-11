@@ -1,7 +1,7 @@
-// healer_v2657_test.go — v26.57: FixTask on a real Go file with a fake model.
+// healer_v2657_test.go (v26.57): FixTask on a real Go file with a fake model.
 //
 // D010: after a failed attempt FixTask "restored" the file by passing the
-// WHOLE file text to RewriteFunction as a function body. parseBody rejected it,
+// whole file text to RewriteFunction as a function body. parseBody rejected it,
 // the error was dropped, and the failed AI body stayed in the file.
 //
 // D011: FixTask targeted GetAll<Entity>, a function no generated file defines.

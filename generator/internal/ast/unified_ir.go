@@ -1,9 +1,9 @@
-// unified_ir.go — v23.7: Node.Else added (ELSE body of an if-branch) so the
+// unified_ir.go (v23.7): Node.Else added (ELSE body of an if-branch) so the
 // CFG can render a distinct else-block.
 package ast
 
 // ─────────────────────────────────────────────────────────────
-// unified_ir.go — Language-agnostic Intermediate Representation
+// unified_ir.go: language-agnostic Intermediate Representation
 //
 // Every language frontend (Go, TypeScript, Python, CA Gen) must
 // convert its native parse tree into this canonical IR.
@@ -46,7 +46,7 @@ const (
 	NodeEscape    NodeKind = "escape"    // CA Gen ESCAPE
 	NodeProcedure NodeKind = "procedure" // CA Gen PROCEDURE block
 
-	// Explicit ignorance — parser encountered this but cannot fully model it.
+	// Explicit ignorance: the parser met this but cannot fully model it.
 	// Always populated: UnknownReason + RawSource.
 	NodeUnknown NodeKind = "unknown"
 )
@@ -142,7 +142,7 @@ type EnumMember struct {
 // ─── Node ─────────────────────────────────────────────────────
 
 // Node is the unified AST element. Fields are populated according
-// to Kind — see inline comments for which fields are relevant.
+// to Kind. See inline comments for which fields are relevant.
 type Node struct {
 	// Universal fields
 	ID       string // unique within module, e.g. "func:CreateUser"
@@ -193,15 +193,15 @@ type Node struct {
 	CallArgs []string // argument expressions (text snippets)
 
 	// ── NodeUnknown ────────────────────────────────────────
-	// ALWAYS populated when Kind == NodeUnknown.
-	// This is the "explicit ignorance channel" — the presentation
+	// Always populated when Kind == NodeUnknown.
+	// This is the "explicit ignorance channel". The presentation
 	// layer surfaces these to the human for verification.
 	RawSource     string
 	UnknownReason string
 
 	// Children are nested nodes (e.g. function body statements,
 	// struct fields as NodeVariable, class methods as NodeMethod).
-	// For NodeBranch (if), Children is the THEN body; Else is the ELSE body
+	// For NodeBranch (if), Children is the then body; Else is the else body
 	// (v23.7) so the CFG builder can emit a distinct else-block. Else is nil
 	// for if-without-else and for switch/select (whose cases are in Children).
 	Children []*Node

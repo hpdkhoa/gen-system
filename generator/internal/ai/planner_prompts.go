@@ -1,11 +1,11 @@
-// generator/internal/ai/planner_prompts.go — v23.1: CompileIdea resolves the
+// generator/internal/ai/planner_prompts.go (v23.1): CompileIdea resolves the
 // model via Model() instead of hard-coded qwen2.5-coder:7b.
 package ai
 
 // ─────────────────────────────────────────────
 // Planner AI functions
 //
-// These functions own the COMPLETE responsibility for:
+// These functions own the complete responsibility for:
 //   - building the prompt string
 //   - calling AskLLM
 //   - parsing the raw LLM response
@@ -22,8 +22,8 @@ import (
 
 // ── STEP 1: Feature extraction ───────────────────────────────────
 
-// ExtractFeatures extracts 3–7 named product features from a goal string.
-// Returns a plain string slice — no planner_v2 dependency.
+// ExtractFeatures extracts 3 to 7 named product features from a goal string.
+// Returns a plain string slice. No planner_v2 dependency.
 func ExtractFeatures(goal string) ([]string, error) {
 	prompt := fmt.Sprintf(`You are a product analyst. Extract ONLY the backend
 features the idea ACTUALLY states. Do not invent features that a similar product
@@ -68,11 +68,11 @@ JSON:`, strings.TrimSpace(goal))
 // ── STEP 2: Architecture design ──────────────────────────────────
 
 // PlanArchitecture designs backend architecture from extracted features.
-// Returns three parallel slices — no Architecture struct imported here.
+// Returns three parallel slices. No Architecture struct is imported here.
 //
-//	archType   — "monolith" or "microservice"
-//	components — e.g. ["api", "database", "auth"]
-//	decisions  — brief rationale strings
+//	archType:   "monolith" or "microservice"
+//	components: e.g. ["api", "database", "auth"]
+//	decisions:  brief rationale strings
 func PlanArchitecture(features []string) (archType string, components []string, decisions []string, err error) {
 	if len(features) == 0 {
 		return "monolith", []string{"api", "database"}, []string{"default"}, nil
@@ -154,17 +154,17 @@ type RawEntitySpec struct {
 }
 
 // PlanEntities generates database entity specs from features + architecture.
-// Takes only primitives — no planner_v2 types in the signature.
+// Takes only primitives. No planner_v2 types appear in the signature.
 //
-//	archType   — "monolith" | "microservice"
-//	components — e.g. ["api", "database", "auth"]
+//	archType:   "monolith" | "microservice"
+//	components: e.g. ["api", "database", "auth"]
 //
-// PlanEntities generates database entity specs from the ORIGINAL idea plus the
+// PlanEntities generates database entity specs from the original idea plus the
 // derived features + architecture. v23.20: the idea text is now passed in and is
-// the primary anchor — features alone are abstract ("Inventory Management") and
+// the primary anchor. Features alone are abstract ("Inventory Management") and
 // led the model to autocomplete a generic schema (Order, Product, Customer,
 // Payment, Review, …) up to the old "max 8" ceiling. The prompt now insists on
-// only the nouns the idea names, and that operations/rules are NOT entities.
+// only the nouns the idea names, and that operations/rules are not entities.
 func PlanEntities(goal string, features []string, archType string, components []string) ([]RawEntitySpec, error) {
 	if len(features) == 0 {
 		return nil, fmt.Errorf("PlanEntities: no features provided")
@@ -255,7 +255,7 @@ JSON:`,
 // ── STEP 0: Compile idea → schema JSON (moved from compiler/idea/) ──
 
 // CompileIdea converts a product idea string into a schema JSON string.
-// Previously lived in compiler/idea/compiler.go — moved here because
+// Previously lived in compiler/idea/compiler.go. It moved here because
 // it is an AI call. It performs no compiler transformation.
 func CompileIdea(input string) (string, error) {
 	prompt := `You are a schema compiler.

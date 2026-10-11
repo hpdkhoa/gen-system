@@ -1,4 +1,4 @@
-// nit/nit.go — AST-NIT serialiser
+// nit/nit.go: AST-NIT serialiser
 // Added for open item 3: compact token-reduced Module serialisation for LLM prompts.
 // "NIT" = Node Indexed Text. Achieves ~28.6% token reduction vs raw source by:
 //  1. Emitting only the structurally-relevant skeleton (signatures, types, names).
@@ -18,7 +18,7 @@
 //	VAR  <name> <type>
 //	CST  <name> <type> = <value>
 //	PRO  <name>  [calls: a,b,c]         (CA Gen PROCEDURE)
-//	UNK  <reason>                        (NodeUnknown — always kept)
+//	UNK  <reason>                        (NodeUnknown, always kept)
 //
 // The caller controls detail level via Options.
 package nit
@@ -94,7 +94,7 @@ func serializeNode(n *ast.Node, opts Options) []string {
 	if n == nil {
 		return nil
 	}
-	// Unknown nodes are always emitted — explicit ignorance channel.
+	// Unknown nodes are always emitted as an explicit ignorance channel.
 	if n.Kind == ast.NodeUnknown {
 		reason := n.UnknownReason
 		if reason == "" {
@@ -220,7 +220,7 @@ func serializeInterface(n *ast.Node, opts Options) string {
 	var b strings.Builder
 	b.WriteString("IFC  ")
 	b.WriteString(n.Name)
-	// Interface fields are method signatures — emit as name:sig.
+	// Interface fields are method signatures. Emit as name:sig.
 	if len(n.Fields) > 0 {
 		b.WriteString("  {")
 		parts := make([]string, 0, len(n.Fields))

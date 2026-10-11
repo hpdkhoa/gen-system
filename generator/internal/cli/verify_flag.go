@@ -1,9 +1,9 @@
-// verify_flag.go — v25.5 (step 2 CLI opt-in): `--verify-understand
+// verify_flag.go, v25.5 (step 2 CLI opt-in): `--verify-understand
 // <stop|autofix>` turns on the Understand-validates-Generate pass and picks the
 // behaviour on a finding.
 //
 //	stop     (default when the flag is present without a value): report every
-//	         finding, halt for human review, and — for a staged continue — write
+//	         finding, halt for human review, and (for a staged continue) write
 //	         a findings report next to the .evolve-review dir.
 //	autofix  route fixable findings through the repair loop, then re-report.
 //
@@ -71,9 +71,9 @@ func SetupVerifyUnderstand() string {
 	agent.VerifyUnderstandMode = mode
 	switch agent.VerifyUnderstandMode {
 	case agent.VerifyAutofix:
-		fmt.Println("🔎 verify-understand: AUTOFIX — findings route to the repair loop")
+		fmt.Println("🔎 verify-understand: AUTOFIX. Findings go to the repair loop")
 	case agent.VerifyStop:
-		fmt.Println("🔎 verify-understand: STOP — findings halt for human review")
+		fmt.Println("🔎 verify-understand: STOP. Findings stop the run for human review")
 	}
 	return val
 }

@@ -1,11 +1,11 @@
-// generator/internal/engine/logic_stats.go — v26.24 (WP1): per-run counters for
+// generator/internal/engine/logic_stats.go, v26.24 (WP1): per-run counters for
 // what happened to model-proposed operations, so the benchmark can report a
 // quality axis that is able to move. compile_pass alone cannot: the stub path
 // guarantees the service builds, so "did it build" is 100% by construction.
-// What varies with model quality is HOW MANY operations survived the compile
+// What varies with model quality is how many operations survived the compile
 // gate as real logic versus degrading to a `not implemented` stub, and how many
 // repair round-trips that took. These counters record exactly that, from the
-// same code path production uses — nothing is instrumented differently for the
+// same code path production uses. Nothing is instrumented differently for the
 // bench.
 //
 // Package-level (mutex-guarded) rather than threaded through call signatures,

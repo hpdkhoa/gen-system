@@ -1,22 +1,22 @@
-// v23.44: NewServerWithWeb pins the static UI dir (absolute) + no-store on the Studio HTML, so a rebuilt UI is never served stale from CWD-relative http.Dir or the browser cache.
-// server.go — v23.9 (Phase 2): the single mux is split into two registration
+// v23.44: NewServerWithWeb pins the static UI dir (absolute) + no-store on the Studio HTML, so the server never serves a rebuilt UI stale from CWD-relative http.Dir or the browser cache.
+// server.go (v23.9, Phase 2): the single mux is now two registration
 // functions so the two products can be assembled independently:
 //
-//	RegisterUnderstandRoutes — /api/events (SSE) + /api/present/* (the Studio).
-//	                           This is ALL the enterprise understand-server needs.
-//	RegisterGenerateRoutes   — snapshots, schema, entities, build, heal, evolve,
+//	RegisterUnderstandRoutes:  /api/events (SSE) + /api/present/* (the Studio).
+//	                           This is all the enterprise understand-server needs.
+//	RegisterGenerateRoutes:    snapshots, schema, entities, build, heal, evolve,
 //	                           and the gated github routes. Internal/generation.
 //
 // NewServer composes both (the all-in-one dev/internal server). The enterprise
-// cmd/understand-server calls ONLY RegisterUnderstandRoutes and therefore links
-// no generation packages — verified by an acceptance test (go list -deps).
+// cmd/understand-server calls only RegisterUnderstandRoutes and therefore links
+// no generation packages. An acceptance test checks this (go list -deps).
 //
-// server.go — v23: + presServer.RegisterV23Routes (architecture/search/callgraph/effects).
-// server.go — v21: + /api/evolve/stage,commit,discard routes. (v20.1: /api/clean.)
+// server.go (v23): + presServer.RegisterV23Routes (architecture/search/callgraph/effects).
+// server.go (v21): + /api/evolve/stage,commit,discard routes. (v20.1: /api/clean.)
 package api
 
 // ─────────────────────────────────────────────────────────────
-// server.go — HTTP multiplexer for the gen-system studio server
+// server.go: HTTP multiplexer for the gen-system studio server
 //
 // v15 change: NewServer now accepts an optional *presentation.Server.
 // Pass nil to keep v14 behaviour; pass a configured Server to add
@@ -24,7 +24,7 @@ package api
 //
 // Patched in v18 (B4): NewServer now also takes a githubEnabled flag.
 // The /api/github/* routes (config, pr, webhook) are only mounted when
-// the flag is true. The engine itself never calls these — they exist
+// the flag is true. The engine itself never calls these. They exist
 // only for explicit user-initiated UI flows. Default off matches the
 // hard constraint that the engine is offline.
 // ─────────────────────────────────────────────────────────────
@@ -40,8 +40,8 @@ import (
 )
 
 // RegisterUnderstandRoutes mounts the read-only code-intelligence surface. It
-// delegates to api/understand (which imports no generation packages) so there is
-// a single source of truth for the Studio routes.
+// delegates to api/understand (which imports no generation packages), so the
+// Studio routes live in one place.
 func RegisterUnderstandRoutes(mux *http.ServeMux, broker *sse.Broker, presServer *presentation.Server) {
 	understand.RegisterRoutes(mux, broker, presServer)
 }
@@ -49,7 +49,7 @@ func RegisterUnderstandRoutes(mux *http.ServeMux, broker *sse.Broker, presServer
 // RegisterGenerateRoutes mounts the generation/build surface: snapshots, schema,
 // goal mapping, entity review, build, heal, evolve, and (when enabled) github.
 // These are driven by *handlers.Handlers and pull in the generation stack. The
-// enterprise understand-server does NOT call this.
+// enterprise understand-server does not call this.
 func RegisterGenerateRoutes(mux *http.ServeMux, h *handlers.Handlers, githubEnabled bool) {
 	// ── Snapshots ────────────────────────────────────────────
 	mux.HandleFunc("/api/snapshots", func(w http.ResponseWriter, r *http.Request) {
@@ -267,7 +267,7 @@ func RegisterGenerateRoutes(mux *http.ServeMux, h *handlers.Handlers, githubEnab
 
 	// ── GitHub HITL CI/CD (Phase 3.1) ────────────────────────
 	// v18: only mounted when --github-enabled is set on gen-server.
-	// Default behaviour is fully offline — the routes do not exist.
+	// The default is fully offline: the routes do not exist.
 	if githubEnabled {
 		mux.HandleFunc("/api/github/config", func(w http.ResponseWriter, r *http.Request) {
 			cors(w)
@@ -305,21 +305,21 @@ func RegisterGenerateRoutes(mux *http.ServeMux, h *handlers.Handlers, githubEnab
 func NewServer(
 	h *handlers.Handlers,
 	broker *sse.Broker,
-	presServer *presentation.Server, // v15 addition — pass nil to disable
-	githubEnabled bool, // v18 addition — pass false to keep /api/github/* unmounted
+	presServer *presentation.Server, // v15 addition; pass nil to disable
+	githubEnabled bool, // v18 addition; pass false to keep /api/github/* unmounted
 ) http.Handler {
 	// v23.44: default web dir is "web" relative to CWD (legacy behaviour). Use
-	// NewServerWithWeb to pin an explicit directory — cmd/gen-server does, so the
+	// NewServerWithWeb to pin an explicit directory. cmd/gen-server does, so the
 	// Studio HTML is served from a known location regardless of launch dir.
 	return NewServerWithWeb(h, broker, presServer, githubEnabled, "web")
 }
 
 // NewServerWithWeb is NewServer with an explicit static-UI directory. v23.44:
-// http.Dir("web") resolved relative to the PROCESS WORKING DIRECTORY, so
+// http.Dir("web") resolved relative to the process working directory, so
 // launching gen-server from anywhere but the tree root silently served a stale
-// (or missing) studio-v23.html — the "my fix isn't showing up" trap. Pinning an
+// (or missing) studio-v23.html: the "my fix isn't showing up" trap. Pinning an
 // absolute path fixes it. Also sets Cache-Control: no-store on the HTML so a
-// rebuilt UI is never served from the browser cache.
+// browser never serves a rebuilt UI from its cache.
 func NewServerWithWeb(
 	h *handlers.Handlers,
 	broker *sse.Broker,
@@ -333,7 +333,7 @@ func NewServerWithWeb(
 
 // NewServerWithProject is NewServerWithWeb plus the dynamic-project endpoints
 // (/api/project/*). v24: pass a non-nil pm to let the Studio load/clear/switch
-// the analysis root at runtime. pm's routes are registered BEFORE the static
+// the analysis root at runtime. pm's routes are registered before the static
 // catch-all so ServeMux resolves them first.
 func NewServerWithProject(
 	h *handlers.Handlers,
@@ -357,7 +357,7 @@ func NewServerWithProject(
 	}
 	fileServer := http.FileServer(http.Dir(webDir))
 	mux.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Never let a browser cache the Studio HTML/JS — a rebuilt UI must show
+		// Never let a browser cache the Studio HTML/JS. A rebuilt UI must show
 		// up on refresh. (Static assets are small; correctness beats caching.)
 		w.Header().Set("Cache-Control", "no-store, must-revalidate")
 		fileServer.ServeHTTP(w, r)

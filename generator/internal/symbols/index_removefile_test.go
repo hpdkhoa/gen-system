@@ -1,4 +1,4 @@
-// symbols/index_removefile_test.go — tests for Index.RemoveFile
+// symbols/index_removefile_test.go: tests for Index.RemoveFile
 // Tests for open item 2: the incremental rebuild delete path.
 package symbols
 

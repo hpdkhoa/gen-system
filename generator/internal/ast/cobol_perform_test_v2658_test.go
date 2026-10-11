@@ -1,4 +1,4 @@
-// cobol_perform_test_v2658_test.go — v26.58 (F6): "PERFORM WITH TEST AFTER
+// cobol_perform_test_v2658_test.go (v26.58, F6): "PERFORM WITH TEST AFTER
 // UNTIL C" took WITH as the name of the performed paragraph. The parser made
 // a loop around a call to WITH, pushed no loop scope, and left the inline body
 // outside the loop, so END-PERFORM closed the wrong scope. WITH TEST BEFORE or

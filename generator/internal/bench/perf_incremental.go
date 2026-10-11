@@ -1,4 +1,4 @@
-// generator/internal/bench/perf_incremental.go — v19.7: measures the end-to-end
+// generator/internal/bench/perf_incremental.go (v19.7): measures the end-to-end
 // latency from "source file changed on disk" to "index updated and watcher
 // event delivered". Uses a temp dir so we don't disturb the user's tree.
 //

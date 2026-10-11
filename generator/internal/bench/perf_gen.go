@@ -1,4 +1,4 @@
-// generator/internal/bench/perf_gen.go — v19.7: end-to-end generation
+// generator/internal/bench/perf_gen.go (v19.7): end-to-end generation
 // latency, determinism check, and Ollama doctor.
 //
 // We bypass the project's ai.AskLLM wrapper so the bench can:
@@ -48,8 +48,8 @@ type ollamaReq struct {
 }
 
 // ollamaOpts mirrors ai.OllamaOptions: deterministic pins plus the optional
-// GPU/context knobs. Duplicated here on purpose — the bench deliberately does
-// not import internal/ai (see the file header) but MUST send the same options
+// GPU/context knobs. Duplicated here on purpose: the bench deliberately does
+// not import internal/ai (see the file header) but must send the same options
 // the production door sends, or the offload curve would measure a different
 // request shape than the one users get. v26.24 (WP2).
 type ollamaOpts struct {
@@ -74,7 +74,7 @@ func benchEnvInt(key string) *int {
 	return &n
 }
 
-// benchOpts returns the deterministic pins plus any env-set GPU/context knobs —
+// benchOpts returns the deterministic pins plus any env-set GPU/context knobs,
 // the exact options production's requestOptions() would send.
 func benchOpts() *ollamaOpts {
 	return &ollamaOpts{
@@ -188,7 +188,7 @@ func OllamaDoctor(host, model string) Suite {
 
 	// 3. warm the model: a 1-token generation primes the GPU and reports
 	// load_duration. If load_duration is very high on a second call,
-	// the model is being unloaded between calls — flag that.
+	// the model is being unloaded between calls. Flag that.
 	warm1, err := ollamaGenerate(host, model, "// say only: ok\n", 60)
 	if err != nil {
 		s.Cases = append(s.Cases, Case{Name: "warm_call_succeeds", Pass: false, Got: err.Error()})
@@ -277,7 +277,7 @@ Return only the function body, no explanation, no markdown fences.`
 
 // DeterminismCheck issues N identical generations and diffs them. With
 // temperature=0 and a fixed seed, outputs must be byte-identical. They
-// usually aren't (KV cache state, batch composition) — this scenario
+// usually aren't (KV cache state, batch composition). This scenario
 // surfaces by how much.
 func DeterminismCheck(host, model string, n int) Suite {
 	t0 := time.Now()

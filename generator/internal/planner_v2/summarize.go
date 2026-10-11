@@ -1,6 +1,6 @@
-// generator/internal/planner_v2/summarize.go — v23.24 (task 4A): builds the
+// generator/internal/planner_v2/summarize.go, v23.24 (task 4A): builds the
 // compact "what already exists" block that grounds the continue-planner so the
-// model proposes a DELTA against the real codebase rather than re-describing it.
+// model proposes a delta against the real codebase rather than re-describing it.
 //
 // Entities + fields come from the loaded context's IR (compiler-accurate).
 // Operations are detected index-first (resolved methods whose receiver is an
@@ -42,7 +42,7 @@ func SummarizeExisting(ctx *context.Context) ExistingState {
 		return st
 	}
 
-	// Entities/fields: prefer the TARGET's own model structs (recovery), which
+	// Entities/fields: prefer the target's own model structs (recovery), which
 	// are tied to the actual codebase. A .gen IR snapshot lives in the working
 	// directory, not the target, so it is unreliable for an arbitrary path and
 	// is used only when no model structs are found.
@@ -145,7 +145,7 @@ func opsFromServiceFile(root, entity string) []string {
 
 // RecoverEntitiesFromModels reads backend/internal/model/*.go structs directly
 // and reconstructs []schema.Entity. This is the fallback used when the IR
-// snapshot (.gen/ir.json) is absent — e.g. continuing a generated app from a
+// snapshot (.gen/ir.json) is absent, e.g. continuing a generated app from a
 // fresh checkout where no IR was carried. The model files are the deterministic
 // inverse of what the generator wrote, so this recovers the true entity set.
 func RecoverEntitiesFromModels(root string) []schema.Entity {

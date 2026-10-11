@@ -1,6 +1,6 @@
-// conflicts.go — v25.8: push-back conflict detection for the continue/evolve
-// consent gate, in a neutral package (planner_v2) so BOTH the CLI gate
-// (package cli) and the server continue flow (package services) reuse ONE
+// conflicts.go (v25.8): push-back conflict detection for the continue/evolve
+// consent gate, in a neutral package (planner_v2) so both the CLI gate
+// (package cli) and the server continue flow (package services) reuse one
 // implementation. Previously this lived in cli; services cannot import cli, so
 // the logic moved here (planner_v2 already owns ContinueResult + ExistingState).
 //
@@ -37,7 +37,7 @@ var mutatingPrefixes = []string{
 	"submit", "approve", "reject", "assign", "archive", "close", "pay",
 }
 
-// readDominant is judged by the ABSENCE of mutating prefixes (below), so there's
+// readDominant is judged by the absence of mutating prefixes (below), so there's
 // no separate read-prefix list to maintain.
 
 func hasPrefixAny(name string, prefixes []string) bool {
@@ -51,7 +51,7 @@ func hasPrefixAny(name string, prefixes []string) bool {
 }
 
 // EntityIsReadDominant reports whether an existing entity's operations are all
-// reads — so adding a write to it is a purpose change worth flagging. Needs at
+// reads, so adding a write to it is a purpose change worth flagging. Needs at
 // least one existing op to judge.
 func EntityIsReadDominant(ops []string) bool {
 	if len(ops) == 0 {
@@ -81,7 +81,7 @@ func DetectConflicts(existing ExistingState, res ContinueResult) []Conflict {
 				out = append(out, Conflict{
 					Kind:    ConflictWriteOnReadOnly,
 					Subject: ent + "." + op,
-					Detail: fmt.Sprintf("%q adds a state-changing operation to %s, which currently exposes only reads (%s) — is this codebase meant to mutate %s?",
+					Detail: fmt.Sprintf("%q adds a state-changing operation to %s, which currently exposes only reads (%s). Is this codebase meant to mutate %s?",
 						op, ent, strings.Join(existingOps, ", "), ent),
 				})
 			}
@@ -104,7 +104,7 @@ func DetectConflicts(existing ExistingState, res ContinueResult) []Conflict {
 			out = append(out, Conflict{
 				Kind:    ConflictDuplicateEntity,
 				Subject: e.Name,
-				Detail: fmt.Sprintf("new entity %q differs only in case from existing %q — likely a duplicate that will fragment the model",
+				Detail: fmt.Sprintf("new entity %q differs only in case from existing %q; it is likely a duplicate that will fragment the model",
 					e.Name, orig),
 			})
 		}
@@ -120,7 +120,7 @@ func DetectConflicts(existing ExistingState, res ContinueResult) []Conflict {
 			out = append(out, Conflict{
 				Kind:    ConflictRemoval,
 				Subject: ent,
-				Detail:  fmt.Sprintf("delta removes %s from %s — anything referencing it will break", what, ent),
+				Detail:  fmt.Sprintf("delta removes %s from %s; anything referencing it will break", what, ent),
 			})
 		}
 	}

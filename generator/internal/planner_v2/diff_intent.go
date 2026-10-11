@@ -16,7 +16,7 @@ const intentPath = ".gen/diff_intent.json"
 // should be explicitly removed during the next MergeWithDiff call.
 //
 // This is how "Remove the 'age' field" instructions from the AI
-// actually reach the compiler — via an explicit removal signal.
+// actually reach the compiler: through an explicit removal signal.
 func ComputeDiffIntent(proposed []schema.Entity) evolution.DiffIntent {
 	intent := evolution.DiffIntent{
 		RemoveEntities:  map[string]bool{},
@@ -26,7 +26,7 @@ func ComputeDiffIntent(proposed []schema.Entity) evolution.DiffIntent {
 
 	ir, err := compiler.LoadPreviousIR()
 	if err != nil || len(ir.Entities) == 0 {
-		// No current IR — first build, nothing to remove.
+		// No current IR: first build, nothing to remove.
 		return intent
 	}
 

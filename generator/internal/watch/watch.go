@@ -1,4 +1,4 @@
-// watch/watch.go — TASK 1 (v19): added 200ms debounce, shouldSkip integration,
+// watch/watch.go (TASK 1, v19): added 200ms debounce, shouldSkip integration,
 // and NotifyFunc hook so gen-server can push SSE events after each file change.
 package watch
 
@@ -277,7 +277,7 @@ func (w *Watcher) handleChange(path string) {
 		Effects: effects,
 	}:
 	default:
-		// Channel full — drop; caller can read from Events at its own pace.
+		// Channel full: drop; caller can read from Events at its own pace.
 	}
 
 	if w.OnChange != nil {

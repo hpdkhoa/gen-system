@@ -2,7 +2,7 @@ package planner_v2
 
 // ─────────────────────────────────────────────
 // Reasoning is the full intermediate state built across all 5 steps.
-// Passed implicitly through BuildPlanV2 — each step enriches it.
+// Passed implicitly through BuildPlanV2. Each step enriches it.
 // ─────────────────────────────────────────────
 type Reasoning struct {
 	Goal         string

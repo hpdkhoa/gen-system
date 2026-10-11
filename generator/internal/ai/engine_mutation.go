@@ -36,7 +36,7 @@ func MutateHandler(entityName, path string) {
 	}
 }
 
-// RunAIMutation is the entry point for `gen ai <path>` — runs AI mutation
+// RunAIMutation is the entry point for `gen ai <path>`. It runs AI mutation
 // for a single entity. engine package is not involved.
 func RunAIMutation(entityName, path string) {
 	fmt.Println("🤖 AI mutation layer...")
@@ -45,7 +45,7 @@ func RunAIMutation(entityName, path string) {
 
 // newTraceID generates a short identifier for logging.
 func newTraceID() string {
-	// simple counter-based ID — replace with UUID if needed
+	// simple counter-based ID; replace with UUID if needed
 	return fmt.Sprintf("ai-%d", traceCounter())
 }
 

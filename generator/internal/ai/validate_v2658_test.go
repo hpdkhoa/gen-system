@@ -1,4 +1,4 @@
-// generator/internal/ai/validate_v2658_test.go — v26.58.
+// generator/internal/ai/validate_v2658_test.go (v26.58).
 //
 // D048: ValidateFunctionBody used substring tests. It rejected the valid one
 // line body "return nil, nil" as "too short", and rejected valid bodies whose

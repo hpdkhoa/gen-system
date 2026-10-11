@@ -1,4 +1,4 @@
-// generator/internal/ai/reviewer_scope_v2658_test.go — v26.58.
+// generator/internal/ai/reviewer_scope_v2658_test.go (v26.58).
 //
 // D047: scopeIssues dropped any line that held a praise phrase as a substring,
 // so "... is not good practice" or "does not contain any check" hid a real

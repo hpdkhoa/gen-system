@@ -1,5 +1,5 @@
-// generator/internal/schema/salvage.go — v23.1 (round 3): salvage is now
-// anchor-based (find each "name", then its "fields" value) so it recovers ALL
+// generator/internal/schema/salvage.go (v23.1, round 3): salvage is now
+// anchor-based (find each "name", then its "fields" value) so it recovers all
 // entities even when the model's outer-object brackets are mismatched. Round 2
 // required a brace-balanced outer object and silently dropped entities whose
 // surrounding brackets were broken (e.g. Task in the real deepseek-coder run).
@@ -22,8 +22,8 @@ var (
 
 // RepairJSON applies mechanical fixes that don't change meaning: normalises
 // smart quotes, collapses whitespace runs, removes trailing commas, and
-// snaps spaced identifier keys to snake_case. It does NOT try to balance
-// brackets — that's SalvageEntities' job.
+// snaps spaced identifier keys to snake_case. It does not try to balance
+// brackets; that's SalvageEntities' job.
 func RepairJSON(s string) string {
 	s = strings.NewReplacer(
 		"\u201c", `"`, "\u201d", `"`, // smart double quotes
@@ -42,9 +42,9 @@ func RepairJSON(s string) string {
 
 // SalvageEntities scans raw model text for entities by anchoring on each
 // "name": "X" and then extracting the nearest following "fields": <value>,
-// reading just that value's balanced brackets. This is robust to the kind of
-// corruption deepseek-coder emits — junk objects, doubled/mismatched brackets,
-// nested {"parentEntities":...} blobs — that prevents the *outer* entity object
+// reading just that value's balanced brackets. This survives the kind of
+// corruption deepseek-coder emits (junk objects, doubled/mismatched brackets,
+// nested {"parentEntities":...} blobs) that prevents the *outer* entity object
 // from ever closing cleanly. Round 3: previously we required a brace-balanced
 // outer object, which silently dropped the 2nd entity (e.g. Task) whenever its
 // surrounding brackets were broken.

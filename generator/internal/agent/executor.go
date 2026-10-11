@@ -1,13 +1,13 @@
-// executor.go — v23.26: review blocks now print a positive "[review] ✓ <file>
+// executor.go (v23.26): review blocks now print a positive "[review] ✓ <file>
 // clean" line when a file passes with no warnings and no info notes, so a silent
 // reviewer no longer looks like it didn't run.
-// executor.go — v23.25 (task C): review blocks print ⚠️ only for WARN-level
+// executor.go, v23.25 (task C): review blocks print ⚠️ only for WARN-level
 // findings (Warnings()), and a quiet ℹ note for info-level ones; SQL-injection
 // false positives on the in-memory backend are downgraded inside reviewer.go.
-// executor.go — v23.15: handler security-review target now uses targetFileFor
+// executor.go (v23.15): handler security-review target now uses targetFileFor
 // (correct <Entity>_handler.go casing) instead of a lower-cased path that
 // pointed at a nonexistent file.
-// executor.go — v23.10 (Phase 4-B): generate_service now also runs the LLM
+// executor.go, v23.10 (Phase 4-B): generate_service now also runs the LLM
 // business-logic generator (engine.GenerateServiceLogic) via a LogicProvider
 // chosen by GEN_LOGIC (replay offline / ollama on box); idea text + entities are
 // set per run by SetLogicRun (called from RunFromPlan).
@@ -113,7 +113,7 @@ func ExecuteTask(task planner.Task, entityMap map[string]interface{}, rootPath s
 		if err := engine.GenerateServiceLogic(runIdea, e, all, logicProvider(), rootPath); err != nil {
 			return err // v26.58 (D029): a failed write fails the task
 		}
-		// Phase 2.1 — Reviewer Agent: security pass on generated service
+		// Phase 2.1, Reviewer Agent: security pass on generated service
 		// v26.58 (D045): the path was built from the raw entity name, so
 		// "Order Item" gave "order item_service.go", a file the generator never
 		// writes; ReviewCode could not read it and reported Safe. targetFileFor
@@ -141,9 +141,9 @@ func ExecuteTask(task planner.Task, entityMap map[string]interface{}, rootPath s
 			return err // v26.58 (D029): a failed write fails the task
 		}
 		engine.RenderBackend(e, rootPath)
-		// Phase 2.1 — Reviewer Agent: security pass on generated handler.
+		// Phase 2.1, Reviewer Agent: security pass on generated handler.
 		// v23.15: handler files are <Entity>_handler.go (capitalized), not the
-		// lower-cased name used before — the old path silently pointed the
+		// lower-cased name used before. The old path silently pointed the
 		// reviewer at a nonexistent file, so handler issues were never surfaced.
 		targetFile := targetFileFor(e.Name, "generate_handler", rootPath)
 		review := ai.ReviewCode("handler", e.Name, targetFile)
@@ -185,7 +185,7 @@ func ExecuteTask(task planner.Task, entityMap map[string]interface{}, rootPath s
 		engine.RenderFrontend(e, rootPath)
 		return nil
 
-	// Phase 2.3 — marker-based JSX evolution (preserves custom code outside markers)
+	// Phase 2.3: marker-based JSX evolution (preserves custom code outside markers)
 	case "evolve_frontend":
 		e, err := resolveEntity(task, entityMap)
 		if err != nil {
@@ -206,7 +206,7 @@ func ExecuteTask(task planner.Task, entityMap map[string]interface{}, rootPath s
 		engine.RenderMobile(e, rootPath)
 		return nil
 
-	// Phase 0.3 — TypeScript interface bridge
+	// Phase 0.3: TypeScript interface bridge
 	// Writes frontend/src/types/{EntityName}.ts for each entity.
 	case "generate_types":
 		e, err := resolveEntity(task, entityMap)
@@ -230,7 +230,7 @@ func ExecuteTask(task planner.Task, entityMap map[string]interface{}, rootPath s
 		// backend shell above does not depend on it, so it is still written.
 		return routerErr
 
-	// Phase 1.2 — Dynamic .env + .env.example + docker-compose.yml
+	// Phase 1.2: dynamic .env + .env.example + docker-compose.yml
 	// components is extracted from the task payload (set by planner_v2).
 	case "generate_env":
 		entities := collectEntities(entityMap)
@@ -251,7 +251,7 @@ func ExecuteTask(task planner.Task, entityMap map[string]interface{}, rootPath s
 		engine.GenerateEnvFiles(entities, rootPath, components)
 		return nil
 
-	// Phase 1.2 — TypeScript barrel: frontend/src/types/index.ts
+	// Phase 1.2: TypeScript barrel: frontend/src/types/index.ts
 	// re-exports all generated entity type files.
 	case "generate_types_barrel":
 		entities := collectEntities(entityMap)
@@ -284,20 +284,20 @@ func ExecuteTask(task planner.Task, entityMap map[string]interface{}, rootPath s
 		return runGoVet(rootPath)
 
 	case "fix":
-		// Fix tasks are dispatched by FixTask — not directly executed here
+		// FixTask dispatches fix tasks; this switch does not execute them
 		return nil
 
-	// Phase 3 placeholder — auth scaffolding deferred.
+	// Phase 3 placeholder: auth scaffolding deferred.
 	// Planner emits this task when arch contains "auth"; executor skips gracefully
 	// so builds don't crash. Remove this case when auth engine is implemented.
 	case "generate_auth":
-		fmt.Printf("     [exec] ⏭  generate_auth skipped (Phase 3 — not yet implemented)\n")
+		fmt.Printf("     [exec] ⏭  generate_auth skipped (Phase 3, not implemented yet)\n")
 		trace.Info(tctx, "task skipped (placeholder)", "type", "generate_auth")
 		return nil
 
-	// Phase 3 placeholder — worker task
+	// Phase 3 placeholder: worker task
 	case "generate_worker":
-		fmt.Printf("     [exec] ⏭  generate_worker skipped (Phase 3 — not yet implemented)\n")
+		fmt.Printf("     [exec] ⏭  generate_worker skipped (Phase 3, not implemented yet)\n")
 		trace.Info(tctx, "task skipped (placeholder)", "type", "generate_worker")
 		return nil
 

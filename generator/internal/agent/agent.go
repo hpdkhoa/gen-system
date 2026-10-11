@@ -1,5 +1,5 @@
-// agent.go — v25.5: (step 2) RunFromPlan runs an Understand-verify pass after the
-// validation loop (runVerifyStage) — the Understand track validates Generate's
+// agent.go (v25.5): (step 2) RunFromPlan runs an Understand-verify pass after the
+// validation loop (runVerifyStage). The Understand track validates Generate's
 // output; stop|autofix via VerifyUnderstandMode, both reporting to the human.
 // (step 1) emit() also fans a structured AgentEvent out to any registered sink
 // (recordLifecycle) after its existing fmt.Print + EventHook. Inert with no sink
@@ -8,7 +8,7 @@
 // run (pruneOrphanEntityFiles) after the snapshot and before execution, so a
 // reused dir with a different entity set can't break the build with stale
 // service/handler/model files referencing now-absent store interfaces.
-// agent.go — v23.13 (Phase 5): optional web/mobile/docker build gates (runFrontendGates) after the Go validation loop, each opt-in via GEN_WEB_GATE/GEN_MOBILE_GATE/GEN_DOCKER_GATE.
+// agent.go, v23.13 (Phase 5): optional web/mobile/docker build gates (runFrontendGates) after the Go validation loop, each opt-in via GEN_WEB_GATE/GEN_MOBILE_GATE/GEN_DOCKER_GATE.
 package agent
 
 import (
@@ -29,11 +29,11 @@ const maxValidationRounds = 3
 const maxConsecutiveFails = 3
 
 // EventHook, if set, receives agent lifecycle events via gen-server SSE.
-// Nil in CLI mode — plain fmt.Printf is used instead.
+// Nil in CLI mode; plain fmt.Printf is used instead.
 var EventHook func(phase, message string)
 
 func emit(phase, msg string) {
-	// v18.3: was fmt.Printf(msg) — Go vet flags this as non-constant
+	// v18.3: was fmt.Printf(msg). Go vet flags this as non-constant
 	// format string. Use fmt.Print which doesn't interpret % verbs.
 	fmt.Print(msg)
 	if EventHook != nil {
@@ -70,7 +70,7 @@ func RunFromPlan(plan planner.Plan, rootPath string) error {
 	// default, ollama when opted in).
 	SetLogicRun(plan.Goal, collectEntities(buildEntityMap(plan)), ai.SelectLogicProvider())
 
-	emit("start", fmt.Sprintf("\n🤖 Agent starting — %d tasks to execute\n", len(plan.Tasks)))
+	emit("start", fmt.Sprintf("\n🤖 Agent starting: %d tasks to execute\n", len(plan.Tasks)))
 	emit("start", fmt.Sprintf("   Root: %s\n", rootPath))
 	emit("start", fmt.Sprintf("   Context: %d files, %d entities tracked\n",
 		len(ctx.Files), len(ctx.IR.Entities)))
@@ -86,9 +86,9 @@ func RunFromPlan(plan planner.Plan, rootPath string) error {
 		emit("snapshot", fmt.Sprintf("📸 Snapshot taken → %s\n", filepath.Base(snapDir)))
 	}
 
-	// v23.15: prune orphaned per-entity files from a PREVIOUS run whose entity
-	// set differed (the V2 planner is non-deterministic). Done AFTER the
-	// snapshot (so it's rollback-covered) and BEFORE any generate task, so a
+	// v23.15: prune orphaned per-entity files from a previous run whose entity
+	// set differed (the V2 planner is non-deterministic). Done after the
+	// snapshot (so it's rollback-covered) and before any generate task, so a
 	// reused directory yields a clean, self-consistent backend instead of one
 	// poisoned by e.g. service/user_service.go referencing a store.UserCRUD the
 	// current run never generates ("undefined: store.UserCRUD").
@@ -110,7 +110,7 @@ func RunFromPlan(plan planner.Plan, rootPath string) error {
 	// ── EXECUTION PHASE ───────────────────────────────────────────
 	for _, task := range ordered {
 		if hasDependencyFailure(task, results) {
-			emit("skip", fmt.Sprintf("  ⏭  SKIP  [%s] — dependency failed\n", task.ID))
+			emit("skip", fmt.Sprintf("  ⏭  SKIP  [%s]: dependency failed\n", task.ID))
 			results[task.ID] = planner.StatusSkipped
 			continue
 		}
@@ -125,11 +125,11 @@ func RunFromPlan(plan planner.Plan, rootPath string) error {
 			continue
 		}
 
-		// Task failed — attempt self-heal
+		// The task failed. Try a self-heal.
 		emit("fail", fmt.Sprintf("  ❌ FAIL  [%s]: %s\n", task.ID, err.Error()))
 		task.Error = err.Error()
 
-		emit("heal", fmt.Sprintf("  🔧 HEAL  [%s] — self-healing (up to %d attempts)...\n",
+		emit("heal", fmt.Sprintf("  🔧 HEAL  [%s]: self-healing (up to %d attempts)...\n",
 			task.ID, maxHealAttempts))
 		healErr := FixTask(task, ctx, rootPath)
 
@@ -142,7 +142,7 @@ func RunFromPlan(plan planner.Plan, rootPath string) error {
 			// Auto-rollback after maxConsecutiveFails straight failures
 			if consecutiveFails >= maxConsecutiveFails && snapDir != "" {
 				emit("rollback", fmt.Sprintf(
-					"\n🔄 %d consecutive failures — rolling back to pre-build snapshot\n",
+					"\n🔄 %d consecutive failures; rolling back to the pre-build snapshot\n",
 					maxConsecutiveFails))
 
 				if rerr := safety.RestoreSnapshot(rootPath, snapDir); rerr != nil {
@@ -197,10 +197,10 @@ func RunFromPlan(plan planner.Plan, rootPath string) error {
 	// Off by default so the offline path needs no Node/Docker. Opt in with
 	// GEN_WEB_GATE=1 (runs `tsc --noEmit` + `npm run build` on the generated
 	// web project) and/or GEN_DOCKER_GATE=1 (runs `docker build`). A failing
-	// gate warns but does not abort — the Go backend remains the hard guarantee.
+	// gate warns but does not abort. The Go backend remains the hard guarantee.
 	runFrontendGates(rootPath)
 
-	// v25.5 (step 4): optional HTTP liveness smoke — boot the built backend and
+	// v25.5 (step 4): optional HTTP liveness smoke. Boot the built backend and
 	// GET each collection route, asserting non-000/non-5xx. Opt-in via
 	// GEN_HTTP_SMOKE=1, advisory (warn, never abort), read-only probes only.
 	runHTTPSmoke(backendPath)
@@ -213,7 +213,7 @@ func RunFromPlan(plan planner.Plan, rootPath string) error {
 		done, failed, skipped))
 
 	if failCount > 0 {
-		return fmt.Errorf("%d task(s) failed — review output above", failCount)
+		return fmt.Errorf("%d task(s) failed; review the output above", failCount)
 	}
 	return nil
 }
@@ -223,29 +223,29 @@ func RunFromPlan(plan planner.Plan, rootPath string) error {
 // ─────────────────────────────────────────────
 func runValidationLoop(rootPath, backendPath string, ctx agentctx.Context, rounds int) error {
 	for round := 1; round <= rounds; round++ {
-		emit("validate", fmt.Sprintf("  [validate] Round %d/%d — go vet + go build...\n",
+		emit("validate", fmt.Sprintf("  [validate] Round %d/%d: go vet + go build...\n",
 			round, rounds))
 
 		vetOut, vetErr := runCmd("go", []string{"vet", "./..."}, backendPath)
 		if vetErr == nil {
 			buildOut, buildErr := runCmd("go", []string{"build", "./..."}, backendPath)
 			if buildErr == nil {
-				// Build is green. Run the generated tests too — crucially the
+				// Build is green. Run the generated tests too, above all the
 				// per-service no-panic contract test, which calls each model
 				// operation and fails if it panics at runtime (e.g. an unchecked
-				// type assertion on the payload). A body that COMPILES but
-				// PANICS would otherwise reach the user as a 500/crash.
+				// type assertion on the payload). A body that compiles but
+				// panics would otherwise reach the user as a 500/crash.
 				testOut, testErr := runCmd("go", []string{"test", "./..."}, backendPath)
 				if testErr == nil {
 					emit("validate", fmt.Sprintf("  [validate] ✅ Round %d passed (vet + build + test)\n", round))
 					return nil
 				}
 				// A failing test means a runtime defect in a generated op. Surface
-				// it and attempt repair on the implicated SERVICE file(s). We
-				// must NOT feed extractBrokenFiles here: it would return the
+				// it and attempt repair on the implicated service file(s). We
+				// must not feed extractBrokenFiles here: it would return the
 				// *_test.go file (which has a .go: line), and repairing the test
-				// is wrong — the defect is in the service body the test exercises.
-				emit("validate", "  [validate] ⚠️  go test failed — a generated operation misbehaves at runtime\n")
+				// is wrong. The defect is in the service body the test exercises.
+				emit("validate", "  [validate] ⚠️  go test failed: a generated operation misbehaves at runtime\n")
 				broken := servicesFromTestOutput(testOut, rootPath)
 				if len(broken) > 0 {
 					dispatchRepairs(broken, testOut, ctx, rootPath, round)
@@ -254,26 +254,26 @@ func runValidationLoop(rootPath, backendPath string, ctx agentctx.Context, round
 				// Could not localize the failure to a service file; build is green
 				// so the app still runs (the dispatcher recovers panics as 500).
 				// Report and accept rather than loop forever.
-				emit("validate", "  [validate] (test failure not localizable to a service; backend builds — continuing)\n")
+				emit("validate", "  [validate] (test failure not localizable to a service; the backend builds, continuing)\n")
 				return nil
 			}
-			emit("validate", "  [validate] ❌ go build failed — extracting broken files\n")
+			emit("validate", "  [validate] ❌ go build failed; extracting broken files\n")
 			dispatchRepairs(extractBrokenFiles(buildOut), buildOut, ctx, rootPath, round)
 			continue
 		}
 
-		emit("validate", "  [validate] ❌ go vet failed — extracting broken files\n")
+		emit("validate", "  [validate] ❌ go vet failed; extracting broken files\n")
 		dispatchRepairs(extractBrokenFiles(vetOut), vetOut, ctx, rootPath, round)
 	}
 	return fmt.Errorf("validation still failing after %d rounds", rounds)
 }
 
 // runFrontendGates runs the Phase 5 web/mobile/docker build gates. v25.5: the
-// WEB gate is now default-ON for internal builds. "Fully executable" should mean
+// web gate is now default-on for internal builds. "Fully executable" should mean
 // that the backend and the frontend both build. It is opt-OUT via GEN_WEB_GATE=0
-// (and still explicitly opt-in-able with =1). It remains ADVISORY (warns, never
-// aborts) and a NO-OP when there is no generated frontend or Node is unavailable,
-// so a Node-less offline box is unaffected. Mobile/docker stay opt-IN (heavier,
+// (and still explicitly opt-in-able with =1). It remains advisory (warns, never
+// aborts) and a no-op when there is no generated frontend or Node is unavailable,
+// so a Node-less offline box is unaffected. Mobile/docker stay opt-in (heavier,
 // need extra toolchains). All gates no-op unless their generated dir exists.
 func runFrontendGates(rootPath string) {
 	// Web: tsc --noEmit + npm run build. Default ON; GEN_WEB_GATE=0 disables.
@@ -281,7 +281,7 @@ func runFrontendGates(rootPath string) {
 		webDir := filepath.Join(rootPath, "frontend")
 		if _, err := os.Stat(filepath.Join(webDir, "package.json")); err == nil {
 			if !nodeAvailable() {
-				emit("warn", "  [web] ⚠️  skipping web gate — Node/npm not found on PATH (set GEN_WEB_GATE=0 to silence)\n")
+				emit("warn", "  [web] ⚠️  skipping web gate: Node/npm not found on PATH (set GEN_WEB_GATE=0 to silence)\n")
 			} else {
 				emit("validate", "\n🌐 Web gate (default on; GEN_WEB_GATE=0 to disable): npm ci + tsc --noEmit + vite build...\n")
 				if out, err := runCmd("npm", []string{"ci"}, webDir); err != nil {
@@ -294,7 +294,7 @@ func runFrontendGates(rootPath string) {
 			}
 		}
 	}
-	// Mobile: JS bundle only (NOT a signed app).
+	// Mobile: JS bundle only (not a signed app).
 	if os.Getenv("GEN_MOBILE_GATE") == "1" {
 		mDir := filepath.Join(rootPath, "mobile")
 		if _, err := os.Stat(filepath.Join(mDir, "package.json")); err == nil {
@@ -348,7 +348,7 @@ func tail(s string) string {
 // service source file to repair. A `go test` failure for a panicking operation
 // reports both a test name like "Test<Entity>Service_OperationsHonorContract"
 // and a "<entity>_service_test.go:NN:" file line; either form is mapped to the
-// corresponding "<entity>_service.go" so the SERVICE body (not the test) is
+// corresponding "<entity>_service.go" so the service body (not the test) is
 // repaired.
 func servicesFromTestOutput(output, rootPath string) []string {
 	seen := map[string]bool{}

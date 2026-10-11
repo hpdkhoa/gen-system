@@ -1,4 +1,4 @@
-// generator/internal/deps/registry.go — v23.11 (Phase 1): stable lib/pq pin
+// generator/internal/deps/registry.go (v23.11, Phase 1): stable lib/pq pin
 // raised v1.10.9 → v1.12.3 to match the version emitGoMod now writes and the
 // version gen-system itself vendors (a go.sum for it is therefore always
 // available offline). Keeps `gen deps stable` from reintroducing the

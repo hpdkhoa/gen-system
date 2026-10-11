@@ -1,4 +1,4 @@
-// generator/internal/engine/web_project_v2658_test.go — v26.58 (D030):
+// generator/internal/engine/web_project_v2658_test.go, v26.58 (D030):
 // GenerateWebProject returned without a message when it could not create
 // frontend/, and dropped the errors of every later write. It now returns them.
 package engine

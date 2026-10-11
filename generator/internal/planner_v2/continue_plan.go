@@ -1,5 +1,5 @@
-// generator/internal/planner_v2/continue_plan.go — v23.24 (task 4A): turns a
-// free-text idea + an existing codebase into a DELTA plan. It asks the model
+// generator/internal/planner_v2/continue_plan.go, v23.24 (task 4A): turns a
+// free-text idea + an existing codebase into a delta plan. It asks the model
 // (ai.ProposeContinueDelta) for tagged changes, applies them deterministically
 // to the existing entities (additive NEW/ADD_FIELD; REMOVE only when allowed),
 // computes which entities were touched, and returns a planner.Plan whose Goal is
@@ -41,7 +41,7 @@ type ContinueResult struct {
 //
 // Offline override: if GEN_CONTINUE_DELTA names a readable JSON file (a
 // ContinueDelta envelope or a bare changes array), it is used instead of a
-// model call. This lets a user — or the sandbox — drive a fully deterministic
+// model call. This lets a user (or the sandbox) drive a fully deterministic
 // continuation with a hand-written delta and no Ollama present.
 var deltaSource = func(idea, existingSummary string) (ai.ContinueDelta, error) {
 	if path := strings.TrimSpace(os.Getenv("GEN_CONTINUE_DELTA")); path != "" {
@@ -68,7 +68,7 @@ func SetDeltaSourceForTest(fn func(idea, existingSummary string) (ai.ContinueDel
 //	existingSum : rendered "what exists" block for the prompt
 //	idea        : the natural-language instruction
 //	writeDir    : where generation will be staged/applied (drives the task graph)
-//	allowRemove : honor REMOVE tags (destructive) — gated by the CLI
+//	allowRemove : honor REMOVE tags (destructive); the CLI gates it
 func BuildContinuePlan(existing []schema.Entity, existingSum, idea, writeDir string, allowRemove bool) (ContinueResult, error) {
 	if strings.TrimSpace(idea) == "" {
 		return ContinueResult{}, fmt.Errorf("continue: idea cannot be empty")
@@ -82,8 +82,8 @@ func BuildContinuePlan(existing []schema.Entity, existingSum, idea, writeDir str
 	res := applyDelta(existing, delta, allowRemove)
 
 	// Build the task graph for only the touched entities, then a plan. The plan
-	// must carry ALL merged entities (not just the changed ones): the agent's
-	// orphan-pruning step deletes per-entity files for any entity NOT in
+	// must carry all merged entities, the unchanged ones too: the agent's
+	// orphan-pruning step deletes per-entity files for any entity not in
 	// plan.Entities, so omitting unchanged entities (e.g. Product) would wrongly
 	// prune their files from the staged copy. The task graph (built from
 	// changedSet) still restricts actual regeneration to the touched entities.
@@ -206,7 +206,7 @@ func applyDelta(existing []schema.Entity, delta ai.ContinueDelta, allowRemove bo
 
 		case ai.ChangeRemove:
 			if !allowRemove {
-				notes = append(notes, fmt.Sprintf("(skipped REMOVE %s%s — pass --allow-remove to apply)",
+				notes = append(notes, fmt.Sprintf("(skipped REMOVE %s%s; pass --allow-remove to apply)",
 					ent, fieldSuffix(c.Field)))
 				continue
 			}
@@ -241,10 +241,10 @@ func applyDelta(existing []schema.Entity, delta ai.ContinueDelta, allowRemove bo
 		notes = append(notes, "no changes proposed (instruction already satisfied)")
 	}
 
-	// If any ENTITY was removed, the shared/global files (store interfaces,
+	// If any entity was removed, the shared/global files (store interfaces,
 	// main.go wiring, router) still reference it. Force every surviving entity
 	// into the changed set so those files are regenerated without the removed
-	// entity — otherwise the staged app fails to build with dangling references.
+	// entity. Otherwise the staged app fails to build with dangling references.
 	entityRemoved := false
 	for _, fields := range removed {
 		for _, f := range fields {

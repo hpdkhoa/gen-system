@@ -1,17 +1,17 @@
-// generator/internal/bench/resolution_stdlib.go — v23.32 (stdlib provenance):
-// NEW. ResolutionRecallWithStdlib loads the project WITH one or more stdlib
-// roots ingested read-only (ProvStdlib), then reports TWO separate numbers:
+// generator/internal/bench/resolution_stdlib.go, v23.32 (stdlib provenance):
+// new file. ResolutionRecallWithStdlib loads the project with one or more stdlib
+// roots ingested read-only (ProvStdlib), then reports two separate numbers:
 //
-//	resolution_recall_internal       — UNCHANGED meaning: of calls to the
-//	                                    project's OWN symbols, how many resolved.
-//	                                    Stdlib symbols are excluded from this
-//	                                    denominator by PROVENANCE, not by name,
-//	                                    so the headline number stays honest even
-//	                                    though the stdlib is now in the index.
-//	resolution_recall_with_stdlib     — NEW: of all calls that land on a symbol
-//	                                    we hold (project OR stdlib), how many
-//	                                    resolved. This is the "we resolve into
-//	                                    the runtime" number.
+//	resolution_recall_internal:    same meaning as before. Of calls to the
+//	                               project's own symbols, how many resolved.
+//	                               Stdlib symbols are excluded from this
+//	                               denominator by provenance, not by name,
+//	                               so the headline number keeps its meaning
+//	                               even though the stdlib is now in the index.
+//	resolution_recall_with_stdlib: new. Of all calls that land on a symbol
+//	                               we hold (project or stdlib), how many
+//	                               resolved. This is the "we resolve into
+//	                               the runtime" number.
 //
 // Keeping the internal metric provenance-gated is the whole point: merging the
 // stdlib into the index would otherwise silently redefine "internal" and make
@@ -62,7 +62,7 @@ func ResolutionRecallWithStdlib(root string, copybookPath []string, stdlibRoots 
 
 	// Partition the symbol set by provenance so "project" and "stdlib" names
 	// are distinguishable even when a stdlib symbol shares a bare name with a
-	// project symbol. A name is "project" if ANY project symbol has it; a name
+	// project symbol. A name is "project" if any project symbol has it; a name
 	// is "stdlib-only" if it is held solely by stdlib symbols.
 	projectNames := map[string]struct{}{}
 	stdlibNames := map[string]struct{}{}
@@ -80,14 +80,14 @@ func ResolutionRecallWithStdlib(root string, copybookPath []string, stdlibRoots 
 	var (
 		internal         int // call to a project-owned name
 		resolvedInternal int // ...that resolved to a project symbol
-		stdlibResolvable int // call to a name held by project OR stdlib
+		stdlibResolvable int // call to a name held by project or stdlib
 		resolvedAny      int // resolved to a symbol we hold (project or stdlib)
 		intoStdlib       int // resolved specifically into a stdlib symbol
 		external         int // name we hold nowhere
 	)
 
 	for _, e := range edges {
-		// Only edges whose CALLER is a project symbol count toward project
+		// Only edges whose caller is a project symbol count toward project
 		// metrics. Without this gate, stdlib→stdlib calls (which flood in once
 		// the stdlib is ingested) would inflate every denominator and silently
 		// redefine "internal recall". This is the single most important line
@@ -119,7 +119,7 @@ func ResolutionRecallWithStdlib(root string, copybookPath []string, stdlibRoots 
 		}
 
 		if e.CalleeID != "" {
-			// Where did it resolve TO?
+			// Where did it resolve to?
 			calleeProv := symbols.ProvProject
 			if callee, ok := ctx.Index.ByID(e.CalleeID); ok && callee != nil {
 				calleeProv = callee.Provenance
@@ -145,14 +145,14 @@ func ResolutionRecallWithStdlib(root string, copybookPath []string, stdlibRoots 
 		withStdlibRate = float64(resolvedAny) / float64(stdlibResolvable)
 	}
 
-	// Honest internal recall — project symbols only, unchanged definition.
+	// Internal recall: project symbols only, unchanged definition.
 	suite.Cases = append(suite.Cases, Case{
 		Name: fmt.Sprintf("internal_recall_at_least_%.0f%%", passThreshold*100),
 		Pass: internal == 0 || internalRate >= passThreshold,
 		Got:  fmt.Sprintf("%.2f%% (%d/%d project calls resolved)", internalRate*100, resolvedInternal, internal),
 		Want: fmt.Sprintf(">=%.2f%%", passThreshold*100),
 	})
-	// New: resolution INCLUDING the stdlib boundary.
+	// New: resolution including the stdlib boundary.
 	suite.Cases = append(suite.Cases, Case{
 		Name: "stdlib_ingested",
 		Pass: stdlibSymCount > 0,

@@ -1,4 +1,4 @@
-// effects_write_v2658_test.go — v26.58 (D100): EffectDB is set for any
+// effects_write_v2658_test.go (v26.58, D100): EffectDB is set for any
 // database access, so the verify pass could not tell a SELECT from a write and
 // reported every Get and List of a PG store as a read that writes. DBWrite now
 // marks the writes alone.

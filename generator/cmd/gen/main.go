@@ -1,4 +1,4 @@
-// gen/main.go — v23.30 (gen report): adds the `report` command (render a
+// gen/main.go, v23.30 (gen report): adds the `report` command (render a
 // standalone HTML validation report from genbench JSON + optional .skill).
 // Prior: v23.24 (task 4A): adds the `continue` command (continue from an
 // existing codebase via a natural-language idea). Prior: v23.11 (Phase 3):
@@ -122,7 +122,7 @@ func main() {
 
 func printUsage() {
 	fmt.Println("")
-	fmt.Println("gen — AI-powered code evolution engine")
+	fmt.Println("gen: plans, generates and evolves Go services with a local model")
 	fmt.Println("")
 	fmt.Println("Usage: gen <command> [args]")
 	fmt.Println("")

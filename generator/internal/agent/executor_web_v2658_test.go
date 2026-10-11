@@ -1,4 +1,4 @@
-// generator/internal/agent/executor_web_v2658_test.go — v26.58 (D030):
+// generator/internal/agent/executor_web_v2658_test.go, v26.58 (D030):
 // GenerateWebProject returned without a message when it could not create
 // frontend/, and the executor returned nil after it, so generate_types_barrel
 // counted as a success with the web project files missing.

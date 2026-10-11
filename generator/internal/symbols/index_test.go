@@ -330,7 +330,7 @@ func TestIndex_CallersCallees(t *testing.T) {
 	callers := idx2.Callers(calleeID)
 	if len(callers) == 0 {
 		// Call edge resolution depends on exact ID matching which is hard to
-		// guarantee without the resolver running. Skip if not resolved.
+		// ensure without the resolver running. Skip if not resolved.
 		t.Logf("Callers: call edge not resolved (expected in unit test without full resolver)")
 		_ = callerID
 		return
@@ -524,7 +524,7 @@ func TestIndex_RemoveFile_ClearsCalleeIDPointingAtRemoved(t *testing.T) {
 	}
 
 	// But the unresolved edge should still be discoverable: a.go's Caller
-	// should still have a call edge, just with empty CalleeID.
+	// should still have a call edge, only with an empty CalleeID.
 	edges := idx.AllCallEdges()
 	foundUnresolved := false
 	for _, e := range edges {
@@ -652,7 +652,7 @@ func TestIndex_UpdateFile_ClearsBothPathsOnMismatch(t *testing.T) {
 	if len(syms) == 0 {
 		t.Fatal("F not found")
 	}
-	// And DefinedIn comes from the module — wrong.go in this case.
+	// And DefinedIn comes from the module: wrong.go in this case.
 	if syms[0].DefinedIn != "wrong.go" {
 		t.Errorf("DefinedIn = %q, want wrong.go (m.FilePath is source of truth)", syms[0].DefinedIn)
 	}

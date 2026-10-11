@@ -1,4 +1,4 @@
-// ast/py_cfg_test.go — TASK 2 (v19): tests for Python structural body nodes.
+// ast/py_cfg_test.go (TASK 2, v19): tests for Python structural body nodes.
 // Skipped automatically when python3/python is unavailable in the sandbox.
 package ast
 
@@ -59,7 +59,7 @@ def check(x):
 // v26.25: renamed from _EmitsBranch. This test predated NodeTry: v25.1 made
 // try/except its own kind (Children = try body, Else = handler), which the
 // structural CFG builder recognises explicitly (flow/cfg_ts_py.go). Asserting
-// NodeBranch here was asserting the OLD contract against a frontend that had
+// NodeBranch here was asserting the old contract against a frontend that had
 // correctly moved to the new one.
 func TestPyFrontend_BodyWithTry_EmitsTry(t *testing.T) {
 	src := `

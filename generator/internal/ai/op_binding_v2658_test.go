@@ -1,4 +1,4 @@
-// generator/internal/ai/op_binding_v2658_test.go — v26.58.
+// generator/internal/ai/op_binding_v2658_test.go (v26.58).
 //
 // D069: bindOperationsToEntities found verbs inside longer words, so "payment
 // reference" bound "pay" to Order and "relationship" bound "ship" to Product.

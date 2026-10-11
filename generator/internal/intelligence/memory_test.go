@@ -199,7 +199,7 @@ func TestStats_ReturnsCorrectCounts(t *testing.T) {
 	mem.RecordSuccess(h1, "syntax", "generate_model", "A", `return nil`)
 
 	h2 := intelligence.HashError("err2")
-	mem.RecordFailure(h2) // failure only — no success
+	mem.RecordFailure(h2) // failure only, no success
 
 	stats := mem.Stats()
 	if stats == "" {

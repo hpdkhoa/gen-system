@@ -1,4 +1,4 @@
-// verify_understand_test.go — v25.5 (step 2): real-behaviour tests for the
+// verify_understand_test.go, v25.5 (step 2): real-behaviour tests for the
 // Understand-verify helpers that don't need a live model or a generated app.
 package agent
 

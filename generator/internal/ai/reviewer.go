@@ -1,9 +1,9 @@
-// generator/internal/ai/reviewer.go — v23.25 (task C): backend-scoped severity
+// generator/internal/ai/reviewer.go, v23.25 (task C): backend-scoped severity
 // tiers. The reviewer used to fire "SQL injection" + "unvalidated input" on
-// EVERY in-memory CRUD file (no SQL anywhere), producing ~15 false-positive
-// lines per continue run and eroding trust in [review] output. Now:
+// every in-memory CRUD file (no SQL anywhere). That produced ~15 false-positive
+// lines per continue run and made the [review] output easy to ignore. Now:
 //   - Findings carry a Severity (warn / info).
-//   - SQL-injection + unvalidated-input findings are only WARNINGS on the
+//   - SQL-injection + unvalidated-input findings are only warnings on the
 //     postgres store path (GEN_BACKEND=postgres). On the in-memory backend they
 //     are downgraded to INFO (there is no SQL string to inject into), and the
 //     prompt tells the model so up front.
@@ -12,7 +12,7 @@
 //   - Safe stays true unless at least one WARN-level issue remains, so the
 //     [review] block only shouts when something actually warrants attention.
 //
-// ai must NOT import engine (engine imports ai); backend mode is read straight
+// ai must not import engine (engine imports ai); backend mode is read straight
 // from GEN_BACKEND here to keep the dependency direction intact.
 package ai
 
@@ -61,7 +61,7 @@ func postgresBackend() bool {
 func ReviewCode(taskType, entityName, filePath string) ReviewResult {
 	data, err := os.ReadFile(filePath)
 	if err != nil {
-		return ReviewResult{Safe: true} // file doesn't exist yet — skip
+		return ReviewResult{Safe: true} // file doesn't exist yet: skip
 	}
 	if len(data) == 0 {
 		return ReviewResult{Safe: true}
@@ -130,7 +130,7 @@ JSON:`, taskType, entityName, storeNote, string(data))
 
 // scopeIssues applies backend-aware severity tiers to the model's raw issue
 // strings. The model is noisy and frequently reports SQL injection on code with
-// no SQL; rather than trust its binary safe/unsafe verdict, we re-classify each
+// no SQL. So instead of taking its binary safe/unsafe verdict, we re-classify each
 // issue and recompute Safe from the WARN-level survivors.
 func scopeIssues(raw []string, pg bool) ReviewResult {
 	res := ReviewResult{Issues: raw}
@@ -150,7 +150,7 @@ func scopeIssues(raw []string, pg bool) ReviewResult {
 			strings.Contains(lc, "discarded with _")
 		// The model often "reports" the absence of a problem as an issue line
 		// ("does not contain any hardcoded secrets" / "good practice"). Those
-		// are not findings at all — drop them entirely.
+		// are not findings at all. Drop them entirely.
 		isNonFinding := isNonFindingLine(lc)
 
 		switch {
@@ -210,7 +210,7 @@ func containsAny(s string, subs ...string) bool {
 	return false
 }
 
-// Warnings returns just the WARN-level finding texts (for the repair hint).
+// Warnings returns only the WARN-level finding texts (for the repair hint).
 func (r ReviewResult) Warnings() []string {
 	var out []string
 	for _, f := range r.Findings {

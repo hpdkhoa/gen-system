@@ -1,5 +1,5 @@
-// generator/internal/api/understand/routes.go — v23.9 (Phase 2/3): the
-// understand-only route registration, deliberately in its OWN package so it
+// generator/internal/api/understand/routes.go (v23.9, Phase 2/3): the
+// understand-only route registration, deliberately in its own package so it
 // imports nothing but sse + presentation. The parent `api` package imports
 // `handlers` (for the generation routes), which transitively pulls in the whole
 // generation stack; anything importing `api` inherits that. By living here,

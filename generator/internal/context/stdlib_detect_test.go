@@ -1,5 +1,5 @@
-// context/stdlib_detect_test.go — v26.5. Pins the two things that were broken
-// before: (1) the language must be a property of each ROOT (the old single
+// context/stdlib_detect_test.go (v26.5). Pins the two things that were broken
+// before: (1) the language must be a property of each root (the old single
 // --stdlib-lang could not express a multi-language project at all), and (2)
 // auto-detection must key off the languages actually present in the project.
 package context
@@ -13,7 +13,7 @@ import (
 )
 
 func TestParseStdlibSpec_PerRootLanguage_v265(t *testing.T) {
-	// THE REGRESSION THIS EXISTS FOR: before v26.5 a single --stdlib-lang was
+	// The regression this exists for: before v26.5 a single --stdlib-lang was
 	// applied to every path, so a Go + Java project was inexpressible. Each entry
 	// must now carry its own language.
 	roots, auto := ParseStdlibSpec("go,java=/opt/jdk/java.base", "")
@@ -149,8 +149,8 @@ func TestDetectStdlibRoots_EmptyIndex_v265(t *testing.T) {
 }
 
 func TestDetectStdlibRoots_UnsupportedLangIsReportedNotGuessed_v265(t *testing.T) {
-	// Python has no validated runtime tree, so we must NOT guess one. We must
-	// still SAY so — that reported line is what tells the user which flag to pass
+	// Python has no validated runtime tree, so we must not guess one. We must
+	// still say so. That reported line is what tells the user which flag to pass
 	// and is the whole point of report-instead-of-prompt.
 	idx := symbols.NewIndex()
 	idx.AddModule(&genast.Module{

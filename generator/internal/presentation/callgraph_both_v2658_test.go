@@ -1,4 +1,4 @@
-// callgraph_both_v2658_test.go — v26.58 (D083): with direction=both the
+// callgraph_both_v2658_test.go (v26.58, D083): with direction=both the
 // callgraph handler tested only direction == "callers" when it wrote an edge,
 // so a caller of the root took the callee branch and came out as root -> caller.
 // The graph showed the root as the caller of its own caller.

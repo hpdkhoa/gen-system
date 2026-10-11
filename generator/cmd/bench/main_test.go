@@ -1,4 +1,4 @@
-// cmd/bench/main_test.go — v19 fix: removed Duration==0 assertion.
+// cmd/bench/main_test.go (v19 fix): removed the Duration==0 assertion.
 // time.Since returns 0 on Windows for sub-millisecond operations (timer
 // resolution ~15ms). Suite completion is already proven by len(Cases)>0.
 // tests for the gen-system v15 benchmark tool.
@@ -34,7 +34,7 @@ func runSuite(t *testing.T, name string, fn func() Result) Result {
 func TestSuite_FrontendRegistry(t *testing.T) {
 	r := runSuite(t, "FrontendRegistry", benchFrontendRegistry)
 
-	// Every required language must be registered — these are hard invariants.
+	// Every required language must be registered. These are hard invariants.
 	required := map[string]bool{}
 	for _, c := range r.Cases {
 		if c.Pass {

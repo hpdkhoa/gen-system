@@ -43,7 +43,7 @@ type DiffIntent struct {
 // Merge: safe additive merge (upsert only)
 //
 // This is the default "safe evolution" mode. It never deletes
-// existing fields or entities — only adds or updates them.
+// existing fields or entities. It only adds or updates them.
 // The report correctly identifies this as intentional safety.
 // ------------------------------------------
 func Merge(oldIR, newIR Schema) Schema {
@@ -75,7 +75,7 @@ func Merge(oldIR, newIR Schema) Schema {
 }
 
 // ------------------------------------------
-// MergeWithDiff: safe evolution WITH explicit deletion support.
+// MergeWithDiff: safe evolution with explicit deletion support.
 //
 // Use this when the user has explicitly signaled deletions via a
 // plan (e.g. "Remove the 'age' field from User").

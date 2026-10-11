@@ -1,29 +1,29 @@
-// context/cobol_runtime.go — v23.33 (COBOL runtime catalog): NEW. COBOL has no
+// context/cobol_runtime.go (v23.33, COBOL runtime catalog): NEW. COBOL has no
 // source standard library to ingest the way Go (GOROOT/src) or Java (a JDK
 // signature tree) do. Its "runtime" is two things, neither of which is a source
 // tree you can point a loader at:
 //
-//  1. INTRINSIC FUNCTIONS — FUNCTION NUMVAL, FUNCTION CURRENT-DATE, FUNCTION
+//  1. Intrinsic functions: FUNCTION NUMVAL, FUNCTION CURRENT-DATE, FUNCTION
 //     MAX … defined by the ISO/ANSI COBOL standard. No source exists; they are
 //     part of the language.
-//  2. RUNTIME / CALLABLE SERVICES — CEE3ABD, CEEMOUT, IGZ* , DSNTIAR … IBM
+//  2. Runtime / callable services: CEE3ABD, CEEMOUT, IGZ* , DSNTIAR … IBM
 //     Language Environment and common vendor services, shipped as compiled
 //     binaries on the mainframe. No portable source.
 //
 // Before this, every CALL "CEE3ABD" and FUNCTION NUMVAL surfaced as an
-// unresolved (external) call edge — visually identical to a genuinely missing
-// program. That is the bulk of COBOL's "external" calls and the reason overall
+// unresolved (external) call edge. It looked the same as a program that is
+// really missing. That is the bulk of COBOL's "external" calls and the reason overall
 // recall on a real codebase sits well below internal recall.
 //
-// This catalog materialises those well-known names as SYNTHETIC ProvStdlib
-// symbols so the calls RESOLVE to a recognised runtime symbol instead of
+// This catalog materialises those well-known names as synthetic ProvStdlib
+// symbols so the calls resolve to a recognised runtime symbol instead of
 // reading as "unknown program worth investigating". It reuses the exact v23.32
 // provenance machinery: the synthetic module is added with ProvStdlib, the
 // resolver links CALL/FUNCTION names to it, and the Understand UI hides it by
 // default behind the same stdlib toggle. It adds no new source. It makes the
 // analysis clearer, since a known runtime service no longer reads as a missing program.
 //
-// Fidelity: these are SIGNATURE-LEVEL stubs (name + provenance, no body),
+// Fidelity: these are signature-level stubs (name + provenance, no body),
 // the same fidelity level as the Java JDK signature tree. They mark "this call
 // targets a known runtime service", nothing more. The list is curated and
 // conservative; an unrecognised CALL still resolves to nothing and stays
@@ -37,7 +37,7 @@ import (
 )
 
 // cobolIntrinsics are the ISO/ANSI COBOL intrinsic functions (invoked as
-// FUNCTION <name>). Conservative, standard set — not vendor extensions.
+// FUNCTION <name>). Conservative, standard set; no vendor extensions.
 var cobolIntrinsics = []string{
 	// numeric
 	"ABS", "ACOS", "ANNUITY", "ASIN", "ATAN", "COS", "FACTORIAL",
@@ -64,11 +64,11 @@ var cobolIntrinsics = []string{
 }
 
 // cobolRuntimeServices are common Language-Environment and vendor callable
-// services invoked as CALL "<name>". Curated, conservative — the ones that
+// services invoked as CALL "<name>". Curated and conservative: the ones that
 // actually appear in real z/OS COBOL and would otherwise read as missing
 // programs. (Not exhaustive; intentionally so.)
 var cobolRuntimeServices = []string{
-	// Language Environment (CEE*) — the most common callable services.
+	// Language Environment (CEE*): the most common callable services.
 	"CEE3ABD", "CEE3DMP", "CEE3GRN", "CEE3GRO", "CEE3PRM", "CEE3SRP",
 	"CEEMOUT", "CEEMRCR", "CEEMRCE", "CEEDATM", "CEEDAYS", "CEELOCT",
 	"CEESECS", "CEEGMT", "CEEGMTO", "CEEUTC", "CEEFMDA", "CEEFMDT",

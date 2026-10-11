@@ -1,4 +1,4 @@
-// generator/internal/ai/logic_test.go — v23.10 (Phase 4-B): lock the operations
+// generator/internal/ai/logic_test.go, v23.10 (Phase 4-B): lock the operations
 // parse contract (envelope, bare array, fenced) + the replay provider.
 package ai
 

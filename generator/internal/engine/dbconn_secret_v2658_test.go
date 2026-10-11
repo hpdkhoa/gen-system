@@ -1,4 +1,4 @@
-// generator/internal/engine/dbconn_secret_v2658_test.go — v26.58 (D028): the
+// generator/internal/engine/dbconn_secret_v2658_test.go, v26.58 (D028): the
 // generated db.Open formatted the ping error with the full DSN, so a database
 // that did not answer put the user name and password from DATABASE_URL into the
 // process log through log.Fatal. The message now names host and database only.

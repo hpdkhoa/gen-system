@@ -1,4 +1,4 @@
-// generator/internal/engine/service_logic_v2310_test.go — v23.10 (Phase 4-B):
+// generator/internal/engine/service_logic_v2310_test.go, v23.10 (Phase 4-B):
 // the containment guarantee. A model op whose body does not compile must be
 // dropped to a safe "not implemented" stub so the service still builds.
 package engine
@@ -19,8 +19,8 @@ func TestSanitizeOperations_BadBodyDropsToStub(t *testing.T) {
 		{Name: "", HTTPMethod: "POST", Body: "return nil, nil"},     // empty name dropped
 		{Name: "Good", HTTPMethod: "POST", Body: "return nil, nil"}, // dup dropped
 	}
-	// Use a provider with NO repair capability (replay) so a genuinely broken
-	// body still falls straight to a stub — the original containment guarantee.
+	// Use a provider with no repair capability (replay) so a genuinely broken
+	// body still falls straight to a stub: the original containment guarantee.
 	out := sanitizeOperations("an orders app", e, []schema.Entity{e}, ops, ai.ReplayProvider())
 	if len(out) != 2 {
 		t.Fatalf("want 2 ops (Good + Bad-as-stub), got %d", len(out))

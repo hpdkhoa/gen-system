@@ -1,4 +1,4 @@
-// project_load_v2658_test.go — v26.58 (D081): handleLoad ran the swap closure
+// project_load_v2658_test.go (v26.58, D081): handleLoad ran the swap closure
 // first and SetRoot after it. The swap rebuilt and saved the beliefs of the new
 // project in the store of the old root, and gen-server attached the enricher to
 // that old store. SetRoot then made a fresh store with no enricher, so inline

@@ -1,14 +1,14 @@
-// context/stdlib_java_test.go — v23.32 (stdlib provenance): the SECOND-LANGUAGE
-// PROOF. Everything the Go stdlib path exercises (provenance tagging, the
+// context/stdlib_java_test.go (v23.32, stdlib provenance): the second-language
+// proof. Everything the Go stdlib path exercises (provenance tagging, the
 // import-scoped loader, cross-boundary resolution) must work for Java through
-// the SAME shared machinery, with zero Java-specific code in symbols/context/
-// flow. If this passes, the stdlib design is genuinely language-agnostic — which
+// the same shared machinery, with zero Java-specific code in symbols/context/
+// flow. If this passes, the stdlib design is language-agnostic. That
 // is the whole point of building the pure-Go Java reader before any sidecar.
 //
 // Java's stdlib ships as bytecode (no src.zip on a headless JDK), so this uses a
 // signature-level fixture under testdata/java_stdlib laid out exactly as a real
 // JDK signature tree would be (java/util/ArrayList.java). Bodies are empty, so
-// the frontend records them as NodeUnknown — the honest representation of
+// the frontend records them as NodeUnknown, which represents
 // "declaration known, implementation not modelled". The sidecar, when it lands,
 // would supply the bodies; this proves the resolution boundary works without it.
 package context
@@ -37,7 +37,7 @@ func TestStdlibProvenance_Java_SecondLanguageProof(t *testing.T) {
 		t.Fatal("nil index")
 	}
 
-	// 1) Stdlib symbols were ingested and tagged ProvStdlib — through the same
+	// 1) Stdlib symbols were ingested and tagged ProvStdlib through the same
 	//    AddModuleWithProvenance path Go uses, with no Java-specific code.
 	var stdlibJava, projectJava int
 	var sawArrayListAdd bool
@@ -65,7 +65,7 @@ func TestStdlibProvenance_Java_SecondLanguageProof(t *testing.T) {
 	}
 
 	// 2) Cross-boundary resolution: at least one project-caller edge resolves
-	//    INTO a stdlib symbol. This is the Java equivalent of "resolve into the
+	//    into a stdlib symbol. This is the Java equivalent of "resolve into the
 	//    runtime", proving the shared resolver tie-break is language-neutral.
 	intoStdlib := 0
 	for _, e := range ctx.Index.AllCallEdges() {
@@ -88,7 +88,7 @@ func TestStdlibProvenance_Java_SecondLanguageProof(t *testing.T) {
 		stdlibJava, projectJava, intoStdlib)
 }
 
-// v24 — collectModuleImports must surface a Java module's imports (emitted as
+// v24: collectModuleImports must surface a Java module's imports (emitted as
 // NodeImport children with ImportPath) so stdlib AutoScope can scope the JDK
 // ingest to referenced packages instead of walking the whole tree.
 func TestCollectModuleImports_Java_v24(t *testing.T) {

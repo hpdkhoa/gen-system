@@ -10,17 +10,17 @@ import (
 	"github.com/hpdkhoa/gen-system/generator/internal/schema"
 )
 
-// realFieldProvider emits bodies that read the entity's REAL fields — exactly
+// realFieldProvider emits bodies that read the entity's real fields. This is
 // the kind of correct business logic that v23.18's fields-less stand-in
 // (struct{ID int}) wrongly rejected, stubbing 100% of real logic. v23.22 makes
-// the compile gate carry the real fields, so these must now PASS the gate.
+// the compile gate carry the real fields, so these must now pass the gate.
 type realFieldProvider struct{}
 
 func (realFieldProvider) Operations(idea string, e schema.Entity, all []schema.Entity) ([]ai.Operation, error) {
 	switch e.Name {
 	case "Order":
 		return []ai.Operation{
-			{ // reads o.Total and o.Status — real fields
+			{ // reads o.Total and o.Status (real fields)
 				Name: "Checkout", HTTPMethod: "POST", Subpath: "checkout",
 				Body: "o, ok := s.store.Get(id)\n" +
 					"if !ok {\nreturn nil, errors.New(\"order not found\")\n}\n" +
@@ -29,7 +29,7 @@ func (realFieldProvider) Operations(idea string, e schema.Entity, all []schema.E
 					"updated, _ := s.store.Update(id, o)\n" +
 					"return updated, nil",
 			},
-			{ // mutates o.Total — real field
+			{ // mutates o.Total (real field)
 				Name: "ApplyDiscount", HTTPMethod: "POST", Subpath: "discount",
 				Body: "o, ok := s.store.Get(id)\n" +
 					"if !ok {\nreturn nil, errors.New(\"order not found\")\n}\n" +
@@ -40,7 +40,7 @@ func (realFieldProvider) Operations(idea string, e schema.Entity, all []schema.E
 		}, nil
 	case "Product":
 		return []ai.Operation{
-			{ // reads/guards p.Stock — the "can't go negative" rule
+			{ // reads/guards p.Stock: the "can't go negative" rule
 				Name: "AdjustStock", HTTPMethod: "POST", Subpath: "adjust-stock",
 				Body: "p, ok := s.store.Get(id)\n" +
 					"if !ok {\nreturn nil, errors.New(\"product not found\")\n}\n" +
@@ -82,7 +82,7 @@ func TestServiceLogic_RealFieldBodiesCompile_v2322(t *testing.T) {
 				t.Errorf("%s: method %s missing", filepath.Base(file), m)
 			}
 		}
-		// ...and the real logic must NOT have been stubbed out.
+		// ...and the real logic must not have been stubbed out.
 		if strings.Contains(src, "not implemented") {
 			t.Errorf("%s: a real-field body was wrongly stubbed (v23.22 regression). src:\n%s",
 				filepath.Base(file), src)

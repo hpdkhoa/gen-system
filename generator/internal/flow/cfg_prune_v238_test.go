@@ -1,4 +1,4 @@
-// generator/internal/flow/cfg_prune_v238_test.go — v23.8: regression test for
+// generator/internal/flow/cfg_prune_v238_test.go (v23.8): regression test for
 // pruneUnreachable. When both the then- and else-branch of an if/else return,
 // the merge block becomes unreachable; it must be pruned and IDs must stay
 // dense + index-aligned (CFG.Block(id) indexes Blocks by position).
@@ -31,7 +31,7 @@ func TestPrune_OrphanMergeRemoved(t *testing.T) {
 		t.Fatal("no CFG for AllBranchesReturn")
 	}
 
-	// No non-entry block may be an orphan (0 predecessors) — that was the bug.
+	// No non-entry block may be an orphan (0 predecessors). That was the bug.
 	for _, b := range cfg.Blocks {
 		if b.ID == cfg.Entry {
 			continue
@@ -78,7 +78,7 @@ func TestPrune_OrphanMergeRemoved(t *testing.T) {
 }
 
 // TestPrune_KeepsReachableMerge ensures a normal if/else (then falls through,
-// no return) is NOT pruned — the merge block stays because it is reachable.
+// no return) is not pruned. The merge block stays because it is reachable.
 func TestPrune_KeepsReachableMerge(t *testing.T) {
 	m := goFuncModule("FallsThrough",
 		&ast.Node{

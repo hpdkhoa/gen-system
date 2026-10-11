@@ -1,4 +1,4 @@
-// generator/internal/bench/report.go — v19.7: render a Run as terminal
+// generator/internal/bench/report.go (v19.7): render a Run as terminal
 // output, write it to JSON, and diff two runs for the regression command.
 package bench
 
@@ -36,11 +36,11 @@ func ReadJSON(path string) (Run, error) {
 }
 
 // RenderTerminal writes a human-readable summary to w. Uses ANSI when
-// stdout is a TTY (best-effort — we don't import golang.org/x/term).
+// stdout is a TTY (best-effort; we don't import golang.org/x/term).
 func RenderTerminal(w io.Writer, r Run) {
 	dur := r.FinishedAt.Sub(r.StartedAt).Round(time.Millisecond)
 	fmt.Fprintln(w, strings.Repeat("─", 70))
-	fmt.Fprintf(w, "genbench — %s on %s/%s (Go %s)\n", r.Schema, r.HostInfo.OS, r.HostInfo.Arch, r.HostInfo.GoVersion)
+	fmt.Fprintf(w, "genbench: %s on %s/%s (Go %s)\n", r.Schema, r.HostInfo.OS, r.HostInfo.Arch, r.HostInfo.GoVersion)
 	fmt.Fprintf(w, "model: %s @ %s\n", r.ModelInfo.Name, r.ModelInfo.Endpoint)
 	fmt.Fprintf(w, "root:  %s\n", r.ProjectRoot)
 	fmt.Fprintf(w, "took:  %s\n", dur)
@@ -56,7 +56,7 @@ func RenderTerminal(w io.Writer, r Run) {
 			mark = "✗"
 		}
 		fmt.Fprintf(w, "\n%s  %s   (%d/%d cases pass)   %s\n", mark, s.Name, p, p+f, s.Duration.Round(time.Microsecond))
-		// Cases — failures first.
+		// Cases: failures first.
 		sorted := make([]Case, len(s.Cases))
 		copy(sorted, s.Cases)
 		sort.SliceStable(sorted, func(i, j int) bool { return !sorted[i].Pass && sorted[j].Pass })

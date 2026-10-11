@@ -1,4 +1,4 @@
-// generator/internal/ai/schema_gen.go — v23.1 (round 3): GenerateSchema now
+// generator/internal/ai/schema_gen.go, v23.1 (round 3): GenerateSchema now
 // constrains the model via AskLLMJSON(entitiesSchema) so output is valid JSON
 // matching {entities:[{name,fields[]}]}. (round 1: model resolved via Model().)
 package ai

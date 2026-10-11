@@ -1,4 +1,4 @@
-// env_example_v2659_test.go — N08: two writers of .env.example.
+// env_example_v2659_test.go (N08): two writers of .env.example.
 // GenerateEnvFiles builds it from the schema and components; the ship scripts
 // (writeShipScripts, and writeSpringShipScripts in Spring mode) wrote a fixed
 // file over it. Whichever ran last won, so the schema based file was lost when

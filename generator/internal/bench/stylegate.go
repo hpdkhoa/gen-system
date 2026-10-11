@@ -1,4 +1,4 @@
-// generator/internal/bench/stylegate.go — v26.33: the team style gate as a
+// generator/internal/bench/stylegate.go (v26.33): the team style gate as a
 // benchmark suite. One case per active rule (pass when that rule has no
 // finding) plus counts, so a profile can be run over any Go tree and the
 // result diffed like every other suite. Deterministic, no model.

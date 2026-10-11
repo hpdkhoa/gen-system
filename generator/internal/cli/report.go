@@ -1,10 +1,10 @@
-// cli/report.go — v23.30 (gen report): NEW subcommand. Renders one or more
+// cli/report.go, v23.30 (gen report): new subcommand. Renders one or more
 // frozen genbench JSON runs (bench.Run, schema "genbench/v1") plus an optional
 // .skill export into a single standalone dark-terminal HTML validation report.
 //
 // No new external deps: stdlib encoding/json + html/template only. The output
 // is self-contained (fonts via Google Fonts <link> are cosmetic per the project
-// HARD CONSTRAINTS — the page renders with the mono fallback if offline).
+// HARD CONSTRAINTS; the page renders with the mono fallback if offline).
 //
 // Usage:
 //
@@ -103,7 +103,7 @@ func WriteReport(args []string) {
 	if model.TotalFail == 0 {
 		fmt.Println("  ok")
 	} else {
-		fmt.Println("  NOTE: report contains failing cases — see the report.")
+		fmt.Println("  NOTE: the report contains failing cases.")
 	}
 }
 
@@ -242,7 +242,7 @@ func buildModel(runs []bench.Run, skill *skillSummary, title string) reportModel
 	if title != "" {
 		m.Title = title
 	} else if m.ProjectRoot != "" {
-		m.Title = "Code-Intelligence Validation — " + m.ProjectRoot
+		m.Title = "Code-Intelligence Validation: " + m.ProjectRoot
 	} else {
 		m.Title = "Code-Intelligence Validation Report"
 	}
@@ -252,8 +252,8 @@ func buildModel(runs []bench.Run, skill *skillSummary, title string) reportModel
 }
 
 // deriveHighlights pulls the few headline numbers a reader scans first.
-// It reads named metrics/cases by their genbench names; anything absent is
-// simply skipped (no fabrication).
+// It reads named metrics/cases by their genbench names and skips anything
+// absent (no fabrication).
 func deriveHighlights(runs []bench.Run, skill *skillSummary) []highlight {
 	var hs []highlight
 	seen := map[string]bool{}

@@ -21,9 +21,9 @@ import (
 //
 // v23.29 (test-fix): build artifacts are written to a throwaway -o directory
 // instead of the package directory. Plain `go build ./...` compiles main
-// packages into the CURRENT directory named after the package's base dir, so a
+// packages into the current directory named after the package's base dir, so a
 // module whose main package lives in `cmd/` made Go fail with
-// "build output cmd already exists and is a directory" — a false build failure
+// "build output cmd already exists and is a directory": a false build failure
 // that had nothing to do with the code. Directing output to a temp dir (which
 // `go build` happily overwrites) makes ValidateBuild a pure compile check that
 // never collides with the source layout.

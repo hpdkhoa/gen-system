@@ -3,7 +3,7 @@
 package ast
 
 // ─────────────────────────────────────────────────────────────
-// cache.go — Checksum-based AST cache
+// cache.go: checksum-based AST cache
 //
 // Modules are expensive to produce (subprocesses for Python,
 // full parse for large TS files). Cache keys on SHA-256 of
@@ -28,7 +28,7 @@ import (
 type Cache struct {
 	mu      sync.RWMutex
 	entries map[string]*Module // key: filePath+"#"+checksum
-	diskDir string             // e.g. ".gen/ast_cache" — empty to disable disk
+	diskDir string             // e.g. ".gen/ast_cache"; empty disables disk
 }
 
 // NewCache creates a cache that optionally persists to diskDir.
@@ -120,7 +120,7 @@ func (c *Cache) ParseOrCache(path string) (*Module, error) {
 	}
 	fe := ForFile(path)
 	if fe == nil {
-		// No frontend registered — not an error, just unsupported extension.
+		// No frontend is registered. That is not an error; the extension is unsupported.
 		trace.Trace(tctx, "no frontend", "file", path, "ext", filepath.Ext(path))
 		return nil, nil
 	}
@@ -141,7 +141,7 @@ func (c *Cache) ParseOrCache(path string) (*Module, error) {
 
 // ─── Disk persistence ────────────────────────────────────────
 
-// diskEntry is what we serialize. RawSource is NOT persisted to
+// diskEntry is what we serialize. RawSource is not persisted to
 // keep disk footprint small.
 type diskEntry struct {
 	FilePath    string       `json:"file"`

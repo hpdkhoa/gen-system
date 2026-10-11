@@ -1,4 +1,4 @@
-// frontend_test.go — v19: COBOL is now registered in the default build.
+// frontend_test.go (v19): COBOL is now registered in the default build.
 // Updated test entries: Language("cobol") expects true, "file.cobol"
 // returns a CobolFrontend, ParseFile("file.cobol", ...) returns a module.
 package ast

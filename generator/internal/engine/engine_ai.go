@@ -6,7 +6,7 @@ import (
 )
 
 // RunAIMutation runs AI-based handler mutation for a single entity.
-// This is called by `gen ai <path>` — NOT by engine.RunAll.
+// `gen ai <path>` calls this, not engine.RunAll.
 //
 // The actual implementation lives in ai/engine_mutation.go.
 // engine_ai.go only bridges the schema.Entity type to the ai package call.

@@ -1,10 +1,10 @@
-// go_cfg_v237_test.go — v23.7: if-else populates Node.Else (distinct else
+// go_cfg_v237_test.go (v23.7): if-else populates Node.Else (distinct else
 // block); nested else-if nests as a NodeBranch inside Else.
 package ast
 
 import "testing"
 
-// v23.7 — if-else must populate Node.Else (distinct else body), and nested
+// v23.7: if-else must populate Node.Else (distinct else body), and nested
 // else-if must nest as a NodeBranch inside Else.
 func TestGoBody_ElsePath(t *testing.T) {
 	src := `package p

@@ -1,18 +1,18 @@
-// generator/internal/bench/genpipe.go — v26.24 (WP1): the end-to-end Generate
+// generator/internal/bench/genpipe.go, v26.24 (WP1): the end-to-end Generate
 // pipeline benchmark. Runs idea → plan → generate → compile gate → heal →
-// Understand-verify for each task idea, through the SAME production entry
+// Understand-verify for each task idea, through the same production entry
 // points the CLI uses (planner_v2.BuildPlanV2 + agent.RunFromPlan), and
 // reports the quality axis that can actually move:
 //
-//	ops_total / ops_stubbed      — how much model logic survived the compile gate
-//	op_repair_attempts/successes — op-level repair round-trips (cap 2, see
-//	                               engine.maxRepairAttempts)
-//	heal_attempts_total/success  — task-level FixTask attempts (cap 3)
-//	go_test_pass                 — independent `go test ./...` on each backend
-//	verify_findings              — Understand-verify findings on the output
-//	wall_s / prompt_tokens       — cost per idea set
+//	ops_total / ops_stubbed:      how much model logic survived the compile gate
+//	op_repair_attempts/successes: op-level repair round-trips (cap 2, see
+//	                              engine.maxRepairAttempts)
+//	heal_attempts_total/success:  task-level FixTask attempts (cap 3)
+//	go_test_pass:                 independent `go test ./...` on each backend
+//	verify_findings:              Understand-verify findings on the output
+//	wall_s / prompt_tokens:       cost per idea set
 //
-// compile_pass stays reported (backend_builds) but is NOT the headline: the
+// compile_pass stays reported (backend_builds) but is not the headline: the
 // stub path makes it green by construction; the stub and repair counts are
 // where quantization or model changes show up.
 //
@@ -134,9 +134,9 @@ func GenPipeline(ideas []string) Suite {
 		if planErr == nil && len(plan.Entities) == 0 {
 			// The V2 planner's entity step has no deterministic fallback: with
 			// no reachable model it returns zero entities. Take the same path
-			// `gen apply` takes — a fixed schema through TaskGraphFromSchema —
+			// `gen apply` takes (a fixed schema through TaskGraphFromSchema)
 			// so the offline (replay) benchmark still exercises the full
-			// generate→gate→verify pipeline. NEVER silent: counted in the
+			// generate→gate→verify pipeline. Never silent: counted in the
 			// planner_fallbacks metric and named in the case note, so a live
 			// sweep where the model died mid-run cannot masquerade as measured
 			// planning.

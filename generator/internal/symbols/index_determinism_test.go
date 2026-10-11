@@ -1,9 +1,9 @@
-// index_determinism_test.go — v26.25: bare-name resolution must be a function of
+// index_determinism_test.go (v26.25): bare-name resolution must be a function of
 // the input alone.
 //
 // resolveByNameLocked used to range over idx.allSymbols (a map) and keep the
 // first match in each tier. Go randomizes map order, so when two symbols in the
-// SAME tier shared a bare name the winner varied between runs on identical
+// same tier shared a bare name the winner varied between runs on identical
 // input, and the call graph varied with it. The determinism contract the rest of
 // the system relies on (temperature 0, fixed seed, byte-identical output) does
 // not hold if the deterministic half is itself unstable.
@@ -20,7 +20,7 @@ import (
 )
 
 // buildAmbiguousIndex creates n files each defining an exported func with the
-// SAME bare name, so resolution has to break a tie.
+// same bare name, so resolution has to break a tie.
 func buildAmbiguousIndex(n int) *Index {
 	idx := NewIndex()
 	for i := 0; i < n; i++ {
@@ -103,7 +103,7 @@ func TestResolveAll_StableCallEdgesAcrossRuns(t *testing.T) {
 	}
 }
 
-// BuildFromModules is a SECOND entry point into resolution: it calls
+// BuildFromModules is a second entry point into resolution: it calls
 // resolveCallEdges, which until v26.26 used a different resolver than
 // ResolveAll did (resolveByName, unsorted map order, no provenance tier). So
 // the earlier determinism test passed while the identical bug survived next

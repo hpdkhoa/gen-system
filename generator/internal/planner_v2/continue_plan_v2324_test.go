@@ -1,5 +1,5 @@
-// generator/internal/planner_v2/continue_plan_v2324_test.go — v23.24 (task 4A):
-// offline tests for the delta application logic. No model is involved — these
+// generator/internal/planner_v2/continue_plan_v2324_test.go, v23.24 (task 4A):
+// offline tests for the delta application logic. No model is involved. These
 // exercise applyDelta directly with hand-built ContinueDelta values, which is
 // the deterministic core that protects existing entities from being dropped and
 // applies NEW / ADD_FIELD / NEW_OP / REMOVE correctly.
@@ -45,7 +45,7 @@ func hasFieldNamed(e schema.Entity, f string) bool {
 	return false
 }
 
-// The headline guarantee: proposing only additions must NEVER drop an existing
+// The headline guarantee: proposing only additions must never drop an existing
 // entity, and must add the new entity + new field + record the new op.
 func TestApplyDelta_AdditiveNeverDropsExisting_v2324(t *testing.T) {
 	delta := ai.ContinueDelta{Changes: []ai.ContinueChange{
@@ -103,7 +103,7 @@ func TestApplyDelta_AdditiveNeverDropsExisting_v2324(t *testing.T) {
 }
 
 // A model that re-proposes an existing entity must not duplicate it or its
-// fields — NEW on an existing entity degrades to a field merge.
+// fields. NEW on an existing entity degrades to a field merge.
 func TestApplyDelta_NewOnExistingEntity_Dedups_v2324(t *testing.T) {
 	delta := ai.ContinueDelta{Changes: []ai.ContinueChange{
 		{Kind: ai.ChangeNew, Entity: "Order", Fields: map[string]string{"total": "float", "note": "string"}},
@@ -135,7 +135,7 @@ func TestApplyDelta_NewOnExistingEntity_Dedups_v2324(t *testing.T) {
 	}
 }
 
-// REMOVE is collected but NOT applied unless allowRemove is true.
+// REMOVE is collected but not applied unless allowRemove is true.
 func TestApplyDelta_RemoveGatedByFlag_v2324(t *testing.T) {
 	delta := ai.ContinueDelta{Changes: []ai.ContinueChange{
 		{Kind: ai.ChangeRemove, Entity: "Product"},
@@ -157,7 +157,7 @@ func TestApplyDelta_RemoveGatedByFlag_v2324(t *testing.T) {
 	}
 }
 
-// REMOVE of a single field (allowed) drops just that field.
+// REMOVE of a single field (allowed) drops only that field.
 func TestApplyDelta_RemoveField_v2324(t *testing.T) {
 	delta := ai.ContinueDelta{Changes: []ai.ContinueChange{
 		{Kind: ai.ChangeRemove, Entity: "Order", Field: "status"},
@@ -187,7 +187,7 @@ func TestApplyDelta_RemoveForcesSurvivorRegen_v2324(t *testing.T) {
 	if !got.changedSet["Order"] {
 		t.Error("survivor Order must be forced into changedSet on entity removal")
 	}
-	// The removed entity must NOT linger in changedSet (it no longer exists).
+	// The removed entity must not linger in changedSet (it no longer exists).
 	if got.changedSet["Product"] {
 		t.Error("removed Product must not remain in changedSet")
 	}

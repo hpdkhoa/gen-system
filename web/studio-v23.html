@@ -1,12 +1,48 @@
 <!DOCTYPE html>
-<!-- studio-v23.html — v26.6: (1) mixed-language stdlib-root WARNING — Architecture flags a single --stdlib root that physically contains more than one language (it cannot be import-scoped correctly), with an amber callout carrying the exact per-language split command and a "mixed" badge + per-language file breakdown on the row. (2) Python CFG is now FAITHFUL and EXPRESSION-LEVEL: the frontend emits nested then/else/merge + loop back-edges + try/except/finally (was flattened), plus short-circuit and/or, ternary if-expr, comprehension for+if filters, and match/case as a multi-way fan-out (v26.1 lane-column layout, for free). Prior v26.5: Architecture "Runtime resolution" table — which stdlib roots attached, which were skipped/missing, and the exact reason (e.g. "JAVA_HOME not set — pass --stdlib java=<dir>"). With this table, the edge-resolution % shows its own cause. Backed by v26.5 engine work: the stdlib language is now PER ROOT (multi-language projects are finally expressible) and roots AUTO-DETECT from the languages actually present in the project. Prior v26.4: IDE-style syntax colouring for CFG code. Each statement line in a process node is now tokenised (a lightweight language-agnostic lexer covering Go / Java / Python / TS / COBOL) and each token drawn in its own coloured <tspan> — keywords, strings, numbers, comments, function calls, and types get distinct theme-aware colours (--syn-* vars, defined for both dark and light). Purely presentational; layout/positions unchanged (still pure-math, headless == browser). Prior v26.3: CFG terminating-call + guard-layout fix (os.Exit/panic/STOP RUN ends at its own End, phantom forward edge dropped; guard peels to side lane, continuation stays on spine). Prior v26.2: graph/CFG zoom range widened & shared (adaptive max from graph size, effective-scale % label, true 1:1 button). Prior v26.1: CFG multi-way layout fix. A Go switch / COBOL EVALUATE / select with 3+ arms no longer overlaps — each arm gets its own lane column (packed by measured subtree width so nested if/switch inside a case gets real room), arms rejoin at their merge back on the decision's spine, and a final per-row overlap-resolution sweep guarantees no two boxes in any depth-row collide (all languages). Prior v23.35: orientation now round-trips through the URL hash (shareable); clicking empty graph canvas clears the find filter (drag-guarded). Prior v23.34: graph-view UX overhaul — (1) orientation-aware
+<!-- studio-v23.html (v26.6): (1) Mixed-language stdlib-root warning. Architecture flags a single
+     --stdlib root that physically contains more than one language (it cannot be import-scoped
+     correctly). An amber callout carries the exact per-language split command, and the row gets
+     a "mixed" badge + per-language file breakdown. (2) The Python CFG is now faithful and
+     expression-level. The frontend emits nested then/else/merge + loop back-edges +
+     try/except/finally (it used to flatten them). It also emits short-circuit and/or, ternary
+     if-expr, comprehension for+if filters, and match/case as a multi-way fan-out. The v26.1
+     lane-column layout handles that fan-out with no new layout code.
+     Prior v26.5: Architecture "Runtime resolution" table. It lists which stdlib roots attached,
+     which were skipped/missing, and the exact reason (for example JAVA_HOME not set, with the
+     hint to pass --stdlib java=<dir>). With this table, the edge-resolution % shows its own
+     cause. v26.5 engine work backs it: the stdlib language is now per root (so multi-language
+     projects can finally be expressed), and roots auto-detect from the languages actually present
+     in the project.
+     Prior v26.4: IDE-style syntax colouring for CFG code. The page now tokenises each statement
+     line in a process node (a lightweight language-agnostic lexer covering Go / Java / Python /
+     TS / COBOL) and draws each token in its own coloured <tspan>. Keywords, strings, numbers,
+     comments, function calls, and types get distinct theme-aware colours (--syn-* vars, defined
+     for both dark and light). The change only affects presentation; layout/positions stay the
+     same (still pure-math, headless == browser).
+     Prior v26.3: CFG terminating-call + guard-layout fix (os.Exit/panic/STOP RUN ends at its own
+     End, and the phantom forward edge is dropped; a guard peels to the side lane, and the
+     continuation stays on the spine).
+     Prior v26.2: graph/CFG zoom range widened & shared (adaptive max from graph size,
+     effective-scale % label, true 1:1 button).
+     Prior v26.1: CFG multi-way layout fix. A Go switch / COBOL EVALUATE / select with 3+ arms no
+     longer overlaps. Each arm gets its own lane column, packed by measured subtree width so a
+     nested if/switch inside a case gets real room. The arms rejoin at their merge back on the
+     decision's spine. A final per-row overlap-resolution sweep guarantees that no two boxes in
+     any depth-row collide (all languages).
+     Prior v23.35: orientation now round-trips through the URL hash (shareable); clicking empty
+     graph canvas clears the find filter (drag-guarded).
+     Prior v23.34: graph-view UX overhaul. (1) Orientation-aware
      layout, default Left→Right so deep call trees grow in depth instead of
      stretching horizontally (toggle ⇄ L→R / ⇅ T→B); compact cross-axis spacing.
      (2) Actual-size (1:1) zoom button so you're never stuck at an unreadable
      fit-scale on big graphs. (3) Find/locate box: highlights nodes by name,
      dims the rest, centers the first match, shows a count. (4) Single-click a
-     call-graph node = SELECT (updates CFG + detail, keeps graph & position);
-     double-click = re-root. Prior: v23.5: Sugiyama-style call-graph layout (barycenter crossing reduction + median x-alignment -> narrower, fewer crossing edges). v23.4: CFG shows REAL source code per statement (line# + actual Go line, all statements, no condensing). v23.3: graph view overhaul — (1) arrowheads on every
+     call-graph node = select (updates CFG + detail, keeps graph & position);
+     double-click = re-root.
+     Prior: v23.5: Sugiyama-style call-graph layout (barycenter crossing reduction + median
+     x-alignment -> narrower, fewer crossing edges). v23.4: CFG shows the real source code per
+     statement (line# + actual Go line, all statements, no condensing). v23.3: graph view
+     overhaul. (1) Arrowheads on every
      edge showing direction (calls ↓ / called-by ↑ / unresolved), (2) taller
      vertical layering so deep graphs read as a full column, (3) fit-to-view
      zoom (frames the whole graph on load; reset = fit), (4) CFG redrawn as a
@@ -21,7 +57,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <style>
-/* v23.1 — palette retuned for long (6–8h) reading sessions:
+/* v23.1: palette retuned for long (6 to 8 h) reading sessions:
    - dark bg shifted off pure-black toward a warm charcoal (less glare)
    - --text-dim lifted from #5a6478 to a warm, legible tone (was failing
      contrast against panels); --text/--text-2 warmed slightly
@@ -42,7 +78,7 @@
   --grey:#6a7180;
   --shadow:0 8px 30px rgba(0,0,0,0.5);
   --r:8px; --tr:140ms cubic-bezier(.4,0,.2,1);
-  /* v26.4 — CFG code syntax colours (dark). Tuned to the existing palette so a
+  /* v26.4: CFG code syntax colours (dark). Tuned to the existing palette so a
      highlighted statement reads like an editor without clashing with node fills. */
   --syn-kw:#c586e0;      /* keywords: if/for/switch/return/func/… */
   --syn-str:#7ec97e;     /* string + char literals */
@@ -64,7 +100,7 @@
   --purple:#7a4fc0; --purple-dim:rgba(122,79,192,0.12);
   --grey:#9a958a;
   --shadow:0 8px 30px rgba(80,70,50,0.18);
-  /* v26.4 — CFG code syntax colours (light), darker for contrast on parchment. */
+  /* v26.4: CFG code syntax colours (light), darker for contrast on parchment. */
   --syn-kw:#9227b0;
   --syn-str:#2e7d32;
   --syn-num:#b05a00;
@@ -94,7 +130,7 @@ a:hover { text-decoration: underline; }
 .pill.network { color: var(--red);    background: var(--red-dim);    border-color: rgba(255,95,109,0.3); }
 .pill.pure    { color: var(--green);  background: var(--green-dim);  border-color: rgba(61,255,160,0.3); }
 .pill.unknown { color: var(--purple); background: var(--purple-dim); border-color: rgba(180,142,254,0.3); }
-/* v26.6 — mixed-language stdlib root warning + inline badge */
+/* v26.6: mixed-language stdlib root warning + inline badge */
 .stdlib-warn { display: flex; gap: 8px; align-items: flex-start; margin: 10px 0; padding: 10px 12px; border-radius: 8px;
   background: var(--amber-dim); border: 1px solid var(--amber); color: var(--text); font-size: 12px; line-height: 1.5; }
 .stdlib-warn-icon { color: var(--amber); font-size: 14px; line-height: 1.4; flex-shrink: 0; }
@@ -138,7 +174,7 @@ a:hover { text-decoration: underline; }
 .search-trigger .kbd { float: right; }
 
 .topbar-right { display: flex; align-items: center; gap: 10px; margin-left: auto; }
-/* v24 — dynamic project modal */
+/* v24: dynamic project modal */
 .pm-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 100; display: flex; align-items: flex-start; justify-content: center; padding-top: 8vh; }
 .pm-panel { background: var(--bg-1); border: 1px solid var(--border); border-radius: 10px; width: 520px; max-width: 92vw; padding: 18px 20px; box-shadow: 0 12px 40px rgba(0,0,0,0.4); }
 .pm-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
@@ -216,7 +252,7 @@ a:hover { text-decoration: underline; }
 #right h5 { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-dim); margin-bottom: 8px; font-weight: 600; }
 .right-empty { color: var(--text-dim); font-size: 12px; padding: 12px 0; text-align: center; font-style: italic; }
 
-/* v25.3 — collapsible side panels to maximise the main content body.
+/* v25.3: collapsible side panels to maximise the main content body.
    #shell columns are driven by CSS vars so the collapsed widths animate and a
    thin re-expand rail replaces a fully-hidden panel (keeps it discoverable). */
 #shell {
@@ -246,12 +282,12 @@ a:hover { text-decoration: underline; }
 .panel-toggle:hover { background: var(--bg-2); color: var(--text); }
 .panel-toggle.off { color: var(--cyan); border-color: rgba(61,214,245,0.4); background: var(--cyan-dim); }
 
-/* v25.3 — draggable gutter between the call-graph and CFG panes. The graph
+/* v25.3: draggable gutter between the call-graph and CFG panes. The graph
    shell's two content columns are driven by --graph-split-cg / --graph-split-cfg
-   (fr fractions summing to 1); the 8px gutter column IS the separator, so the
-   resizable variant zeroes the COLUMN gap (the base .graph-shell 14px gap would
-   otherwise stack 14+8+14px of dead space around the gutter — the reported wide
-   empty band). Row gap is preserved for the controls/src spacing. */
+   (fr fractions summing to 1); the 8px gutter column is the separator, so the
+   resizable variant zeroes the column gap. Otherwise the base .graph-shell 14px gap
+   would stack 14+8+14px of dead space around the gutter (the reported wide empty
+   band). Row gap is preserved for the controls/src spacing. */
 .graph-shell { --graph-split: 0.5; }
 .graph-shell.resizable {
   grid-template-columns: minmax(0, var(--graph-split-cg, 1fr)) 8px minmax(0, var(--graph-split-cfg, 1fr));
@@ -304,7 +340,7 @@ table.data td.kind { color: var(--text-dim); }
 .graph-body { flex: 1; overflow: auto; padding: 8px; position: relative; }
 svg.graph { width: 100%; height: 100%; display: block; }
 .graph-empty { display: flex; align-items: center; justify-content: center; height: 100%; color: var(--text-dim); font-size: 13px; text-align: center; padding: 20px; }
-/* v23.37 — back/forward nav arrows + source panel */
+/* v23.37: back/forward nav arrows + source panel */
 .btn.nav-arrow { min-width: 30px; padding: 4px 8px; font-size: 13px; }
 .btn.nav-arrow:disabled { opacity: 0.3; cursor: default; }
 .btn.nav-arrow:disabled:hover { background: transparent; border-color: transparent; }
@@ -321,9 +357,9 @@ svg.graph { width: 100%; height: 100%; display: block; }
 .cg-node rect.depth-1 { fill: var(--bg-2); stroke: var(--border-2); }
 .cg-node rect.depth-2 { fill: var(--bg-2); stroke: var(--border); }
 .cg-node rect.depth-3 { fill: var(--bg-1); stroke: var(--border); }
-/* v23.34 — select / find / locate affordances */
+/* v23.34: select / find / locate affordances */
 .cg-node.selected rect { stroke: var(--cyan); stroke-width: 2.5; }
-/* v24 — constructor/allocation node (new X): tinted + dashed to read as an
+/* v24: constructor/allocation node (new X): tinted + dashed to read as an
    allocation, not a normal method call. */
 .cg-node.cg-init rect { stroke: var(--green); stroke-dasharray: 4 3; fill: color-mix(in srgb, var(--green) 8%, var(--bg-1)); }
 .cg-node.dimmed { opacity: 0.18; transition: opacity var(--tr); }
@@ -348,7 +384,7 @@ svg.graph { width: 100%; height: 100%; display: block; }
 .cg-node text.sub { fill: var(--text-dim); font-size: 9px; }
 .cg-edge path { stroke: var(--border-2); stroke-width: 1.2; fill: none; }
 .cg-edge path.unresolved { stroke-dasharray: 3 3; stroke: var(--purple); }
-/* v24 — dense-graph readability: fade edges while hovering a node, and make the
+/* v24: dense-graph readability: fade edges while hovering a node, and make the
    hovered node's connected edges bold + darker so a call chain is traceable. */
 svg.graph.cg-hovering .edge-group { opacity: 0.15; transition: opacity var(--tr); }
 svg.graph.cg-hovering .edge-group.edge-hi { opacity: 1; }
@@ -362,7 +398,7 @@ svg.graph .edge-group.edge-hi path.edge-path.up { stroke: var(--amber); }
 .cfg-block.exit { border-left-color: var(--red); }
 .cfg-edge { color: var(--text-dim); font-size: 11px; padding-left: 18px; font-family: 'IBM Plex Mono', monospace; }
 
-/* v23.3 — call-graph + CFG as arrowed SVG flows */
+/* v23.3: call-graph + CFG as arrowed SVG flows */
 svg.graph .edge-path { fill: none; stroke: var(--border-2); stroke-width: 1.6; }
 svg.graph .edge-path.up { stroke: var(--amber); }
 svg.graph .edge-path.loop-back { stroke: var(--amber); stroke-dasharray: 5 3; }
@@ -376,7 +412,7 @@ svg.graph .cfg-node.start rect { fill: color-mix(in srgb, var(--green) 14%, var(
 svg.graph .cfg-node.end rect { fill: color-mix(in srgb, var(--red) 12%, var(--bg-2)); stroke: var(--red); stroke-width: 1.8; }
 svg.graph .cfg-node.decision polygon { fill: color-mix(in srgb, var(--amber) 12%, var(--bg-2)); stroke: var(--amber); stroke-width: 1.8; }
 svg.graph .cfg-node.loop-header polygon { fill: color-mix(in srgb, var(--amber) 20%, var(--bg-2)); stroke: var(--amber); stroke-width: 2; }
-/* v24 — Option C loop-limit bracket (opt-in): a soft frame around a loop. */
+/* v24: Option C loop-limit bracket (opt-in): a soft frame around a loop. */
 svg.graph .cfg-loop-bracket rect { fill: color-mix(in srgb, var(--amber) 5%, transparent); stroke: var(--amber); stroke-width: 1; stroke-dasharray: 2 4; opacity: 0.6; }
 svg.graph .cfg-loop-bracket path.cap { fill: none; stroke: var(--amber); stroke-width: 2.4; }
 svg.graph .cfg-loop-bracket-label { fill: var(--amber); font-size: 9px; font-style: italic; font-family: 'IBM Plex Mono', monospace; }
@@ -385,7 +421,7 @@ svg.graph .cfg-node .dia-text { fill: var(--text); font-family: 'IBM Plex Mono',
 svg.graph .cfg-node .title { fill: var(--text); font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; }
 svg.graph .cfg-node .stmt { fill: var(--text-2); font-family: 'IBM Plex Mono', monospace; font-size: 10px; }
 svg.graph .cfg-node .stmt .gutter { fill: var(--text-dim); }
-/* v26.4 — IDE-style syntax colouring for CFG code tokens (theme-aware). */
+/* v26.4: IDE-style syntax colouring for CFG code tokens (theme-aware). */
 svg.graph .cfg-node .stmt .t-kw   { fill: var(--syn-kw); }
 svg.graph .cfg-node .stmt .t-str  { fill: var(--syn-str); }
 svg.graph .cfg-node .stmt .t-num  { fill: var(--syn-num); }
@@ -433,7 +469,7 @@ svg.graph .cfg-node .more { fill: var(--text-dim); font-family: 'IBM Plex Mono',
 .belief-actions .accept:hover { color: var(--green); border-color: var(--green); }
 .belief-actions .correct:hover { color: var(--amber); border-color: var(--amber); }
 .belief-actions .defer:hover { color: var(--purple); border-color: var(--purple); }
-/* v26.12 — three-eval belief UI: source tags, behavioral kinds, staleness */
+/* v26.12: three-eval belief UI: source tags, behavioral kinds, staleness */
 .belief-subject-head { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--cyan); padding: 10px 14px 4px; background: var(--bg-2); border-bottom: 1px solid var(--border); }
 .belief-claim { display: flex; gap: 8px; align-items: baseline; }
 .belief-text { font-size: 13px; color: var(--text); }
@@ -460,7 +496,7 @@ svg.graph .cfg-node .more { fill: var(--text-dim); font-family: 'IBM Plex Mono',
 .belief-stale-summary .stale-subj { font-family: 'IBM Plex Mono', monospace; color: var(--text); min-width: 160px; }
 .belief-stale-summary .stale-said { color: var(--green); }
 .belief-stale-summary .stale-now { color: var(--text-2); }
-/* v26.13 — enrich validation badges */
+/* v26.13: enrich validation badges */
 .belief-valid { display: flex; gap: 8px; align-items: center; margin-top: 4px; font-size: 11px; }
 .belief-valid .valid-badge { border-radius: 3px; padding: 1px 6px; font-family: 'IBM Plex Mono', monospace; }
 .belief-valid-contradicts { color: var(--red); }
@@ -470,7 +506,7 @@ svg.graph .cfg-node .more { fill: var(--text-dim); font-family: 'IBM Plex Mono',
 .belief-valid-consistent { color: var(--green); }
 .belief-valid-consistent .valid-badge { background: rgba(52,211,153,0.10); border: 1px solid rgba(52,211,153,0.3); }
 .belief-valid .valid-note { color: var(--text-dim); }
-/* v26.16 — scope summaries panel */
+/* v26.16: scope summaries panel */
 .belief-summaries { background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--r); padding: 12px 14px; margin-bottom: 14px; }
 .belief-summaries .summaries-head { font-size: 12px; color: var(--cyan); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; }
 .summaries-restale { font-size: 12px; color: var(--amber); background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.3); border-radius: 4px; padding: 6px 10px; margin-bottom: 10px; font-family: 'IBM Plex Mono', monospace; }
@@ -514,7 +550,7 @@ svg.graph .cfg-node .more { fill: var(--text-dim); font-family: 'IBM Plex Mono',
 .loader::before { content: ''; width: 14px; height: 14px; border: 2px solid var(--border-2); border-top-color: var(--cyan); border-radius: 50%; animation: spin 700ms linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* v23.1 — settings popup (display text size + theme) */
+/* v23.1: settings popup (display text size + theme) */
 .icon-btn { padding: 6px 8px; border-radius: 6px; color: var(--text-2); font-size: 15px; line-height: 1; }
 .icon-btn:hover { background: var(--bg-2); color: var(--text); }
 #settings-pop { display: none; position: fixed; top: 52px; right: 14px; z-index: 120; width: 280px; background: var(--bg-1); border: 1px solid var(--border-2); border-radius: var(--r); box-shadow: var(--shadow); padding: 16px; }
@@ -534,7 +570,7 @@ svg.graph .cfg-node .more { fill: var(--text-dim); font-family: 'IBM Plex Mono',
 .set-reset { font-size: 11px; color: var(--text-dim); margin-top: 4px; }
 .set-reset button { color: var(--cyan); text-decoration: underline; }
 
-/* v23.1 — graph zoom controls (pan/zoom inside the call-graph SVG) */
+/* v23.1: graph zoom controls (pan/zoom inside the call-graph SVG) */
 .graph-body { position: relative; }
 .zoom-controls { position: absolute; top: 10px; right: 10px; z-index: 5; display: flex; flex-direction: column; gap: 4px; background: var(--bg-1); border: 1px solid var(--border-2); border-radius: 6px; padding: 4px; box-shadow: var(--shadow); }
 .zoom-controls button { width: 28px; height: 26px; border-radius: 4px; color: var(--text-2); font-size: 15px; line-height: 1; display: flex; align-items: center; justify-content: center; }
@@ -607,7 +643,7 @@ svg.graph .viewport { transition: none; }
           <input class="pm-input" id="pm-stdlib-lang" type="text" placeholder="go / java" spellcheck="false" />
         </div>
       </div>
-      <label class="pm-check"><input type="checkbox" id="pm-live" /> Live watch <span class="pm-hint">(default off / static — track file changes on this project)</span></label>
+      <label class="pm-check"><input type="checkbox" id="pm-live" /> Live watch <span class="pm-hint">(default off / static; when on, it tracks file changes on this project)</span></label>
       <div class="pm-msg" id="pm-msg"></div>
       <div class="pm-actions">
         <button class="pm-btn pm-btn-clear" id="pm-clear">Clear project</button>
@@ -636,7 +672,7 @@ svg.graph .viewport { transition: none; }
     </div>
     <div class="left-history">
       <h4 style="font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-dim);margin-bottom:8px;font-weight:600;">Recent</h4>
-      <div id="history-list" class="history-empty">No history yet — pick a symbol to start.</div>
+      <div id="history-list" class="history-empty">No history yet. Pick a symbol to start.</div>
     </div>
   </div>
   <div id="center">
@@ -777,7 +813,7 @@ function handleRoute() {
   $$('.page').forEach(p => p.style.display = 'none');
   $$('.nav-btn, .left-nav-item').forEach(b => b.classList.remove('active'));
   $$('[data-route="' + route + '"]').forEach(b => b.classList.add('active'));
-  // v23.38: the page div ids don't all equal their route name — 'architecture'
+  // v23.38: the page div ids don't all equal their route name. 'architecture'
   // maps to #page-arch. Building '#page-' + route silently missed it, so the
   // Architecture container was never un-hidden and the tab looked blank even
   // though its data (and the 146 badge) loaded fine. Map explicitly.
@@ -864,7 +900,7 @@ function connectSSE() {
           state.arch = null;
           if (state.route === 'architecture') renderArchitecture();
         } else if (type === 'heal') {
-          // v25.5: a structured self-healing step — render it in the panel.
+          // v25.5: a structured self-healing step. Render it in the panel.
           pushHealEvent({
             kind: 'heal', phase: p.phase, func: p.func, attempt: p.attempt,
             max: p.max, strategy: p.strategy, message: p.detail,
@@ -877,7 +913,7 @@ function connectSSE() {
       let p = {}; try { p = JSON.parse(ev.data); } catch (e) {}
       pushHealEvent(p);
     });
-    // v24 — dynamic project load/clear: full refresh of all views.
+    // v24: dynamic project load/clear: full refresh of all views.
     ['project_loaded','project_cleared'].forEach(type => {
       es.addEventListener(type, ev => {
         let p = {}; try { p = JSON.parse(ev.data); } catch (e) {}
@@ -915,11 +951,11 @@ async function renderArchitecture() {
       el('div', { class: 'page-subtitle' }, 'Nothing parsed yet.'),
     ]));
     const box = el('div', { class: 'right-empty', style: 'text-align:left;max-width:640px;line-height:1.7;' });
-    box.appendChild(el('div', { style: 'font-weight:600;margin-bottom:8px;' }, 'The index is empty — 0 symbols.'));
+    box.appendChild(el('div', { style: 'font-weight:600;margin-bottom:8px;' }, 'The index is empty (0 symbols).'));
     box.appendChild(el('div', null, 'This usually means one of:'));
     const ul = el('div', { style: 'margin:8px 0 8px 4px;' });
     ['The server was started with a --root that has no source files in a supported language (Go, TS, Python, CA Gen, COBOL, Java).',
-     'The parse is still running — large trees take a moment. Hit Refresh.',
+     'The parse is still running. Large trees take a moment. Hit Refresh.',
      'A COBOL/CA Gen root without --copybooks, so files could not resolve.'].forEach(t =>
       ul.appendChild(el('div', { style: 'margin:4px 0;' }, '• ' + t)));
     box.appendChild(ul);
@@ -949,8 +985,8 @@ async function renderArchitecture() {
   }
   page.appendChild(cards);
 
-  // v26.5 — RUNTIME RESOLUTION. The edge-resolution % above is only meaningful
-  // if you can see WHICH runtimes were attached and which were not: an
+  // v26.5: runtime resolution. The edge-resolution % above is only meaningful
+  // if you can see which runtimes were attached and which were not: an
   // unresolved-heavy project is usually just a project whose stdlib wasn't
   // ingested. This section renders the loader's report: what attached, what was
   // skipped, and the exact reason. The number then carries its own cause, and
@@ -966,8 +1002,8 @@ async function renderArchitecture() {
         'stdlib mode: ' + (sl.mode || '—')),
     ]));
 
-    // v26.6 — WARNINGS callout (chiefly the mixed-language-root case). Shown
-    // ABOVE the table because it is the actionable thing: a single --stdlib path
+    // v26.6: warnings callout (chiefly the mixed-language-root case). We show it
+    // above the table because it is the actionable thing: a single --stdlib path
     // that holds more than one language only resolves one of them, and the
     // warning already carries the exact per-root command to fix it.
     (sl.warnings || []).forEach(w => {
@@ -988,7 +1024,7 @@ async function renderArchitecture() {
         const attached = r.status === 'attached';
         const where = r.path === 'cobol' ? 'built-in catalog' : (r.path || '—');
         // A single root that saw more than one language is flagged inline so the
-        // reader sees WHICH row the warning above refers to.
+        // reader sees which row the warning above refers to.
         const bd = r.lang_breakdown || {};
         const bdLangs = Object.keys(bd);
         const mixed = bdLangs.length > 1;
@@ -1092,7 +1128,7 @@ async function renderGraph(params) {
   const shell = el('div', { class: 'graph-shell' });
   page.appendChild(shell);
   const ctrl = el('div', { class: 'graph-controls' }, [
-    // v23.37 — browser-style back/forward through visited roots ([ and ] keys).
+    // v23.37: browser-style back/forward through visited roots ([ and ] keys).
     el('button', { id: 'nav-back', class: 'btn ghost nav-arrow', title: 'Back  [', onclick: () => navBack() }, '◀'),
     el('button', { id: 'nav-fwd', class: 'btn ghost nav-arrow', title: 'Forward  ]', onclick: () => navForward() }, '▶'),
     el('label', null, ['Direction', (function(){
@@ -1107,21 +1143,21 @@ async function renderGraph(params) {
     })()]),
     el('div', { style: 'flex:1;' }),
     (function(){
-      // v23.34 — find/locate box: highlights matching nodes, centers the first.
+      // v23.34: find/locate box: highlights matching nodes, centers the first.
       const inp = el('input', { type: 'text', class: 'graph-find', placeholder: 'Find node…',
         oninput: (e) => { const n = locateInGraph(e.target.value); const c = $('#graph-find-count'); if (c) c.textContent = e.target.value.trim() ? (n + ' match' + (n===1?'':'es')) : ''; },
         onkeydown: (e) => { if (e.key === 'Escape') { e.target.value=''; locateInGraph(''); $('#graph-find-count').textContent=''; } } });
       return el('label', { class: 'graph-find-wrap', title: 'Find a node by name in the current graph' }, [inp, el('span', { id: 'graph-find-count', class: 'graph-find-count' }, '')]);
     })(),
     (function(){
-      // v23.34 — orientation toggle (LR keeps deep trees from stretching wide)
+      // v23.34: orientation toggle (LR keeps deep trees from stretching wide)
       const b = el('button', { class: 'btn ghost', title: 'Toggle layout orientation',
         onclick: () => { state.graphOrient = state.graphOrient === 'LR' ? 'TB' : 'LR'; if (rootId) setRoute('graph', { root: rootId }); } },
         state.graphOrient === 'LR' ? '⇄ L→R' : '⇅ T→B');
       return b;
     })(),
     (function(){
-      // v24 — Option C: toggle loop-limit brackets (compact hexagon by default).
+      // v24: Option C: toggle loop-limit brackets (compact hexagon by default).
       const b = el('button', { class: 'btn ghost', title: 'Toggle loop-limit brackets around loops',
         onclick: () => { state.cfgLoopBrackets = !state.cfgLoopBrackets; if (state.currentCFG) loadCFGInto(state.currentCFG); } },
         state.cfgLoopBrackets ? '⟦ loops ⟧' : '⟦ loops');
@@ -1161,7 +1197,7 @@ async function renderGraph(params) {
   shell.appendChild(right);
   shell.classList.add('resizable');
   initGraphGutter(shell, gutter);
-  // v23.37 — source panel spans full width beneath the two graph panes so long
+  // v23.37: source panel spans full width beneath the two graph panes so long
   // lines read comfortably. Collapsed unless toggled on (state.srcOpen).
   const srcWrap = el('div', { id: 'src-wrap', class: 'src-wrap', style: state.srcOpen ? '' : 'display:none;' }, [
     el('div', { class: 'graph-pane-header' }, [
@@ -1184,7 +1220,7 @@ async function renderGraph(params) {
     $('#cg-body').innerHTML = '';
     const svg = layoutCallgraph(cg);
     $('#cg-body').appendChild(svg);
-    // v23.1 — zoom/pan controls layered over the call-graph pane
+    // v23.1: zoom/pan controls layered over the call-graph pane
     const zc = el('div', { class: 'zoom-controls' }, [
       el('button', { title: 'Zoom in', onclick: () => svg._z && svg._z._zoomIn() }, '+'),
       el('div', { class: 'zoom-level' }, '100%'),
@@ -1194,7 +1230,7 @@ async function renderGraph(params) {
     ]);
     $('#cg-body').appendChild(zc);
     attachZoom(svg, $('#cg-body'));
-    // v25.9.3 — same guarantee for the call graph: open fitted + centered.
+    // v25.9.3: same guarantee for the call graph: open fitted + centered.
     forceFitWhenSized(svg);
     // v23.35: clicking (not dragging) empty canvas clears the find filter.
     // Track press position so a pan-drag that ends over empty space doesn't
@@ -1211,7 +1247,7 @@ async function renderGraph(params) {
         const c = $('#graph-find-count'); if (c) c.textContent = '';
       }
     });
-    // v23.3 — direction legend
+    // v23.3: direction legend
     const legend = el('div', { class: 'graph-legend' }, [
       el('span', null, [el('i', { style: 'color:var(--border-2)' }), document.createTextNode('calls →')]),
       el('span', null, [el('i', { style: 'color:var(--amber)' }), document.createTextNode('called by ↑')]),
@@ -1219,7 +1255,7 @@ async function renderGraph(params) {
       el('span', null, [el('i', { style: 'border:1px dashed var(--text-dim);background:transparent;' }), document.createTextNode('stdlib')]),
     ]);
     $('#cg-body').appendChild(legend);
-    if (cg.truncated) toast('Call graph truncated at 200 nodes — narrow depth or direction.', 'warn');
+    if (cg.truncated) toast('Call graph truncated at 200 nodes. Narrow the depth or direction.', 'warn');
   } catch (e) {
     $('#cg-body').innerHTML = '';
     $('#cg-body').appendChild(el('div', { class: 'graph-empty' }, 'Failed: ' + e.message));
@@ -1232,9 +1268,9 @@ async function renderGraph(params) {
   loadSourceInto(rootId);      // v23.37: populate the source panel for the root
 }
 
-// v23.34 — load the CFG for a symbol into the CFG pane. Shared by initial
+// v23.34: load the CFG for a symbol into the CFG pane. Shared by initial
 // render and by single-click selection so clicking a node updates the flow
-// WITHOUT re-rooting the call graph.
+// without re-rooting the call graph.
 async function loadCFGInto(symbolId) {
   state.currentCFG = symbolId; // v24: remember for the loop-brackets toggle re-render
   const body = $('#cfg-body');
@@ -1250,7 +1286,7 @@ async function loadCFGInto(symbolId) {
     if (flow && flow.noCFG) {
       const box = el('div', { class: 'cfg-nocfg', style: 'padding:22px;max-width:520px;margin:0 auto;text-align:center;color:var(--text-2);' });
       box.appendChild(el('div', { style: 'font-size:26px;margin-bottom:8px;opacity:0.5;' }, '◇'));
-      box.appendChild(el('div', { style: 'font-size:14px;color:var(--text);margin-bottom:6px;' }, (flow.name || 'This symbol') + ' — no control-flow graph'));
+      box.appendChild(el('div', { style: 'font-size:14px;color:var(--text);margin-bottom:6px;' }, (flow.name || 'This symbol') + ': no control-flow graph'));
       box.appendChild(el('div', { style: 'font-size:12.5px;line-height:1.5;' }, flow.reason || 'This symbol has no control flow to display.'));
       if (flow.hint) box.appendChild(el('div', { style: 'font-size:12px;margin-top:8px;color:var(--text-dim);' }, flow.hint));
       if (flow.methods && flow.methods.length) {
@@ -1282,13 +1318,13 @@ async function loadCFGInto(symbolId) {
     ]);
     body.appendChild(zc2);
     attachZoom(cfgSvg, body);
-    // v25.9.3 — a freshly-rendered CFG must ALWAYS open fitted and centered.
+    // v25.9.3: a freshly-rendered CFG must always open fitted and centered.
     // Force it (a brand-new graph carries no user zoom to preserve) and keep
-    // retrying until the pane reports a real box — the pane can still be
+    // retrying until the pane reports a real box. The pane can still be
     // unlaid-out for several frames after a view switch, and a one-shot rAF just
     // misses it. attachZoom's ResizeObserver is the belt; this is the braces.
     forceFitWhenSized(cfgSvg);
-    // v23.38 — legend so the role-based block titles are self-explanatory.
+    // v23.38: legend so the role-based block titles are self-explanatory.
     const cfgLegend = el('div', { class: 'graph-legend cfg-legend' }, [
       el('span', null, [el('i', { class: 'sw-term', style: 'border-color:var(--green);' }), document.createTextNode('Start / End')]),
       el('span', null, [el('i', { class: 'sw-proc' }), document.createTextNode('Step (code)')]),
@@ -1303,7 +1339,7 @@ async function loadCFGInto(symbolId) {
   }
 }
 
-// v23.37 — fetch and render the full contiguous source of a symbol into the
+// v23.37: fetch and render the full contiguous source of a symbol into the
 // source panel, so you can read the actual code behind the selected node/CFG.
 // The panel is collapsed by default (toggle in the graph controls); we only
 // hit the endpoint when it is open, to avoid a fetch per node when unused.
@@ -1311,7 +1347,7 @@ async function loadSourceInto(symbolId) {
   const body = $('#src-body');
   if (!body) return;
   state.srcSymbolId = symbolId;
-  if (!state.srcOpen) return;   // panel hidden — skip the fetch until opened
+  if (!state.srcOpen) return;   // panel hidden: skip the fetch until opened
   body.innerHTML = '';
   body.appendChild(el('div', { class: 'loader' }, 'Loading source…'));
   try {
@@ -1319,7 +1355,7 @@ async function loadSourceInto(symbolId) {
     body.innerHTML = '';
     body.appendChild(el('div', { class: 'src-meta' },
       (src.name || '(anon)') + '  ·  ' + (src.kind || '') + '  ·  ' +
-      fileTail(src.file) + ':' + src.start_line + '–' + src.end_line));
+      fileTail(src.file) + ':' + src.start_line + '-' + src.end_line));
     const pre = el('pre', { class: 'src-pre' });
     (src.lines || []).forEach(L => {
       const row = el('div', { class: 'src-line' }, [
@@ -1342,7 +1378,7 @@ function toggleSource() {
   if (state.srcOpen && state.srcSymbolId) loadSourceInto(state.srcSymbolId);
 }
 
-// v23.34 — single-click on a call-graph node: highlight it, center it in the
+// v23.34: single-click on a call-graph node: highlight it, center it in the
 // pane (no re-root), update the CFG pane + right-hand detail. Double-click
 // re-roots (see node handler).
 function selectGraphNode(symbolId) {
@@ -1366,7 +1402,7 @@ function centerGraphNode(symbolId, pulse) {
   if (pulse) { g.classList.add('locate-pulse'); setTimeout(() => g.classList.remove('locate-pulse'), 1400); }
 }
 
-// v23.34 — find/locate: match nodes by name substring, dim the rest, center
+// v23.34: find/locate: match nodes by name substring, dim the rest, center
 // the first match. Empty query clears the filter.
 function locateInGraph(query) {
   const q = (query || '').trim().toLowerCase();
@@ -1383,7 +1419,7 @@ function locateInGraph(query) {
   return count;
 }
 
-// v23.3 — shared SVG arrowhead defs. Two markers: forward (calls) and an
+// v23.3: shared SVG arrowhead defs. Two markers: forward (calls) and an
 // up-tinted one for caller edges.
 function makeArrowDefs(svgNS) {
   const defs = document.createElementNS(svgNS, 'defs');
@@ -1400,8 +1436,8 @@ function makeArrowDefs(svgNS) {
     m.appendChild(path);
     return m;
   }
-  // v24: the forward arrow was var(--border-2) — the SAME faint tan as the edge
-  // line — so on a light background the arrowhead was nearly invisible and edges
+  // v24: the forward arrow was var(--border-2), the same faint tan as the edge
+  // line. On a light background the arrowhead was nearly invisible and edges
   // looked directionless. Use a darker ink so direction always reads.
   defs.appendChild(marker('arrow', 'var(--text-dim)'));
   defs.appendChild(marker('arrow-up', 'var(--amber)'));
@@ -1429,13 +1465,13 @@ function layoutCallgraph(cg) {
   const rootId = cg.root;
   const dir = cg.direction || 'callees';
   // v23.34: orientation. 'LR' = depth flows left→right, siblings stack
-  // vertically (keeps deep call trees from stretching horizontally — the
-  // common case). 'TB' = the classic top→bottom. Read from state.
+  // vertically (keeps deep call trees, the common case, from stretching
+  // horizontally). 'TB' = the classic top→bottom. Read from state.
   const orient = (typeof state !== 'undefined' && state.graphOrient) ? state.graphOrient : 'LR';
   const LR = orient === 'LR';
 
   // ── Sugiyama-style layered layout (v23.5, orientation-aware v23.34) ──────
-  // Depth = the LAYER axis; siblings spread along the CROSS axis. In LR the
+  // Depth = the layer axis; siblings spread along the cross axis. In LR the
   // layer axis is x and the cross axis is y; in TB it's the reverse. We keep
   // the cross-axis slot tight so fan-out stacks compactly instead of blowing
   // up the runaway dimension.
@@ -1494,7 +1530,7 @@ function layoutCallgraph(cg) {
   }
 
   // ── coordinate assignment ──────────────────────────────────────────────
-  // cross[id] is the position along the CROSS axis (start: ordered index *
+  // cross[id] is the position along the cross axis (start: ordered index *
   // SLOT), then median-aligned so a node hugs the centre of its neighbours,
   // pulling the cross dimension narrower.
   const xOf = {}; // "xOf" historically; here it means CROSS-axis coordinate
@@ -1602,8 +1638,8 @@ function layoutCallgraph(cg) {
     g.dataset.symId = n.symbol_id;
     g.dataset.name = (n.name || '').toLowerCase();
     g.style.cursor = 'pointer';
-    // v23.34: single click SELECTS (updates the CFG + side panel, keeps the
-    // current graph and your position); double click RE-ROOTS the graph on
+    // v23.34: single click selects (updates the CFG + side panel, keeps the
+    // current graph and your position); double click re-roots the graph on
     // that node. A small timer disambiguates the two without a click lag that
     // feels laggy.
     let clickTimer = null;
@@ -1617,9 +1653,9 @@ function layoutCallgraph(cg) {
       if (clickTimer) { clearTimeout(clickTimer); clickTimer = null; }
       setRoute('graph', { root: n.symbol_id });
     });
-    // v24: hovering a node highlights its connected edges and fades the rest —
-    // the key readability aid for a dense graph like Main.main where thin edges
-    // are otherwise hard to trace. Pure DOM class toggling; no layout change.
+    // v24: hovering a node highlights its connected edges and fades the rest.
+    // This is the key readability aid for a dense graph like Main.main where thin
+    // edges are otherwise hard to trace. It only toggles DOM classes; no layout change.
     g.addEventListener('mouseenter', () => {
       const id = n.symbol_id;
       svg.classList.add('cg-hovering');
@@ -1663,23 +1699,23 @@ function layoutCallgraph(cg) {
   return svg;
 }
 
-// v23.1 — attachZoom: pan + zoom inside the call-graph SVG.
+// v23.1: attachZoom: pan + zoom inside the call-graph SVG.
 //   wheel        → zoom toward cursor
 //   drag (empty) → pan
 //   +/−/reset    → buttons in .zoom-controls
 //   double-click empty space → reset to fit
 // State lives on the svg element (svg._z) so it survives re-renders within
 // the same body and is read back by the zoom-control label.
-// v25.9.3 — force a freshly-rendered graph to fit + center, retrying until its
+// v25.9.3: force a freshly-rendered graph to fit + center, retrying until its
 // pane actually has a box.
 //
 // Why a retry loop rather than one requestAnimationFrame: after a view switch or
 // a pane reveal, the container can report a 0×0 (or stale) rect for several
 // frames. A single rAF fires into that window, the fit is computed against
-// nothing, and the graph is left at whatever scale it happened to have — which is
-// the "opens zoomed in and off-screen" symptom. We poll a handful of frames,
-// stop the moment we get a real fit, and give up quietly after ~1s so a genuinely
-// hidden pane never spins.
+// nothing, and the graph keeps whatever scale it happened to have. That is the
+// "opens zoomed in and off-screen" symptom. We poll a handful of frames, stop the
+// moment we get a real fit, and give up quietly after ~1s so a hidden pane never
+// spins.
 function forceFitWhenSized(svg, tries) {
   tries = tries == null ? 60 : tries;
   if (!svg || !svg._z || typeof svg._z._fit !== 'function') return;
@@ -1692,16 +1728,16 @@ function attachZoom(svg, body) {
   if (!svg || svg.tagName.toLowerCase() !== 'svg') return;
   const vp = svg.querySelector('g.viewport');
   if (!vp) return;
-  // v26.2 — WIDE zoom range for both panes (call-graph AND CFG share this
+  // v26.2: wide zoom range for both panes (call-graph and CFG share this
   // controller). "Fit" resets the transform to identity and lets the viewBox map
   // the whole graph into the pane (v25.9.4), so at scale 1 a graph that is much
   // wider than the pane (e.g. a 16-arm switch ~7500px in a ~900px pane) is shrunk
   // to ~12% effective and its text is unreadable. To read that text the user must
-  // be able to zoom the transform WELL past the old 4× ceiling; and to get a clean
+  // be able to zoom the transform well past the old 4× ceiling; and to get a clean
   // overview of a tall graph they need to go below 1×. We therefore compute the
   // ceiling from the graph's own size so 1:1-with-source (and beyond) is always
   // reachable no matter how large the graph is, and drop the floor for overview.
-  // maxFor(): enough transform-scale that the graph can reach ~140% of its NATURAL
+  // maxFor(): enough transform-scale that the graph can reach ~140% of its natural
   // (source-pixel) size on screen, i.e. transform-scale = (natural/fitted)*1.4,
   // with a generous absolute cap so a small graph can still zoom in hard.
   const zMaxFloor = 8;      // never less than 8× even for a small graph
@@ -1719,20 +1755,20 @@ function attachZoom(svg, body) {
   }
   // The floor: at transform-scale 1 the whole graph already fits (the overview),
   // so zooming out much past that just shrinks it into a dot. Allow a little
-  // headroom below fit (0.4×) for breathing room, but no less — otherwise the
+  // headroom below fit (0.4×) for breathing room, but no less. Otherwise the
   // label reads 0% and the graph vanishes.
   function minFor() { return 0.4; }
   const z = { scale: 1, tx: 0, ty: 0, min: minFor(), max: zMaxFloor };
   z._recalcMax = () => { z.max = maxFor(); z.min = minFor(); };
   z._recalcMax();
-  // v25.9.2 — once the user zooms/pans, stop auto-fitting on pane resize so we
+  // v25.9.2: once the user zooms/pans, stop auto-fitting on pane resize so we
   // never yank their view. Declared here (before zoomAt) to avoid a TDZ error.
   let userZoomed = false;
   svg._z = z;
   function apply() {
-    // v25.9.3 — clamp at the point of truth. Every writer *should* go through
+    // v25.9.3: clamp at the point of truth. Every writer *should* go through
     // clampScale, but a single unclamped assignment anywhere (now or later) used
-    // to leak straight into the transform and the label — which is how a CFG
+    // to leak straight into the transform and the label. That is how a CFG
     // ended up rendered at 2073% and scrolled off-screen. The clamp here catches
     // every such assignment, so that class of bug cannot happen.
     if (!(z.scale > 0) || !isFinite(z.scale)) z.scale = 1;
@@ -1742,7 +1778,7 @@ function attachZoom(svg, body) {
     vp.setAttribute('transform', 'translate(' + z.tx + ',' + z.ty + ') scale(' + z.scale + ')');
     const lbl = body.querySelector('.zoom-level');
     if (lbl) {
-      // v26.2 — show EFFECTIVE on-screen scale (transform × viewBox-fit), so 100%
+      // v26.2: show the effective on-screen scale (transform × viewBox-fit), so 100%
       // means "1:1 with the source" for every graph regardless of how much the
       // viewBox pre-shrank a wide/tall one. Without this, a huge switch reads
       // "400%" while still being unreadably small (the 400% was only the transform
@@ -1776,18 +1812,18 @@ function attachZoom(svg, body) {
     const p = pt.matrixTransform(m.inverse());
     return { x: p.x, y: p.y };
   }
-  // v23.3 — fit the whole graph inside the visible pane.
+  // v23.3: fit the whole graph inside the visible pane.
   function fitView() {
     const rect = body.getBoundingClientRect();
-    // v25.9.2 — bail on an unsized pane; the ResizeObserver re-fits later.
+    // v25.9.2: bail on an unsized pane; the ResizeObserver re-fits later.
     if (rect.width < 2 || rect.height < 2) return false;
-    // v25.9.4 — THE FIT IS THE VIEWBOX. renderCFG / layoutCallgraph give the SVG a
+    // v25.9.4: the fit is the viewBox. renderCFG / layoutCallgraph give the SVG a
     // `viewBox` and CSS width/height:100%, so the browser already scales the whole
-    // graph to fill the pane AND centers it (preserveAspectRatio xMidYMid meet).
-    // attachZoom's transform is meant ONLY for subsequent user zoom/pan. The old
+    // graph to fill the pane and centers it (preserveAspectRatio xMidYMid meet).
+    // attachZoom's transform is meant only for subsequent user zoom/pan. The old
     // fitView recomputed a scale from baseW/baseH as if they were pixels and
-    // applied it ON TOP of the viewBox mapping — double-scaling a small graph to
-    // 200%+ and shoving it off-screen. "Fit" is therefore just: reset to identity
+    // applied it on top of the viewBox mapping. That double-scaled a small graph to
+    // 200%+ and shoved it off-screen. "Fit" is therefore just: reset to identity
     // and let the viewBox do its job.
     z.scale = 1; z.tx = 0; z.ty = 0;
     z._recalcMax();
@@ -1818,8 +1854,8 @@ function attachZoom(svg, body) {
   });
   window.addEventListener('mouseup', () => { dragging = false; svg.classList.remove('panning'); });
   svg.addEventListener('dblclick', (e) => { if (!e.target.closest('.cg-node')) fitView(); });
-  // v26.2 — zoom the +/− buttons toward the CENTER OF THE VISIBLE PANE (what the
-  // user is looking at), not the center of the whole graph — on a wide switch the
+  // v26.2: zoom the +/− buttons toward the center of the visible pane (what the
+  // user is looking at), not the center of the whole graph. On a wide switch the
   // graph-center is off-screen, so the old math lurched the view sideways. Step is
   // 1.35 so crossing the now-much-wider range with clicks isn't tedious.
   function paneCenterSvg() {
@@ -1828,12 +1864,12 @@ function attachZoom(svg, body) {
   }
   z._zoomIn  = () => { const p = paneCenterSvg(); zoomAt(1.35, p.x, p.y); };
   z._zoomOut = () => { const p = paneCenterSvg(); zoomAt(1 / 1.35, p.x, p.y); };
-  // v25.9.2 — an explicit Fit/Reset means "go back to auto": clear the manual
+  // v25.9.2: an explicit Fit/Reset means "go back to auto": clear the manual
   // flag so later pane resizes keep the graph fitted.
   const refit = () => { userZoomed = false; return fitView(); };
   z._reset   = refit;       // "reset" now means fit-to-view
   z._fit     = refit;
-  // v23.34 / v26.2 — actual size (1:1): show the graph at its SOURCE-pixel size,
+  // v23.34 / v26.2: actual size (1:1): show the graph at its source-pixel size,
   // centered on the current view. Because "fit" is the viewBox (scale 1 = whole
   // graph fits the pane), true 1:1 on screen is transform-scale = 1/fitScale.
   // This button makes a huge switch legible. It jumps from the tiny fit view
@@ -1856,14 +1892,14 @@ function attachZoom(svg, body) {
     userZoomed = true;
     apply();
   };
-  // v23.34 — center the viewport on an svg-space point at a readable scale
+  // v23.34: center the viewport on an svg-space point at a readable scale
   // (used by find/locate and single-click select). Bumps scale up to >=0.7 so
   // the located node is actually legible even if the whole graph was fit tiny.
   z._centerOn = (sx, sy) => {
     const rect = body.getBoundingClientRect();
     if (rect.width < 2 || rect.height < 2) return;
     const vw = rect.width, vh = rect.height;
-    // v25.9.3 — bump a tiny graph up to a legible scale, but NEVER beyond the
+    // v25.9.3: bump a tiny graph up to a legible scale, but never beyond the
     // scale at which the whole graph still fits the pane. Previously this forced
     // 0.9 unconditionally, so selecting a node in a large graph zoomed in and
     // pushed everything off-screen instead of centering it.
@@ -1876,12 +1912,12 @@ function attachZoom(svg, body) {
     z.ty = vh / 2 - sy * z.scale;
     apply();
   };
-  // v25.9.2 — fit as soon as the pane ACTUALLY has a box.
+  // v25.9.2: fit as soon as the pane actually has a box.
   //
   // The old `requestAnimationFrame(fitView)` was a one-shot guess: when a graph
   // pane has just been created/revealed, its height can still be 0 on the next
   // frame, fitView bailed (or fell back to the graph's own size), and the graph
-  // was left effectively unfitted — the "no center when I pick a node" symptom.
+  // was left effectively unfitted (the "no center when I pick a node" symptom).
   //
   // A ResizeObserver fires exactly when layout settles, and again whenever the
   // pane is resized (gutter drag, panel collapse, window resize). We auto-fit
@@ -1890,7 +1926,7 @@ function attachZoom(svg, body) {
   const tryFit = () => { if (!userZoomed) fitView(); };
   requestAnimationFrame(tryFit);              // fast path: usually laid out already
   if (typeof ResizeObserver !== 'undefined') {
-    // A re-render (e.g. picking another node) attaches a NEW svg to the same
+    // A re-render (e.g. picking another node) attaches a new svg to the same
     // body. Drop the previous observer or it keeps firing against a detached
     // graph, leaking observers and racing this one.
     if (body._ro) { try { body._ro.disconnect(); } catch (e) {} }
@@ -1901,12 +1937,12 @@ function attachZoom(svg, body) {
   }
 }
 
-// v26.4 — tokenizeCode: split a single source line into coloured tokens for the
-// CFG. Deliberately lightweight and LANGUAGE-AGNOSTIC (one lexer for Go / Java /
+// v26.4: tokenizeCode: split a single source line into coloured tokens for the
+// CFG. Deliberately lightweight and language-agnostic (one lexer for Go / Java /
 // Python / TS / COBOL): it recognises strings, comments, numbers, a shared
 // keyword/type set, and a function-call pattern (identifier immediately followed
-// by "("). It is not a full parser — it never needs to be, because the CFG shows
-// short single statements — but it makes a node read like an editor line. Returns
+// by "("). It is not a full parser. It never needs to be, because the CFG shows
+// short single statements, but it makes a node read like an editor line. Returns
 // an array of { cls, text } where cls is one of the .t-* classes.
 const SYN_KEYWORDS = new Set([
   // Go / general
@@ -1943,7 +1979,7 @@ function tokenizeCode(src) {
   const isIdent = c => /[A-Za-z0-9_$\-]/.test(c);   // '-' for COBOL identifiers
   while (i < n) {
     const c = s[i];
-    // whitespace — keep as plain so spacing is preserved
+    // whitespace: keep as plain so spacing is preserved
     if (c === ' ' || c === '\t') { let j = i + 1; while (j < n && (s[j] === ' ' || s[j] === '\t')) j++; toks.push({ cls: 't-txt', text: s.slice(i, j) }); i = j; continue; }
     // line comment: // …  or  # …  or  * … (COBOL col-7 handled by whole-line below)
     if ((c === '/' && s[i + 1] === '/') || c === '#') { toks.push({ cls: 't-com', text: s.slice(i) }); break; }
@@ -1982,7 +2018,7 @@ function tokenizeCode(src) {
   return toks;
 }
 
-// v23.3 — renderCFG now draws a real top-down flow chart in SVG: each basic
+// v23.3: renderCFG now draws a real top-down flow chart in SVG: each basic
 // block is a node, successor edges are arrowed, branch blocks (2+ succs) get
 // true/false (or sN) edge labels, and long runs of `call X` statements are
 // condensed so the block reads as flow rather than a dead list. Returns an SVG
@@ -2005,15 +2041,15 @@ function renderCFG(flow) {
     return svg;
   }
 
-  // v23.39 — TRUE FLOW-CHART renderer. Each CFG block becomes a shape a reader
-  // recognises: a rounded TERMINAL (Start / End), a PROCESS box (straight-line
-  // steps), or a DECISION diamond (a block with 2+ successors). The decision's
-  // text is the real condition (BlockEntry.cond from the backend — the Go/COBOL
+  // v23.39: a true flow-chart renderer. Each CFG block becomes a shape a reader
+  // recognises: a rounded terminal (Start / End), a process box (straight-line
+  // steps), or a decision diamond (a block with 2+ successors). The decision's
+  // text is the real condition (BlockEntry.cond from the backend; the Go/COBOL
   // frontends now preserve it), and the two exits are labelled yes / no. A
   // no-ELSE IF's "no" edge routes to wherever the CFG says (the merge / End),
-  // which is exactly "skip to exit". Empty pass-through blocks (an artefact of
-  // the block model — e.g. a "then" that only forwards to a merge) are elided so
-  // the chart shows decisions and real work, not bookkeeping nodes.
+  // which is exactly "skip to exit". The renderer elides empty pass-through blocks
+  // (an artefact of the block model, e.g. a "then" that only forwards to a merge)
+  // so the chart shows decisions and real work, not bookkeeping nodes.
   const exits = new Set(flow.exits || []);
   const raw = {};
   flow.blocks.forEach(b => { raw[b.id] = b; });
@@ -2023,17 +2059,17 @@ function renderCFG(flow) {
     return (b.stmts || []).map(s => ({ ln: 0, text: s }));
   }
   const isDecision = b => (b.succs || []).length >= 2;
-  // v26.3 — a block whose LAST real statement hard-terminates the function
+  // v26.3: a block whose last real statement hard-terminates the function
   // (os.Exit, log.Fatal*, panic, COBOL STOP RUN / GOBACK / EXIT PROGRAM, a bare
   // Go `return` at the tail of a returning path) does not actually flow to its
-  // lexical successor — but several backend frontends still record a forward
+  // lexical successor. But several backend frontends still record a forward
   // successor for it (os.Exit isn't special-cased in flow.Build). Rendering that
-  // phantom edge is what produces BOTH the "missing End" (the path is drawn
-  // continuing into the next block instead of stopping) AND a long back-/cross
+  // phantom edge produces both the "missing End" (the path is drawn
+  // continuing into the next block instead of stopping) and a long back-/cross
   // edge that shoots to a far node with no visible arrowhead (the reported stray
   // diagonal). We detect the terminator here and, in the edge pass, route such a
-  // block to its own End and DROP the phantom forward edge. Purely a render
-  // correction; backend data is untouched.
+  // block to its own End and drop the phantom forward edge. This only corrects the
+  // render; backend data is untouched.
   const TERMINATOR_RE = /\b(?:os\.Exit|log\.(?:Fatal|Fatalf|Fatalln|Panic|Panicf|Panicln)|panic)\s*\(/;
   const COBOL_TERM_RE = /\b(?:STOP\s+RUN|GOBACK|EXIT\s+PROGRAM)\b/i;
   function isTerminatingBlock(b) {
@@ -2043,15 +2079,15 @@ function renderCFG(flow) {
     return TERMINATOR_RE.test(last) || COBOL_TERM_RE.test(last);
   }
   // A block is "empty" (elidable) if it carries no real source lines, is not a
-  // decision, is not an exit, and has exactly one successor — i.e. a pure
+  // decision, is not an exit, and has exactly one successor, i.e. a pure
   // connector. Start is never elided.
-  // v25.2: ALSO elide an empty, non-decision, non-entry, NON-EXIT block with
-  // ZERO successors — a dangling empty JOIN (e.g. a try's `try_merge` when the
-  // try body just returns, so normal completion has nowhere to go and the block
-  // is not in exits). Previously such a block fell through to a blank process
-  // node with its own dangling End, AND its predecessor's edge routed to a
-  // SEPARATE End (leadsOnlyToExit), leaving the blank node with no inbound edge
-  // — the reported "floating blank action node + floating End". Eliding it makes
+  // v25.2: also elide an empty, non-decision, non-entry, non-exit block with
+  // zero successors. That is a dangling empty join (e.g. a try's `try_merge` when
+  // the try body just returns, so normal completion has nowhere to go and the
+  // block is not in exits). Previously such a block fell through to a blank process
+  // node with its own dangling End, and its predecessor's edge routed to a
+  // separate End (leadsOnlyToExit). That left the blank node with no inbound edge:
+  // the reported "floating blank action node + floating End". Eliding it makes
   // the predecessor (e.g. try_body) terminate cleanly at a single End.
   function isEmptyConnector(b) {
     if (b.id === flow.entry || isDecision(b) || exits.has(b.id)) return false;
@@ -2059,13 +2095,13 @@ function renderCFG(flow) {
     if (succN > 1) return false;
     const ls = linesOf(b).filter(L => (L.text || '').trim() !== '');
     if (ls.length !== 0) return false;
-    // one successor (classic connector) OR zero successors (dangling empty join)
+    // one successor (classic connector) or zero successors (dangling empty join)
     return succN === 1 || succN === 0;
   }
 
   // Build a display graph that skips empty connectors: for every kept block,
   // follow each successor through any chain of empty connectors to the next
-  // KEPT block, so edges connect real nodes directly.
+  // kept block, so edges connect real nodes directly.
   function skipToKept(id, seen) {
     seen = seen || new Set();
     if (seen.has(id)) return id; seen.add(id);
@@ -2085,10 +2121,10 @@ function renderCFG(flow) {
 
   // ── v23.40 display model ────────────────────────────────
   // The previous version mapped the entry block to a bare "Start" pill, which
-  // DISCARDED that block's real statements and its branch condition (the
+  // discarded that block's real statements and its branch condition (the
   // reported "missing SUBTRACT" + "missing first IF"). Fix: every real CFG block
-  // is rendered by its CONTENT, and Start/End are SEPARATE synthetic terminals
-  // that only bracket the chart. A block that both does work AND branches is
+  // is rendered by its content, and Start/End are separate synthetic terminals
+  // that only bracket the chart. A block that both does work and branches is
   // split into a process node (its statements) feeding a decision node (its
   // condition), so nothing is lost.
   function realLines(b) { return linesOf(b).filter(L => (L.text || '').trim() !== ''); }
@@ -2119,7 +2155,7 @@ function renderCFG(flow) {
   function addNode(nd) { dindex[nd.key] = nd; dnodes.push(nd); return nd.key; }
   const dedges = [];       // {from, to, label}
 
-  // synthetic Start terminal (single). End terminals are created PER exit edge
+  // synthetic Start terminal (single). End terminals are created per exit edge
   // (v23.41) so a "no" path or a returning branch ends at a nearby End laid out
   // beside/just under its source, instead of every path sweeping down to one
   // shared End far below (the reported "why scroll down" + "points back").
@@ -2136,7 +2172,7 @@ function renderCFG(flow) {
     const work = dec ? workLines(b) : realLines(b);
     let firstKey = null, lastKey = null;
     if (work.length) {
-      // v24: one process node PER statement (was: a single node holding every
+      // v24: one process node per statement (was: a single node holding every
       // line of the basic block, which made a straight-line function look like
       // one giant block and truncated long lines with "…"). Each statement is
       // its own node, chained top-to-bottom; the full text is kept (the node
@@ -2174,14 +2210,14 @@ function renderCFG(flow) {
   }
 
   // A successor that is a pure-exit block (no display node) means "this path
-  // ends" — route it to its OWN End terminal.
-  // v23.46: the REAL COBOL topology (confirmed from live data) has empty "then"
-  // blocks that just forward to a merge, and the final statement living IN the
+  // ends". Route it to its own End terminal.
+  // v23.46: the real COBOL topology (confirmed from live data) has empty "then"
+  // blocks that just forward to a merge, and the final statement living in the
   // exit block. So "leads only to exit" must (a) tolerate the exit block itself
-  // having content — reaching a block with NO successors is the end regardless
-  // of its lines — and (b) recognise an empty forwarding block as a skip path.
+  // having content (reaching a block with no successors is the end regardless
+  // of its lines) and (b) recognise an empty forwarding block as a skip path.
   // We route a decision edge to a dedicated End when its target chain does no
-  // NEW work before terminating. The target that carries real work (the true
+  // new work before terminating. The target that carries real work (the true
   // path) still links to that work node.
   function leadsOnlyToExit(startId) {
     const seen = new Set();
@@ -2193,7 +2229,7 @@ function renderCFG(flow) {
       const succs = b.succs || [];
       const hasWork = linesOf(b).filter(L => (L.text || '').trim() !== '').length > 0;
       const isDec = succs.length >= 2;
-      // A terminal block (no successors) ends the path — even if it has a line,
+      // A terminal block (no successors) ends the path. Even if it has a line,
       // that line is its own node; the path still terminates here.
       if (succs.length === 0) return !hasWork && !isDec; // empty terminal → pure End
       if (hasWork || isDec) return false;                // real node ahead → not a skip
@@ -2213,7 +2249,7 @@ function renderCFG(flow) {
     const succs = dispSucc[b.id] || [];
     const dec = isDecision(b);
     if (fromKey) {
-      // v26.3 — a hard-terminating block (os.Exit / panic / STOP RUN / …) ends the
+      // v26.3: a hard-terminating block (os.Exit / panic / STOP RUN / …) ends the
       // path here regardless of any phantom forward successor the backend recorded.
       // Route it straight to its own End and skip the misleading forward edge(s).
       if (isTerminatingBlock(b)) {
@@ -2241,14 +2277,14 @@ function renderCFG(flow) {
     }
   });
 
-  // ── layout: MAIN SPINE + side lanes (v23.43) ─────────────
+  // ── layout: main spine + side lanes (v23.43) ─────────────
   // The prior BFS row-packing scattered a decision's yes/no targets onto
   // arbitrary x-positions, so "no" edges doubled back and their arrowheads
   // landed beside the End box instead of on it. New model: assign each display
-  // node a (depth, lane). The MAIN flow (Start → work → the primary/yes path →
-  // End) runs straight down lane 0. A decision's SECONDARY exit (the "no" of a
+  // node a (depth, lane). The main flow (Start → work → the primary/yes path →
+  // End) runs straight down lane 0. A decision's secondary exit (the "no" of a
   // 2-way, or a terminating side-branch) goes to lane +1 at (near) the
-  // decision's own depth, so its End sits to the RIGHT of the diamond with a
+  // decision's own depth, so its End sits to the right of the diamond with a
   // clean elbow. Multi-way (EVALUATE) keeps the spread-row treatment.
   const depth = { '__start__': 0 };
   const lane = { '__start__': 0 };
@@ -2256,10 +2292,10 @@ function renderCFG(flow) {
   const outEdges = {};
   dedges.forEach(e => { (outEdges[e.from] = outEdges[e.from] || []).push(e); });
 
-  // v23.48 — LOOP awareness. A loop-header is a decision one of whose successors
-  // can reach BACK to it (a cycle / back-edge — e.g. PERFORM … UNTIL). For a
-  // loop, the BODY (the successor on the cycle) belongs in a side lane and loops
-  // back up; the EXIT (the other successor) is the MAIN flow and must stay on the
+  // v23.48: loop awareness. A loop-header is a decision one of whose successors
+  // can reach back to it (a cycle / back-edge, e.g. PERFORM … UNTIL). For a
+  // loop, the body (the successor on the cycle) belongs in a side lane and loops
+  // back up; the exit (the other successor) is the main flow and must stay on the
   // spine going straight down. The previous code treated a loop-header like a
   // plain if (body on spine, exit shunted sideways), which made the continuation
   // "hang in the air" to the right. Detect, per decision, which successor is the
@@ -2290,20 +2326,20 @@ function renderCFG(flow) {
     // if both or neither loop back, treat as a normal if (no loopInfo)
   });
 
-  // v26.1 — MULTI-WAY awareness (Go switch / COBOL EVALUATE / select). A decision
+  // v26.1: multi-way awareness (Go switch / COBOL EVALUATE / select). A decision
   // with 3+ forward successors is a fan-out: the previous layout gave every arm
-  // (and its whole subtree) the SAME (depth,lane) as the decision, so all N case
-  // bodies collapsed onto ONE point and rendered stacked on top of each other
+  // (and its whole subtree) the same (depth,lane) as the decision, so all N case
+  // bodies collapsed onto one point and rendered stacked on top of each other
   // (the reported overlap). A multi-way decision must instead spread its arms
-  // into PARALLEL COLUMNS — each arm gets its own lane, laid out as a vertical
+  // into parallel columns. Each arm gets its own lane, laid out as a vertical
   // column, exactly like a human reads a switch. This is language-agnostic: it
   // keys only on "decision with >=3 non-back-edge successors", so Go switch,
   // COBOL EVALUATE and select all get the same treatment with no per-language code.
   //
   // multiInfo[key] = { arms:[armKey…], merge:mergeKey|null }.
-  //   arms  — the immediate successor display nodes, one per case (in edge order).
-  //   merge — the single node where the arms reconverge (the switch's join). It is
-  //           NOT an arm; it returns to the decision's own lane below the columns
+  //   arms:  the immediate successor display nodes, one per case (in edge order).
+  //   merge: the single node where the arms reconverge (the switch's join). It is
+  //          not an arm; it returns to the decision's own lane below the columns
   //           so the spine continues straight (otherwise it would inherit some
   //           arm's lane and drift sideways).
   const multiInfo = {};
@@ -2315,10 +2351,10 @@ function renderCFG(flow) {
     const targets = es.map(e => e.to);
     const inDeg = {};
     targets.forEach(t => { inDeg[t] = (inDeg[t] || 0) + 1; });
-    // Arms are the distinct direct successors. A DIRECT merge is a target hit by
-    // >1 arm edge. But the common case (switch/EVALUATE with a tail after the
-    // block) is that arms CONVERGE further down at a shared descendant — the
-    // reconvergence join — which must return to the decision's own lane so the
+    // Arms are the distinct direct successors. A direct merge is a target hit by
+    // >1 arm edge. But in the common case (switch/EVALUATE with a tail after the
+    // block) the arms converge further down at a shared descendant (the
+    // reconvergence join). That join must return to the decision's own lane so the
     // spine continues straight (else it drifts into whichever arm reached it
     // first). Detect that join as the shallowest display node reachable from 2+
     // distinct arms without passing back through the decision.
@@ -2353,24 +2389,24 @@ function renderCFG(flow) {
     multiInfo[n.key] = { arms, merge };
   });
 
-  // v26.1 — per-arm lane packing for multi-way fan-outs. An arm may contain its
-  // OWN inner if/else or nested switch, so its subtree can occupy several lanes.
+  // v26.1: per-arm lane packing for multi-way fan-outs. An arm may contain its
+  // own inner if/else or nested switch, so its subtree can occupy several lanes.
   // Giving arms consecutive single lanes therefore let a wide arm bleed into its
   // neighbour (adjacent case columns overlapped). Instead we (1) collect each
-  // arm's subtree, (2) lay each subtree out LOCALLY to learn how many lanes it
+  // arm's subtree, (2) lay each subtree out locally to learn how many lanes it
   // spans (its [minLane,maxLane] about 0), then (3) pack the arms left→right,
-  // giving each a lane BASE so its span never intersects the next arm's span.
+  // giving each a lane base so its span never intersects the next arm's span.
   // Nested decisions inside a case therefore get their own lanes.
   //
   // armBaseLane[armKey] = the lane offset (relative to the decision) applied to
-  //   the whole arm subtree. armSubtreeLane[armKey][node] = that node's LOCAL lane
+  //   the whole arm subtree. armSubtreeLane[armKey][node] = that node's local lane
   //   within the arm (0 = arm's own column). Final lane = decisionLane + base + local.
   const armBaseLane = {};
   const localLaneOf = {};   // nodeKey -> local lane inside its arm subtree
   const armOfNode = {};     // nodeKey -> armKey it belongs to (for base lookup)
   const multiArmRoots = new Set();
 
-  // collect the subtree of an arm: all nodes reachable from it WITHOUT going
+  // collect the subtree of an arm: all nodes reachable from it without going
   // through the owning decision or any sibling arm root or the merge.
   function collectArmSubtree(armKey, decisionKey, stopSet) {
     const nodes = [];
@@ -2406,7 +2442,7 @@ function renderCFG(flow) {
         const t = e.to;
         let tl, td = (ld[k] || 0) + 1;
         if (mi2 && mi2.arms.indexOf(t) !== -1) {
-          // nested multi-way inside this arm — spread its arms too (simple spread;
+          // nested multi-way inside this arm: spread its arms too (simple spread;
           // deep nesting is rare, and each still gets a distinct local lane).
           const idx = mi2.arms.indexOf(t);
           tl = (ll[k] || 0) + (idx - Math.floor(mi2.arms.length / 2));
@@ -2463,16 +2499,16 @@ function renderCFG(flow) {
     });
   });
 
-  // v26.3 — for a two-way decision, decide which branch is the MAIN continuation
+  // v26.3: for a two-way decision, decide which branch is the main continuation
   // and keep it on the spine; the other peels into the side lane. Normally "yes"
-  // (then) is the spine and "no" peels off. But the very common guard pattern —
-  // `if bad { print; os.Exit }` / `if err != nil { return }` — has the THEN branch
-  // dead-end quickly while the "no"/fall-through carries the real work. We measure
-  // how many nodes each branch runs before it terminates WITHOUT branching again
+  // (then) is the spine and "no" peels off. But in the very common guard pattern
+  // (`if bad { print; os.Exit }` / `if err != nil { return }`) the then branch
+  // dead-ends quickly while the "no"/fall-through carries the real work. We measure
+  // how many nodes each branch runs before it terminates without branching again
   // (deadEndLen: a finite count if the branch is a straight run to an End, or
-  // Infinity if it branches/loops/is long). When the THEN side is a short dead-end
-  // and the NO side runs longer (or branches), we swap so NO stays on the spine
-  // and the short guard peels to the side lane — matching how the code reads.
+  // Infinity if it branches/loops/is long). When the then side is a short dead-end
+  // and the no side runs longer (or branches), we swap so no stays on the spine
+  // and the short guard peels to the side lane. That matches how the code reads.
   function deadEndLen(startKey) {
     let cur = startKey, hops = 0;
     const seen = new Set();
@@ -2497,8 +2533,8 @@ function renderCFG(flow) {
     const yesE = es.find(e => e.label === 'yes'), noE = es.find(e => e.label === 'no');
     if (!yesE || !noE) return;
     const yLen = deadEndLen(yesE.to), nLen = deadEndLen(noE.to);
-    // swap only when THEN is a genuine dead-end AND it is shorter than the NO path
-    // (a strictly longer or branching NO side is the true continuation). Ties and
+    // swap only when then is a real dead-end and it is shorter than the no path
+    // (a strictly longer or branching no side is the true continuation). Ties and
     // the plain if/else (both reach a shared merge, both finite & equal-ish) keep
     // the default yes-on-spine so nothing else shifts.
     if (yLen !== Infinity && nLen > yLen) spineNoOf[n.key] = true;
@@ -2520,18 +2556,18 @@ function renderCFG(flow) {
       let tLane, tDepth;
       if (mergeOfDecision[t] !== undefined) {
         // reconvergence join of a multi-way switch/EVALUATE: pin it to the
-        // DECISION's lane (back on the spine) and BELOW the deepest arm, so the
+        // decision's lane (back on the spine) and below the deepest arm, so the
         // flow visibly rejoins one column instead of trailing off a random arm.
         const decKey = mergeOfDecision[t];
         tLane = lane[decKey] || 0;
         tDepth = (depth[decKey] || 0) + (armMaxDepthBelow[decKey] || 1) + 1;
       } else if (mi && mi.arms.indexOf(t) !== -1) {
-        // multi-way arm ROOT: lane = decisionLane + this arm's packed base.
+        // multi-way arm root: lane = decisionLane + this arm's packed base.
         tLane = (lane[k] || 0) + (armBaseLane[t] || 0);
         tDepth = (depth[k] || 0) + 1;
       } else if (armOfNode[t] !== undefined && t !== (mi && mi.merge)) {
-        // a node INSIDE some arm subtree: lane = decisionLane(of that arm's owner,
-        // already baked into the arm root's lane) — we reconstruct it as the arm
+        // a node inside some arm subtree: lane = decisionLane(of that arm's owner,
+        // already baked into the arm root's lane). We reconstruct it as the arm
         // root's lane + (localLane[t] - localLane[armRoot]). Simpler: arm root lane
         // is known once placed; use armRoot lane + local offset.
         const armKey = armOfNode[t];
@@ -2547,7 +2583,7 @@ function renderCFG(flow) {
         if (t === li.exit) { tLane = lane[k] || 0; tDepth = (depth[k] || 0) + 1; }
         else { tLane = (lane[k] || 0) + 1; tDepth = (depth[k] || 0) + 1; } // body beside/below
       } else if (twoWay && swapNo && e.label === 'yes') {
-        // guard pattern: THEN dead-ends → peel it to the side lane.
+        // guard pattern: then dead-ends → peel it to the side lane.
         tLane = (lane[k] || 0) + 1; tDepth = depth[k];
       } else if (twoWay && swapNo && e.label === 'no') {
         // …and the "no" continuation stays on the spine going straight down.
@@ -2587,12 +2623,12 @@ function renderCFG(flow) {
   const rowY = {}; let acc = PADTOP2; depthKeys.forEach(d => { rowY[d] = acc + rowH[d] / 2; acc += rowH[d] + GY; });
   const dTotalH = acc + 10;
 
-  // horizontal: LANE-COLUMN model (v26.1). Every node sits in a column keyed by
-  // its (now possibly NEGATIVE) lane. Each lane column is as wide as its widest
+  // horizontal: lane-column model (v26.1). Every node sits in a column keyed by
+  // its (now possibly negative) lane. Each lane column is as wide as its widest
   // member, and adjacent columns are separated by LANEGAP. Lane 0 is the spine.
   // This replaces the old "spine + right-only offset" placement, which (a) could
   // not represent lanes left of the spine and (b) collapsed every node sharing a
-  // (depth,lane) cell onto ONE x — the multi-way switch overlap. With one lane
+  // (depth,lane) cell onto one x (the multi-way switch overlap). With one lane
   // per arm, a switch now renders as parallel vertical columns; a plain function
   // (all lane 0) is byte-identical to before (single centered spine).
   const widestNode = Math.max(PW, DW, ...dnodes.map(n => dsz[n.key].w));
@@ -2619,12 +2655,12 @@ function renderCFG(flow) {
     if (d === undefined || laneCenterX[L] === undefined) return;
     DC[n.key] = { x: laneCenterX[L], y: rowY[d] };
   });
-  // v26.1 — PER-ROW OVERLAP RESOLUTION (final safety net, language-agnostic).
-  // The lane-column model prevents most overlaps, but two nodes in DIFFERENT
+  // v26.1: per-row overlap resolution (final safety net, language-agnostic).
+  // The lane-column model prevents most overlaps, but two nodes in different
   // branches can still land in adjacent/near columns whose actual box widths (a
   // wide 300px process step beside another) exceed the column pitch, or an
   // unrelated spine node (e.g. a top-level if's then-branch) can sit at the same
-  // depth as a switch arm. Rather than special-case each, we GUARANTEE no two
+  // depth as a switch arm. Rather than special-case each, we guarantee no two
   // boxes in the same depth-row overlap: sort the row by x, then sweep left→right
   // pushing any node that would collide with its left neighbour rightwards by the
   // exact overlap + a gap. This preserves left→right order and only ever adds
@@ -2662,10 +2698,10 @@ function renderCFG(flow) {
     const sideways = Math.abs(B.y - A.y) < 8;   // target on ~same row (side lane)
 
     let ax, ay, tx, ty, d;
-    // v23.50 — a loop BACK-EDGE (body → loop-header) must not aim at the header
-    // diamond's TOP vertex: that's where the incoming edge from above already
+    // v23.50: a loop back-edge (body → loop-header) must not aim at the header
+    // diamond's top vertex: that's where the incoming edge from above already
     // lands, so the back-arrow was drawn on top of it and looked missing. Route
-    // the back-edge into the header's SIDE vertex (the side the body sits on)
+    // the back-edge into the header's side vertex (the side the body sits on)
     // with its own elbow, so the return arrow is clearly visible.
     const targetIsLoopHeader = nb && nb.kind === 'decision' && loopInfo[e.to] && loopInfo[e.to].body === e.from;
     if (targetIsLoopHeader) {
@@ -2702,13 +2738,13 @@ function renderCFG(flow) {
     }
 
     if (sideways) {
-      // horizontal into the target's LEFT edge (side-lane End sits to the right)
+      // horizontal into the target's left edge (side-lane End sits to the right)
       tx = B.x - sb.w / 2; ty = B.y;
       const mx = (ax + tx) / 2;
       d = 'M' + ax + ',' + ay + ' C' + mx + ',' + ay + ' ' + mx + ',' + ty + ' ' + tx + ',' + ty;
       p.setAttribute('marker-end', 'url(#arrow)');
     } else {
-      // vertical into the target's TOP
+      // vertical into the target's top
       tx = B.x; ty = B.y - sb.h / 2;
       const my = (ay + ty) / 2;
       const up = B.y < A.y;
@@ -2723,13 +2759,13 @@ function renderCFG(flow) {
     if (e.label) {
       let lx, ly, anchor;
       if (yn) {
-        // v25.4 — yes/no labels must not collide when guards chain horizontally
+        // v25.4: yes/no labels must not collide when guards chain horizontally
         // (a Go multi-`if` pattern: decision A's "no" hops sideways to decision B
         // on the same row, so A's right-tip "no" and B's left-tip "yes" landed at
-        // the same x+y and merged into "noyes"). Fix: (1) put "yes" ABOVE the row
-        // and "no" BELOW it so they never share a text line even at equal x; and
-        // (2) for a sideways "no" that targets another DECISION, anchor the label
-        // at the SOURCE diamond's tip (not the hop midpoint, which sits under the
+        // the same x+y and merged into "noyes"). Fix: (1) put "yes" above the row
+        // and "no" below it so they never share a text line even at equal x; and
+        // (2) for a sideways "no" that targets another decision, anchor the label
+        // at the source diamond's tip (not the hop midpoint, which sits under the
         // next diamond) so it stays with its own decision.
         const yesAbove = (e.label === 'yes') ? -8 : 12;
         if (sideways) {
@@ -2760,10 +2796,10 @@ function renderCFG(flow) {
     vp.appendChild(g);
   });
 
-  // v24 — Option C: optional loop-limit BRACKETS. When state.cfgLoopBrackets is
+  // v24: Option C: optional loop-limit brackets. When state.cfgLoopBrackets is
   // on, each loop draws a bracket enclosing its header hexagon + body node, with
-  // a small "loop" cap label — the classic flowchart loop-limit frame. Drawn
-  // BEHIND the nodes (additive) so the compact hexagon layout is unchanged when
+  // a small "loop" cap label (the classic flowchart loop-limit frame). We draw it
+  // behind the nodes (additive) so the compact hexagon layout is unchanged when
   // off. Nested/sibling loops each get their own bracket from their own loopInfo.
   if (state.cfgLoopBrackets) {
     Object.keys(loopInfo).forEach(hk => {
@@ -2813,7 +2849,7 @@ function renderCFG(flow) {
     g.setAttribute('transform', 'translate(' + (c.x - s.w / 2) + ',' + (c.y - s.h / 2) + ')');
 
     if (n.kind === 'decision') {
-      // v23.50 — a loop-header renders as a HEXAGON (the standard flowchart
+      // v23.50: a loop-header renders as a hexagon (the standard flowchart
       // Preparation / loop symbol), so a loop is instantly distinguishable from
       // a one-time if/EVALUATE decision (which stay diamonds). loopInfo, computed
       // in the layout pass, identifies loop-headers precisely by their back-edge.
@@ -2870,7 +2906,7 @@ function renderCFG(flow) {
           t.appendChild(g1);
         }
         const codeText = clamp(L.text || '', 92);
-        // v26.4 — colour each token like an editor line. clamp() may have added a
+        // v26.4: colour each token like an editor line. clamp() may have added a
         // trailing ellipsis; tokenize the (possibly truncated) text and emit a
         // coloured <tspan> per token. Falls back to one plain span if tokenizing
         // yields nothing (blank line).
@@ -2918,7 +2954,7 @@ async function renderBeliefs() {
   const warnings = data.warnings || [];
   if (warnings.length) {
     const box = el('div', { class: 'belief-stale-summary' }, [
-      el('div', { class: 'stale-head' }, '⚠ ' + warnings.length + ' correction' + (warnings.length > 1 ? 's are' : ' is') + ' out of date — the code changed since a human corrected these'),
+      el('div', { class: 'stale-head' }, '⚠ ' + warnings.length + ' correction' + (warnings.length > 1 ? 's are' : ' is') + ' out of date. The code changed after a human corrected these.'),
     ]);
     warnings.forEach(w => {
       box.appendChild(el('div', { class: 'stale-item' }, [
@@ -2937,13 +2973,13 @@ async function renderBeliefs() {
     const panel = el('div', { class: 'belief-summaries' }, [
       el('div', { class: 'summaries-head' }, 'Summaries'),
     ]);
-    // v26.23: a stale SUMMARY is not a stale human correction — it means a member
+    // v26.23: a stale summary is not a stale human correction. It means a member
     // changed, so the roll-up needs regenerating. Say that plainly instead of
     // listing it under the corrections warning with nothing to compare.
     if (nStale) {
       panel.appendChild(el('div', { class: 'summaries-restale' },
         '⚠ ' + nStale + ' summar' + (nStale > 1 ? 'ies are' : 'y is') +
-        ' out of date — a member changed. Re-run: gen-enrich --root <project> --summarize'));
+        ' out of date because a member changed. Re-run: gen-enrich --root <project> --summarize'));
     }
     summaries.forEach(s => {
       panel.appendChild(el('div', { class: 'summary-item' + (s.stale ? ' is-stale' : '') }, [
@@ -3014,11 +3050,11 @@ function srcTag(src) {
 }
 function srcTitle(s) {
   if (s === 'parser') return 'Derived deterministically by the offline parser';
-  if (s === 'enrich') return 'Described by the local model — verify it';
+  if (s === 'enrich') return 'Described by the local model. Verify it.';
   if (s === 'human') return 'Verified or corrected by a person';
   return s;
 }
-// v26.13 — validation of enrich beliefs against parser facts.
+// v26.13: validation of enrich beliefs against parser facts.
 function validLabel(v) {
   if (v === 'contradicts') return '✗ contradicts the code';
   if (v === 'needs-human') return '? needs human check';
@@ -3037,7 +3073,7 @@ function beliefRow(b) {
   if (b.corrected_to && b.corrected_to !== b.object) {
     bodyKids.push(el('div', { class: 'belief-was' }, 'parser saw: ' + b.object));
   }
-  // Staleness: show the human value AND the new source value side by side.
+  // Staleness: show the human value and the new source value side by side.
   if (b.stale && b.source_now) {
     bodyKids.push(el('div', { class: 'belief-stale-inline' }, [
       el('span', { class: 'stale-badge' }, 'out of date'),
@@ -3066,8 +3102,8 @@ function beliefRow(b) {
 }
 async function actBelief(b, action) {
   // A verify/correct flips the belief's source to 'human'. If the user is filtering
-  // by 'enrich' (or 'parser', or 'pending'), the row therefore LEAVES the current
-  // view the moment it succeeds — which reads exactly like "the button did nothing"
+  // by 'enrich' (or 'parser', or 'pending'), the row therefore leaves the current
+  // view the moment it succeeds. That reads exactly like "the button did nothing"
   // (v26.23). So say where it went, and offer a jump to the filter that shows it.
   const leavesView = ['enrich', 'parser', 'pending'].includes(state.beliefFilter);
   const jump = () => { state.beliefFilter = 'verified'; state.beliefs = null; renderBeliefs(); };
@@ -3076,7 +3112,7 @@ async function actBelief(b, action) {
       const r = await fetch('/api/present/beliefs/correct', { method: 'POST', headers: {'Content-Type':'application/json'},
         body: JSON.stringify({ belief_id: b.id, corrected_to: (b.corrected_to || b.object), human_note: 'verified via Studio' }) });
       if (!r.ok) throw new Error(await r.text() || ('HTTP ' + r.status));
-      toast(leavesView ? 'Verified: ' + b.subject + ' — now under "verified"' : 'Verified: ' + b.subject);
+      toast(leavesView ? 'Verified: ' + b.subject + ' (now under "verified")' : 'Verified: ' + b.subject);
       state.beliefs = null;
       renderBeliefs();
       if (leavesView) jump();
@@ -3089,7 +3125,7 @@ async function actBelief(b, action) {
       const r = await fetch('/api/present/beliefs/correct', { method: 'POST', headers: {'Content-Type':'application/json'},
         body: JSON.stringify({ belief_id: b.id, corrected_to: v.trim(), human_note: 'corrected via Studio' }) });
       if (!r.ok) throw new Error(await r.text() || ('HTTP ' + r.status));
-      toast(leavesView ? 'Corrected: ' + b.subject + ' — now under "verified"' : 'Corrected: ' + b.subject + ' → ' + v.trim());
+      toast(leavesView ? 'Corrected: ' + b.subject + ' (now under "verified")' : 'Corrected: ' + b.subject + ' → ' + v.trim());
       state.beliefs = null;
       renderBeliefs();
       if (leavesView) jump();
@@ -3269,7 +3305,7 @@ function updateNavButtons() {
 }
 function renderHistory() {
   const el2 = $('#history-list');
-  if (!state.history.length) { el2.className = 'history-empty'; el2.textContent = 'No history yet — pick a symbol to start.'; return; }
+  if (!state.history.length) { el2.className = 'history-empty'; el2.textContent = 'No history yet. Pick a symbol to start.'; return; }
   el2.className = '';
   el2.innerHTML = '';
   state.history.forEach(id => {
@@ -3361,7 +3397,7 @@ function setTheme(t) {
 }
 (function initTheme() { const t = localStorage.getItem('genv23-theme') || 'dark'; setTheme(t); })();
 
-// ── v25.3 — collapsible side panels ───────────────────────────────────────
+// ── v25.3: collapsible side panels ───────────────────────────────────────
 // Collapse #left / #right to a thin re-expand rail so the main content body
 // (Architecture, Graph, CFG, …) can use the full width. State persists.
 function applyPanels() {
@@ -3403,7 +3439,7 @@ function toggleRight() { setRightCollapsed(!state.rightCollapsed); }
   else wire();
 })();
 
-// ── v25.3 — draggable split between the call-graph and CFG panes ──────────
+// ── v25.3: draggable split between the call-graph and CFG panes ──────────
 // Applies the persisted ratio to the graph shell and installs a drag handler on
 // the gutter. Called by renderGraph after it builds the shell.
 function applyGraphSplit(shell) {
@@ -3456,7 +3492,7 @@ function initGraphGutter(shell, gutter) {
   });
 }
 
-// v23.1 — display text scale, persisted, drives --fz-scale on :root
+// v23.1: display text scale, persisted, drives --fz-scale on :root
 function setFontScale(s) {
   s = Math.max(0.85, Math.min(1.6, Math.round(s * 100) / 100));
   document.documentElement.style.setProperty('--fz-scale', String(s));
@@ -3656,7 +3692,7 @@ window.addEventListener('keydown', (e) => {
     return;
   }
   // v25.3: Shift+[ / Shift+] collapse the left / right panels (plain [ ] stay
-  // browser-style graph nav). '\\' collapses BOTH for a full-width content body.
+  // browser-style graph nav). '\\' collapses both for a full-width content body.
   if (e.key === '{') { toggleLeft();  e.preventDefault(); return; }
   if (e.key === '}') { toggleRight(); e.preventDefault(); return; }
   if (e.key === '\\') {

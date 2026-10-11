@@ -1,6 +1,6 @@
-// generator/internal/engine/ship_scripts.go — v23.10 (Phase 4-B): writes the
-// build + bundle scripts INTO the generated project. These produce a deployable
-// ARTIFACT only — there is NO deploy/transport step (that is a separate future
+// generator/internal/engine/ship_scripts.go, v23.10 (Phase 4-B): writes the
+// build + bundle scripts into the generated project. These produce a deployable
+// artifact only. There is no deploy/transport step (that is a separate future
 // phase; see CHECKPOINT). Target: Ubuntu 24.04 LTS, linux/amd64. Version comes
 // from `--version <v>` or a VERSION file (air-gapped boxes often lack git).
 //

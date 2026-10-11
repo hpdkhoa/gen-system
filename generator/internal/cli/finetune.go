@@ -190,7 +190,7 @@ func finetuneStats() {
 
 func printFinetuneUsage() {
 	fmt.Println("")
-	fmt.Println("gen finetune — private fine-tuning from repair memory")
+	fmt.Println("gen finetune: fine-tune a local model on the repair memory")
 	fmt.Println("")
 	fmt.Println("Usage:")
 	fmt.Println("  gen finetune export    [--min-success N] [--out path]")

@@ -1,4 +1,4 @@
-// cli/report_test.go — v23.31 (gen report test fix): the v23.30 test referred
+// cli/report_test.go, v23.31 (gen report test fix): the v23.30 test referred
 // to a non-existent buildModelFromRuns and an invalid []struct{} conversion,
 // so the package failed to compile under `go test`. Rewired to the real
 // buildModel([]bench.Run, ...) signature; behaviour assertions unchanged.

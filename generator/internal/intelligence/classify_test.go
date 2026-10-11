@@ -94,7 +94,7 @@ func TestClassifyError_UnknownError(t *testing.T) {
 // are checked before undefined errors (they can overlap).
 func TestClassifyError_ImportCheckedBeforeUndefined(t *testing.T) {
 	// This message contains both "imported and not used" (import) and could
-	// match "undefined" heuristics — import should win because it's checked first.
+	// match "undefined" heuristics. Import should win because it's checked first.
 	result := intelligence.ClassifyError(`"os" imported and not used`)
 	if result.ErrorType != intelligence.ImportError {
 		t.Errorf("import should be classified before undefined, got %s", result.ErrorType)

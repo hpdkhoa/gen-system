@@ -1,4 +1,4 @@
-// generator/internal/schema/parse_tolerant_test.go — v23.1: proves the
+// generator/internal/schema/parse_tolerant_test.go (v23.1): proves the
 // tolerant parser recovers object-style fields, fenced output, and prose-
 // wrapped JSON that the old strict ParseFile dropped to zero entities.
 package schema
@@ -41,7 +41,7 @@ func TestTolerant_ArrayFields(t *testing.T) {
 func TestTolerant_OldParseFileFailedThisBefore(t *testing.T) {
 	// The real-world failures that produced zero entities were markdown fences
 	// and surrounding prose (Go's json.Unmarshal is partial, so bare object
-	// fields still yielded a named entity — but a fenced doc fails outright).
+	// fields still yielded a named entity, but a fenced doc fails outright).
 	fenced := "```json\n{\"entities\":[{\"name\":\"Project\",\"fields\":{\"id\":\"int\"}}]}\n```"
 	if n := len(ParseFile(fenced).Entities); n != 0 {
 		t.Fatalf("expected old strict ParseFile to drop fenced doc, got %d", n)

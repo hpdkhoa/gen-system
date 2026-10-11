@@ -1,27 +1,27 @@
-// generator/internal/belief/belief.go — v26.7 (session 1: belief store relocated
-// out of internal/presentation into its own low-level package so BOTH the
-// Understand track and the Generate track may import it — presentation is
+// generator/internal/belief/belief.go, v26.7 (session 1): the belief store moved
+// out of internal/presentation into its own low-level package so both the
+// Understand track and the Generate track may import it. Presentation is
 // forbidden from importing internal/context, and the generator is forbidden from
 // importing presentation, so the shared belief layer could not live in either.
 //
-// This package imports ONLY symbols + flow (generation-free, no internal/context,
+// This package imports only symbols + flow (generation-free, no internal/context,
 // no presentation, no ai/engine/agent/planner). That keeps the understand-server
 // boundary intact: the belief package is a leaf both sides can depend on.
 //
-// Session-1 scope: relocate + two honesty fixes carried in without behavior change
+// Session-1 scope: relocate + two accuracy fixes carried in without behavior change
 // to any caller:
-//  1. Store is now project-ROOT scoped. The old store hardcoded diskPath
+//  1. Store is now project-root scoped. The old store hardcoded diskPath
 //     ".gen/beliefs.json" relative to the process CWD, so corrections made while
 //     viewing project A were reloaded when viewing project B from the same shell.
 //     NewStore(root) writes <root>/.gen/beliefs.json.
 //  2. The hardcoded per-kind Confidence float (0.95/0.85/0.75) was a priority
-//     LABEL masquerading as a probability. It is retained for wire-compat but a
+//     label that looked like a probability. It is retained for wire-compat, but a
 //     new Source field ("parser"/"enrich"/"human") now records where a belief
-//     actually came from — the honest replacement the later sessions build on.
+//     actually came from. The later sessions build on this replacement.
 //
 // The behavioral-kind vocabulary, the derived/asserted (Box1/Box2) split, the
 // staleness warning, the LLM enrich tier, and correction-steered generation are
-// LATER sessions. This file deliberately preserves the current kinds and the
+// later sessions. This file deliberately preserves the current kinds and the
 // current rebuildFromIndex logic so session 1 is a pure move.
 package belief
 
@@ -44,35 +44,35 @@ import (
 	"github.com/hpdkhoa/gen-system/generator/internal/trace"
 )
 
-// Kind classifies a belief in HUMAN-REVIEWABLE, behavioral terms — what a person
-// reading unfamiliar code would jot in a notebook — rather than compiler-internal
+// Kind classifies a belief in human-reviewable, behavioral terms (what a person
+// reading unfamiliar code would jot in a notebook) rather than compiler-internal
 // analysis tags. A banking analyst can read "this routine's inputs are X; it
 // writes to the account record; it calls Y" and say yes/no; they cannot
 // meaningfully verify "this symbol is in layer service" or "effect: pure".
 //
-// The kind is BLENDED across the three evals (session design): parser-eval sets an
+// The kind is blended across the three evals (session design): parser-eval sets an
 // initial kind from what the parser can see for certain; enrich-eval (session 4,
 // local LLM) and human-eval (Box 2) may refine or override it. Each kind below is
-// annotated with which eval can HONESTLY produce it.
+// annotated with which eval can actually produce it.
 type Kind string
 
 const (
-	// Parser-eval kinds — emitted deterministically, offline, from index data.
+	// Parser-eval kinds: emitted deterministically, offline, from index data.
 	KindInputs     Kind = "inputs"      // "its inputs are: id int, amount float64"   (from Params)
 	KindCalls      Kind = "calls"       // "it calls: OrderService.Place"              (from call edges)
 	KindDataChange Kind = "data-change" // "it writes to: orders (db)"                 (from RefWrite + effects)
 	KindEffect     Kind = "effect"      // "it touches: db"                            (from effect inference)
-	KindAction     Kind = "action"      // "it appears to: create user"  (SHALLOW parser guess from name+effect;
+	KindAction     Kind = "action"      // "it appears to: create user"  (shallow parser guess from name+effect;
 	//                                     the rich version is enrich-eval's job)
 
-	// Enrich-eval kinds — the parser cannot honestly produce these; a local LLM
+	// Enrich-eval kinds. The parser cannot produce these; a local LLM
 	// reading the body does (session 4). Declared now so the vocabulary is stable
 	// and human corrections/steering can reference them.
 	KindComputation  Kind = "computation"  // "computes new-balance = old − amount"
 	KindPrecondition Kind = "precondition" // "refuses if amount would make balance negative"
 
-	// Summary — a rolled-up description of a SCOPE (service / module / project),
-	// produced by summarizing the BELIEFS of the members below it rather than raw
+	// Summary: a rolled-up description of a scope (service / module / project),
+	// produced by summarizing the beliefs of the members below it rather than raw
 	// source (session 10). Subject is the scope name; Object is the prose. Persisted
 	// + child-fingerprinted so a change below cascades staleness upward.
 	KindSummary Kind = "summary"
@@ -86,7 +86,7 @@ const (
 )
 
 // IsParserDerivable reports whether the parser can emit this kind deterministically.
-// enrich-eval / human-eval kinds return false — they need reasoning or a person.
+// enrich-eval / human-eval kinds return false: they need reasoning or a person.
 func (k Kind) IsParserDerivable() bool {
 	switch k {
 	case KindInputs, KindCalls, KindDataChange, KindEffect, KindAction:
@@ -96,7 +96,7 @@ func (k Kind) IsParserDerivable() bool {
 	}
 }
 
-// Source records WHERE a belief came from. This is the honest replacement for the
+// Source records where a belief came from. It replaces the
 // old hardcoded Confidence float: instead of pretending a call edge is "0.95
 // probable", we state that it was produced deterministically by the parser.
 // Later sessions add SourceEnrich (local LLM) and lean on SourceHuman for the
@@ -121,7 +121,7 @@ type Belief struct {
 	Source Source `json:"source"`
 
 	// Confidence is retained for wire/UI compatibility. It is a per-kind priority
-	// hint, NOT a measured probability; do not compute with it. New code should
+	// hint, not a measured probability; do not compute with it. New code should
 	// branch on Source instead.
 	Confidence float64 `json:"confidence"`
 
@@ -132,25 +132,25 @@ type Belief struct {
 	// Stale is set when a human correction exists for this belief but the
 	// parser-derived value has since changed (source moved under the assertion).
 	// The human's value still wins (Object/CorrectedTo), but Stale + SourceNow
-	// let the UI show BOTH: "you said X; the code now says Y".
+	// let the UI show both: "you said X; the code now says Y".
 	Stale     bool   `json:"stale,omitempty"`
 	SourceNow string `json:"source_now,omitempty"` // fresh parser-derived Object when Stale
 
 	// Validation records how an enrich (model-written) belief was checked against
 	// the deterministic parser facts (session 7). It is only meaningful for
 	// Source==enrich beliefs:
-	//   "consistent"  — the claim agrees with (or doesn't contradict) parser facts.
-	//   "contradicts" — the claim asserts something the parser positively denies
-	//                    (e.g. a db write the parser never observed). ValidationNote
-	//                    explains. A contradicting belief is shown flagged and never
-	//                    steers generation.
-	//   "needs-human" — a semantic claim (computation / precondition) that CANNOT be
-	//                    mechanically validated; only a person can confirm it.
+	//   "consistent":  the claim agrees with (or doesn't contradict) parser facts.
+	//   "contradicts": the claim asserts something the parser positively denies
+	//                  (e.g. a db write the parser never observed). ValidationNote
+	//                  explains. A contradicting belief is shown flagged and never
+	//                  steers generation.
+	//   "needs-human": a semantic claim (computation / precondition) that cannot be
+	//                  mechanically validated; only a person can confirm it.
 	// Empty for parser/human beliefs (nothing to validate).
 	Validated      string `json:"validated,omitempty"`
 	ValidationNote string `json:"validation_note,omitempty"`
 
-	// SourceHash is the fingerprint of the routine's SOURCE at the time an enrich
+	// SourceHash is the fingerprint of the routine's source at the time an enrich
 	// belief was written (session 9). Enrich claims are about the body, so they go
 	// stale when the body changes: on rebuild, if the routine's current source hash
 	// differs from this, the enrich belief is flagged Stale (a signal to re-enrich).
@@ -168,9 +168,9 @@ type Belief struct {
 
 	// Parent names the enclosing scope for a summary belief (v26.22): a service
 	// summary's parent is its module, a module summary's parent is the project.
-	// Storing it makes module/project membership RE-DERIVABLE at rebuild time, so
-	// those scopes cascade on a member being ADDED or REMOVED — not just on a
-	// member's content changing. Empty for routine beliefs and for project scope.
+	// Storing it makes module/project membership re-derivable at rebuild time, so
+	// those scopes cascade when a member is added or removed, as well as when a
+	// member's content changes. Empty for routine beliefs and for project scope.
 	Parent string `json:"parent,omitempty"`
 
 	// Group is the scope this belief's routine belongs to, captured at derive time
@@ -182,12 +182,12 @@ type Belief struct {
 }
 
 // Correction is a human override of a specific belief. Corrections are stored in a
-// SEPARATE map from beliefs (the asserted / Box-2 tier) and re-applied on top after
+// separate map from beliefs (the asserted / Box-2 tier) and re-applied on top after
 // every rebuild-from-source, so a human's judgment survives re-parsing.
 //
-// DerivedAt is the FINGERPRINT: the parser-derived Object value at the moment the
-// human made this correction. On a later re-parse the store compares the NEW
-// derived value against DerivedAt — if they differ, the source has moved under the
+// DerivedAt is the fingerprint: the parser-derived Object value at the moment the
+// human made this correction. On a later re-parse the store compares the new
+// derived value against DerivedAt. If they differ, the source has moved under the
 // human's assertion, so the overlaid belief is flagged Stale and carries the new
 // value (SourceNow) for side-by-side review. This is the Box-2-overlays-Box-1 rule
 // with staleness detection: never silently keep (a lie) nor silently drop (data loss).
@@ -215,8 +215,8 @@ type Store struct {
 	mu          sync.Mutex
 	beliefs     map[string]*Belief
 	corrections map[string]Correction
-	// enrichBeliefs is the THIRD persistence class (session 9): model-written
-	// beliefs that PERSIST across parser rebuilds (unlike parser beliefs, which are
+	// enrichBeliefs is the third persistence class (session 9): model-written
+	// beliefs that persist across parser rebuilds (unlike parser beliefs, which are
 	// wiped) and are re-attached on each rebuild, then re-validated + stale-checked
 	// against the current source. Keyed by belief ID. Written either inline by an
 	// injected Enricher or out-of-band by the gen-enrich producer.
@@ -255,7 +255,7 @@ func NewStore(root string) *Store {
 	return bs
 }
 
-// RebuildFromIndex regenerates all DERIVED beliefs from the current index +
+// RebuildFromIndex regenerates all derived beliefs from the current index +
 // effects, then overlays any stored human corrections on top. Beliefs are wiped
 // and rebuilt (source is truth); corrections are preserved and re-applied.
 func (bs *Store) RebuildFromIndex(idx *symbols.Index, efx map[string]*flow.FuncEffects) {
@@ -267,13 +267,13 @@ func (bs *Store) RebuildFromIndex(idx *symbols.Index, efx map[string]*flow.FuncE
 	bs.beliefs = make(map[string]*Belief)
 
 	// Collect parser facts per symbol so persisted enrich beliefs can be
-	// re-validated against the CURRENT deterministic ground truth on every rebuild.
+	// re-validated against the current deterministic ground truth on every rebuild.
 	factsBySym := make(map[string]parserFacts)
 	// file -> module/PROGRAM-ID, for grouping flat languages (v26.21).
 	moduleByFile := buildModuleByFile(idx)
 	groupBySym := make(map[string]string)
 
-	// Only describe project functions/methods/procedures — the things a human
+	// Only describe project functions/methods/procedures, the things a human
 	// reviews. Skip non-callable symbols (structs, vars) and external/stdlib code.
 	for _, sym := range idx.AllSymbols() {
 		if sym.Provenance.IsExternal() {
@@ -293,20 +293,20 @@ func (bs *Store) RebuildFromIndex(idx *symbols.Index, efx map[string]*flow.FuncE
 		}
 
 		// Inline enrich-eval (when an Enricher is injected in-process): best-effort.
-		// Its output is now PERSISTED into bs.enrichBeliefs so it survives future
+		// Its output is now persisted into bs.enrichBeliefs so it survives future
 		// parser rebuilds, exactly like a human correction.
 		for _, b := range bs.enrichLocked(sym, parserBeliefs) {
 			bs.enrichBeliefs[b.ID] = b
 		}
 	}
 
-	// Re-attach persisted enrich beliefs (from a prior inline run OR from the
+	// Re-attach persisted enrich beliefs (from a prior inline run or from the
 	// out-of-band gen-enrich producer). Each is re-validated against the current
 	// parser facts and stale-checked against the current routine source, then
-	// overlaid — a human correction on top of an enrich belief still wins.
+	// overlaid. A human correction on top of an enrich belief still wins.
 	bs.reattachEnrichLocked(factsBySym, groupBySym)
 
-	// Re-attach scope summaries LAST (they depend on member beliefs already being
+	// Re-attach scope summaries last (they depend on member beliefs already being
 	// present) and cascade staleness from any changed member (session 10).
 	bs.reattachSummariesLocked()
 
@@ -319,7 +319,7 @@ func (bs *Store) RebuildFromIndex(idx *symbols.Index, efx map[string]*flow.FuncE
 
 // staleSourceNote is the note an enrich belief carries while its routine's source
 // differs from the body it was written from.
-const staleSourceNote = "the routine's source changed since this was written — re-enrich"
+const staleSourceNote = "the routine's source changed since this was written, re-enrich"
 
 // reattachEnrichLocked folds persisted enrich beliefs into the live belief set,
 // re-validating and stale-checking each against current source. Caller holds mu.
@@ -369,7 +369,7 @@ func (bs *Store) reattachEnrichLocked(factsBySym map[string]parserFacts, groupBy
 
 // enrichLocked calls the injected Enricher for one symbol and maps its proposals
 // to beliefs with stable IDs and SourceEnrich. Caller holds bs.mu. Any failure
-// yields nil — enrichment is strictly additive and never blocks a rebuild.
+// yields nil. Enrichment is strictly additive and never blocks a rebuild.
 func (bs *Store) enrichLocked(sym *symbols.Symbol, parserBeliefs []*Belief) []*Belief {
 	if bs.enricher == nil {
 		return nil
@@ -432,7 +432,7 @@ func (bs *Store) enrichLocked(sym *symbols.Symbol, parserBeliefs []*Belief) []*B
 }
 
 // EnrichFact is the read-only view of one routine handed to an Enricher: the
-// parser-known facts, so the LLM enriches WITH the deterministic context rather
+// parser-known facts, so the LLM enriches with the deterministic context rather
 // than re-deriving it. Body is the raw source of the routine when available.
 type EnrichFact struct {
 	SymbolID   string
@@ -453,13 +453,13 @@ type EnrichBelief struct {
 	Object string
 }
 
-// Enricher turns parser facts into richer, plain-language beliefs — the enrich-eval
-// tier. The concrete implementation (local LLM) lives in a SEPARATE package that
-// imports internal/ai and is wired ONLY by the generation-side binaries; the belief
+// Enricher turns parser facts into richer, plain-language beliefs (the enrich-eval
+// tier). The concrete implementation (local LLM) lives in a separate package that
+// imports internal/ai and is wired only by the generation-side binaries. The belief
 // store depends on this interface, never on the LLM, so understand-server stays
 // air-gapped and free of generation packages. A nil Enricher (or one returning an
-// error / empty slice) simply yields no enrich beliefs — parser + human tiers are
-// unaffected. Enrich MUST be side-effect free and safe to skip.
+// error / empty slice) yields no enrich beliefs, and the parser and human tiers are
+// unaffected. Enrich must be side-effect free and safe to skip.
 type Enricher interface {
 	Enrich(fact EnrichFact) ([]EnrichBelief, error)
 }
@@ -474,7 +474,7 @@ func (bs *Store) SetEnricher(e Enricher) {
 
 // BodyProvider optionally supplies a routine's source text for enrichment. The
 // index/effects alone don't carry bodies; a caller that has them (e.g. via the
-// AST cache) can provide one. Nil is fine — enrichment then works from facts only.
+// AST cache) can provide one. Nil is fine: enrichment then works from facts only.
 type BodyProvider func(symbolID string) string
 
 // SetBodyProvider injects a source-text lookup used to populate EnrichFact.Body.
@@ -494,8 +494,8 @@ func isCallable(k symbols.SymbolKind) bool {
 	}
 }
 
-// deriveParserBeliefs produces the behavioral, human-reviewable beliefs the PARSER
-// can state for certain about one routine — the parser-eval tier. It never guesses
+// deriveParserBeliefs produces the behavioral, human-reviewable beliefs the parser
+// can state for certain about one routine (the parser-eval tier). It never guesses
 // at meaning it cannot see (computation / precondition are left to enrich-eval).
 //
 // Object is written as the human-readable value that the UI shows and that a human
@@ -508,7 +508,7 @@ func deriveParserBeliefs(sym *symbols.Symbol, idx *symbols.Index, efx map[string
 		subj = sym.Name
 	}
 
-	// inputs — from the declared parameters.
+	// inputs: from the declared parameters.
 	if len(sym.Params) > 0 {
 		out = append(out, &Belief{
 			ID:        "inputs:" + sym.ID,
@@ -520,7 +520,7 @@ func deriveParserBeliefs(sym *symbols.Symbol, idx *symbols.Index, efx map[string
 		})
 	}
 
-	// calls — the routines this one invokes (resolved callees only).
+	// calls: the routines this one invokes (resolved callees only).
 	if callees := resolvedCallees(sym.ID, idx); len(callees) > 0 {
 		out = append(out, &Belief{
 			ID:        "calls:" + sym.ID,
@@ -532,7 +532,7 @@ func deriveParserBeliefs(sym *symbols.Symbol, idx *symbols.Index, efx map[string
 		})
 	}
 
-	// effect + data-change — from inferred effects. db/fs mean the routine changes
+	// effect + data-change: from inferred effects. db/fs mean the routine changes
 	// stored state; that is the "change-catalog" observation in the user's terms.
 	if e, ok := efx[sym.ID]; ok {
 		effs := effectList(e)
@@ -558,7 +558,7 @@ func deriveParserBeliefs(sym *symbols.Symbol, idx *symbols.Index, efx map[string
 		}
 	}
 
-	// action — a SHALLOW parser guess (verb from the name + what it touches). This
+	// action: a shallow parser guess (verb from the name + what it touches). This
 	// is deliberately crude; session 4's enrich-eval replaces it with a real
 	// description read from the body. Marked SourceParser so a human sees it as a
 	// machine guess to verify.
@@ -585,11 +585,11 @@ func deriveParserBeliefs(sym *symbols.Symbol, idx *symbols.Index, efx map[string
 
 // groupForSymbol determines the scope a routine belongs to for summary roll-up.
 // Receiver first (Go methods, Java classes: "OrderService.Checkout" -> OrderService),
-// falling back to the enclosing MODULE symbol — which for COBOL is the PROGRAM-ID —
+// falling back to the enclosing module symbol (for COBOL, the PROGRAM-ID),
 // so flat languages whose routine names carry no receiver (COBOL paragraphs like
 // APPLY-CREDIT) group into their program instead of into nothing.
 //
-// NOTE: symbols.Symbol has NO PackageName field; the program name lives on the
+// NOTE: symbols.Symbol has no PackageName field; the program name lives on the
 // SymModule symbol for the same file, so it is resolved via the index by DefinedIn.
 func groupForSymbol(sym *symbols.Symbol, moduleByFile map[string]string) string {
 	if sym.ReceiverType != "" {
@@ -700,7 +700,7 @@ func stateChanges(effs []string) string {
 }
 
 // shallowAction composes a crude "verb noun" guess from the routine name and its
-// dominant effect. Intentionally low-fidelity — a placeholder the enrich tier
+// dominant effect. It is intentionally low-fidelity, a placeholder the enrich tier
 // upgrades. Returns "" when it has nothing meaningful to say.
 func shallowAction(sym *symbols.Symbol) string {
 	name := sym.Name
@@ -755,17 +755,17 @@ func splitCamel(s string) []string {
 
 // applyCorrectionLocked overlays a stored human correction (Box 2) onto a
 // freshly-derived belief (Box 1), running the staleness comparison. On entry,
-// b.Object holds the FRESH parser-derived value. Caller holds bs.mu.
+// b.Object holds the fresh parser-derived value. Caller holds bs.mu.
 //
 // Cases:
 //   - No correction        → nothing to do (pure derived belief).
 //   - DerivedAt empty       → baseline unknown (correction predates fingerprinting,
 //     or was just made without one): re-baseline to the
-//     current derived value. No warning — we can't compare
+//     current derived value. No warning, because we can't compare
 //     against a baseline we never recorded.
 //   - DerivedAt == fresh    → source unchanged: overlay silently.
 //   - DerivedAt != fresh    → source moved under the assertion: overlay the human
-//     value BUT flag Stale and record SourceNow so the UI
+//     value but flag Stale and record SourceNow so the UI
 //     shows both the human's value and the current source.
 func (bs *Store) applyCorrectionLocked(b *Belief) {
 	c, ok := bs.corrections[b.ID]
@@ -807,14 +807,14 @@ func (bs *Store) All() []Belief {
 
 // CorrectionContext renders the human-verified beliefs for a project as a compact,
 // plain-language block suitable for prepending/appending to a generation prompt.
-// This is the bridge that lets human corrections STEER continue/evolve: a person
+// This is the bridge that lets human corrections steer continue/evolve: a person
 // corrects the machine's understanding in the Understand UI, and that correction
 // arrives at the planner as an explicit constraint the model is told to honor.
 //
-// Only human-sourced beliefs are included — machine guesses (parser/enrich) are
+// Only human-sourced beliefs are included. Machine guesses (parser/enrich) are
 // the model's to reconsider, but a human's correction is authoritative. A stale
 // correction (source moved under it) is still included but flagged, so the model
-// is told the human's intent AND that the code has since changed.
+// is told the human's intent and that the code has since changed.
 //
 // Returns "" when there are no human corrections, so callers can append
 // unconditionally without emitting an empty section.
@@ -902,11 +902,11 @@ type StaleWarning struct {
 
 // Warnings returns one entry per currently-stale asserted belief, ID-sorted. Empty
 // when nothing is stale. Call after a rebuild to surface staleness to the UI/CLI.
-// Warnings lists HUMAN CORRECTIONS that have gone out of date — the code changed
+// Warnings lists human corrections that have gone out of date: the code changed
 // under an assertion a person made, so the UI can show "you said X; the source now
 // says Y" and let them reconcile.
 //
-// v26.23: this deliberately EXCLUDES other stale things. A stale enrich belief or a
+// v26.23: this deliberately excludes other stale things. A stale enrich belief or a
 // stale scope summary is also "out of date", but neither has a human value or a
 // source value to compare, so including them rendered empty rows under a heading
 // about corrections. Staleness for those is surfaced on the row/summary itself.
@@ -967,7 +967,7 @@ func (bs *Store) Correct(c Correction) error {
 	// Fingerprint = the current source-derived value. If the belief is currently
 	// flagged stale, the fresh source value lives in SourceNow; otherwise Object
 	// still holds the derived value (a first correction hasn't been overlaid yet
-	// in a way that loses it — Object equals the derived value at derive time).
+	// in a way that loses it; Object equals the derived value at derive time).
 	derived := b.Object
 	if b.Stale && b.SourceNow != "" {
 		derived = b.SourceNow
@@ -1026,9 +1026,9 @@ func (bs *Store) computeChecksumLocked() {
 	bs.checksum = hex.EncodeToString(h.Sum(nil))
 }
 
-// persisted is the on-disk shape. Only the DURABLE classes are stored: human
+// persisted is the on-disk shape. Only the durable classes are stored: human
 // corrections and enrich beliefs. Parser beliefs are transient (rebuilt from
-// source every time) and deliberately NOT persisted. The legacy Beliefs field is
+// source every time) and deliberately not persisted. The legacy Beliefs field is
 // still read for backward-compat (old files that stored everything): any enrich
 // beliefs found there are migrated into EnrichBeliefs.
 type persisted struct {
@@ -1089,7 +1089,7 @@ func (bs *Store) load() {
 }
 
 // hashSource returns a short stable fingerprint of a routine's source text. Empty
-// input yields "" (no fingerprint — used to mean "unknown body").
+// input yields "" (no fingerprint, which means "unknown body").
 func hashSource(src string) string {
 	src = strings.TrimSpace(src)
 	if src == "" {
@@ -1124,7 +1124,7 @@ type EnrichInput struct {
 	Body     string // routine source at enrichment time (fingerprinted)
 }
 
-// UpsertEnrichBeliefs is the write path for the INDEPENDENT producer (gen-enrich):
+// UpsertEnrichBeliefs is the write path for the independent producer (gen-enrich):
 // it stores model-written beliefs that then persist across parser rebuilds. Each
 // input is fingerprinted against its source and validated later (on the next
 // rebuild, against fresh parser facts). Persisted immediately. Safe to call with
@@ -1156,8 +1156,8 @@ func (bs *Store) UpsertEnrichBeliefs(inputs []EnrichInput) error {
 	return bs.saveLocked()
 }
 
-// ClearEnrichForSymbol drops all persisted enrich beliefs for one routine — used
-// by the producer before re-enriching it, so stale kinds don't linger.
+// ClearEnrichForSymbol drops all persisted enrich beliefs for one routine. The
+// producer calls it before re-enriching the routine, so stale kinds don't linger.
 func (bs *Store) ClearEnrichForSymbol(symbolID string) {
 	bs.mu.Lock()
 	defer bs.mu.Unlock()

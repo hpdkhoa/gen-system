@@ -1,6 +1,6 @@
-// http_smoke.go — v25.5 (step 4): optional HTTP liveness smoke INSIDE the loop.
+// http_smoke.go, v25.5 (step 4): optional HTTP liveness smoke inside the loop.
 //
-// "Fully executable" should mean the generated app SERVES, beyond the check that
+// "Fully executable" should mean the generated app serves, beyond the check that
 // it compiles and its no-panic contract test passes. When GEN_HTTP_SMOKE=1, after
 // the validation loop (and Understand-verify) pass, this:
 //  1. builds the backend binary,
@@ -9,11 +9,11 @@
 //  4. GETs each discovered collection route and asserts non-000 / non-5xx,
 //  5. shuts the server down.
 //
-// It is ADVISORY (warn, never abort — the Go backend + contract test remain the
-// hard guarantee) and OPT-IN (needs a runnable box; off by default so the offline
-// static path is unaffected). Read-only GETs only: it never fires mutating
-// business-op POSTs (those need payloads and would change state) — a collection
-// GET returning 200 is the honest "is it alive and serving" signal.
+// It is advisory: it warns and never aborts. The Go backend + contract test remain
+// the hard guarantee. It is opt-in (needs a runnable box; off by default so the
+// offline static path is unaffected). Read-only GETs only: it never fires mutating
+// business-op POSTs (those need payloads and would change state). A collection
+// GET returning 200 is the direct "is it alive and serving" signal.
 //
 // No new dependencies: route discovery is a regex over generated source; the
 // probe uses net/http. Lives in the agent (generation) package; understand-server
@@ -82,7 +82,7 @@ func runHTTPSmoke(backendPath string) {
 	if _, err := os.Stat(filepath.Join(backendPath, "go.mod")); err != nil {
 		// No standalone module here; the backend may build as part of a parent.
 		// Skip quietly rather than guess.
-		emit("validate", "  [smoke] (no backend/go.mod — skipping HTTP smoke)\n")
+		emit("validate", "  [smoke] (no backend/go.mod; skipping HTTP smoke)\n")
 		return
 	}
 
@@ -137,7 +137,7 @@ func runHTTPSmoke(backendPath string) {
 		time.Sleep(250 * time.Millisecond)
 	}
 	if !ready {
-		emit("warn", "  [smoke] ⚠️  backend did not become ready on /health within 10s — skipping probes\n")
+		emit("warn", "  [smoke] ⚠️  backend did not become ready on /health within 10s; skipping probes\n")
 		return
 	}
 	emit("validate", "  [smoke] ✅ backend booted and answered /health\n")

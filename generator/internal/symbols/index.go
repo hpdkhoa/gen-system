@@ -1,4 +1,4 @@
-// index.go — v23.32 (stdlib provenance): AddModuleWithProvenance stamps a
+// index.go (v23.32, stdlib provenance): AddModuleWithProvenance stamps a
 // module's symbols with an origin tier; resolveByNameLocked is now
 // provenance-aware (project-tier symbols win over stdlib on a bare-name
 // collision, keeping project resolution stable and deterministic when a stdlib
@@ -9,8 +9,8 @@
 // AddModule path (LoadContext, gen-server start-up) now call this once
 // after the parse loop completes. Previously only BuildFromModules invoked
 // the unexported resolveCallEdges, so any cold-load index had every
-// CallEdge.CalleeID == "" — the call graph was empty until the watcher
-// fired UpdateFile on something. The fix is purely additive: AddModule's
+// CallEdge.CalleeID == "", and the call graph was empty until the watcher
+// fired UpdateFile on something. The fix only adds code: AddModule's
 // invariants are unchanged and UpdateFile's existing per-call resolution
 // sweep continues to work.
 //
@@ -19,7 +19,7 @@
 //     These remove all symbols, refs, and call edges originating from a file,
 //     then (for UpdateFile) re-ingest the new Module.
 //   - Absorbs RemoveFile and fileFromSymbolID from the standalone
-//     index_removefile.go file. That file MUST BE DELETED from the
+//     index_removefile.go file. That file must be deleted from the
 //     symbols/ directory before this patch will compile.
 //   - All existing tests in index_removefile_test.go remain valid against
 //     the new RemoveFile semantics (verified against each assertion).
@@ -28,7 +28,7 @@
 package symbols
 
 // ─────────────────────────────────────────────────────────────
-// index.go — Cross-file symbol index and resolver
+// index.go: cross-file symbol index and resolver
 //
 // The Index is the central "symbol database" for a repository.
 // It aggregates per-file Tables, resolves cross-file references,
@@ -173,8 +173,8 @@ func BuildFromModules(modules []*ast.Module) *Index {
 // been mostly stable.
 //
 // v19.8: callers that build the index incrementally via AddModule (the
-// LoadContext path, the gen-server start-up path) MUST invoke this once
-// after the parse loop completes — AddModule does not resolve callees on
+// LoadContext path, the gen-server start-up path) must invoke this once
+// after the parse loop completes. AddModule does not resolve callees on
 // its own (it can't, because subsequent files may define the callee).
 // UpdateFile already performs an in-line per-call resolution sweep, so
 // the watcher path is unaffected.
@@ -193,7 +193,7 @@ func (idx *Index) ResolveAll() {
 }
 
 // resolveEdgeLocked (v26.34) resolves one call edge. A package qualified
-// name is resolved through the CALLER FILE'S IMPORTS: when the first segment
+// name is resolved through the caller file's imports: when the first segment
 // of the callee is an import alias in that file, only symbols defined under
 // that import path are candidates, and if none exists the edge stays
 // unresolved. Before this, `errors.New` was stripped to the bare name `New`
@@ -288,8 +288,8 @@ func dirMatchesImport(definedIn, importPath string) bool {
 // v26.26: this used to call a second resolver, resolveByName, which ranged over
 // the symbol map in its randomized order and had no provenance tier preference
 // at all. That made the BuildFromModules path (used by cmd/bench) both
-// non-deterministic AND willing to let a stdlib symbol capture a project call —
-// the exact defect the v23.32 note below describes as fixed, fixed in only one
+// non-deterministic and willing to let a stdlib symbol capture a project call.
+// That is the exact defect the v23.32 note below describes as fixed, fixed in only one
 // of the two paths. There is now a single resolution rule in this package.
 // Takes the write lock because it mutates callEdges; no caller holds it.
 func (idx *Index) resolveCallEdges() {
@@ -316,7 +316,7 @@ func (idx *Index) resolveCallEdges() {
 //   - any CalleeID that pointed to a symbol in that file is cleared
 //     to "" (the call edge itself stays, becoming an unresolved call)
 //
-// Idempotent — calling RemoveFile on an unknown path is a no-op.
+// Idempotent: calling RemoveFile on an unknown path is a no-op.
 //
 // Use this when a source file has been deleted from the project.
 // To re-parse an existing file with new contents, prefer UpdateFile,
@@ -343,7 +343,7 @@ func (idx *Index) removeFileLocked(filePath string) {
 		delete(idx.tables, filePath)
 	} else {
 		// Defensive: if no table exists for filePath, still walk
-		// allSymbols by SymbolID prefix — symbols persisted from a
+		// allSymbols by SymbolID prefix. Symbols persisted from a
 		// Load() may exist without a Table.
 		prefix := filePath + "#"
 		for id := range idx.allSymbols {
@@ -412,7 +412,7 @@ func (idx *Index) UpdateFile(filePath string, m *ast.Module) {
 		return
 	}
 
-	// BuildTable does not touch idx state — safe outside the lock.
+	// BuildTable does not touch idx state, so it is safe outside the lock.
 	t := BuildTable(m)
 
 	idx.mu.Lock()
@@ -454,7 +454,7 @@ func (idx *Index) UpdateFile(filePath string, m *ast.Module) {
 // stdlib symbol can share a bare name with a project symbol (Write, String,
 // New, …). Returning whichever the map happened to yield first would let the
 // stdlib symbol capture a project call, both corrupting the call graph and
-// making project resolution non-deterministic. So we PREFER a project-tier
+// making project resolution non-deterministic. So we prefer a project-tier
 // match: a project (non-external) exported symbol wins outright; only if no
 // project symbol of that name exists do we fall to a stdlib/thirdparty one.
 // Within a tier the first exported match wins (unexported is the last resort).
@@ -467,7 +467,7 @@ func (idx *Index) resolveByNameLocked(name string) *Symbol {
 	// v26.25 (determinism fix): collect every candidate first, then choose.
 	// The prior version ranged over idx.allSymbols and took the first match in
 	// each tier. idx.allSymbols is a map, so Go randomizes that order: when two
-	// symbols in the SAME tier shared a bare name, which one won varied between
+	// symbols in the same tier shared a bare name, which one won varied between
 	// runs on identical input. That broke the determinism contract that the
 	// rest of the system relies on, and the call graph changed from run to run
 	// with no warning. The code now sorts candidates by their unique,
@@ -544,7 +544,7 @@ func (idx *Index) ByName(name string) []*Symbol {
 	}
 	// v26.26: sort before returning. allSymbols is a map, so without this the
 	// slice order is randomized per call, and several callers treat it as
-	// ordered — context.go's buildEntityUsage/buildArchSummary walk it to build
+	// ordered: context.go's buildEntityUsage/buildArchSummary walk it to build
 	// the derived views that are supposed to be deterministic. Returning an
 	// arbitrary order from a public accessor is a determinism hazard handed to
 	// every caller; SymbolID is unique and stable, so sorting on it is total.
@@ -572,7 +572,7 @@ func (idx *Index) Resolve(name, fromFile string) (*Symbol, bool) {
 
 	// 2. Same directory (= same Go package, or same conceptual module
 	// for other languages). v18.4: the previous code required
-	// syms[0].Exported, which was wrong for Go — package-private
+	// syms[0].Exported, which was wrong for Go: package-private
 	// symbols *are* visible to other files in the same package. The
 	// Exported gate was conflating "cross-package visibility" with
 	// "same-package visibility". Only the cross-package paths (the
@@ -597,7 +597,7 @@ func (idx *Index) Resolve(name, fromFile string) (*Symbol, bool) {
 		}
 	}
 
-	// 3. Qualified: pkg.Name — look up by import in fromFile
+	// 3. Qualified: pkg.Name, look up by import in fromFile
 	if dot := strings.Index(name, "."); dot >= 0 {
 		pkg := name[:dot]
 		localName := name[dot+1:]
@@ -696,7 +696,7 @@ func (idx *Index) Callees(symbolID string) []*Symbol {
 	return out
 }
 
-// ImpactSet returns the transitive set of callers — "what breaks
+// ImpactSet returns the transitive set of callers: "what breaks
 // if I change this symbol?"
 func (idx *Index) ImpactSet(symbolID string) []*Symbol {
 	visited := map[string]bool{}

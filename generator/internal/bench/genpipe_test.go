@@ -1,4 +1,4 @@
-// genpipe_test.go — v26.24 (WP1): the gen_pipeline suite must run fully
+// genpipe_test.go, v26.24 (WP1): the gen_pipeline suite must run fully
 // offline (replay provider, planner fallbacks) and emit every WP1 metric.
 // This is the test that proves the new quality axis is wired to the real
 // pipeline, not to a bench-only shim. Skipped under -short: it generates and

@@ -1,10 +1,10 @@
 // v23.39: BasicBlock.Cond carries the branch condition (set from NodeBranch.RawSource) so the CFG view can render a real decision node.
-// flow.go — v23.8: buildGoCFG now prunes unreachable blocks (pruneUnreachable)
+// flow.go (v23.8): buildGoCFG now prunes unreachable blocks (pruneUnreachable)
 // so an if/else where every branch returns no longer leaves an orphan merge
 // block (0 preds) in the graph; IDs are remapped densely so CFG.Block(id) stays
 // valid. v23.7: NodeBranch with a non-empty Else now emits a distinct
 // else-block (pred->else->merge) instead of folding else into the then-block.
-// flow.go — Control-flow graph, dataflow analysis, effect tagging
+// flow.go: control-flow graph, dataflow analysis, effect tagging
 // Patched for open item 4: TS/Python full CFG.
 // Change: buildFuncCFG now calls buildStructuralCFG (defined in cfg_ts_py.go)
 // for non-Go languages that have extractable structural nodes, instead of
@@ -30,7 +30,7 @@ type BasicBlock struct {
 	// Label describes the block for human presentation.
 	Label string
 	// Cond is the branch condition text for a block that ends in an if/switch
-	// (v23.39). Empty for straight-line blocks. Lets the CFG view show the real
+	// (v23.39). Empty for straight-line blocks. The CFG view uses it to show the real
 	// test (e.g. "CUST-BALANCE < 0") on the decision node instead of a bare "IF".
 	Cond string
 }
@@ -109,7 +109,7 @@ func buildFuncCFG(id string, n *ast.Node, lang ast.Language) *CFG {
 		return buildStructuralCFG(id, n)
 	}
 
-	// Fully opaque body — single block (covers empty Go functions too).
+	// Fully opaque body: single block (covers empty Go functions too).
 	cfg := &CFG{FuncID: id}
 	entry := &BasicBlock{ID: 0, Label: "entry+body+exit"}
 	for _, c := range n.Children {
@@ -133,7 +133,7 @@ func buildGoCFG(id string, stmts []*ast.Node) *CFG {
 		b.processNode(stmt)
 	}
 
-	// v23.8 — prune unreachable blocks before finalizing exits. When every
+	// v23.8: prune unreachable blocks before finalizing exits. When every
 	// branch of an if/else returns, the NodeBranch case still allocates a merge
 	// block that nothing flows into (0 predecessors); it is correct that the
 	// join is unreachable, but leaving the empty orphan in the CFG clutters the
@@ -171,7 +171,7 @@ func pruneUnreachable(cfg *CFG) {
 	// v26.58 (D103): a block with statements and no predecessors is dead code
 	// (statements after a return). It is a root of the walk too, so it and the
 	// blocks it flows into survive; AnalyzeDataFlow reports it as dead_code.
-	// Only EMPTY orphans, such as the join of an if/else whose arms both
+	// Only empty orphans, such as the join of an if/else whose arms both
 	// return, are dropped, which is what v23.8 set out to do.
 	reachable := map[int]bool{}
 	queue := []int{cfg.Entry}
@@ -294,13 +294,13 @@ func (b *cfgBuilder) processNode(n *ast.Node) {
 		b.current = nil
 
 	case ast.NodeBranch:
-		// v23.41 — EVALUATE (COBOL) is a MULTI-WAY branch: its children are WHEN
+		// v23.41: EVALUATE (COBOL) is a multi-way branch: its children are WHEN
 		// nodes, each a NodeBranch whose RawSource is the case value. Build one
 		// decision block that fans out to a case-block per WHEN, all rejoining at
-		// a shared merge — instead of nesting each WHEN as a fake if (which
+		// a shared merge, instead of nesting each WHEN as a fake if (which
 		// produced the "decision / decision / decision" cascade with no labels).
 		//
-		// v25.9 — Go's `switch`, `type-switch` and `select` are the same shape and
+		// v25.9: Go's `switch`, `type-switch` and `select` are the same shape and
 		// now emit the same IR (a case-node per clause carrying its value in
 		// RawSource), so they take this path too. Previously they flattened every
 		// case body into Children with no Else, and the if/else path below turned
@@ -309,9 +309,9 @@ func (b *cfgBuilder) processNode(n *ast.Node) {
 		if isMultiWayBranch(n) {
 			pred := b.current
 			// Evaluate any non-arm children (e.g. calls inside a Go switch tag)
-			// in the DECIDING block first, before any case block exists. Doing
+			// in the deciding block first, before any case block exists. Doing
 			// this in the fan-out loop would append them to whichever case block
-			// happened to be current — order-dependent and wrong.
+			// happened to be current. That is order-dependent and wrong.
 			for _, ch := range n.Children {
 				if ch != nil && ch.Kind != ast.NodeBranch {
 					b.processNode(ch)
@@ -353,7 +353,7 @@ func (b *cfgBuilder) processNode(n *ast.Node) {
 
 		// if/switch: then-block, optional else-block, merge-block
 		pred := b.current
-		// v23.39 — record the condition text on the deciding block so the CFG
+		// v23.39: record the condition text on the deciding block so the CFG
 		// view can render a real decision node. RawSource carries it (set by the
 		// Go/COBOL frontends); the branch node itself is also kept as a stmt.
 		if pred != nil && n.RawSource != "" && pred.Cond == "" {
@@ -371,7 +371,7 @@ func (b *cfgBuilder) processNode(n *ast.Node) {
 			b.edge(b.current, mergeBlock)
 		}
 
-		// v23.7 — if there is an explicit else body, give it its OWN block
+		// v23.7: if there is an explicit else body, give it its own block
 		// (pred → else → merge) instead of a bare pred → merge fall-through.
 		if len(n.Else) > 0 {
 			elseBlock := b.newBlock("else")
@@ -428,7 +428,7 @@ func (b *cfgBuilder) processNode(n *ast.Node) {
 		// for/while: loop-header, body, merge
 		pred := b.current
 		headerBlock := b.newBlock("loop_header")
-		// v23.43 — the header is the decision block; show the loop condition
+		// v23.43: the header is the decision block; show the loop condition
 		// (e.g. "until WS-FEE-INDEX >= TXN-FEE-COUNT") instead of a bare label.
 		if n.RawSource != "" {
 			headerBlock.Cond = n.RawSource
@@ -736,21 +736,21 @@ func inferNodeEffects(id string, children []*ast.Node, lang ast.Language) *FuncE
 	return efx
 }
 
-// isMultiWayBranch reports whether a NodeBranch models a MULTI-WAY construct
+// isMultiWayBranch reports whether a NodeBranch models a multi-way construct
 // (COBOL EVALUATE, Go switch / type-switch / select) rather than a two-way
 // if/else. Such a node's case arms are child NodeBranch nodes, each carrying its
-// case value in RawSource. Requires at least one NodeBranch child — a `switch {}`
+// case value in RawSource. Requires at least one NodeBranch child. A `switch {}`
 // with no cases degenerates to the if/else path harmlessly.
 //
-// NOTE: the arms are matched by KIND, not by name. COBOL emits "WHEN" *and*
+// NOTE: the arms are matched by kind, not by name. COBOL emits "WHEN" *and*
 // "WHEN_OTHER"; Go emits "case". Matching a single literal name would silently
 // regress an EVALUATE whose only arm is WHEN OTHER. v25.9.
 func isMultiWayBranch(n *ast.Node) bool {
 	switch n.Name {
 	case "EVALUATE", "switch", "type-switch", "select", "match":
-		// v26.6: Python 3.10 match/case fans out like a switch/EVALUATE — a parent
+		// v26.6: Python 3.10 match/case fans out like a switch/EVALUATE: a parent
 		// branch whose Children are per-case NodeBranch arms. Recognising it here
-		// gives match the same multi-way lane-column layout (v26.1) for free.
+		// gives match the same multi-way lane-column layout (v26.1) with no extra code.
 	default:
 		return false
 	}

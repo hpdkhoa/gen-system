@@ -1,4 +1,4 @@
-// verify_classify_test.go — v26.34: the Understand verify pass reports
+// verify_classify_test.go (v26.34): the Understand verify pass reports
 // internal resolution and counts external and literal calls instead of
 // reporting them as unresolved project symbols. Runs without a stdlib so the
 // classification, not the stdlib pass, is what is under test.

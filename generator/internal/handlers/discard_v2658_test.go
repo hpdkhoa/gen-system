@@ -1,4 +1,4 @@
-// discard_v2658_test.go — v26.58 (D091): DiscardStage had no method test, and
+// discard_v2658_test.go (v26.58, D091): DiscardStage had no method test, and
 // the /api/evolve/discard route passes every method except OPTIONS. A GET, for
 // example a link prefetch, removed the staging folder and the pending proposal.
 // StageEvolve and CommitStage already answer 405 to anything but POST.

@@ -1,4 +1,4 @@
-// cobol_else_v2658_test.go — v26.58 (F5): in a multi line IF, a statement on
+// cobol_else_v2658_test.go (v26.58, F5): in a multi line IF, a statement on
 // the same line as ELSE ("ELSE CALL 'SUB-ELSE'") left no node. The ELSE
 // handler switched the IF to its else arm and consumed the whole line, so the
 // text after ELSE was never parsed. An END-IF on that line did not close the

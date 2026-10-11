@@ -1,12 +1,12 @@
-// symbols/symbol.go — v23.32 (stdlib provenance): added Provenance field +
+// symbols/symbol.go (v23.32, stdlib provenance): added Provenance field +
 // type. Language-agnostic origin tier so the index, genbench metrics, skill
 // export, and Understand UI can distinguish a project's own symbols from
-// standard-library / third-party ones WITHOUT branching per language. Default
+// standard-library / third-party ones without branching per language. Default
 // zero value is ProvProject, so every pre-existing symbol is unchanged.
 package symbols
 
 // ─────────────────────────────────────────────────────────────
-// symbol.go — Language-agnostic symbol types
+// symbol.go: language-agnostic symbol types
 //
 // A Symbol is a named, typed, located entity in a codebase:
 // a function, a type, a variable, a constant.  Symbols are
@@ -40,8 +40,8 @@ const (
 )
 
 // IsExternal reports whether the symbol originates outside the user's project
-// (stdlib or third-party). Shared code uses this to keep "internal recall"
-// honest and to drive the default Understand filter.
+// (stdlib or third-party). Shared code uses this to limit "internal recall"
+// to project symbols and to drive the default Understand filter.
 func (p Provenance) IsExternal() bool {
 	return p == ProvStdlib || p == ProvThirdParty
 }

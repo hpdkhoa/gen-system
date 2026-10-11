@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# verify-v23.1.sh — one-shot capability check for gen-system v23.1.
+# verify-v23.1.sh: one-shot capability check for gen-system v23.1.
 # What it does, in order, stopping at the first hard failure:
 #   1. sanity: Go toolchain, project layout, single-dep rule
 #   2. build:  gen, gen-server, genbench  +  go vet
@@ -10,7 +10,7 @@
 #
 # Run from the project root (the dir holding go.mod):
 #   chmod +x verify-v23.1.sh
-#   ./verify-v23.1.sh                 # steps 1–5 (offline, no model needed)
+#   ./verify-v23.1.sh                 # steps 1 to 5 (offline, no model needed)
 #   ./verify-v23.1.sh --with-idea     # also step 6 (needs Ollama running)
 #
 # Nothing here writes outside the repo except a temp gen-server log in /tmp

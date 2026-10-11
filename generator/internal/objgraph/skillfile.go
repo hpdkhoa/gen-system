@@ -1,11 +1,11 @@
-// skillfile.go — v23.32 (stdlib provenance): SkillRecord/node now carries a
+// skillfile.go (v23.32, stdlib provenance): SkillRecord/node now carries a
 // Provenance field; writer emits it and IndexFromSkillFile round-trips it via
 // AddModuleWithProvenance so a reloaded .skill preserves stdlib vs project
 // origin. Prior:
 // v19.8 (resolve-coldload-edges): IndexFromSkillFile now calls
 // idx.ResolveAll() after the AddModule loop so skill-seeded contexts
 // have resolved call edges. Same root cause as the LoadContext fix.
-// objgraph/skillfile.go — TASK 4 (v19): SkillFile format for structured
+// objgraph/skillfile.go (TASK 4, v19): SkillFile format for structured
 // project context. Replaces opaque .md files with a versioned, machine-readable
 // JSONL format that LoadContext can ingest directly.
 //
@@ -229,7 +229,7 @@ func ReadSkillFile(path string) (*SkillFile, error) {
 
 		var rec SkillRecord
 		if err := json.Unmarshal([]byte(line), &rec); err != nil {
-			// Tolerate malformed lines — log and skip.
+			// Tolerate malformed lines: log and skip.
 			continue
 		}
 		switch rec.Kind {
@@ -288,7 +288,7 @@ func (sf *SkillFile) ToObjectGraph() *ObjectGraph {
 
 // IndexFromSkillFile builds a minimal symbols.Index from the nodes in a
 // SkillFile by constructing synthetic ast.Module values per file and
-// calling idx.AddModule — the same path used during normal parsing.
+// calling idx.AddModule, the same path normal parsing uses.
 // The resulting index has all the symbols but no raw AST or CFG data.
 func IndexFromSkillFile(sf *SkillFile) *symbols.Index {
 	idx := symbols.NewIndex()
@@ -323,7 +323,7 @@ func IndexFromSkillFile(sf *SkillFile) *symbols.Index {
 		}
 		idx.AddModuleWithProvenance(m, prov)
 	}
-	// v19.8: same fix as the LoadContext path — AddModule does not
+	// v19.8: same fix as the LoadContext path. AddModule does not
 	// resolve callees on its own, so synthetic-module construction
 	// would otherwise leave every CalleeID empty.
 	idx.ResolveAll()

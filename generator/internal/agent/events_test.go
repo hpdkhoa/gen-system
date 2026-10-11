@@ -1,5 +1,5 @@
-// events_test.go — v25.5: proves the structured agent-event recorder actually
-// fans events out (not just that the funcs exist). Covers: emit→lifecycle sink,
+// events_test.go (v25.5): checks that the structured agent-event recorder
+// fans events out, beyond the check that the funcs exist. Covers: emit→lifecycle sink,
 // emitHeal→heal sink, multi-sink fan-out, inert-with-no-sink, and JSONL trace
 // round-trip. Real behaviour, per the code-quality rule.
 package agent

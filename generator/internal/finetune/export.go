@@ -1,7 +1,7 @@
 // Package finetune provides tools for extracting training data from
 // gen-system's repair memory and producing artifacts for LLM fine-tuning.
 //
-// Phase 3.3 — Private Fine-Tuning:
+// Phase 3.3, Private Fine-Tuning:
 //
 //	gen-system accumulates repair knowledge in .gen/memory.json every time
 //	the healer successfully fixes a build error. The data is valuable because
@@ -56,7 +56,7 @@ type ExportStats struct {
 // dataset to outputPath.
 //
 // minSuccess filters out records where the fix hasn't been confirmed
-// successful at least N times — low-quality fixes make bad training data.
+// successful at least N times. Low-quality fixes make bad training data.
 //
 // The output uses OpenAI chat format (system + user + assistant messages)
 // which is supported by Ollama, OpenAI, HuggingFace TRL, and unsloth.
@@ -65,7 +65,7 @@ func ExportTrainingData(outputPath string, minSuccess int) (ExportStats, error) 
 
 	if len(mem.Fixes) == 0 {
 		return ExportStats{}, fmt.Errorf(
-			"no repair records found in .gen/memory.json — " +
+			"no repair records found in .gen/memory.json; " +
 				"run some builds and let the healer fix errors first")
 	}
 

@@ -1,4 +1,4 @@
-// generator/internal/bench/diag.go — v19.8b: resolution diagnostic.
+// generator/internal/bench/diag.go (v19.8b): resolution diagnostic.
 // Not a pass/fail scenario. Prints the raw state needed to understand
 // why resolution recall reports 0%:
 //
@@ -74,7 +74,7 @@ func ResolutionDiagnostic(root string, copybookPath []string, limit int) Suite {
 		Want: "every edge has a CalleeName",
 	})
 
-	// Sample first `limit` UNRESOLVED edges and check whether the bare
+	// Sample first `limit` unresolved edges and check whether the bare
 	// name (after stripping at last '.') exists in the symbol index.
 	type sample struct {
 		callerID    string

@@ -1,4 +1,4 @@
-// executor_v2658_test.go — v26.58.
+// executor_v2658_test.go (v26.58).
 //
 // D045: the service security review built its path from the raw entity name,
 // so "Order Item" gave "order item_service.go". The generator writes

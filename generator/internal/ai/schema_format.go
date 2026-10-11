@@ -1,5 +1,5 @@
-// generator/internal/ai/schema_format.go — v23.1 (round 3): the JSON Schema we
-// pass to Ollama's `format` parameter so the model is CONSTRAINED to emit a
+// generator/internal/ai/schema_format.go, v23.1 (round 3): the JSON Schema we
+// pass to Ollama's `format` parameter so the model is constrained to emit a
 // valid {entities:[{name, fields[]}]} document. This is the root-cause fix:
 // with a schema-constrained decode the model cannot produce the bracket-
 // mismatched, trailing-comma, tab-storm garbage that free-form prompting did.

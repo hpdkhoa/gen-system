@@ -1,4 +1,4 @@
-// symbols_root_v2657_test.go — v26.57 (D013): /api/present/symbols must not
+// symbols_root_v2657_test.go (v26.57, D013): /api/present/symbols must not
 // parse a file outside the project. handleFiles refused such a folder with 403,
 // but handleSymbols parsed and indexed any path it was given, so a request
 // could read the functions of any .go file on the machine, and

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- studio.html — v20 unified Studio. Replaces gen-system-v7.html + intelligence.html.
+<!-- studio.html (v20): unified Studio. Replaces gen-system-v7.html + intelligence.html.
      Single page: guided Home → Import / Generate / Understand → Review → Export.
      Binds to real /api/* (generation) and /api/present/* (intelligence) endpoints. -->
 <html lang="en" data-theme="dark">
@@ -360,7 +360,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
     <div class="home-inner">
       <div class="hero">
         <h1>What do you want to do?</h1>
-        <p>gen-system either <b>builds</b> a complete product from a plain-language goal, or <b>reads</b> an existing codebase and explains it at compiler accuracy. Pick a starting point — both run fully offline.</p>
+        <p>gen-system either <b>builds</b> a complete product from a plain-language goal, or <b>reads</b> an existing codebase and explains it at compiler accuracy. Pick a starting point. Both run fully offline.</p>
       </div>
       <div class="steps">
         <div class="step-chip"><b>1</b> Choose a mode</div>
@@ -372,7 +372,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
         <div class="card gen" onclick="setMode('gen')">
           <div class="card-ico">✦</div>
           <h3>Generate a product</h3>
-          <p>Type a goal like “a customer onboarding app with KYC”. The planner proposes a schema and entities across six layers — Go, React, React Native, Postgres, TS, Docker. You approve each entity before anything is written.</p>
+          <p>Type a goal like “a customer onboarding app with KYC”. The planner proposes a schema and entities across six layers: Go, React, React Native, Postgres, TS, Docker. You approve each entity before anything is written.</p>
           <span class="go">Start from a goal →</span>
         </div>
         <div class="card und" onclick="setMode('und')">
@@ -385,7 +385,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
       <div class="recent">
         <h4>Recent snapshots</h4>
         <div class="recent-list" id="recentList">
-          <div class="recent-empty">No snapshots yet — they appear here after your first build.</div>
+          <div class="recent-empty">No snapshots yet. They appear here after your first build.</div>
         </div>
       </div>
     </div>
@@ -410,7 +410,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
       </div>
       <!-- center: blueprint -->
       <div class="panel center" style="position:relative">
-        <div class="ph"><span class="ph-title">Proposed entities — review before build</span><span class="ph-title" id="entCount" style="color:var(--text-dim)"></span></div>
+        <div class="ph"><span class="ph-title">Proposed entities: review before build</span><span class="ph-title" id="entCount" style="color:var(--text-dim)"></span></div>
         <div id="blueprintWrap" style="flex:1;overflow:hidden;display:flex;">
           <div class="empty-center" id="genEmpty">
             <div class="ec-ico">✦</div>
@@ -461,14 +461,14 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
           <div class="langchips">
             <span class="lc">Go</span><span class="lc">TypeScript</span><span class="lc">Python</span><span class="lc">CA Gen</span><span class="lc">COBOL/CICS</span>
           </div>
-          <div class="hint">Native compiler frontends — no Tree-sitter, nothing leaves this machine. <code class="mono" style="color:var(--text3)">NodeUnknown</code> constructs are flagged, never dropped. The tree is rooted at the server's <code class="mono" style="color:var(--text3)">--root</code>.</div>
+          <div class="hint">Native compiler frontends. No Tree-sitter, and nothing leaves this machine. <code class="mono" style="color:var(--text3)">NodeUnknown</code> constructs are flagged, never dropped. The tree is rooted at the server's <code class="mono" style="color:var(--text3)">--root</code>.</div>
         </div>
         <div class="ph"><span class="ph-title">Symbols</span><span class="ph-title" id="symLang" style="color:var(--purple)"></span></div>
         <div class="pb" id="symList" style="flex:1"><div class="feed-empty">Click a file in the tree to parse it.</div></div>
       </div>
       <!-- center: beliefs -->
       <div class="panel center">
-        <div class="ph"><span class="ph-title">Beliefs — verify or correct each inference</span><span class="ph-title" id="beliefCount" style="color:var(--text-dim)"></span></div>
+        <div class="ph"><span class="ph-title">Beliefs: verify or correct each inference</span><span class="ph-title" id="beliefCount" style="color:var(--text-dim)"></span></div>
         <div class="pb" id="beliefPane">
           <div class="empty-center" style="height:auto;padding:60px 30px">
             <div class="ec-ico">◎</div>
@@ -481,7 +481,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
       <!-- right: flow / detail -->
       <div class="panel">
         <div class="ph"><span class="ph-title">Control flow &amp; effects</span></div>
-        <div class="pb" id="flowPane"><div class="feed-empty">Click a <b>function</b> in the Symbols list (left) to see its control-flow graph here — the blocks it runs, the branches and loops between them, and whether it touches the database, filesystem, or network.</div></div>
+        <div class="pb" id="flowPane"><div class="feed-empty">Click a <b>function</b> in the Symbols list (left) to see its control-flow graph here: the blocks it runs, the branches and loops between them, and whether it touches the database, filesystem, or network.</div></div>
       </div>
     </div>
   </div>
@@ -493,7 +493,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
   <div class="modal-card">
     <div class="modal-head"><h3>New snapshot</h3><button class="btn btn-ghost" onclick="closeModal('snapModal')">✕</button></div>
     <div class="modal-body">
-      <label>Name</label><input id="snapName" placeholder="v1 — initial schema"/>
+      <label>Name</label><input id="snapName" placeholder="v1: initial schema"/>
       <label>Description (optional)</label><textarea id="snapDesc" rows="2" placeholder="What changed in this snapshot"></textarea>
     </div>
     <div class="modal-foot">
@@ -516,7 +516,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
       <button class="btn btn-primary" style="width:100%;justify-content:center;margin-bottom:18px" onclick="closeModal('exportModal');openCreateSnap()">+ Capture current state as snapshot</button>
       <label style="color:var(--red)">Danger zone</label>
       <div style="font-size:12px;color:var(--text2);line-height:1.55;margin-bottom:10px">Clean start removes engine state (<code class="mono" style="color:var(--text3)">.gen</code>) and the generated layers (<code class="mono" style="color:var(--text3)">backend, frontend, mobile, db</code>) under the project root. Code you imported yourself is untouched.</div>
-      <button class="btn btn-red" style="width:100%;justify-content:center" onclick="cleanStart()">⌫ Clean start — remove generated files</button>
+      <button class="btn btn-red" style="width:100%;justify-content:center" onclick="cleanStart()">⌫ Clean start: remove generated files</button>
     </div>
     <div class="modal-foot"><button class="btn" onclick="closeModal('exportModal')">Close</button></div>
   </div>
@@ -620,7 +620,7 @@ function connectSSE(){
 function handleBuildEvent(ev,d){
   if(ev==='build_phase'){$('boPhase').textContent=d.phase||'Working…';$('boSub').textContent=d.text||'';pushFeed(d.phase||'build',d.text||'',d.dot||'cyan');}
   if(ev==='build_done'){$('buildOverlay').classList.remove('show');toast('Build complete','ok');refreshSchema();refreshSnapshots();}
-  if(ev==='build_failed'){$('buildOverlay').classList.remove('show');toast('Build failed — try self-heal','err');pushFeed('failed',d.error||'build failed','red');}
+  if(ev==='build_failed'){$('buildOverlay').classList.remove('show');toast('Build failed. Try self-heal.','err');pushFeed('failed',d.error||'build failed','red');}
 }
 
 /* ───────────────── activity feed ───────────────── */
@@ -643,9 +643,9 @@ async function mapGoal(){
     const res=await api('/api/goal/map',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({goal})});
     entities=res.entities||[];
     if(entities.length===0){
-      // empty IR — this is the v7 confusion. Be honest about it.
+      // empty IR: this is the v7 confusion. Say so plainly.
       renderEntities([]);
-      toast('No prior schema — hit Build to generate one','info');
+      toast('No prior schema. Hit Build to generate one.','info');
       pushFeed('map','No existing entities. The schema is created during Build, then shown here for review.','amber');
     }else{
       renderEntities(entities);
@@ -764,7 +764,7 @@ function openReview(res){
   stagedFiles=res.files||[];
   stagedSel=null;
   pendingStagingDir=res.staging_dir||'';
-  $('reviewChange').textContent=res.change?('— "'+res.change+'"'):'';
+  $('reviewChange').textContent=res.change?(': "'+res.change+'"'):'';
   $('reviewCount').textContent='('+stagedFiles.length+')';
   if(!stagedFiles.length){
     $('diffList').innerHTML='<div class="feed-empty">No files changed. The evolve produced no diff against the current code.</div>';
@@ -796,7 +796,7 @@ function selectDiff(i){
   const f=stagedFiles[i];
   // Diff pane
   $('diffView').innerHTML='<div class="diff-text">'+renderHunks(f.hunks||'')+'</div>';
-  // Understanding pane — parse the STAGED file so you see post-change symbols.
+  // Understanding pane: parse the staged file so you see post-change symbols.
   loadStagedUnderstanding(f);
 }
 
@@ -870,7 +870,7 @@ function renderSnaps(snaps){
 }
 function renderRecent(snaps){
   const el=$('recentList');if(!el)return;
-  if(!snaps||!snaps.length){el.innerHTML='<div class="recent-empty">No snapshots yet — they appear here after your first build.</div>';return;}
+  if(!snaps||!snaps.length){el.innerHTML='<div class="recent-empty">No snapshots yet. They appear here after your first build.</div>';return;}
   el.innerHTML=snaps.slice(0,5).map(s=>`
     <div class="recent-item" onclick="setMode('gen')">
       <span class="ri-ico">◷</span>
@@ -903,7 +903,7 @@ async function cleanStart(){
   try{
     const res=await api('/api/clean',{method:'POST'});
     const removed=(res.removed||[]);
-    toast(removed.length?('Removed: '+removed.join(', ')):'Nothing to remove — already clean','ok');
+    toast(removed.length?('Removed: '+removed.join(', ')):'Nothing to remove. Already clean.','ok');
     entities=[];approved=new Set();renderEntities([]);
     refreshSnapshots();
     closeModal('exportModal');
@@ -926,7 +926,7 @@ async function browseDir(dir){
     browseRootPath=res.root;
     renderCrumbs(res.root,res.dir);
     expanded[res.dir]=res.entries||[];
-    $('rootTag').textContent=res.root?('— '+res.root):'';
+    $('rootTag').textContent=res.root?('('+res.root+')'):'';
     $('curPath').textContent=res.dir||'';
     renderTree(res.dir,res.parent);
   }catch(e){
@@ -1035,7 +1035,7 @@ async function loadSymbols(file){
     });
     if(!html){
       // Parsed fine but nothing indexable (common for copybooks / data-only files).
-      html=`<div class="feed-empty">Parsed as <b>${esc(res.language||'?')}</b> but no top-level symbols.<br>This is normal for copybooks and data-only files — their fields appear when included by a program.</div>`;
+      html=`<div class="feed-empty">Parsed as <b>${esc(res.language||'?')}</b> but no top-level symbols.<br>This is normal for copybooks and data-only files. Their fields appear when a program includes them.</div>`;
     }
     $('symList').innerHTML=html;
     toast(syms.length+' symbols'+(unk.length?', '+unk.length+' unknown':''),syms.length?'ok':'info');
@@ -1154,7 +1154,7 @@ async function sendCorrection(beliefID, correctedTo, note){
   try{
     await api('/api/present/beliefs/correct',{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({belief_id:beliefID, corrected_to:correctedTo, human_note:note})});
-    toast('Saved — survives re-parsing','ok');
+    toast('Saved. It survives re-parsing.','ok');
     // update local copy without full reload
     const b=_beliefs.find(x=>x.id===beliefID);
     if(b){b.human_verified=true;b.corrected_to=correctedTo;}
@@ -1180,7 +1180,7 @@ async function loadFlow(funcId,name){
   }catch(e){
     const msg=(e.message||'');
     if(msg.includes('not found in CFG')){
-      $('flowPane').innerHTML='<div class="feed-empty">No control-flow graph for this symbol.<br>CFGs are built for <b>functions/methods</b> — types, constants and imports don’t have one. Pick a function.</div>';
+      $('flowPane').innerHTML='<div class="feed-empty">No control-flow graph for this symbol.<br>CFGs are built for <b>functions/methods</b>. Types, constants and imports don’t have one. Pick a function.</div>';
     }else{
       $('flowPane').innerHTML='<div class="feed-empty">'+esc(msg)+'</div>';
     }

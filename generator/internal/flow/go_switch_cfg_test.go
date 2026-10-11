@@ -1,6 +1,6 @@
-// go_switch_cfg_test.go — v25.9: a Go `switch` must build as a MULTI-WAY CFG
+// go_switch_cfg_test.go (v25.9): a Go `switch` must build as a multi-way CFG
 // (one deciding block fanning out to a case-block per clause, all rejoining at a
-// shared merge) — NOT flattened into an if/else cascade.
+// shared merge), not flattened into an if/else cascade.
 //
 // The bug this pins: the Go frontend concatenated every case body into
 // NodeBranch.Children with no case values and no Else, so flow.Build's if/else

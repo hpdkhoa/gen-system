@@ -1,10 +1,10 @@
-// generator/internal/config/config.go — v23.21: central runtime configuration.
+// generator/internal/config/config.go (v23.21): central runtime configuration.
 //
 // WHAT: a tiny, dependency-free .env loader plus a place that documents every
 // runtime knob. WHY: the product is configured entirely through environment
 // variables (OLLAMA_MODEL_PLAN/_CODE, GEN_LOGIC, OLLAMA_HOST, timeouts, DB URL,
 // …). Spreading those across shell exports makes per-environment launches
-// (dev / staging / production) fragile. This package loads a .env file ONCE at
+// (dev / staging / production) fragile. This package loads a .env file once at
 // startup so a single file fully describes an environment, while preserving the
 // rule that a real, already-exported environment variable always wins (so CI or
 // an operator can override the file without editing it).
@@ -28,10 +28,10 @@ import (
 	"strings"
 )
 
-// Load reads a .env file and sets any variables it defines that are NOT already
+// Load reads a .env file and sets any variables it defines that are not already
 // present in the process environment. An explicit path wins; otherwise the file
 // is chosen from GEN_ENV (.env.<name>) or defaults to ./.env. A missing file is
-// not an error — the product runs fine on real env vars / defaults alone.
+// not an error. The product runs fine on real env vars / defaults alone.
 //
 // Returns the path actually loaded ("" if none) so the caller can report it.
 func Load(explicitPath string) (string, error) {
@@ -117,7 +117,7 @@ func parseLine(raw string) (string, string, bool) {
 
 // ── Documented knobs (read at their use sites via os.Getenv) ───────────────
 // This list is the single reference for what a .env may contain. The constants
-// are the variable NAMES, so callers and tests share one spelling.
+// are the variable names, so callers and tests share one spelling.
 const (
 	EnvLogic         = "GEN_LOGIC"         // "ollama" → live model logic; else templates
 	EnvModel         = "OLLAMA_MODEL"      // legacy single model (fallback for both roles)

@@ -1,9 +1,9 @@
-// cobol_frontend_v19_test.go — v19 tests for the feature-complete COBOL
+// cobol_frontend_v19_test.go: v19 tests for the feature-complete COBOL
 // frontend: EVALUATE, COPY books, REDEFINES, OCCURS, FILE-CONTROL/SELECT,
 // FD, COMP-3 and other USAGE clauses, expanded CICS verb surface.
 //
 // v19.6: assertions updated to use Node.ImportPath (was Node.Path) and
-// Node.RawSource (was Node.Tag) — Node has no Tag field. Field.Tag
+// Node.RawSource (was Node.Tag). Node has no Tag field. Field.Tag
 // assertions are unchanged because Field actually has a Tag.
 package ast
 
@@ -655,7 +655,7 @@ func keysOfBool(m map[string]bool) []string {
 	return out
 }
 
-// v23.41 — data statements (SUBTRACT/MOVE/…) must emit a NodeAssign so they
+// v23.41: data statements (SUBTRACT/MOVE/…) must emit a NodeAssign so they
 // appear in the CFG (previously they produced no node and were invisible).
 func TestCOBOL_DataStatementEmitsAssign_v2341(t *testing.T) {
 	src := `
@@ -696,7 +696,7 @@ func TestCOBOL_DataStatementEmitsAssign_v2341(t *testing.T) {
 	}
 }
 
-// v23.41 — EVALUATE keeps its selector, and each WHEN keeps its value, so the
+// v23.41: EVALUATE keeps its selector, and each WHEN keeps its value, so the
 // CFG can label the multi-way decision (was: bare "decision" with no condition).
 func TestCOBOL_EvaluateKeepsSelectorAndWhenValues_v2341(t *testing.T) {
 	m := parseCobolMust(t, evaluateSrc)
@@ -739,7 +739,7 @@ func TestCOBOL_EvaluateKeepsSelectorAndWhenValues_v2341(t *testing.T) {
 	}
 }
 
-// v23.43 — PERFORM ... UNTIL keeps its condition on the NodeLoop so the CFG
+// v23.43: PERFORM ... UNTIL keeps its condition on the NodeLoop so the CFG
 // loop-header decision shows the real test instead of a bare "decision".
 func TestCOBOL_PerformUntilKeepsCondition_v2343(t *testing.T) {
 	src := `
@@ -773,7 +773,7 @@ func TestCOBOL_PerformUntilKeepsCondition_v2343(t *testing.T) {
 	}
 }
 
-// v23.46 — IF bodies must NEST as children of the branch, not flat siblings.
+// v23.46: IF bodies must nest as children of the branch, not flat siblings.
 // Before this fix the CFG built empty then-blocks and pushed real statements
 // into the merge/exit (the "no End on branch" bug). Verify the nested shape.
 func TestCOBOL_IfBodyNests_v2346(t *testing.T) {
@@ -799,7 +799,7 @@ func TestCOBOL_IfBodyNests_v2346(t *testing.T) {
 	if para == nil {
 		t.Fatal("APPLY-DEBIT not found")
 	}
-	// paragraph should have: SUBTRACT (assign) + outer IF (branch). NOT the
+	// paragraph should have: SUBTRACT (assign) + outer IF (branch). Not the
 	// PERFORM as a flat sibling.
 	var outerIf *Node
 	var flatPerform bool
@@ -839,8 +839,8 @@ func TestCOBOL_IfBodyNests_v2346(t *testing.T) {
 	}
 }
 
-// v23.47 — PERFORM <para> UNTIL <cond> must nest the paragraph call as the loop
-// BODY (was: loop and call emitted as siblings → empty "until" diamond).
+// v23.47: PERFORM <para> UNTIL <cond> must nest the paragraph call as the loop
+// body (was: loop and call emitted as siblings → empty "until" diamond).
 func TestCOBOL_PerformParaUntilNestsCall_v2347(t *testing.T) {
 	src := `
        IDENTIFICATION DIVISION.
@@ -882,7 +882,7 @@ func TestCOBOL_PerformParaUntilNestsCall_v2347(t *testing.T) {
 	}
 }
 
-// v23.47 — EXEC CICS statements inside IF/ELSE must nest into the branch, not
+// v23.47: EXEC CICS statements inside IF/ELSE must nest into the branch, not
 // collapse onto the paragraph (was: both arms' EXEC landed outside the IF).
 func TestCOBOL_ExecInIfElseNests_v2347(t *testing.T) {
 	src := `

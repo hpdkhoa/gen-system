@@ -1,4 +1,4 @@
-// generator/internal/agent/executor_write_v2658_test.go — v26.58 (D029): the
+// generator/internal/agent/executor_write_v2658_test.go, v26.58 (D029): the
 // engine write helpers dropped every file system error and the exported
 // generators returned nothing, so a generate task whose files could not be
 // written still counted as a success. With a regular file named backend in the

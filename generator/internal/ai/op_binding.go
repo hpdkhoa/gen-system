@@ -1,12 +1,12 @@
-// generator/internal/ai/op_binding.go — v23.25 (task B): added OpMisplaced +
-// opVerb — a conservative negative post-filter the engine applies after
+// generator/internal/ai/op_binding.go, v23.25 (task B): added OpMisplaced +
+// opVerb, a conservative negative post-filter the engine applies after
 // generation to drop an op confidently bound to a different entity. Pairs with
 // the original v23.24 positive-hint binding below.
-// generator/internal/ai/op_binding.go — v23.24 (op-misplacement fix): a
+// generator/internal/ai/op_binding.go, v23.24 (op-misplacement fix): a
 // deterministic pass over the idea text that figures out which operation
 // phrases most likely belong to a given entity, so the logic prompt can give a
-// POSITIVE hint ("operations likely on THIS entity: …") instead of only
-// forbidding wrong ones. This addresses the failure where Product received NO
+// positive hint ("operations likely on THIS entity: …") instead of only
+// forbidding wrong ones. This addresses the failure where Product received no
 // operations because the prompt was purely prohibitive and the model
 // over-corrected to an empty list.
 //
@@ -223,11 +223,11 @@ func appendUniqueCI(s []string, v string) []string {
 }
 
 // OpMisplaced reports whether an operation named opName, generated on entity
-// `target`, is confidently bound to a DIFFERENT entity by the idea text — i.e.
-// the verb that opName derives from appears in the idea next to another
-// entity's keyword and NOT next to target's. It is deliberately conservative:
+// `target`, is confidently bound to a different entity by the idea text. That
+// is, the verb that opName derives from appears in the idea next to another
+// entity's keyword and not next to target's. It is deliberately conservative:
 // it returns true only when (a) the op's verb is found in the idea, (b) that
-// verb binds to some entity, and (c) that entity is not target AND target is
+// verb binds to some entity, and (c) that entity is not target and target is
 // not also a plausible owner of the same verb. On any ambiguity it returns
 // false (keep the op), so it acts only as a backstop. No model call.
 //
@@ -258,7 +258,7 @@ func OpMisplaced(idea, target string, opName string, all []schema.Entity) bool {
 	if ownsVerb(target) {
 		return false
 	}
-	// Otherwise, drop only if exactly one OTHER entity clearly owns it.
+	// Otherwise, drop only if exactly one other entity clearly owns it.
 	owner := ""
 	for _, e := range all {
 		if strings.EqualFold(e.Name, target) {
@@ -266,7 +266,7 @@ func OpMisplaced(idea, target string, opName string, all []schema.Entity) bool {
 		}
 		if ownsVerb(e.Name) {
 			if owner != "" {
-				return false // two owners — ambiguous, keep
+				return false // two owners: ambiguous, keep
 			}
 			owner = e.Name
 		}

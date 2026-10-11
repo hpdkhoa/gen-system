@@ -6,8 +6,8 @@
 // the shared CFG builder (flow.Build non-Go path) and the symbol index
 // (extractCallEdges over NodeCall.Callee) work on Java exactly as they do for
 // COBOL/TS/Py. Hard cases (annotations, generics with wildcards, lambdas,
-// method refs, inner/anonymous classes) are pushed to NodeUnknown first — the
-// IR's explicit-ignorance channel — rather than guessed at.
+// method refs, inner/anonymous classes) are pushed to NodeUnknown first (the
+// IR's explicit-ignorance channel) rather than guessed at.
 package ast
 
 import (
@@ -18,7 +18,7 @@ import (
 
 // LangJava is the canonical language identifier for Java source.
 // Declared here (package-level const) to mirror LangCOBOL in cobol_frontend.go;
-// it is intentionally NOT in multi.go's const block.
+// it is intentionally not in multi.go's const block.
 const LangJava Language = "java"
 
 // JavaFrontend implements Frontend for Java 17 source files.
@@ -29,7 +29,7 @@ func (j *JavaFrontend) Language() Language   { return LangJava }
 func (j *JavaFrontend) Extensions() []string { return []string{".java"} }
 func (j *JavaFrontend) Available() bool      { return true } // pure Go
 
-// Emit returns source unchanged — Java reformatting is out of scope, and the
+// Emit returns source unchanged. Java reformatting is out of scope, and the
 // lossless contract is satisfied by returning the original bytes (like COBOL).
 func (j *JavaFrontend) Emit(module *Module) ([]byte, error) {
 	return module.RawSource, nil
@@ -40,8 +40,8 @@ func (j *JavaFrontend) Emit(module *Module) ([]byte, error) {
 //
 // Java's grammar is brace-delimited, so a token stream that correctly skips
 // comments and string/char/text-block literals (so braces inside them don't
-// throw off depth tracking) gets us most of the way. We DON'T build a full
-// Java AST — we identify declaration headers and statement keywords, and track
+// throw off depth tracking) gets us most of the way. We don't build a full
+// Java AST. We identify declaration headers and statement keywords, and track
 // brace depth to delimit bodies. Anything we can't classify becomes NodeUnknown.
 // ─────────────────────────────────────────────────────────────
 
@@ -216,8 +216,8 @@ func isJavaNumberPart(c byte) bool {
 // declaration headers (class/interface/enum/record, methods, fields) by their
 // shape, and inside method bodies we recognise statement keywords (if/for/
 // while/do/switch/return/try) and method-call expressions. Anything that
-// doesn't fit a recognised shape becomes a NodeUnknown carrying the raw text —
-// the IR's explicit-ignorance channel — so nothing is silently dropped.
+// doesn't fit a recognised shape becomes a NodeUnknown carrying the raw text
+// (the IR's explicit-ignorance channel), so nothing is silently dropped.
 // ─────────────────────────────────────────────────────────────
 
 type javaParser struct {
@@ -282,7 +282,7 @@ func (p *javaParser) isKeyword(s string) bool {
 }
 
 // skipBalanced consumes from an opening delimiter through its matching close,
-// assuming the opener has NOT yet been consumed. Used to skip annotation
+// assuming the opener has not yet been consumed. Used to skip annotation
 // argument lists, generic argument lists, and parameter lists wholesale.
 func (p *javaParser) skipBalanced(open, close string) {
 	if !p.isPunct(open) {
@@ -316,7 +316,7 @@ var javaModifiers = map[string]bool{
 // precede a declaration. Annotations are recorded by name so Spring stereotypes
 // (@RestController, @Autowired, @RequestMapping, …) are captured into the
 // declaration's DocComment for the human-review layer, but their argument lists
-// are skipped (pushed past, not interpreted — the NodeUnknown-first discipline).
+// are skipped (pushed past, not interpreted: the NodeUnknown-first discipline).
 type javaMods struct {
 	names       map[string]bool
 	annotations []string
@@ -378,7 +378,7 @@ func (p *javaParser) parseFile() {
 			} else if p.eof() {
 				return
 			} else {
-				// Unrecognised top-level construct — record and resync to the
+				// Unrecognised top-level construct: record and resync to the
 				// next ; or } so we never spin.
 				p.recordUnknownStmt(nil, "unrecognised top-level construct")
 			}
@@ -472,7 +472,7 @@ func (p *javaParser) atTypeKeyword() bool {
 func (p *javaParser) parseTypeDecl(mods javaMods, parent *Node) {
 	startLine := p.cur().line
 
-	// Annotation-type: @interface — capture as interface, push specifics to Unknown.
+	// Annotation-type @interface: capture as interface, push specifics to Unknown.
 	if p.isPunct("@") {
 		p.advance() // @
 	}
@@ -570,7 +570,7 @@ func (p *javaParser) parseTypeDecl(mods javaMods, parent *Node) {
 }
 
 // collectTypeParamNames reads <A, B extends C, ?> and returns the simple names
-// (A, B). Bounded wildcards and complex bounds are not modelled — the names are
+// (A, B). Bounded wildcards and complex bounds are not modelled. The names are
 // enough for the symbol layer; the rest is intentionally not interpreted.
 func (p *javaParser) collectTypeParamNames() []string {
 	var names []string
@@ -667,15 +667,15 @@ func (p *javaParser) parseRecordComponents() []Field {
 // ─── type body: members ──────────────────────────────────────
 
 // parseTypeBody consumes a { ... } body, dispatching each member to a field,
-// method, nested type, or — for enums — the leading constant list. Assumes the
-// opening { has NOT been consumed.
+// method, nested type, or (for enums) the leading constant list. Assumes the
+// opening { has not been consumed.
 func (p *javaParser) parseTypeBody(owner *Node) {
 	if !p.isPunct("{") {
 		return
 	}
 	p.advance() // {
 
-	// Enum constants come first, before any ; — capture them as EnumMembers.
+	// Enum constants come first, before any ;. Capture them as EnumMembers.
 	if owner.Kind == NodeEnum {
 		p.parseEnumConstants(owner)
 	}
@@ -733,7 +733,7 @@ func (p *javaParser) parseEnumConstants(owner *Node) {
 		if p.isPunct("}") || p.eof() {
 			return
 		}
-		// anything unexpected — bail to member loop
+		// anything unexpected: bail to member loop
 		return
 	}
 }
@@ -750,7 +750,7 @@ func (p *javaParser) parseFieldOrMethod(owner *Node, mods javaMods) {
 	}
 
 	// Read a leading type (return type or field type) and then a name. For a
-	// constructor there is no separate return type — the first identifier is the
+	// constructor there is no separate return type. The first identifier is the
 	// name and ( follows immediately.
 	firstName := p.collectTypeRefName()
 	secondName := ""
@@ -848,7 +848,7 @@ func (p *javaParser) parseParamList() []Parameter {
 		typeName := p.collectTypeRefName()
 		variadic := false
 		if p.isPunct(".") && p.peek(1).kind == jtPunct && p.peek(1).text == "." {
-			// varargs ... — three dots lexed as separate '.'
+			// varargs ...: three dots lexed as separate '.'
 			for p.isPunct(".") {
 				p.advance()
 			}
@@ -879,12 +879,12 @@ func (p *javaParser) parseParamList() []Parameter {
 //
 // We emit the structural nodes the shared (non-Go) CFG builder understands:
 // NodeBranch (with Else), NodeLoop, NodeReturn, NodeTry, and NodeCall. We do
-// NOT attempt full expression parsing — a statement contributes NodeCall
+// not attempt full expression parsing. A statement contributes NodeCall
 // children for the method invocations it textually contains (callee = the
 // identifier before a '('), which is exactly what the symbol index needs to
 // build the call graph. Unrecognised constructs become NodeUnknown.
 
-// parseMethodBody assumes the opening { has NOT been consumed.
+// parseMethodBody assumes the opening { has not been consumed.
 func (p *javaParser) parseMethodBody(method *Node) {
 	if !p.isPunct("{") {
 		return
@@ -940,7 +940,7 @@ func (p *javaParser) parseStatement(host *Node) {
 			p.parseTry(host, t.line)
 			return
 		case "throw":
-			// throw expr; — capture as a return-like terminator with its calls.
+			// throw expr;: capture as a return-like terminator with its calls.
 			line := t.line
 			p.advance()
 			calls := p.collectStatementCalls()
@@ -950,7 +950,7 @@ func (p *javaParser) parseStatement(host *Node) {
 			host.Children = append(host.Children, node)
 			return
 		case "synchronized":
-			// synchronized (x) { ... } — descend into the block.
+			// synchronized (x) { ... }: descend into the block.
 			p.advance()
 			if p.isPunct("(") {
 				p.skipBalanced("(", ")")
@@ -967,7 +967,7 @@ func (p *javaParser) parseStatement(host *Node) {
 	}
 
 	// Lambda or method reference somewhere in the statement → push to Unknown so
-	// it's surfaced rather than mis-modelled, BUT still harvest calls so the
+	// it's surfaced rather than mis-modelled, but still harvest calls so the
 	// call graph stays useful.
 	if p.statementHasLambda() {
 		line := t.line
@@ -984,10 +984,10 @@ func (p *javaParser) parseStatement(host *Node) {
 	}
 
 	// Generic expression / local-variable / assignment statement. v24: harvest
-	// its calls AND, if it produced none (e.g. a plain "this.inv = inv;" in a
+	// its calls and, if it produced none (e.g. a plain "this.inv = inv;" in a
 	// constructor), still emit a NodeAssign carrying the statement's source line
 	// so the CFG shows the real work instead of collapsing to Start→End. The
-	// presentation layer reads the source line via Span, so we just need a node
+	// presentation layer reads the source line via Span, so we only need a node
 	// anchored at the right line.
 	stmtLine := t.line
 	calls := p.collectStatementCalls()
@@ -1087,7 +1087,7 @@ func (p *javaParser) parseSwitch(host *Node, line int) {
 
 func (p *javaParser) parseReturn(host *Node, line int) {
 	p.advance() // return
-	// return switch (...) { ... };  → switch EXPRESSION; emit the branch.
+	// return switch (...) { ... };  → switch expression; emit the branch.
 	if p.isKeyword("switch") {
 		p.parseSwitch(host, line)
 		// consume a trailing ';' if present
@@ -1183,7 +1183,7 @@ func (p *javaParser) collectParenCalls() []*Node {
 	return calls
 }
 
-// collectParenCallsWithText is collectParenCalls plus the raw condition TEXT
+// collectParenCallsWithText is collectParenCalls plus the raw condition text
 // between the outer parens (v24). parseIf/parseLoop discarded the condition text,
 // so the CFG's NodeBranch/NodeLoop had an empty RawSource → the renderer showed
 // the literal word "decision" instead of e.g. "have < qty" or
@@ -1257,7 +1257,7 @@ func (p *javaParser) harvestCallAt(calls *[]*Node) {
 // statementHasLambda peeks ahead (bounded) to see if the current statement, up
 // to its terminating ; at paren/brace depth 0, contains a lambda arrow '->'.
 // v24: a bare method reference '::' (e.g. Integer::sum passed as an argument to a
-// normal call like stock.merge(sku, qty, Integer::sum)) does NOT count — it is a
+// normal call like stock.merge(sku, qty, Integer::sum)) does not count. It is a
 // callable argument, not a statement-dominating lambda. Treating '::' as a lambda
 // here was pushing perfectly ordinary statements to NodeUnknown and hiding their
 // real call (the "stock.merge missing" bug).

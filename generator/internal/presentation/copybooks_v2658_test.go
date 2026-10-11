@@ -1,4 +1,4 @@
-// copybooks_v2658_test.go — v26.58 (D082): SetRoot stored the whole
+// copybooks_v2658_test.go (v26.58, D082): SetRoot stored the whole
 // --copybooks text as one folder path. With two folders in the list, the on
 // demand COBOL parse in handleSymbols searched one folder named by the whole
 // list, so every COPY stayed unresolved and the copybook symbols were missing.

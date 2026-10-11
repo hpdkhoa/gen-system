@@ -1,20 +1,20 @@
-// generator/internal/enrich/enrich.go — v26.10 (session 4): the enrich-eval tier.
+// generator/internal/enrich/enrich.go (v26.10, session 4): the enrich-eval tier.
 //
-// This package is the CONCRETE, LLM-backed implementation of belief.Enricher. It
+// This package is the concrete, LLM-backed implementation of belief.Enricher. It
 // reads a routine's parser facts (and body when available) and asks a local Ollama
-// model to describe, in plain language a human can verify, what the routine DOES —
+// model to describe, in plain language a human can verify, what the routine does:
 // the action / computation / precondition beliefs the deterministic parser cannot
-// honestly produce.
+// derive from the syntax alone.
 //
 // BOUNDARY: this package imports internal/ai (which spawns the model) and is wired
-// ONLY by generation-side binaries (gen, gen-server). understand-server must NEVER
-// import it — that keeps the air-gapped enterprise binary free of the AI stack and
+// only by generation-side binaries (gen, gen-server). understand-server must never
+// import it. That keeps the air-gapped enterprise binary free of the AI stack and
 // of any subprocess/network path, exactly as the project's hard constraints require.
-// The belief store depends on the belief.Enricher INTERFACE, not on this package,
+// The belief store depends on the belief.Enricher interface, not on this package,
 // so the store itself stays LLM-free and importable by understand-server.
 //
 // GRACEFUL ABSENCE: if Ollama is unreachable, Enrich returns an error, which the
-// belief store treats as "no enrich beliefs" — parser-eval + human-eval continue
+// belief store treats as "no enrich beliefs", and parser-eval + human-eval continue
 // to work. Nothing here is required for the store to function.
 package enrich
 
@@ -67,7 +67,7 @@ type enrichResponse struct {
 // Enrich implements belief.Enricher. It builds a prompt from the parser facts,
 // asks the local model for behavioral observations, and maps them back to
 // enrich-tier beliefs. Any failure (no model, bad JSON) yields (nil, err) and the
-// store simply skips enrichment for this routine.
+// store skips enrichment for this routine.
 func (e *Enricher) Enrich(fact belief.EnrichFact) ([]belief.EnrichBelief, error) {
 	prompt := e.buildPrompt(fact)
 	raw, err := ai.AskLLMJSON(prompt, ai.ModelFor(ai.RolePlan), enrichSchema)
@@ -121,7 +121,7 @@ func (e *Enricher) buildPrompt(fact belief.EnrichFact) string {
 	sb.WriteString("verify every line you write against the code, so accuracy matters far more ")
 	sb.WriteString("than completeness: a missing observation is fine, a WRONG one is not.\n\n")
 
-	// ESTABLISHED FACTS — presented as authoritative constraints the model must
+	// ESTABLISHED FACTS: the prompt presents them as authoritative constraints the model must
 	// build on, not as background. This is the prevention half of the trust model:
 	// anchoring the description to what the parser proved reduces hallucination at
 	// the source, before the post-hoc validation gate ever runs.
@@ -206,12 +206,12 @@ type RunResult struct {
 	SaveErrors int
 }
 
-// Run is the INDEPENDENT PRODUCER entry point. It enriches each routine with the
+// Run is the independent producer entry point. It enriches each routine with the
 // local model and writes the results into the belief store as persistent enrich
 // beliefs (surviving future parser rebuilds, fingerprinted against the source).
 // It is deliberately decoupled: the caller loads the project and supplies the
 // routines, so this package never imports internal/context. Best-effort per
-// routine — a model failure on one skips it and continues.
+// routine: a model failure on one routine skips it and the run continues.
 func (e *Enricher) Run(store *belief.Store, routines []Routine) RunResult {
 	var res RunResult
 	for _, r := range routines {
@@ -315,7 +315,7 @@ var summarySchema = json.RawMessage(`{
 
 // Available reports whether the local model responds. Cheap best-effort probe the
 // generation binaries can call before wiring the enricher; a false result means
-// the store should run parser-eval only. Never errors — returns a bool.
+// the store should run parser-eval only. It never errors; it returns a bool.
 func Available() bool {
 	_, err := ai.AskLLMWithModelRaw("ping: reply with the single word ok", ai.ModelFor(ai.RolePlan))
 	return err == nil

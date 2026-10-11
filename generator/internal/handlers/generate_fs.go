@@ -1,7 +1,7 @@
-// generate_fs.go — v25.6: output-folder picker + generated-file browser for the
+// generate_fs.go (v25.6): output-folder picker + generated-file browser for the
 // three-pane generate.html.
 //
-// Endpoints (gen-server generation surface ONLY — never mounted on
+// Endpoints (gen-server generation surface only; never mounted on
 // understand-server, so the air-gapped enterprise binary keeps zero generation
 // routes):
 //
@@ -65,7 +65,7 @@ func withinBase(base, abs string) bool {
 	return true
 }
 
-// GenerateBase handles GET /api/generate/base — the base + root for the UI so it
+// GenerateBase handles GET /api/generate/base: the base + root for the UI so it
 // can explain the boundary and disable the picker when no base is set.
 func (h *Handlers) GenerateBase(w http.ResponseWriter, r *http.Request) {
 	base, root, ok := h.baseAndRoot()
@@ -76,7 +76,7 @@ func (h *Handlers) GenerateBase(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// GenerateOutdirs handles GET /api/generate/outdirs — immediate subdirectories of
+// GenerateOutdirs handles GET /api/generate/outdirs: immediate subdirectories of
 // the base, each flagged so the UI can show which are empty / already generated /
 // the current root (which is not selectable).
 func (h *Handlers) GenerateOutdirs(w http.ResponseWriter, r *http.Request) {
@@ -118,7 +118,7 @@ func (h *Handlers) GenerateOutdirs(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, map[string]interface{}{"base": base, "root": root, "dirs": dirs})
 }
 
-// GenerateMkdir handles POST /api/generate/mkdir {name} — create a new folder
+// GenerateMkdir handles POST /api/generate/mkdir {name}: create a new folder
 // directly under the base (single path segment, no separators). Returns the
 // created absolute path.
 func (h *Handlers) GenerateMkdir(w http.ResponseWriter, r *http.Request) {
@@ -143,7 +143,7 @@ func (h *Handlers) GenerateMkdir(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "folder name required", 400)
 		return
 	}
-	// Single clean segment only — no separators, no traversal, no dotfiles.
+	// Single clean segment only: no separators, no traversal, no dotfiles.
 	if strings.ContainsAny(name, `/\`) || name == "." || name == ".." || strings.HasPrefix(name, ".") {
 		http.Error(w, "folder name must be a simple name (no slashes, no leading dot)", 400)
 		return
@@ -172,7 +172,7 @@ type treeNode struct {
 	Children []treeNode `json:"children,omitempty"`
 }
 
-// GenerateTree handles GET /api/generate/tree?dir= — the file tree of a generated
+// GenerateTree handles GET /api/generate/tree?dir=: the file tree of a generated
 // output folder, bounded to the base. Skips heavy/noise dirs.
 func (h *Handlers) GenerateTree(w http.ResponseWriter, r *http.Request) {
 	base, _, ok := h.baseAndRoot()
@@ -235,7 +235,7 @@ func buildTree(abs string, depth int) treeNode {
 	return node
 }
 
-// GenerateFile handles GET /api/generate/file?path= — read one text file, bounded
+// GenerateFile handles GET /api/generate/file?path=: read one text file, bounded
 // to the base and capped in size. Returns {path, content, truncated}.
 func (h *Handlers) GenerateFile(w http.ResponseWriter, r *http.Request) {
 	base, _, ok := h.baseAndRoot()

@@ -1,5 +1,5 @@
-// generator/internal/agent/target_resolve_test.go — v23.15: locks in the heal
-// target-file resolution against the generator's REAL filename conventions, so a
+// generator/internal/agent/target_resolve_test.go (v23.15): locks in the heal
+// target-file resolution against the generator's real filename conventions, so a
 // future change can't silently reintroduce the casing/dir mismatch that made
 // every handler/validation self-heal fail with "no such file or directory".
 package agent
@@ -86,17 +86,17 @@ func TestPruneOrphanEntityFiles(t *testing.T) {
 		"backend/internal/model/stock.go",
 		"backend/internal/store/user.go",
 		"backend/internal/store/stock.go",
-		"backend/internal/store/interfaces.go", // shared — must survive
+		"backend/internal/store/interfaces.go", // shared: must survive
 		"backend/internal/service/user_service.go",
 		"backend/internal/service/user_service_test.go",
 		"backend/internal/service/stock_service.go",
 		"backend/internal/handler/User_handler.go",
 		"backend/internal/handler/User_handler_test.go",
 		"backend/internal/handler/User_service_handler.go",
-		"backend/internal/handler/handler.go", // shared — must survive
+		"backend/internal/handler/handler.go", // shared: must survive
 		"backend/internal/validation/User_validation.go",
-		"backend/internal/validation/require.go", // shared — must survive
-		"backend/main.go",                        // shared — must survive
+		"backend/internal/validation/require.go", // shared: must survive
+		"backend/main.go",                        // shared: must survive
 	} {
 		writeEmpty(t, filepath.Join(root, rel))
 	}

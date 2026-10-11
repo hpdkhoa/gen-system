@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 #
-# build.sh — build gen-system. Two products from one tree.
+# build.sh: build gen-system. Two products from one tree.
 #
 # Modes:
 #   ./build.sh                 default = --internal (everything)
 #   ./build.sh --understand    ENTERPRISE: build only understand-server + genbench,
 #                              then run the architecture boundary test that proves
-#                              the enterprise binary links NO generation/model code.
+#                              the enterprise binary links no generation/model code.
 #   ./build.sh --internal      FULL: gen + gen-server + understand-server (+ vet)
 #
 # Flags (any mode):
@@ -104,7 +104,7 @@ fi
 echo "→ go vet ./generator/… (should be silent)"
 if go vet ./generator/... ; then echo "  vet clean."; else echo "  ⚠ vet reported issues above."; fi
 
-# ── enterprise guarantee: prove no generation/model code is linked ───
+# ── enterprise check: prove no generation/model code is linked ───
 if [[ "$MODE" == "understand" ]]; then
   echo "→ Architecture guardrail: understand-server must link NO generation/model code…"
   if go test ./generator/internal/archtest/ -run TestUnderstandServerHasNoGenDeps ; then

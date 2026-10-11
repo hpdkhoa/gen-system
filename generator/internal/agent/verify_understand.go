@@ -1,30 +1,30 @@
-// verify_understand.go — v25.5 (step 2): the Understand track validates the
+// verify_understand.go, v25.5 (step 2): the Understand track validates the
 // Generate track's output.
 //
 // After the Go compile/vet/test loop passes, this runs the generated backend
-// through gen-system's OWN comprehension engine (context.LoadContext) and asserts
+// through gen-system's own comprehension engine (context.LoadContext) and asserts
 // properties `go build` cannot see:
 //
-//  1. RESOLUTION — every call in the generated code resolves to a real symbol.
-//     go build already guarantees this for Go, but the NUMBER is the first real
+//  1. RESOLUTION: every call in the generated code resolves to a real symbol.
+//     go build already guarantees this for Go, but the number is the first real
 //     internal benchmark and the identical check that matters for non-Go source.
-//  2. ORPHAN OPERATIONS — a handler/test references a service method that is not
+//  2. ORPHAN OPERATIONS: a handler/test references a service method that is not
 //     in the index (the v23.24 "continue dropped Checkout" class of bug, caught
 //     structurally rather than after it ships).
-//  3. EFFECT SANITY — a read-only operation (Get/List/Find/…) whose inferred
+//  3. EFFECT SANITY: a read-only operation (Get/List/Find/…) whose inferred
 //     effects include a DB write is a semantic bug go build waves through.
 //
 // GATING. VerifyMode controls what happens on a finding:
 //   - VerifyOff (default when RunFromPlan is called directly): skip entirely.
-//   - VerifyStop: report findings, DO NOT modify anything, return them so the
+//   - VerifyStop: report findings, do not modify anything, return them so the
 //     caller can leave staged output for human review + write a findings report.
 //   - VerifyAutofix: route each fixable finding through the existing repair loop
 //     (dispatchRepairs), then re-report.
 //
-// Both modes ALWAYS report to the human (emit + structured record), so a human
-// sees the findings before the system acts on beliefs. That is a hard constraint.
+// Both modes always report to the human (emit + structured record), so a human
+// sees the findings before the system acts on them. That is a hard constraint.
 //
-// BOUNDARY. This lives in the agent (generation) package and uses agentctx —
+// BOUNDARY. This lives in the agent (generation) package and uses agentctx,
 // which agent already imports. understand-server never links agent, so the
 // archtest boundary is unaffected.
 package agent
@@ -68,7 +68,7 @@ func VerifyHalted() bool { return verifyHalted }
 // "" / "off" → Off; "stop" → Stop; "autofix"/"heal" → Autofix.
 //
 // v26.58 (D021): an unknown word used to give VerifyOff with no message, so a
-// typo such as "sotp" turned the gate off while the user believed it ran. Off
+// typo such as "sotp" turned the gate off while the user thought it ran. Off
 // is now named explicitly and every other word is an error the CLI reports.
 func ParseVerifyMode(s string) (VerifyMode, error) {
 	switch strings.ToLower(strings.TrimSpace(s)) {
@@ -94,7 +94,7 @@ type VerifyFinding struct {
 // VerifyReport is the full result of one Understand validation pass.
 //
 // v26.34: the population is split the way bench/resolution.go splits it.
-// TotalEdges counts INTERNAL edges only: calls from a project caller to a
+// TotalEdges counts internal edges only: calls from a project caller to a
 // name some project symbol defines. ExternalEdges counts calls to names no
 // project symbol defines (stdlib, third party, methods on stdlib types),
 // whether or not the stdlib pass resolved them. LiteralEdges counts anonymous
@@ -118,7 +118,7 @@ func (r VerifyReport) ResolutionPct() float64 {
 }
 
 // readOpPrefixes are the operation-name prefixes treated as read-only. A method
-// whose name starts with one of these should NOT carry a DB-write effect. Mirrors
+// whose name starts with one of these should not carry a DB-write effect. Mirrors
 // the read-detection used when forcing POST vs GET in service_logic.
 var readOpPrefixes = []string{"get", "list", "find", "fetch", "search", "query", "view"}
 
@@ -132,7 +132,7 @@ func runUnderstandVerify(backendPath string) VerifyReport {
 		return rep
 	}
 
-	// ── Check 1: resolution recall over INTERNAL project call edges ──
+	// ── Check 1: resolution recall over internal project call edges ──
 	//
 	// v26.34: before this, every call from a project function counted, and a
 	// callee was "a project defect" unless it was one of 16 builtin names. On a
@@ -140,7 +140,7 @@ func runUnderstandVerify(backendPath string) VerifyReport {
 	// (errors.New, http.Error, t.Fatalf, s.mu.Lock) reported as unresolved
 	// project symbols, an 18.5 percent "recall", and a halt in stop mode over
 	// nothing. The rule is now the benchmark's: an edge is internal when its
-	// bare callee name is one some PROJECT symbol defines. Everything else is
+	// bare callee name is one some project symbol defines. Everything else is
 	// external and is counted, not reported. A dropped service operation is
 	// still caught: by the orphan check below, and by the compile gate before
 	// it. The known limit: a call to a project receiver's method that no
@@ -149,7 +149,7 @@ func runUnderstandVerify(backendPath string) VerifyReport {
 	edges := uctx.Index.AllCallEdges()
 	for _, e := range edges {
 		// Gate on caller provenance so the number stays project-only (the same
-		// honesty rule the stdlib metric uses).
+		// provenance rule the stdlib metric uses).
 		caller, ok := uctx.Index.ByID(e.CallerID)
 		if ok && caller.Provenance != symbols.ProvProject {
 			continue
@@ -179,7 +179,7 @@ func runUnderstandVerify(backendPath string) VerifyReport {
 		}
 	}
 
-	// ── Check 2: orphan operations — a service method referenced but absent ──
+	// ── Check 2: orphan operations: a service method referenced but absent ──
 	// Build the set of defined service method names, then look for references to
 	// <Entity>Service.<Op> whose target is not defined. We approximate via the
 	// index: any call whose CalleeName matches a *Service method shape but has no
@@ -205,12 +205,12 @@ func runUnderstandVerify(backendPath string) VerifyReport {
 				Kind:   "orphan",
 				Symbol: e.CalleeName,
 				File:   file,
-				Detail: fmt.Sprintf("service operation %q is referenced but not defined — a prior op may have been dropped", e.CalleeName),
+				Detail: fmt.Sprintf("service operation %q is referenced but not defined; an earlier step may have dropped the op", e.CalleeName),
 			})
 		}
 	}
 
-	// ── Check 3: effect sanity — a read-op that writes to the DB ──
+	// ── Check 3: effect sanity: a read-op that writes to the DB ──
 	for _, s := range uctx.Index.AllSymbols() {
 		if s.Kind != symbols.SymMethod || s.Provenance != symbols.ProvProject {
 			continue
@@ -230,7 +230,7 @@ func runUnderstandVerify(backendPath string) VerifyReport {
 				Kind:   "effect",
 				Symbol: s.ReceiverType + "." + s.Name,
 				File:   s.DefinedIn,
-				Detail: fmt.Sprintf("read-style operation %s.%s has an inferred DB-WRITE effect — a read should not mutate", s.ReceiverType, s.Name),
+				Detail: fmt.Sprintf("read-style operation %s.%s has an inferred DB-WRITE effect; a read should not mutate", s.ReceiverType, s.Name),
 			})
 		}
 	}
@@ -258,13 +258,13 @@ func isReadOpName(name string) bool {
 
 // runVerifyStage runs the Understand pass (when enabled) and acts on it per
 // VerifyUnderstandMode. Returns the report (nil-safe) and whether generation
-// should HALT for human review (VerifyStop with findings). Called from
+// should halt for human review (VerifyStop with findings). Called from
 // RunFromPlan after the validation loop.
 func runVerifyStage(backendPath, rootPath string, ctx agentctx.Context) (VerifyReport, bool) {
 	if VerifyUnderstandMode == VerifyOff {
 		return VerifyReport{}, false
 	}
-	emit("verify", "\n🔎 Understand pass — validating generated output through the comprehension engine...\n")
+	emit("verify", "\n🔎 Understand pass: checking the generated output with the Understand engine...\n")
 	rep := runUnderstandVerify(backendPath)
 
 	emit("verify", fmt.Sprintf("  [verify] resolution: %.1f%% (%d/%d internal call edges resolved; %d external, %d literal excluded)\n",
@@ -273,7 +273,7 @@ func runVerifyStage(backendPath, rootPath string, ctx agentctx.Context) (VerifyR
 		rep.ResolutionPct(), rep.ResolvedEdges, rep.TotalEdges, len(rep.Findings)))
 
 	if len(rep.Findings) == 0 {
-		emit("verify", "  [verify] ✅ no structural findings — generated output is internally consistent\n")
+		emit("verify", "  [verify] ✅ no structural findings; the generated output is internally consistent\n")
 		return rep, false
 	}
 
@@ -284,7 +284,7 @@ func runVerifyStage(backendPath, rootPath string, ctx agentctx.Context) (VerifyR
 
 	switch VerifyUnderstandMode {
 	case VerifyAutofix:
-		emit("verify", "  [verify] autofix mode — routing fixable findings to the repair loop\n")
+		emit("verify", "  [verify] autofix mode: fixable findings go to the repair loop\n")
 		var files []string
 		var evidence strings.Builder
 		seen := map[string]bool{}
@@ -306,7 +306,7 @@ func runVerifyStage(backendPath, rootPath string, ctx agentctx.Context) (VerifyR
 		recordLifecycle("verify", fmt.Sprintf("autofix done: %d→%d findings", len(rep.Findings), len(after.Findings)))
 		return after, false
 	default: // VerifyStop
-		emit("verify", fmt.Sprintf("  [verify] ⛔ stop mode — %d finding(s); leaving output for human review\n", len(rep.Findings)))
+		emit("verify", fmt.Sprintf("  [verify] ⛔ stop mode: %d finding(s); leaving the output for human review\n", len(rep.Findings)))
 		recordLifecycle("verify", "stop mode: halted for human review")
 		return rep, true
 	}
@@ -317,13 +317,13 @@ func runVerifyStage(backendPath, rootPath string, ctx agentctx.Context) (VerifyR
 // artifact alongside the .evolve-review directory.
 func WriteFindingsReport(rep VerifyReport) string {
 	var b strings.Builder
-	fmt.Fprintf(&b, "gen-system — Understand verification findings\n")
+	fmt.Fprintf(&b, "gen-system: Understand verification findings\n")
 	fmt.Fprintf(&b, "=============================================\n\n")
 	fmt.Fprintf(&b, "Resolution: %.1f%%  (%d/%d internal call edges resolved; %d external, %d literal excluded)\n",
 		rep.ResolutionPct(), rep.ResolvedEdges, rep.TotalEdges, rep.ExternalEdges, rep.LiteralEdges)
 	fmt.Fprintf(&b, "Findings:   %d\n\n", len(rep.Findings))
 	if len(rep.Findings) == 0 {
-		fmt.Fprintf(&b, "No structural findings — generated output is internally consistent.\n")
+		fmt.Fprintf(&b, "No structural findings. The generated output is internally consistent.\n")
 		return b.String()
 	}
 	for i, f := range rep.Findings {

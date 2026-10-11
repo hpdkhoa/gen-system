@@ -1,4 +1,4 @@
-// style_flag.go — v26.33: `--style <gen-style.json>` and `--style-mode
+// style_flag.go (v26.33): `--style <gen-style.json>` and `--style-mode
 // <off|report|gate|autofix>` turn on the team style profile for a generation
 // run. The same two settings can come from the environment (GEN_STYLE,
 // GEN_STYLE_MODE), which is how bench drivers pass them; a flag on the

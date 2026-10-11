@@ -1,13 +1,13 @@
-// consent_gate.go — v25.8: the CONTINUE consent gate (CLI presentation layer).
+// consent_gate.go (v25.8): the `continue` consent gate (CLI presentation layer).
 //
-// The conflict-DETECTION logic moved to planner_v2 (conflicts.go) so the server
+// The conflict-detection logic moved to planner_v2 (conflicts.go) so the server
 // continue flow can reuse the exact same rules. This file is now just the CLI
 // presentation + prompt around planner_v2.DetectConflicts.
 //
-// WHY THE GATE. `gen continue` reads existing source, plans a DELTA, then
-// stages+generates. This gate summarizes what the existing code is FOR, shows the
+// Why the gate: `gen continue` reads existing source, plans a delta, then
+// stages+generates. This gate summarizes what the existing code is for, shows the
 // proposed delta, pushes back on conflicts with that purpose, and waits for
-// confirmation before the caller acts — the front-of-pipeline analog of
+// confirmation before the caller acts. It is the front-of-pipeline analog of
 // --verify-understand.
 //
 // Flags: default prompts; --no-gate restores the old silent behaviour;
@@ -34,12 +34,12 @@ func RunConsentGate(existing planner_v2.ExistingState, res planner_v2.ContinueRe
 
 	fmt.Println()
 	fmt.Println("┌─────────────────────────────────────────────")
-	fmt.Println("│ REVIEW — what exists, and what this will change")
+	fmt.Println("│ REVIEW: what exists, and what this will change")
 	fmt.Println("└─────────────────────────────────────────────")
 
 	fmt.Println("\n  Existing code:")
 	if len(existing.EntityOrder) == 0 {
-		fmt.Println("    (no recognizable entities — this looks like a fresh or non-generated target)")
+		fmt.Println("    (no recognizable entities; this looks like a fresh or non-generated target)")
 	} else {
 		for _, ent := range existing.EntityOrder {
 			ops := existing.Ops[ent]

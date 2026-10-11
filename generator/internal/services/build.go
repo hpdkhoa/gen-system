@@ -1,15 +1,15 @@
-// build.go — v25.6: StartInDir(goal, outDir) lets the UI pick the output folder
-// (default = root); run() writes a DESIGN MANIFEST (manifest.go) into
+// build.go (v25.6): StartInDir(goal, outDir) lets the UI pick the output folder
+// (default = root); run() writes a design manifest (manifest.go) into
 // <outDir>/design-manifest/ right after planning and generates into <outDir>.
 // Prior:
-// build.go — v25.5: Start() now also wires the STRUCTURED self-healing observer
+// build.go (v25.5): Start() now also wires the structured self-healing observer
 // (agent.HealObserver → "heal" SSE) and a broker AgentSink (→ "agent_structured"
 // SSE) so the Studio can render repair attempts live in a dedicated panel.
 // Prior:
-// build.go — v23.10 fix: 0-entity plans now FAIL with an actionable message
+// build.go (v23.10 fix): 0-entity plans now fail with an actionable message
 // (Ollama down) instead of silently "completing" empty; build_complete now
 // carries output_path + entity count for the UI.
-// build.go — v20.1: + BuildService.Clean (clean start: wipe .gen + generated dirs).
+// build.go (v20.1): + BuildService.Clean (clean start: wipe .gen + generated dirs).
 // Patched in v18 (B2): the build pipeline no longer references the github
 // client. Opening a PR is now strictly an out-of-engine action (gen-ferry).
 // The PROnSuccess gate and CreateBuildPR call site are removed.
@@ -17,7 +17,7 @@
 // Patched in v18.1: convert compiler.SchemaIR → []schema.Entity in the
 // evolve flow. The previous code assigned ir.Entities (of type
 // []compiler.EntityIR) directly to planner.Plan.Entities (of type
-// []schema.Entity), which never compiled — the planner type asserts
+// []schema.Entity), which never compiled. The planner type asserts
 // schema shape, not the relational IR shape.
 package services
 
@@ -96,7 +96,7 @@ func (s *BuildService) Root() string {
 }
 
 // ValidateOutputDir resolves req to an absolute, symlink-cleaned path and
-// confirms it is inside projectsBase and is NOT the server root. The directory
+// confirms it is inside projectsBase and is not the server root. The directory
 // must already exist (create it first via the mkdir endpoint). Mirrors
 // ProjectManager.validateRoot, with the extra root-exclusion rule because a
 // build overwrites its target. Returns the safe absolute path or an error.
@@ -127,7 +127,7 @@ func (s *BuildService) ValidateOutputDir(req string) (string, error) {
 	if err != nil || !fi.IsDir() {
 		return "", fmt.Errorf("output directory must be an existing directory")
 	}
-	// Reject the server root — a build overwrites its target and must never
+	// Reject the server root. A build overwrites its target and must never
 	// clobber the currently-served project.
 	root := s.root
 	if r, err := filepath.EvalSymlinks(root); err == nil {
@@ -136,7 +136,7 @@ func (s *BuildService) ValidateOutputDir(req string) (string, error) {
 		root = a
 	}
 	if resolved == root {
-		return "", fmt.Errorf("cannot generate into the current root (%s) — a build overwrites its target; pick or create another folder", s.root)
+		return "", fmt.Errorf("cannot generate into the current root (%s): a build overwrites its target; pick or create another folder", s.root)
 	}
 	return resolved, nil
 }
@@ -151,7 +151,7 @@ type CleanResult struct {
 // state (.gen) and the generated layer directories (backend, frontend,
 // mobile, db) under root. Refuses while a build/evolve is running.
 //
-// It deliberately does NOT touch source the user brought themselves
+// It deliberately does not touch source the user brought themselves
 // (anything outside those generated dirs), and reports exactly what it
 // removed vs. what was absent so the UI can show a clear summary.
 func (s *BuildService) Clean() (CleanResult, error) {
@@ -159,7 +159,7 @@ func (s *BuildService) Clean() (CleanResult, error) {
 	running := s.job != nil && s.job.Status == JobRunning
 	s.mu.Unlock()
 	if running {
-		return CleanResult{}, fmt.Errorf("a build is in progress — wait for it to finish")
+		return CleanResult{}, fmt.Errorf("a build is in progress; wait for it to finish")
 	}
 
 	targets := []string{".gen", "backend", "frontend", "mobile", "db"}
@@ -181,7 +181,7 @@ func (s *BuildService) Clean() (CleanResult, error) {
 	if s.broker != nil {
 		s.broker.Publish("agent_event", map[string]string{
 			"phase": "clean", "dot": "amber",
-			"text": "Clean start — removed " + strings.Join(res.Removed, ", "),
+			"text": "Clean start: removed " + strings.Join(res.Removed, ", "),
 		})
 	}
 	return res, nil
@@ -230,12 +230,12 @@ func (s *BuildService) StartInDir(goal, outDir string) (*BuildJob, error) {
 		})
 	}
 
-	// v25.5: also wire the STRUCTURED self-healing observer and a broker sink so
-	// the Studio can render repair attempts in a dedicated panel (not just the
+	// v25.5: also wire the structured self-healing observer and a broker sink so
+	// the Studio can render repair attempts in a dedicated panel (in addition to the
 	// free-text agent_event log). HealObserver carries the per-attempt fields;
 	// the FuncSink republishes every structured AgentEvent (lifecycle + heal) as
 	// an "agent_structured" SSE event the Studio's panel consumes. Both are
-	// package-level hooks — understand-server never links agent, so the archtest
+	// package-level hooks. understand-server never links agent, so the archtest
 	// boundary is unaffected.
 	agent.HealObserver = func(ev agent.HealEvent) {
 		s.broker.Publish("heal", map[string]interface{}{
@@ -269,14 +269,14 @@ func (s *BuildService) run(job *BuildJob, goal, target string) {
 		s.broker.Publish("agent_event", map[string]string{"phase": dot, "dot": dot, "text": text})
 	}
 
-	emit("cyan", fmt.Sprintf("Planner V2 starting — goal: \"%s\"", goal))
+	emit("cyan", fmt.Sprintf("Planner V2 starting, goal: \"%s\"", goal))
 
 	// v23.10 fix: stream planner step progress to the UI. The planner makes
 	// several model calls (the slowest part of a build); without this the UI got
 	// no events during planning and looked stuck. Note model cold-load: the first
 	// call after `ollama serve` loads the model into RAM (an 11GB model can take
 	// 30-90s), so step 1 may pause noticeably the first time.
-	emit("amber", "Calling the local model — if this is the first build after starting Ollama, it loads the model into memory first (can take 30-90s for a large model).")
+	emit("amber", "Calling the local model. If this is the first build after starting Ollama, it loads the model into memory first (can take 30-90s for a large model).")
 	planner_v2.ProgressHook = func(dot, msg string) { emit(dot, msg) }
 	defer func() { planner_v2.ProgressHook = nil }()
 
@@ -289,18 +289,18 @@ func (s *BuildService) run(job *BuildJob, goal, target string) {
 	emit("green", fmt.Sprintf("Plan ready: %d entities, %d tasks", len(plan.Entities), len(plan.Tasks)))
 
 	// v23.10 fix: an empty-entity plan means the planner could not turn the goal
-	// into a data model — almost always because the local model (Ollama) is not
+	// into a data model. Almost always the cause is that the local model (Ollama) is not
 	// running or returned nothing usable. Generating from it "succeeds" but
 	// produces no usable app, which looks like the UI silently stalling. Fail
 	// loudly with an actionable message instead.
 	if len(plan.Entities) == 0 {
-		s.fail(job, "the planner produced 0 entities — the local model (Ollama) is likely not running or returned no usable schema. "+ // v23.35: hint the qwen planner model
+		s.fail(job, "the planner produced 0 entities. The local model (Ollama) is likely not running or returned no usable schema. "+ // v23.35: hint the qwen planner model
 			"Start it (`ollama serve` + `ollama pull qwen3:14b`) and set GEN_LOGIC=ollama, or run `gen apply schema.json` with an explicit schema.")
 		return
 	}
 
-	// v25.6: write the DESIGN MANIFEST — the whole pre-code design (idea,
-	// features, schema, task graph) into <target>/design-manifest/ BEFORE
+	// v25.6: write the design manifest (the whole pre-code design: idea,
+	// features, schema, task graph) into <target>/design-manifest/ before
 	// generation runs, so it survives even if generation later fails. Side
 	// artifact: non-fatal, the build proceeds by default.
 	if mp, err := WriteDesignManifest(target, goal, plan); err != nil {
@@ -335,7 +335,7 @@ func (s *BuildService) run(job *BuildJob, goal, target string) {
 	s.mu.Unlock()
 
 	s.broker.Publish("build_complete", job)
-	emit("green", fmt.Sprintf("Build complete — %d entities generated from \"%s\"", len(plan.Entities), goal))
+	emit("green", fmt.Sprintf("Build complete: %d entities generated from \"%s\"", len(plan.Entities), goal))
 	emit("cyan", "Output written to: "+absOut)
 
 	// Note: opening a GitHub PR is no longer part of the build pipeline.
@@ -352,15 +352,15 @@ func (s *BuildService) run(job *BuildJob, goal, target string) {
 }
 
 // ─────────────────────────────────────────────
-// Evolve — Phase 2.3: marker-based frontend evolution
+// Evolve (Phase 2.3): marker-based frontend evolution
 //
 // Loads current IR from .gen/ir.json, builds evolve_frontend tasks for
 // all known entities, and runs them through the agent loop.
 // EvolveForm/EvolveList use gen-system markers to preserve custom code
-// outside the generated block — safe to run on an existing codebase.
+// outside the generated block, so they are safe to run on an existing codebase.
 //
 // change is the natural-language description (e.g. "add search bar to
-// user list") — logged in job.Goal for traceability.
+// user list"). job.Goal logs it for traceability.
 // ─────────────────────────────────────────────
 func (s *BuildService) Evolve(change string) (*BuildJob, error) {
 	s.mu.Lock()
@@ -395,19 +395,19 @@ func (s *BuildService) runEvolve(job *BuildJob, change string) {
 		s.broker.Publish("agent_event", map[string]string{"phase": dot, "dot": dot, "text": text})
 	}
 
-	emit("purple", fmt.Sprintf("Evolution engine — change: \"%s\"", change))
+	emit("purple", fmt.Sprintf("Evolution engine, change: \"%s\"", change))
 
 	// Load current IR to discover all known entities
 	ir, err := compiler.LoadPreviousIR()
 	if err != nil || len(ir.Entities) == 0 {
-		s.fail(job, "no IR found — run a full build first before evolving")
+		s.fail(job, "no IR found; run a full build before evolving")
 		return
 	}
 
 	emit("purple", fmt.Sprintf("Loaded IR: %d entities", len(ir.Entities)))
 
 	// Build evolve_frontend tasks for every known entity.
-	// EvolveForm/EvolveList are marker-safe — if markers don't exist yet
+	// EvolveForm/EvolveList are marker-safe. If markers don't exist yet
 	// they fall back to full overwrite (same as GenerateForm/GenerateList).
 	var tasks []planner.Task
 	for _, e := range ir.Entities {
@@ -428,7 +428,7 @@ func (s *BuildService) runEvolve(job *BuildJob, change string) {
 
 	plan := planner.Plan{
 		Goal:     fmt.Sprintf("evolve: %s", change),
-		Entities: irToSchemaEntities(ir), // v18.1: was `ir.Entities` — type mismatch
+		Entities: irToSchemaEntities(ir), // v18.1: was `ir.Entities`, a type mismatch
 		Tasks:    tasks,
 	}
 
@@ -445,7 +445,7 @@ func (s *BuildService) runEvolve(job *BuildJob, change string) {
 	s.mu.Unlock()
 
 	s.broker.Publish("build_complete", job)
-	emit("purple", fmt.Sprintf("Evolution complete — %d components updated", len(tasks)))
+	emit("purple", fmt.Sprintf("Evolution complete: %d components updated", len(tasks)))
 
 	// Snapshot after successful evolution
 	if s.snapSvc != nil {
@@ -563,7 +563,7 @@ func irToSchemaEntities(ir compiler.SchemaIR) []schema.Entity {
 // ("belongsTo", "hasMany"). The FromEntity side of a 1:N or N:M owns
 // the collection; the FromEntity side of a 1:1 owns the foreign key.
 // Anything unrecognised falls through as "hasMany" rather than getting
-// dropped — better a permissive default than a silent inconsistency.
+// dropped. A permissive default is better than a silent inconsistency.
 func relTypeIRToSchema(t string) string {
 	switch t {
 	case "1:1":

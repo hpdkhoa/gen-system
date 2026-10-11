@@ -1,8 +1,8 @@
-// generator/internal/symbols/classify.go — v26.34: one rule for what a call
+// generator/internal/symbols/classify.go (v26.34): one rule for what a call
 // edge is, shared by the resolution benchmark and the Understand verify pass.
 //
 // Before this, each had its own rule. The benchmark called an edge internal
-// when its bare callee name matched ANY symbol name, stdlib included, so a
+// when its bare callee name matched any symbol name, stdlib included, so a
 // stdlib ingest moved the population. The verify pass called an edge a
 // project defect unless it was one of 16 builtin names, so every stdlib call
 // in a generated backend was reported. Both are now this:
@@ -75,7 +75,7 @@ func (idx *Index) NewEdgeClassifier() *EdgeClassifier {
 }
 
 // Classify returns the class of an edge and whether it resolved to a
-// PROJECT symbol.
+// project symbol.
 func (c *EdgeClassifier) Classify(e CallEdge) (EdgeClass, bool) {
 	name := e.CalleeName
 	if name == "" {

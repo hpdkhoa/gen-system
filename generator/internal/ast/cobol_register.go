@@ -1,4 +1,4 @@
-// cobol_register.go — registration of the COBOL frontend.
+// cobol_register.go: registration of the COBOL frontend.
 //
 // v19: COBOL is now feature-complete (EVALUATE, COPY, REDEFINES, OCCURS,
 // FILE-CONTROL/SELECT/FD, COMP-3, expanded CICS verbs) and registers in

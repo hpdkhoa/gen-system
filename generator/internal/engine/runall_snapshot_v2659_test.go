@@ -1,4 +1,4 @@
-// runall_snapshot_v2659_test.go — N11: RunAll dropped the error of LoadIRAt.
+// runall_snapshot_v2659_test.go (N11): RunAll dropped the error of LoadIRAt.
 // A broken .gen/ir_snapshot.json read as a first run, so RunAll regenerated
 // every entity of an existing app without a word about the broken file.
 package engine

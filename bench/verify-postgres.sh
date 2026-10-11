@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
-# verify-postgres.sh — gen-system v23.28 (task E): LIVE Postgres verification.
+# verify-postgres.sh: gen-system v23.28 (task E): live Postgres verification.
 #
-# The genbench `postgres_generation` suite proves the generator EMITS the right
+# The genbench `postgres_generation` suite proves the generator emits the right
 # migration + store + FK artifacts (pure Go, no DB). This script proves the
-# generated app actually WORKS against a real PostgreSQL: it applies the
+# generated app works against a real PostgreSQL: it applies the
 # migrations, exercises CRUD over HTTP, and, as its main check,
-# confirms the FK constraint REJECTS an orphaned child row. The suite and this
+# confirms the FK constraint rejects an orphaned child row. The suite and this
 # script together take Phase 1 from "build-verified" to "live-verified".
 #
-# Run this on YOUR box (the one with a Postgres you can write to).
+# Run this on your box (the one with a Postgres you can write to).
 #
 #   Usage:
-#     ./verify-postgres.sh [--db-url postgres://user:pass@host:5432/dbname?sslmode=disable]
+#     ./bench/verify-postgres.sh [--db-url postgres://user:pass@host:5432/dbname?sslmode=disable]
 #                          [--out-dir <dir>] [--keep]
 #
 #   DB connection resolution (first that is set wins):
@@ -27,7 +27,7 @@
 #                       on this postgres path (the severity flip)
 #     SUMMARY.txt       pass/fail per step (read this first)
 #
-# Exit 0 iff every REQUIRED step passed (incl. the FK-rejection proof).
+# Exit 0 iff every required step passed (incl. the FK-rejection proof).
 
 set -uo pipefail
 
@@ -51,18 +51,14 @@ DSN="${DB_URL_ARG:-${DATABASE_URL:-${DB_URL:-$DEFAULT_DSN}}}"
 mask_dsn() { echo "$1" | sed -E 's#(://[^:]+:)[^@]+(@)#\1****\2#'; }
 
 # ── locate repo ──────────────────────────────────────────────
-REPO=""
-for d in . .. ./gen-system-v23.26 ./gen-system-v23.25 ./*/ ../*/; do
-  if [ -f "$d/go.mod" ] && grep -q "module gen-system" "$d/go.mod" 2>/dev/null; then
-    REPO="$(cd "$d" && pwd)"; break
-  fi
-done
-if [ -z "$REPO" ]; then
-  echo "❌ Could not find the gen-system source (go.mod with 'module gen-system')."
+# This script lives in bench/, so the repository root is one folder up.
+REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+if ! grep -q "^module github.com/hpdkhoa/gen-system$" "$REPO/go.mod" 2>/dev/null; then
+  echo "❌ $REPO is not the gen-system source (no go.mod with its module path)."
   exit 2
 fi
 
-# work + evidence OUTSIDE the source tree (v23.19 guard)
+# work + evidence outside the source tree (v23.19 guard)
 BASE="${VERIFY_BASE:-$(dirname "$REPO")/verify-postgres-run}"
 rm -rf "$BASE"; mkdir -p "$BASE"
 OUT="$BASE/verify-postgres-out"
@@ -86,7 +82,7 @@ cleanup() {
 }
 trap cleanup EXIT
 
-# psql helper (optional — used for direct DB checks; the app does the real work)
+# psql helper (optional; it runs direct DB checks, the app does the real work)
 HAVE_PSQL=0
 command -v psql >/dev/null 2>&1 && HAVE_PSQL=1
 
@@ -226,8 +222,8 @@ step "04 CRUD + FK rejection"
   curl -s -X POST localhost:8080/posts -d '{"id":2,"title":"orphan","userID":999}' -w "\n  http=%{http_code}\n"
 } > "$OUT/04_crud.txt" 2>&1
 
-# Verdict: the orphan insert must NOT have produced a 2xx, and (if psql present)
-# must NOT have landed a row in posts with user_id=999.
+# Verdict: the orphan insert must not have produced a 2xx, and (if psql present)
+# must not have landed a row in posts with user_id=999.
 ORPHAN_CODE="$(grep -A3 'MISSING user' "$OUT/04_crud.txt" | grep -oE 'http=[0-9]+' | grep -oE '[0-9]+' | tail -1)"
 ORPHAN_ROWS=1
 if [ "$HAVE_PSQL" = 1 ]; then
@@ -257,7 +253,7 @@ fi
 
 # ── 05 reviewer severity flip on the postgres path (task C) ──
 step "05 reviewer flip (postgres → SQL findings are WARNINGS)"
-# On GEN_BACKEND=postgres the reviewer must NOT downgrade SQL findings to info.
+# On GEN_BACKEND=postgres the reviewer must not downgrade SQL findings to info.
 # We assert it via the unit the code uses (scopeIssues), captured by a tiny
 # probe so this needs no model. We just confirm the generated store path is the
 # pg one (real SQL strings), which is what makes the WARN severity correct.

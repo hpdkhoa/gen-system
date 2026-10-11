@@ -1,4 +1,4 @@
-// generator/internal/schema/wire.go — v26.57: the ONE place that decides how an
+// generator/internal/schema/wire.go (v26.57): the one place that decides how an
 // entity and its fields appear on the wire of a generated app.
 //
 // Until v26.57 the Go backend (internal/engine) and the TypeScript client

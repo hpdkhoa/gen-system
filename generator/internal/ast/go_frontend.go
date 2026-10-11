@@ -1,5 +1,5 @@
 // v23.39: Go if NodeBranch now preserves the condition text (exprText(st.Cond)) in RawSource for the CFG decision node.
-// go_frontend.go — v23.6: convertBody now walks the function body
+// go_frontend.go (v23.6): convertBody now walks the function body
 // statement-by-statement and emits NodeBranch/NodeLoop/NodeReturn/NodeAssign
 // with nested Children (was a flat goast.Inspect that only produced NodeCall),
 // so the CFG builder actually splits if/for/switch into branch & loop blocks.
@@ -7,7 +7,7 @@
 package ast
 
 // ─────────────────────────────────────────────────────────────
-// go_frontend.go — Go language frontend
+// go_frontend.go: Go language frontend
 //
 // Uses the standard library go/ast + go/parser for exact,
 // spec-accurate parsing. Every Go source construct we need
@@ -41,7 +41,7 @@ func (g *GoFrontend) Parse(filePath string, source []byte) (*Module, error) {
 	fset := gotoken.NewFileSet()
 	file, err := goparser.ParseFile(fset, filePath, source, goparser.ParseComments)
 	if err != nil {
-		// go/parser returns a partial AST even on syntax errors — we proceed
+		// go/parser returns a partial AST even on syntax errors. We proceed
 		// but record the error as unrecoverable only if file is nil.
 		if file == nil {
 			return nil, fmt.Errorf("go_frontend: parse %s: %w", filePath, err)
@@ -62,11 +62,11 @@ func (g *GoFrontend) Parse(filePath string, source []byte) (*Module, error) {
 	cv := &goConverter{fset: fset, filePath: filePath}
 
 	// ── Top-level declarations ────────────────────────────
-	// v18 (D1#5): the previous code iterated file.Imports first AND let
+	// v18 (D1#5): the previous code iterated file.Imports first and let
 	// convertGenDecl below also emit NodeImport for each ImportSpec, so
 	// every import was duplicated (e.g. 3 imports → 6 nodes). Drop the
 	// redundant file.Imports loop and rely on the GenDecl walk, which
-	// is the single source of truth for top-level declarations.
+	// is the only source of top-level declarations.
 	for _, decl := range file.Decls {
 		switch d := decl.(type) {
 		case *goast.FuncDecl:
@@ -362,9 +362,9 @@ func (c *goConverter) convertFunc(d *goast.FuncDecl) *Node {
 	return n
 }
 
-// convertBody walks a function body statement-by-statement, PRESERVING control
+// convertBody walks a function body statement-by-statement, preserving control
 // structure (v23.6). Previously this used goast.Inspect and only emitted a flat
-// list of NodeCall for every call anywhere in the body — so if/for/switch never
+// list of NodeCall for every call anywhere in the body. So if/for/switch never
 // became NodeBranch/NodeLoop and the CFG collapsed every Go function into one
 // block. Now each statement becomes the right node kind with nested Children,
 // which lets the CFG builder split then/merge and loop blocks.
@@ -399,7 +399,7 @@ func (c *goConverter) convertStmt(s goast.Stmt) []*Node {
 		n.Children = append(n.Children, c.callsIn(st.Init)...)
 		n.Children = append(n.Children, c.callsIn(st.Cond)...)
 		n.Children = append(n.Children, c.convertStmtList(st.Body.List)...)
-		// v23.7 — else / else-if goes into Else (a DISTINCT block in the CFG),
+		// v23.7: else / else-if goes into Else (a distinct block in the CFG),
 		// not flattened into the then-body. An "else if" nests as a single
 		// NodeBranch inside Else.
 		if st.Else != nil {
@@ -435,9 +435,9 @@ func (c *goConverter) convertStmt(s goast.Stmt) []*Node {
 		return []*Node{n}
 
 	case *goast.SwitchStmt:
-		// v25.9 — a Go `switch` is a MULTI-WAY branch, not an if/else. Emit the
+		// v25.9: a Go `switch` is a multi-way branch, not an if/else. Emit the
 		// same shape COBOL's EVALUATE uses (proven in v23.41): the switch node
-		// carries the tag in RawSource, and each case clause becomes a CHILD
+		// carries the tag in RawSource, and each case clause becomes a child
 		// NodeBranch whose RawSource is the case value, holding that case's
 		// statements as its own children. flow.Build fans these out to one
 		// case-block each with a shared merge.
@@ -456,7 +456,7 @@ func (c *goConverter) convertStmt(s goast.Stmt) []*Node {
 		return []*Node{n}
 
 	case *goast.TypeSwitchStmt:
-		// v25.9 — same multi-way treatment. The "tag" is the type-switch guard.
+		// v25.9: same multi-way treatment. The "tag" is the type-switch guard.
 		// v26.58 (D059): the Init and the guard (`t := x.(type)`) were never
 		// read, so their calls were lost and RawSource was empty. The guard text
 		// now labels the node, and the calls in both come before the cases.
@@ -467,7 +467,7 @@ func (c *goConverter) convertStmt(s goast.Stmt) []*Node {
 		return []*Node{n}
 
 	case *goast.SelectStmt:
-		// v25.9 — select is multi-way too; each CommClause becomes a case child
+		// v25.9: select is multi-way too; each CommClause becomes a case child
 		// whose RawSource is the comm operation (or "default").
 		n := &Node{Kind: NodeBranch, Language: LangGo, Name: "select", Span: c.span(st.Pos(), st.End())}
 		for _, cl := range st.Body.List {
@@ -508,7 +508,7 @@ func (c *goConverter) convertStmt(s goast.Stmt) []*Node {
 		return c.convertStmtList(st.List)
 
 	case *goast.ExprStmt:
-		// a bare expression statement — usually a call.
+		// a bare expression statement, usually a call.
 		// v26.58 (D060): the outer call alone lost the calls in its arguments
 		// (outer(nested())). callsIn walks the whole expression and still
 		// yields the outer call first, as AssignStmt already does.
@@ -741,10 +741,10 @@ func stmtText(st goast.Stmt) string {
 	return strings.TrimSpace(buf.String())
 }
 
-// caseClauses converts a switch/type-switch body into one case NODE per clause.
+// caseClauses converts a switch/type-switch body into one case node per clause.
 // Each case node is a NodeBranch whose RawSource is the comma-joined case value
 // (or "default" for the default clause) and whose Children are that clause's
-// statements. This is the multi-way shape flow.Build fans out — mirroring how
+// statements. This is the multi-way shape flow.Build fans out. It mirrors how
 // COBOL's EVALUATE/WHEN is modelled. v25.9.
 func (c *goConverter) caseClauses(list []goast.Stmt) []*Node {
 	var out []*Node

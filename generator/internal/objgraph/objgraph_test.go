@@ -1,4 +1,4 @@
-// objgraph/objgraph_test.go — tests for the ObjectGraph format
+// objgraph/objgraph_test.go: tests for the ObjectGraph format
 package objgraph
 
 import (

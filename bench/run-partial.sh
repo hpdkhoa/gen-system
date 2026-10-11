@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# bench/run-partial.sh — v26.35: run only the drivers you name, and fill the
+# bench/run-partial.sh (v26.35): run only the drivers you name, and fill the
 # other tables from earlier results directories without re-dating them.
 #
 #   bench/run-partial.sh --run strategies,swebench:60 --reuse results/2026-09-05 --reuse results/2026-09-04

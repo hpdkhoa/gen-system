@@ -1,4 +1,4 @@
-// runall_rerun_v2659_test.go — N06: RunAll decided a first run from an empty
+// runall_rerun_v2659_test.go (N06): RunAll decided a first run from an empty
 // change set. Since D072 a rerun with an unchanged schema also gives an empty
 // change set, so RunAll regenerated every entity on every rerun and the
 // incremental skip never happened.

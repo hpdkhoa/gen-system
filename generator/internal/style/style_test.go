@@ -1,4 +1,4 @@
-// style_test.go — v26.33: the profile, the gate, derive, the op check and
+// style_test.go (v26.33): the profile, the gate, derive, the op check and
 // the prompt, on fixture trees written into a temp dir. No model, no
 // network. Two properties matter most and both are asserted: the gate is
 // deterministic (same tree, same profile, byte identical report), and the

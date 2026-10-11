@@ -1,6 +1,6 @@
-// generator/internal/ai/logic_fixtures.go — v23.10 (Phase 4-B): deterministic
+// generator/internal/ai/logic_fixtures.go, v23.10 (Phase 4-B): deterministic
 // replay fixtures. These stand in for the model offline so the full
-// generate→inject→compile→test path is verifiable without Ollama. They are REAL
+// generate→inject→compile→test path is verifiable without Ollama. They are real
 // business operations (not CRUD) written against the fixed signature
 //
 //	func (s *<E>Service) <Name>(id int, in map[string]any) (any, error)

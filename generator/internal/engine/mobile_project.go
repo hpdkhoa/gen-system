@@ -1,6 +1,6 @@
-// generator/internal/engine/mobile_project.go — v23.13 (Phase 5): wraps the
+// generator/internal/engine/mobile_project.go, v23.13 (Phase 5): wraps the
 // loose generated mobile/ screens in a minimal React Native project so a JS
-// BUNDLE can be produced. HONEST BOUNDARY: this gates a JS bundle only — NOT a
+// bundle can be produced. Boundary: this gates a JS bundle only, not a
 // signed .apk/.ipa. Producing an installable app needs the Android/iOS SDKs and
 // signing keys, which are out of scope (and absent in any offline build box).
 // The scaffold is what makes `npx react-native bundle` possible; running it is a

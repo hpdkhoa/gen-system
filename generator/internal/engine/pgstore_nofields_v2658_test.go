@@ -1,4 +1,4 @@
-// generator/internal/engine/pgstore_nofields_v2658_test.go — v26.58 (D026):
+// generator/internal/engine/pgstore_nofields_v2658_test.go, v26.58 (D026):
 // genStorePostgres emitted `INSERT INTO tags () VALUES ()` and
 // `UPDATE tags SET  WHERE id=$1`, , id)` for an entity whose only field is id,
 // so the generated Postgres store did not parse and the backend did not build.

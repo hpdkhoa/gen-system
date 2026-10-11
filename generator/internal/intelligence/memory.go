@@ -29,7 +29,7 @@ type FixRecord struct {
 }
 
 // Memory is the persistent store of AI repairs.
-// Stored in .gen/memory.json — versioned with the project.
+// It lives in .gen/memory.json and is versioned with the project.
 type Memory struct {
 	Fixes map[string]FixRecord `json:"fixes"`
 }
@@ -65,7 +65,7 @@ func SaveMemory(m Memory) error {
 }
 
 // HashError creates a short, stable key from an error message.
-// Uses first 8 bytes of SHA256 — collision probability is negligible
+// Uses first 8 bytes of SHA256. Collision probability is negligible
 // for the number of distinct compiler errors in a typical project.
 func HashError(errMsg string) string {
 	h := sha256.Sum256([]byte(errMsg))

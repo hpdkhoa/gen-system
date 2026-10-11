@@ -1,4 +1,4 @@
-// generator/internal/ai/op_binding_v2324_test.go — v23.24: the verb→entity
+// generator/internal/ai/op_binding_v2324_test.go (v23.24): the verb→entity
 // binding that fixes operation misplacement (Product getting no ops).
 package ai
 
@@ -28,7 +28,7 @@ func TestBindOperations_OrdersProducts_v2324(t *testing.T) {
 		t.Errorf("Order bindings missing checkout/discount: %v", b["Order"])
 	}
 
-	// The headline fix: Product MUST receive the stock-adjust operation.
+	// The headline fix: Product must receive the stock-adjust operation.
 	joinedProduct := strings.ToLower(strings.Join(b["Product"], " "))
 	if !strings.Contains(joinedProduct, "stock") {
 		t.Errorf("Product must bind 'adjust stock', got: %v", b["Product"])

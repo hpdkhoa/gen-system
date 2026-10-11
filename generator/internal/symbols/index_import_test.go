@@ -1,4 +1,4 @@
-// index_import_test.go — v26.34: a package qualified call resolves through the
+// index_import_test.go (v26.34): a package qualified call resolves through the
 // caller file's imports, and never falls back to a bare name capture.
 //
 // Before this, `errors.New` was stripped to `New` and resolved to whatever

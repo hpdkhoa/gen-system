@@ -1,4 +1,4 @@
-// cobol_frontend_test.go — tests for the COBOL/CICS language frontend
+// cobol_frontend_test.go: tests for the COBOL/CICS language frontend
 //
 // v19: build-tag removed. COBOL frontend now registers in the default
 // build, so these tests run with the standard `go test ./...`.
@@ -111,7 +111,7 @@ func TestCOBOL_ProgramID(t *testing.T) {
 	}
 }
 
-// ─── Data Division — 01-level records ────────────────────────
+// ─── Data Division: 01-level records ─────────────────────────
 
 const dataDivSrc = `
        IDENTIFICATION DIVISION.
@@ -452,8 +452,8 @@ func TestCOBOL_Emit_RoundTrip(t *testing.T) {
 	}
 }
 
-// v24 — inline PERFORM UNTIL … END-PERFORM must nest the statements between the
-// header and END-PERFORM as the loop BODY (previously the body was lost and the
+// v24: inline PERFORM UNTIL … END-PERFORM must nest the statements between the
+// header and END-PERFORM as the loop body (previously the body was lost and the
 // statements attached at the wrong scope level).
 func TestCOBOL_InlinePerformUntilBodyNests_v24(t *testing.T) {
 	src := `       IDENTIFICATION DIVISION.
@@ -489,7 +489,7 @@ func TestCOBOL_InlinePerformUntilBodyNests_v24(t *testing.T) {
 	if len(loop.Children) < 2 {
 		t.Errorf("inline PERFORM UNTIL body should nest its 2 statements as loop children, got %d: %v", len(loop.Children), loop.Children)
 	}
-	// STOP RUN must NOT be inside the loop (it's after END-PERFORM).
+	// STOP RUN must not be inside the loop (it's after END-PERFORM).
 	for _, c := range loop.Children {
 		if c.Kind == NodeReturn {
 			t.Error("STOP RUN after END-PERFORM must not be nested inside the loop body")

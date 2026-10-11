@@ -1,4 +1,4 @@
-// context/stdlib.go — v23.32 (stdlib provenance): NEW file. Language-agnostic
+// context/stdlib.go (v23.32, stdlib provenance): NEW file. Language-agnostic
 // read-only ingest of standard-library source trees. Parses configured roots
 // with the frontend their file extensions select, adds modules tagged
 // ProvStdlib, and builds their CFGs/effects so a project call that lands in the
@@ -6,8 +6,8 @@
 // Go's GOROOT/src and a Java signature tree go through the same path; only the
 // extensions differ.
 //
-// IMPORT-SCOPED by default: ingesting an entire language stdlib (GOROOT/src is
-// ~5k files / ~150k symbols) is both slow and irrelevant — a project calls into
+// Import-scoped by default: ingesting an entire language stdlib (GOROOT/src is
+// ~5k files / ~150k symbols) is both slow and irrelevant. A project calls into
 // a dozen packages, not all of them, and the flat O(n) resolver plus per-symbol
 // CFGs do not scale to the whole tree. So when a root carries an ImportScope
 // (the set of import paths the project actually uses), only those subpackages
@@ -67,7 +67,7 @@ func (ctx *Context) loadStdlibRoots(roots []StdlibRoot, cobolFE *genast.CobolFro
 			p.filesSkipped++
 			return
 		}
-		// v26.6: record the language family SEEN (before size/parse gating), so the
+		// v26.6: record the language family seen (before size/parse gating), so the
 		// mixed-language-root warning reflects the tree's real contents even if some
 		// files are later skipped for size.
 		if curLangs != nil {
@@ -125,7 +125,7 @@ func (ctx *Context) loadStdlibRoots(roots []StdlibRoot, cobolFE *genast.CobolFro
 			continue
 		}
 
-		// v26.5 — per-root accounting so the StdlibReport can name each root and
+		// v26.5: per-root accounting so the StdlibReport can name each root and
 		// say exactly what it contributed. We snapshot the aggregate counters and
 		// the index size before this root and diff after, which needs no change to
 		// the ingest paths themselves.
@@ -137,10 +137,10 @@ func (ctx *Context) loadStdlibRoots(roots []StdlibRoot, cobolFE *genast.CobolFro
 			Auto: root.autoDetected,
 		}
 
-		// v23.33: synthetic catalog roots. COBOL has no source stdlib to walk
-		// — its "runtime" is intrinsic functions (defined by the ISO standard,
+		// v23.33: synthetic catalog roots. COBOL has no source stdlib to walk.
+		// Its "runtime" is intrinsic functions (defined by the ISO standard,
 		// no source) plus vendor/LE callable services (compiled binaries on the
-		// mainframe). So instead of walking a directory we MATERIALISE a curated
+		// mainframe). So instead of walking a directory we materialise a curated
 		// catalog of those names as synthetic ProvStdlib symbols, which lets a
 		// CALL "CEE3ABD" or FUNCTION NUMVAL resolve to a known runtime symbol
 		// rather than reading as an unresolved (missing-program) call. Reuses
@@ -163,8 +163,8 @@ func (ctx *Context) loadStdlibRoots(roots []StdlibRoot, cobolFE *genast.CobolFro
 		rr.LangBreakdown = curLangs
 
 		// Resolve symlinks on the root. Debian/Ubuntu's Go packaging ships
-		// GOROOT/src as a symlink, and filepath.Walk does NOT follow a
-		// symlinked ROOT — it lstat's it, sees a non-directory, visits it once
+		// GOROOT/src as a symlink, and filepath.Walk does not follow a
+		// symlinked root. It lstat's it, sees a non-directory, visits it once
 		// and stops, silently ingesting nothing. EvalSymlinks gives the real
 		// directory. Symlinks *inside* the tree are still not followed, which
 		// is what we want (no escaping the root).
@@ -181,11 +181,11 @@ func (ctx *Context) loadStdlibRoots(roots []StdlibRoot, cobolFE *genast.CobolFro
 		}
 
 		if len(root.ImportScope) == 0 {
-			// v24: only ingest the WHOLE tree when the caller explicitly opted in
-			// (AutoScope=false AND WholeTree). An AutoScope root that resolved to
-			// an EMPTY scope means "the project imports nothing from this root" —
-			// ingesting all ~6000 JDK files in that case is the startup-hang bug,
-			// so we ingest NOTHING and note it. Point --stdlib at the right module
+			// v24: only ingest the whole tree when the caller explicitly opted in
+			// (AutoScope=false and WholeTree). An AutoScope root that resolved to
+			// an empty scope means "the project imports nothing from this root".
+			// Ingesting all ~6000 JDK files in that case is the startup-hang bug,
+			// so we ingest nothing and note it. Point --stdlib at the right module
 			// dir (e.g. <jdk>/java.base) and ensure the project's imports were
 			// collected if you expected resolution.
 			if root.AutoScope {
@@ -206,12 +206,12 @@ func (ctx *Context) loadStdlibRoots(roots []StdlibRoot, cobolFE *genast.CobolFro
 
 		// Scoped ingest: each import path maps to a subdirectory of the root
 		// (Go: "net/http" -> <root>/net/http). Only existing dirs are walked.
-		// v24: a Java import is a fully-qualified CLASS ("java.util.HashMap"),
-		// whose directory is the PACKAGE ("java/util") — the class name is a
+		// v24: a Java import is a fully-qualified class ("java.util.HashMap"),
+		// whose directory is the package ("java/util"). The class name is a
 		// file, not a dir. So for each import we try the mapped path as a dir and,
-		// if that is not a directory, fall back to its PARENT (the package dir).
+		// if that is not a directory, fall back to its parent (the package dir).
 		// This is what makes `--stdlib <jdk>/java.base --stdlib-lang java` ingest
-		// only java/util, java/lang, etc. — not the whole 6000-file JDK.
+		// only java/util, java/lang, etc., not the whole 6000-file JDK.
 		seen := map[string]bool{}
 		tryWalk := func(dir string) {
 			if dir == "" || seen[dir] {

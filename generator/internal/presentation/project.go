@@ -1,5 +1,5 @@
-// project.go — v24: dynamic project loading for the Studio. Lets the UI plug in
-// one source codebase at a time (hard swap), clear it, and plug another —
+// project.go (v24): dynamic project loading for the Studio. Lets the UI plug in
+// one source codebase at a time (hard swap), clear it, and plug another,
 // without restarting gen-server. Security: every requested root must resolve
 // (symlinks cleaned) to a subdirectory of the configured projectsBase; absolute
 // escapes and ".." traversal are rejected. The heavy work (parse + swap) is
@@ -36,7 +36,7 @@ type ProjectLoadOpts struct {
 
 // WatcherControl lets the project endpoints re-point the file watcher when the
 // root changes. gen-server supplies an implementation. Repoint(root, live)
-// stops watching the old root and — only if live — starts watching the new one.
+// stops watching the old root and (only if live) starts watching the new one.
 type WatcherControl interface {
 	Repoint(root string, live bool)
 }
@@ -86,7 +86,7 @@ func (pm *ProjectManager) Register(mux *http.ServeMux) {
 }
 
 // handleList returns the immediate subdirectories of the projects base so the
-// Studio can offer a folder PICKER instead of a raw absolute-path text box.
+// Studio can offer a folder picker instead of a raw absolute-path text box.
 // Each entry is flagged with whether it looks like a source project (contains
 // recognizable code / a .gen marker), so the user can tell projects from noise.
 func (pm *ProjectManager) handleList(w http.ResponseWriter, r *http.Request) {

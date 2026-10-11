@@ -140,7 +140,7 @@ func (s *SnapshotStore) Find(id string) *SnapshotRecord {
 	return nil
 }
 
-// Create stores a new CURRENT record. v26.58 (D096): auto is stored in the
+// Create stores a new current record. v26.58 (D096): auto is stored in the
 // record; before, the parameter did not exist and every record had auto=false.
 func (s *SnapshotStore) Create(name, desc, author, projectID, snapPath string, entities, fields, lines int, auto bool) (*SnapshotRecord, error) {
 	s.mu.Lock()

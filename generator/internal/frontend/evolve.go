@@ -43,7 +43,7 @@ func EvolveForm(e schema.Entity, rootPath string) {
 	newBlock := buildFormInputs(e)
 
 	if strings.Contains(content, start) && strings.Contains(content, end) {
-		// Markers found — replace only the inner block
+		// Markers found: replace only the inner block
 		startIdx := strings.Index(content, start) + len(start)
 		endIdx := strings.Index(content, end)
 		if startIdx > 0 && endIdx > startIdx {
@@ -57,7 +57,7 @@ func EvolveForm(e schema.Entity, rootPath string) {
 		}
 	}
 
-	// No markers — safe first run: regenerate with markers embedded
+	// No markers, so this is a safe first run. Regenerate with markers embedded
 	generateFormWithMarkers(e, rootPath)
 	fmt.Printf("[evolve] ✅ Form generated with evolution markers: %s\n", formPath)
 }

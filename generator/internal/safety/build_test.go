@@ -57,7 +57,7 @@ func main() {}
 	}
 }
 
-// TestValidateBuild_FailureReturnsCompilerOutput is the CRITICAL fix test.
+// TestValidateBuild_FailureReturnsCompilerOutput is the test for the critical fix.
 // It verifies that the error output from the compiler is returned as a
 // non-empty string, not silently discarded.
 func TestValidateBuild_FailureReturnsCompilerOutput(t *testing.T) {
@@ -74,7 +74,7 @@ func main() {
 	if err == nil {
 		t.Fatal("broken code should fail to build")
 	}
-	// THE CRITICAL CHECK: output must not be empty
+	// The critical check: output must not be empty
 	if output == "" {
 		t.Fatal("compiler output must not be empty on build failure — needed for HashError() and ClassifyError()")
 	}

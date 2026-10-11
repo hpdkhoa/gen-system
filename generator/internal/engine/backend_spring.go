@@ -1,18 +1,18 @@
-// generator/internal/engine/backend_spring.go — v23.14 (Phase 6): generates a
-// Spring Boot 3.2 / Java 17 backend as an ALTERNATIVE target to the Go backend.
+// generator/internal/engine/backend_spring.go, v23.14 (Phase 6): generates a
+// Spring Boot 3.2 / Java 17 backend as an alternative target to the Go backend.
 // Opt in with GEN_BACKEND=spring (mirrors GEN_BACKEND=postgres). Produces a
 // standard Maven project: JPA @Entity per schema entity, a Spring Data
 // repository, a @RestController with full CRUD, a DTO/validation layer, and an
-// application bootstrap — plus a pom.xml pinned to Spring Boot 3.2.x on Java 17.
+// application bootstrap, plus a pom.xml pinned to Spring Boot 3.2.x on Java 17.
 //
 // The Go backend remains the in-sandbox compile guarantee. For Spring, the Java
-// SOURCES are generated deterministically and (this session) compile-checked
+// sources are generated deterministically and (this session) compile-checked
 // with a real javac 17 against minimal stubs; the full `mvn package` that
 // resolves Spring Boot from Maven Central is the documented verify-on-box step
 // (Maven Central is not reachable from the offline build box the way the Go
 // toolchain debs were).
 //
-// GENERATE-side only — must never be linked by understand-server (archtest
+// Generate side only. It must never be linked by understand-server (archtest
 // enforces). Lives in package engine alongside the Go/postgres generators and
 // reuses their identifier/sanitiser helpers (exportName, splitIdent, jsonTag,
 // fieldsForEntity, relationFields, plural, routeName, writeFileMk).
@@ -40,7 +40,7 @@ const springPkgPath = "backend/src/main/java/com/gensystem/app"
 
 // ─── Java type + identifier helpers ──────────────────────────
 //
-// We deliberately do NOT reuse goType (Go types). Java needs boxed reference
+// We deliberately do not reuse goType (Go types). Java needs boxed reference
 // types for JPA columns. javaFieldName produces lowerCamelCase; javaClassName
 // reuses exportName (PascalCase). columnName reuses jsonTag (snake_case) so the
 // DB columns match the Go/Postgres generator's convention.
@@ -64,8 +64,8 @@ func javaType(t string) string {
 
 // javaFieldName → lowerCamelCase valid Java identifier (e.g. "due date" ->
 // "dueDate", "UserID" via splitIdent -> "userid"? no: splitIdent("UserID")=
-// ["UserID"], so we route relation FK names through splitCamel first — done by
-// relationFields — and entity fields through here).
+// ["UserID"], so we route relation FK names through splitCamel first (done by
+// relationFields) and entity fields through here).
 func javaFieldName(s string) string {
 	parts := splitIdent(s)
 	if len(parts) == 0 {
@@ -116,7 +116,7 @@ var javaReserved = map[string]bool{
 // ─── project skeleton: pom.xml + application bootstrap ────────
 
 // GenerateSpringApp writes the whole Spring Boot project for the entity set.
-// Called from GenerateBackendApp when springEnabled(). It does NOT emit the Go
+// Called from GenerateBackendApp when springEnabled(). It does not emit the Go
 // files (the caller gates those out in Spring mode).
 //
 // v26.59 (N07): every writeFileMk error was dropped, so a file that could not

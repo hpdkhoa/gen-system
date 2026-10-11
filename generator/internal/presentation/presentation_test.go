@@ -399,7 +399,7 @@ func TestRegisterRoutes_AllEndpoints(t *testing.T) {
 // ─── New / AddFlowData ────────────────────────────────────────
 
 func TestNew_NilIndex(t *testing.T) {
-	// New(nil) should not panic — it should initialise with empty index
+	// New(nil) should not panic. It should initialise with empty index
 	defer func() {
 		if r := recover(); r != nil {
 			t.Errorf("New(nil) panicked: %v", r)

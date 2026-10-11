@@ -1,17 +1,17 @@
-// genbench main — v23.32 (stdlib provenance): added `--stdlib` / `--stdlib-lang`
+// genbench main, v23.32 (stdlib provenance): added `--stdlib` / `--stdlib-lang`
 // to the `resolution` subcommand; when set, routes to ResolutionRecallWithStdlib
 // which ingests the stdlib read-only and reports a separate with-stdlib recall
-// alongside the unchanged honest internal recall. `--stdlib go` expands to
+// alongside the unchanged internal recall (project symbols only). `--stdlib go` expands to
 // GOROOT/src. Prior:
-// genbench main — v23.25 (task F): `regression` accepts `--baseline` (resolves
+// genbench main, v23.25 (task F): `regression` accepts `--baseline` (resolves
 // --old to the committed bench/baselines/cobolcraft_v23.24.json) and `--strict`
 // (exit non-zero on drift; default is report-only). Enables the frozen COBOL
 // baseline + CI-gate workflow without hand-wiring JSON paths.
-// genbench main — v23.14 (Phase 6): added `genbench springgen` (Spring Boot project gen check).
-// genbench main — v23.13 (Phase 5): added `genbench webgate` (generate web project + tsc/build gate).
-// generator/cmd/genbench/main.go — v23.11 (Phase 1): added `postgres`
-// subcommand — generates a GEN_BACKEND=postgres app and asserts on the emitted
-// migrations + FK-constraint SQL (pure-Go gate; companion verify-postgres.sh
+// genbench main, v23.14 (Phase 6): added `genbench springgen` (Spring Boot project gen check).
+// genbench main, v23.13 (Phase 5): added `genbench webgate` (generate web project + tsc/build gate).
+// generator/cmd/genbench/main.go, v23.11 (Phase 1): added the `postgres`
+// subcommand. It generates a GEN_BACKEND=postgres app and asserts on the emitted
+// migrations + FK-constraint SQL (pure-Go gate; companion bench/verify-postgres.sh
 // does the live-DB apply/CRUD/FK-rejection run). Also folded into `all`.
 // v19.8b: added `diag` subcommand for resolution-recall debugging. v19.7 base
 // unchanged.
@@ -38,7 +38,7 @@ import (
 	"github.com/hpdkhoa/gen-system/generator/internal/style"
 )
 
-const usage = `genbench — reliability and performance bench for gen-system
+const usage = `genbench: reliability and performance bench for gen-system
 
 USAGE
   genbench <subcommand> [flags]
@@ -198,7 +198,7 @@ func parseCommon(fs *flag.FlagSet, args []string) commonFlags {
 	fs.StringVar(&cf.labels, "labels", "", "effect-labels JSON path")
 	fs.IntVar(&cf.runs, "runs", 5, "number of runs (gen/determinism)")
 	fs.Float64Var(&cf.threshold, "threshold", 0.90, "resolution-recall pass threshold (0..1)")
-	fs.StringVar(&cf.stdlib, "stdlib", "", "v26.5: comma-separated stdlib roots, language PER ROOT. Shorthands: 'go' → GOROOT/src, 'cobol' → built-in runtime catalog. Explicit: 'java=/opt/jdk/java.base'. Mixable: 'go,java=/opt/jdk/java.base'. Empty = no stdlib (the honest project-only benchmark). 'auto' is REJECTED here: a benchmark must be reproducible.")
+	fs.StringVar(&cf.stdlib, "stdlib", "", "v26.5: comma-separated stdlib roots, language per root. Shorthands: 'go' → GOROOT/src, 'cobol' → built-in runtime catalog. Explicit: 'java=/opt/jdk/java.base'. Mixable: 'go,java=/opt/jdk/java.base'. Empty = no stdlib (a project-only benchmark). 'auto' is rejected here, because a benchmark must be reproducible.")
 	fs.StringVar(&cf.stdlibLang, "stdlib-lang", "", "DEPRECATED (v26.5): legacy single language label for bare --stdlib paths. Prefer the per-root 'lang=path' form.")
 	_ = fs.Parse(args)
 	return cf
@@ -206,19 +206,19 @@ func parseCommon(fs *flag.FlagSet, args []string) commonFlags {
 
 // stdlibRootsFor turns the --stdlib flag into concrete StdlibRoot entries.
 //
-// v26.5: delegates to the SHARED context.ParseStdlibSpec — this was the third
+// v26.5: delegates to the shared context.ParseStdlibSpec. This was the third
 // hand-rolled copy of the same "go"/"cobol" expansion (gen-server had two more)
 // and it had already drifted: its synthetic COBOL root omitted AutoScope:false,
-// and like the others it applied ONE --stdlib-lang to EVERY path, which made a
+// and like the others it applied one --stdlib-lang to every path, which made a
 // multi-language spec impossible to express. The shared parser takes the
 // language per root ("java=/opt/jdk/java.base").
 //
-// NOTE the deliberate difference from the servers: genbench does NOT support
-// auto-detection. Its whole purpose is the honest internal-recall number, and a
-// benchmark must measure exactly what it was told to measure — a root set that
-// varies with the machine's GOROOT/JAVA_HOME would make results irreproducible.
-// So `--stdlib auto` is REJECTED here (loudly, rather than silently ingesting
-// nothing), and an empty --stdlib means no stdlib at all.
+// NOTE the deliberate difference from the servers: genbench does not support
+// auto-detection. Its whole purpose is the internal-recall number (project
+// symbols only). A benchmark must measure exactly what it was told to measure,
+// and a root set that varies with the machine's GOROOT/JAVA_HOME would make
+// results irreproducible. So genbench rejects `--stdlib auto` (loudly, rather
+// than silently ingesting nothing), and an empty --stdlib means no stdlib at all.
 func stdlibRootsFor(spec, langLabel string) []agentctx.StdlibRoot {
 	spec = strings.TrimSpace(spec)
 	if spec == "" {
@@ -303,8 +303,8 @@ func cmdResolution(args []string) {
 	abs, _ := filepath.Abs(cf.root)
 	r := newRun(cf.model, cf.host, abs)
 	if roots := stdlibRootsFor(cf.stdlib, cf.stdlibLang); len(roots) > 0 {
-		// v23.32: stdlib-inclusive resolution. Reports honest internal recall
-		// (project symbols only) AND a separate with-stdlib number.
+		// v23.32: stdlib-inclusive resolution. Reports the internal recall
+		// (project symbols only) and a separate with-stdlib number.
 		r.Suites = []bench.Suite{
 			bench.ResolutionRecallWithStdlib(abs, splitCopybooks(cf.copybooks), roots, cf.threshold),
 		}
@@ -354,7 +354,7 @@ func cmdDiff(args []string) {
 // Pure-Go generation gate for the Postgres layer. Generates a
 // GEN_BACKEND=postgres app from a fixed two-entity-with-FK fixture and asserts
 // the migrations + 900_foreign_keys.sql are emitted correctly. The live-DB
-// apply / CRUD / FK-rejection run is verify-postgres.sh's job.
+// apply / CRUD / FK-rejection run is the job of bench/verify-postgres.sh.
 
 func cmdPostgres(args []string) {
 	fs := flag.NewFlagSet("postgres", flag.ExitOnError)
@@ -374,7 +374,7 @@ func cmdWebGate(args []string) {
 	finish(r, cf.out)
 }
 
-// âââ subcommand: springgen (Phase 6) âââ
+// ─── subcommand: springgen (Phase 6) ─────────────────────────────────
 
 func cmdSpringGen(args []string) {
 	fs := flag.NewFlagSet("springgen", flag.ExitOnError)
@@ -507,7 +507,7 @@ func loadIdeas(path string) []string {
 }
 
 // ─── subcommand: localize (v26.31) ───────────────────────────────────
-// Localization recall on an arbitrary repository. NOT a solve rate: see
+// Localization recall on an arbitrary repository. It is not a solve rate: see
 // bench/swebench/README.md for the boundary. Seeds and gold files come from
 // files so a 500 task driver never hits argv limits.
 
@@ -633,13 +633,13 @@ func cmdRegression(args []string) {
 	}
 	fmt.Println(strings.Repeat("─", 70))
 	if !ok {
-		fmt.Println("DRIFT — at least one metric regressed beyond tolerance")
+		fmt.Println("DRIFT: at least one metric regressed beyond tolerance")
 		if cf.strict {
 			os.Exit(1)
 		}
 		return
 	}
-	fmt.Println("OK — no metric regressed beyond tolerance")
+	fmt.Println("OK: no metric regressed beyond tolerance")
 }
 
 // findBaseline locates the committed COBOL baseline JSON. It walks up from the

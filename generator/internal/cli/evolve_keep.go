@@ -1,4 +1,4 @@
-// evolve_keep.go — v26.58: gen evolve never drops a field.
+// evolve_keep.go (v26.58): gen evolve never drops a field.
 //
 // The user decided that a field which disappears from the schema must stay in
 // the generated app, with a warning. Before, the evolution merge kept the field

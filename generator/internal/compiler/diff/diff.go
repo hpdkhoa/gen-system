@@ -1,4 +1,4 @@
-// diff.go — TASK 3 (v19): skip appending EntityChange to Modified when
+// diff.go (TASK 3, v19): skip appending EntityChange to Modified when
 // Added, Removed, and Modified are all empty (was: always appended).
 package diff
 

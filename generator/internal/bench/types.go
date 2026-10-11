@@ -1,4 +1,4 @@
-// generator/internal/bench/types.go — v19.7 (genbench): shared bench types.
+// generator/internal/bench/types.go, v19.7 (genbench): shared bench types.
 // New package. Defines the JSON shape every scenario emits so the
 // `regression` subcommand can diff runs and the report writer can render them
 // without knowing which scenario produced which metric.
@@ -41,7 +41,7 @@ type Suite struct {
 	Notes    string        `json:"notes,omitempty"`
 }
 
-// Case is a pass/fail check. Use for reliability — assertions about
+// Case is a pass/fail check. Use for reliability: assertions about
 // what the engine produced.
 type Case struct {
 	Name string `json:"name"`

@@ -1,10 +1,10 @@
 // v23.44: gen-server resolves the web UI dir to an absolute path (--web / binary-dir/web / ./web) so studio-v23.html is served deterministically regardless of launch dir.
-// gen-server/main.go — v23.32 (stdlib provenance): --stdlib / --stdlib-lang
+// gen-server/main.go, v23.32 (stdlib provenance): --stdlib / --stdlib-lang
 // flags; initial load goes through LoadContextWithOpts so the Understand views
 // can resolve and display calls that cross into the standard library.
-// gen-server/main.go — v23: banner now points at /studio-v23.html (redesigned UI).
-// gen-server/main.go — TASK 1 (v19): start incremental file watcher after
-// gen-server/main.go — v20: --copybooks flag; SetRoot wiring; banner points at studio.html.
+// gen-server/main.go, v23: banner now points at /studio-v23.html (redesigned UI).
+// gen-server/main.go, TASK 1 (v19): start incremental file watcher after
+// gen-server/main.go, v20: --copybooks flag; SetRoot wiring; banner points at studio.html.
 // LoadContext; drain watcher Events channel to update presServer + push SSE.
 package main
 
@@ -40,7 +40,7 @@ func main() {
 	stdlibSpec := flag.String("stdlib", "", "v26.5: comma-separated stdlib roots, language PER ROOT. 'auto' (default when omitted) detects a runtime for every language in the project; 'none' opts out. Shorthands: 'go' → GOROOT/src, 'cobol' → built-in runtime catalog. Explicit form: 'java=/opt/jdk/java.base'. Mixable: 'go,java=/opt/jdk/java.base'. All roots are import-scoped.")
 	stdlibLang := flag.String("stdlib-lang", "", "DEPRECATED (v26.5): legacy single language label applied to bare --stdlib paths. Prefer the per-root 'lang=path' form, which is the only way to express a multi-language project.")
 	githubEnabled := flag.Bool("github-enabled", false,
-		"mount /api/github/* routes; default off — keeps the studio offline")
+		"mount /api/github/* routes; default off, which keeps the studio offline")
 	webDir := flag.String("web", "",
 		"directory holding the Studio UI (studio-v23.html). Default: <binary-dir>/web, else ./web. v23.44: pin this so the UI is served from a known place regardless of launch dir.")
 	projectsBase := flag.String("projects-base", "",
@@ -48,7 +48,7 @@ func main() {
 	enrichInline := flag.Bool("enrich-inline", false,
 		"v26.22: enrich beliefs with the local model DURING each rebuild, instead of out-of-band via gen-enrich. "+
 			"Costs a model call per routine on every re-parse, so it suits small projects and demos; prefer gen-enrich for real codebases. "+
-			"A missing/unreachable model is not an error — the parser and human belief tiers carry on.")
+			"A missing or unreachable model is not an error. The parser and human belief tiers carry on.")
 	watchLive := flag.Bool("watch", false,
 		"v24: start the file watcher live at boot (default STATIC: no live watching until switched on per-project in the Studio).")
 	flag.Parse()
@@ -70,7 +70,7 @@ func main() {
 	// v26.5: one shared spec parser (context.ParseStdlibSpec) replaces the inline
 	// per-binary special-casing of "go"/"cobol" that gen-server, understand-server
 	// and genbench each carried a copy of (and could drift on). The language is now
-	// a property of each ROOT ("java=/opt/jdk/java.base"), not of the flag, so a
+	// a property of each root ("java=/opt/jdk/java.base"), not of the flag, so a
 	// multi-language project is finally expressible. An omitted --stdlib means
 	// "auto": detect a runtime for every language actually in the project.
 	roots, auto := agentctx.ParseStdlibSpec(*stdlibSpec, *stdlibLang)
@@ -88,15 +88,15 @@ func main() {
 	presServer.SetRoot(*root, *copybooks, *browseRoot)
 	presServer.SetStdlibReport(stdlibReportView(ctx.StdlibReport))
 
-	// v26.22: optional INLINE enrichment. gen-server is the generation-side binary,
-	// so it may legitimately link internal/enrich; presentation may not (archtest
-	// forbids it), which is why the wiring is inverted — we reach into the store and
+	// v26.22: optional inline enrichment. gen-server is the generation-side binary,
+	// so it may legitimately link internal/enrich. Presentation may not (archtest
+	// forbids it), so the wiring is inverted: we reach into the store and
 	// inject rather than presentation importing the model. Off by default: enrichment
 	// costs a model call per routine on every rebuild, so the out-of-band gen-enrich
 	// producer remains the recommended path for anything but a small project.
 	attachEnricher(presServer, ctx.Index, *enrichInline)
 
-	// v24: re-pointable watcher manager. Default is STATIC (no live watching)
+	// v24: re-pointable watcher manager. Default is static (no live watching)
 	// unless --watch is passed; the Studio can switch a loaded project to live
 	// per-load. wm.repoint(root, live, idx) stops the current watcher and, only
 	// when live, starts a fresh one bound to the given index + root, re-attaching
@@ -118,26 +118,26 @@ func main() {
 	}
 
 	// v24: loader closure over LoadContextWithOpts. Returns a swap() that applies
-	// the freshly parsed context to the presentation server AND re-binds the
+	// the freshly parsed context to the presentation server and re-binds the
 	// watcher to the new index (so live watching, if on, tracks the new project).
 	loader := func(r string, o presentation.ProjectLoadOpts) (string, func(*presentation.Server), error) {
 		lo := agentctx.LoadContextOpts{}
 		if o.CopybookPath != "" {
 			lo.CopybookPath = filepath.SplitList(o.CopybookPath)
 		}
-		// v26.5: the SAME shared spec parser as the boot path. This copy had
-		// already drifted — it never handled the 'cobol' synthetic catalog, so a
+		// v26.5: the same shared spec parser as the boot path. This copy had
+		// already drifted. It never handled the 'cobol' synthetic catalog, so a
 		// COBOL project loaded through the Studio's 📂 picker silently got no
 		// runtime while the same project passed via --stdlib on the command line
 		// did. A dynamically loaded project with no
-		// stdlib spec now AUTO-detects, matching the boot default.
+		// stdlib spec now auto-detects, matching the boot default.
 		sroots, sauto := agentctx.ParseStdlibSpec(o.Stdlib, o.StdlibLang)
 		lo.StdlibRoots = sroots
 		lo.StdlibAuto = sauto
 		newCtx := agentctx.LoadContextWithOpts(r, lo)
 		swap := func(ps *presentation.Server) {
 			ps.ReplaceContext(newCtx.Index, newCtx.CFGs, newCtx.Effects)
-			// v26.5: the newly loaded project has its OWN stdlib outcome — refresh
+			// v26.5: the newly loaded project has its own stdlib outcome. Refresh
 			// the report too, or Architecture would keep describing the previous
 			// project's runtimes.
 			ps.SetStdlibReport(stdlibReportView(newCtx.StdlibReport))
@@ -159,7 +159,7 @@ func main() {
 	// current root).
 	buildSvc.SetProjectsBase(base)
 
-	// v23.44: resolve the Studio UI directory to an ABSOLUTE path so it's served
+	// v23.44: resolve the Studio UI directory to an absolute path so it's served
 	// from a known place no matter which directory gen-server was launched from.
 	resolvedWeb := resolveWebDir(*webDir)
 	srv := api.NewServerWithProject(h, broker, presServer, *githubEnabled, resolvedWeb, pm)
@@ -193,7 +193,7 @@ func main() {
 //  3. ./web (legacy CWD-relative behaviour) as a last resort
 //
 // Returning an absolute path means the served studio-v23.html is deterministic
-// regardless of where gen-server was launched from — the fix for "I replaced
+// regardless of where gen-server was launched from. This fixes "I replaced
 // the UI file but the browser still shows the old one".
 func resolveWebDir(flagVal string) string {
 	abs := func(p string) string {
@@ -230,7 +230,7 @@ type watchManager struct {
 
 // rebind points the manager at a new symbol index (after a project swap) without
 // changing live/root state. If a watcher is currently live, it is restarted so
-// it updates the NEW index.
+// it updates the new index.
 func (m *watchManager) rebind(idx *symbols.Index) {
 	m.mu.Lock()
 	m.idx = idx
@@ -302,10 +302,10 @@ func stdlibReportView(r agentctx.StdlibReport) presentation.StdlibReportView {
 // attachEnricher injects the optional enrich tier into the presentation server's
 // belief store (v26.22).
 //
-// The dependency direction matters: internal/presentation is a CORE Understand
+// The dependency direction matters: internal/presentation is a core Understand
 // package and archtest forbids it from importing internal/enrich (which pulls in the
-// model). So presentation exposes its store and the GENERATION-side binary — this one
-// — does the injection. understand-server never calls this, and therefore never links
+// model). So presentation exposes its store and the generation-side binary (this one)
+// does the injection. understand-server never calls this, and therefore never links
 // enrich at all.
 //
 // Must be re-called after any operation that rebinds the store (SetRoot at boot,
@@ -319,7 +319,7 @@ func attachEnricher(ps *presentation.Server, idx *symbols.Index, on bool) {
 		return
 	}
 	if !enrich.Available() {
-		fmt.Println("⚠ --enrich-inline: local model not reachable — belief enrichment is OFF.")
+		fmt.Println("⚠ --enrich-inline: local model not reachable, so belief enrichment is off.")
 		fmt.Println("  The parser and human belief tiers work without it; start Ollama and restart to enable.")
 		return
 	}
@@ -330,7 +330,7 @@ func attachEnricher(ps *presentation.Server, idx *symbols.Index, on bool) {
 
 // bodyProviderFor returns a BodyProvider that reads a routine's source on demand,
 // preferring exact byte offsets and falling back to line slicing for the frontends
-// that record only line numbers (Java/COBOL/TS/Python — see v26.20). Results are
+// that record only line numbers (Java/COBOL/TS/Python; see v26.20). Results are
 // cached per file while the file keeps its mod time and size.
 func bodyProviderFor(idx *symbols.Index) belief.BodyProvider {
 	// v26.58 (D017): the cache kept the first bytes of a file for the life of

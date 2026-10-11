@@ -1,4 +1,4 @@
-// context/cobol_runtime_test.go — v23.33 (COBOL runtime catalog): proves the
+// context/cobol_runtime_test.go (v23.33, COBOL runtime catalog): proves the
 // synthetic catalog resolves COBOL intrinsic (FUNCTION) and runtime-service
 // (CALL) references to ProvStdlib symbols, while leaving a genuinely missing
 // program unresolved. This is the COBOL analog of the Go/Java stdlib proofs and
@@ -78,7 +78,7 @@ func TestCobolRuntimeCatalog_Resolution(t *testing.T) {
 	if intoProject < 1 {
 		t.Errorf("expected >=1 edge into a project paragraph (CALC-TAX), got %d", intoProject)
 	}
-	// CALL "MISSING-PROG" must stay unresolved — the catalog never invents it.
+	// CALL "MISSING-PROG" must stay unresolved. The catalog never invents it.
 	if unresolved < 1 {
 		t.Errorf("expected the genuinely missing program to stay unresolved, got %d unresolved", unresolved)
 	}

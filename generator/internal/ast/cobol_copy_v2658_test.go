@@ -1,4 +1,4 @@
-// cobol_copy_v2658_test.go — v26.58: COPY expansion defects.
+// cobol_copy_v2658_test.go (v26.58): COPY expansion defects.
 //
 // D056: expandCopybooks marked a copybook as visited and never cleared the
 // mark, so a second COPY of the same book (a common pattern with REPLACING)

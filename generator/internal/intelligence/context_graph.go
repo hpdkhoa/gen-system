@@ -14,8 +14,8 @@ import (
 //	Layer  → file paths grouped by architectural role
 //	Call chain: Handler → Service → Repo → Model (inferred from imports)
 //
-// This enables the healer to find ALL related files for an entity
-// across layers, not just the single file that errored.
+// This enables the healer to find all related files for an entity
+// across layers, beyond the single file that errored.
 // ─────────────────────────────────────────────
 type SystemGraph struct {
 	// EntityToFiles: entity name → all file paths that reference it.

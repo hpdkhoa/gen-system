@@ -1,4 +1,4 @@
-// generator/internal/ollama.go — v26.24 (WP2): GPU/context knobs and streaming
+// generator/internal/ollama.go, v26.24 (WP2): GPU/context knobs and streaming
 // are now configurable via env, so the offload/streaming benches can measure the
 // real production door instead of a bench-only shim. OLLAMA_NUM_GPU (layers to
 // offload), OLLAMA_NUM_CTX, OLLAMA_NUM_BATCH are passed through as request
@@ -10,7 +10,7 @@
 // Prior (v23.21): HTTP timeout, Ollama host, and keep_alive configurable via env
 // (OLLAMA_TIMEOUT seconds, OLLAMA_HOST, OLLAMA_KEEP_ALIVE). Default timeout
 // raised 90s→600s because running two models (a planner model and a code model)
-// means a cold model load (30–90s) can happen mid-run on top of generation time;
+// means a cold model load (30 to 90s) can happen mid-run on top of generation time;
 // 90s was too tight. keep_alive keeps a model resident between calls so the
 // second phase doesn't reload.
 package ai
@@ -83,7 +83,7 @@ type OllamaRequest struct {
 	KeepAlive any             `json:"keep_alive,omitempty"` // v23.21: keep model warm; v26.32: number or duration string
 }
 
-// OllamaOptions — deterministic guardrails, plus optional GPU/context knobs.
+// OllamaOptions holds deterministic guardrails, plus optional GPU/context knobs.
 // The three pointer fields are nil (and omitted from the request JSON) unless
 // their env var is set, so a box that never sets them sends byte-identical
 // requests to the pre-v26.24 code.
@@ -201,8 +201,8 @@ func AskLLM(prompt string) (string, error) {
 // AskLLMJSON calls the model with Ollama's structured-output constraint. If
 // schema is non-nil it must be a JSON Schema object and the model is forced to
 // produce output matching it; if schema is nil, plain JSON mode ("format":
-// "json") is used. Either way the model CANNOT emit the bracket-mismatched
-// garbage that free-form prompting produced. v23.1 round 3 — root-cause fix.
+// "json") is used. Either way the model cannot emit the bracket-mismatched
+// garbage that free-form prompting produced. v23.1 round 3: root-cause fix.
 func AskLLMJSON(prompt string, model string, schema json.RawMessage) (string, error) {
 	format := schema
 	if len(format) == 0 {

@@ -1,4 +1,4 @@
-// generator/internal/ai/op_binding_v2325_test.go — v23.25 (task B): the
+// generator/internal/ai/op_binding_v2325_test.go, v23.25 (task B): the
 // negative post-filter keeps correctly-bound ops and flags an op generated on
 // the wrong entity. Mirrors the real orders/products scenario from the on-box
 // run (Order: checkout, discount; Product: adjust-stock).

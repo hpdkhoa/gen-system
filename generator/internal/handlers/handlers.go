@@ -1,4 +1,4 @@
-// handlers.go — v21: + staging service field (propose-before-write evolve).
+// handlers.go (v21): + staging service field (propose-before-write evolve).
 package handlers
 
 import (

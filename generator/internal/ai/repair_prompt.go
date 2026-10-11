@@ -8,8 +8,8 @@ import (
 // ─────────────────────────────────────────────
 // RepairCtx carries all inputs needed to build a repair prompt.
 // agent/healer.go populates this struct and calls BuildRepairPrompt.
-// The ai package owns the prompt format — healer owns the logic of
-// WHEN to escalate and WHAT context to collect.
+// The ai package owns the prompt format. The healer owns the logic of
+// when to escalate and what context to collect.
 // ─────────────────────────────────────────────
 type RepairCtx struct {
 	// Core context (always present)
@@ -27,7 +27,7 @@ type RepairCtx struct {
 
 	// Attempt 2+: RAG-retrieved framework documentation snippets (Phase 2.2)
 	// Populated by rag.SearchSummary(errMsg, 3) when docs have been ingested.
-	// Empty string = no docs ingested yet or no relevant match — omit silently.
+	// Empty string = no docs ingested yet or no relevant match; omit silently.
 	RAGContext string
 
 	// Attempt 3: related file content
@@ -47,7 +47,7 @@ type RepairCtx struct {
 //	Attempt 2: also set ArchSummary + RAGContext
 //	Attempt 3: also set RelatedFiles
 //
-// This function only formats — it has no notion of "attempts".
+// This function only formats. It has no notion of "attempts".
 func BuildRepairPrompt(ctx RepairCtx) string {
 	var b strings.Builder
 
@@ -60,7 +60,7 @@ func BuildRepairPrompt(ctx RepairCtx) string {
 	b.WriteString(fmt.Sprintf("REPAIR HINT: %s\n\n", ctx.ErrHint))
 	b.WriteString(fmt.Sprintf("EXISTING CODE:\n%s\n", ctx.ExistingCode))
 
-	// Phase 2.2 — RAG framework docs injected at attempt 2+
+	// Phase 2.2: RAG framework docs injected at attempt 2+
 	if ctx.RAGContext != "" {
 		b.WriteString("\n# RELEVANT FRAMEWORK DOCUMENTATION:\n")
 		b.WriteString(ctx.RAGContext)

@@ -1,4 +1,4 @@
-// conflicts_test.go — v25.8: pins the push-back logic (moved from cli). Internal
+// conflicts_test.go (v25.8): pins the push-back logic (moved from cli). Internal
 // to planner_v2, so it exercises DetectConflicts + EntityIsReadDominant directly.
 package planner_v2
 

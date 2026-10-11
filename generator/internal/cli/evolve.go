@@ -75,12 +75,12 @@ func Evolve() {
 		changedSet[name] = true
 	}
 
-	// ✅ Use DYNAMIC task graph — only generates tasks for changed entities,
+	// ✅ Use a dynamic task graph. It only generates tasks for changed entities,
 	// and only adds migrate tasks for entities that are actually new/changed.
 	tasks := planner.TaskGraphDynamic(sfile, writeDir, changedSet)
 
 	if len(tasks) == 0 {
-		fmt.Println("✅ No changes detected — nothing to evolve")
+		fmt.Println("✅ No changes detected; nothing to evolve")
 		return
 	}
 

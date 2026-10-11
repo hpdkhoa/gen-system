@@ -1,20 +1,20 @@
-// v23.37: added GET /api/present/source?sym=<id> — full contiguous source of a
+// v23.37: added GET /api/present/source?sym=<id>: full contiguous source of a
 // symbol (read-only, bounded to its span) so the Studio can show real code
 // behind a graph node / CFG. See handleSource.
 // v23.7: collapse consecutive duplicate source lines (assign+call on one line).
-// v23.4: GET /api/present/flow now returns BlockEntry.Lines — each statement as
+// v23.4: GET /api/present/flow now returns BlockEntry.Lines, each statement as
 // its real source line (read from the func's file via Span), so the CFG shows
 // actual Go code instead of coarse "call X" categories. Legacy Stmts kept.
 // v20.3: file browser uses browseRoot; expandable tree support unchanged server-side. (v20: /api/present/files, SetRoot, copybook parse, dir guard.)
-// presentation.go — TASK 1 (v19): added OnFileChanged hook, sync.RWMutex on
+// presentation.go (TASK 1, v19): added OnFileChanged hook, sync.RWMutex on
 // cfgs/efx maps, and broker field so SSE push works from the watcher goroutine.
 package presentation
 
 // ─────────────────────────────────────────────────────────────
-// presentation — HTTP API for human-in-the-loop code review
+// presentation: HTTP API for human-in-the-loop code review
 //
 // This is Phase 4: the "present layer" that makes the system's
-// understanding visible and correctable by a human BEFORE any
+// understanding visible and correctable by a human before any
 // code changes are made.
 //
 // Endpoints:
@@ -121,7 +121,7 @@ type DataFlowIssueView struct {
 // and the generator may not import presentation, so a leaf package was required).
 // These aliases keep presentation's existing references (Belief, BeliefKind,
 // BeliefCorrection, BeliefLayer, …) working unchanged while the definitions live
-// in one place. Session 1 is a pure relocation — behavior is preserved.
+// in one place. Session 1 only moved code; behavior is unchanged.
 type (
 	BeliefKind       = belief.Kind
 	Belief           = belief.Belief
@@ -184,7 +184,7 @@ type Server struct {
 	browseRoot string
 
 	// v26.5: what the stdlib pass attached / skipped, surfaced on Architecture
-	// so the edge-resolution % explains itself. Stored as a LOCAL DTO rather
+	// so the edge-resolution % explains itself. Stored as a local DTO rather
 	// than importing internal/context here: presentation is a read-only view
 	// layer and must not take a dependency on the loader (the understand-server
 	// boundary test walks these imports). The caller mirrors the loader's report
@@ -240,11 +240,11 @@ func New(idx *symbols.Index) *Server {
 	}
 }
 
-// BeliefStore returns the live belief store so a GENERATION-SIDE caller can inject
+// BeliefStore returns the live belief store so a generation-side caller can inject
 // the optional enrich tier (v26.22). presentation itself must never import
-// internal/enrich — it is a core Understand package and enrich pulls in the model
-// (archtest enforces this) — so the wiring is inverted: gen-server, which legitimately
-// links both halves, calls this and injects. understand-server simply never calls it,
+// internal/enrich: it is a core Understand package and enrich pulls in the model
+// (archtest enforces this). So the wiring is inverted: gen-server, which
+// links both halves, calls this and injects. understand-server never calls it,
 // and the enterprise binary stays model-free.
 //
 // Returns nil before SetRoot has bound a project. Callers should re-inject after
@@ -274,7 +274,7 @@ func (s *Server) SetRoot(root, copybookPath, browseRoot string) {
 	if copybookPath != "" {
 		s.copybookPaths = filepath.SplitList(copybookPath)
 	}
-	// Rebind the belief store to <root>/.gen so corrections belong to THIS
+	// Rebind the belief store to <root>/.gen so corrections belong to this
 	// project rather than the process working directory (the old CWD-relative
 	// path meant corrections for project A reappeared while viewing project B).
 	if s.root != "" {
@@ -320,13 +320,13 @@ func (s *Server) roots() (root, browseRoot string, copybookPaths []string) {
 	return s.root, browseRoot, append([]string(nil), s.copybookPaths...)
 }
 
-// ReplaceContext atomically swaps the entire analysis context — symbol index,
-// CFGs, and effects — for a freshly loaded project. v24: this is the backend of
+// ReplaceContext atomically swaps the entire analysis context (symbol index,
+// CFGs, and effects) for a freshly loaded project. v24: this is the backend of
 // the Studio "load / clear project" (dynamic --root) feature. Everything is
 // swapped under the write lock so in-flight reads (via index() and the cfgs/efx
 // maps) see a consistent old-or-new snapshot, never a torn mix. Beliefs are
-// rebuilt from the new index (corrections are keyed by symbol and simply won't
-// match the new project's symbols — they are not lost, just inert until a
+// rebuilt from the new index (corrections are keyed by symbol and won't
+// match the new project's symbols; they are not lost, only inert until a
 // matching project is loaded again). Passing a nil idx clears the project
 // (empty state).
 func (s *Server) ReplaceContext(idx *symbols.Index, cfgs map[string]flow.CFGSet, efx map[string]*flow.FuncEffects) {
@@ -447,9 +447,9 @@ func (s *Server) handleSymbols(w http.ResponseWriter, r *http.Request) {
 		}
 		// v20.1: guard against a directory being sent here (e.g. pasted into the
 		// manual path box). Reading a dir as a file yields a confusing
-		// "permission denied" — reject it cleanly and tell the client to browse.
+		// "permission denied". Reject it cleanly and tell the client to browse.
 		if fi, statErr := os.Stat(filePath); statErr == nil && fi.IsDir() {
-			http.Error(w, fmt.Sprintf("%s is a directory — open it in the browser, then pick a file", filePath), http.StatusBadRequest)
+			http.Error(w, fmt.Sprintf("%s is a directory; open it in the browser, then pick a file", filePath), http.StatusBadRequest)
 			return
 		}
 		// Try re-parsing on-demand. v20: COBOL files (esp. copybooks) need a
@@ -662,7 +662,7 @@ func (s *Server) handleFiles(w http.ResponseWriter, r *http.Request) {
 
 // v24: methodsWithCFGFor returns the methods of a type that DO have a CFG, so the
 // flow panel can offer them when a type (which has none) is selected. Each entry
-// is {id, name} — the UI turns them into clickable links.
+// is {id, name}; the UI turns them into clickable links.
 func (s *Server) methodsWithCFGFor(typeSym *symbols.Symbol) []map[string]string {
 	if typeSym == nil {
 		return nil
@@ -695,7 +695,7 @@ func (s *Server) handleFlow(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Find the CFG — take a read lock while scanning the map.
+	// Find the CFG. Take a read lock while scanning the map.
 	s.mu.RLock()
 	var cfg *flow.CFG
 	for _, cfgSet := range s.cfgs {
@@ -739,7 +739,7 @@ func (s *Server) handleFlow(w http.ResponseWriter, r *http.Request) {
 				"noCFG":  true,
 				"kind":   string(sym.Kind),
 				"name":   sym.Name,
-				"reason": sym.Name + " is a " + string(sym.Kind) + " — it holds data, not control flow. CFGs exist only for functions and methods.",
+				"reason": sym.Name + " is a " + string(sym.Kind) + ": it holds data, not control flow. CFGs exist only for functions and methods.",
 			})
 			return
 		case symbols.SymImport, symbols.SymModule:
@@ -747,12 +747,12 @@ func (s *Server) handleFlow(w http.ResponseWriter, r *http.Request) {
 				"noCFG":  true,
 				"kind":   string(sym.Kind),
 				"name":   sym.Name,
-				"reason": sym.Name + " is a " + string(sym.Kind) + " — no control flow to show.",
+				"reason": sym.Name + " is a " + string(sym.Kind) + ": no control flow to show.",
 			})
 			return
 		default:
-			// A function/method that SHOULD have a CFG but doesn't — this is the
-			// genuinely unexpected case (parser produced no body, or it's an
+			// A function/method that should have a CFG but doesn't. This is the
+			// unexpected case (parser produced no body, or it's an
 			// external/stdlib signature with no source body).
 			writeProjectJSON(w, http.StatusOK, map[string]interface{}{
 				"noCFG":  true,
@@ -771,7 +771,7 @@ func (s *Server) handleFlow(w http.ResponseWriter, r *http.Request) {
 		table, _ = idxCFG.TableFor(sym.DefinedIn)
 	}
 
-	// v23.4 — load the function's source file once so each CFG statement can be
+	// v23.4: load the function's source file once so each CFG statement can be
 	// rendered as its real source line (keyed by Span), instead of the coarse
 	// "call X" category that made Go read like flat procedural code.
 	var srcLines []string
@@ -812,7 +812,7 @@ func (s *Server) handleFlow(w http.ResponseWriter, r *http.Request) {
 			if text == "" {
 				text = desc // fall back to the category when no source is available
 			}
-			// v23.7 — collapse consecutive duplicate source lines (an assignment
+			// v23.7: collapse consecutive duplicate source lines (an assignment
 			// emits both a NodeAssign and a NodeCall for the same RHS line).
 			if k := len(be.Lines); k > 0 && be.Lines[k-1].Line == ln && be.Lines[k-1].Text == text {
 				continue
@@ -832,7 +832,7 @@ func (s *Server) handleFlow(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 
-	// Effects — read under lock.
+	// Effects: read under lock.
 	s.mu.RLock()
 	if e, ok := s.efx[funcID]; ok {
 		for eff := range e.Effects {
@@ -848,8 +848,8 @@ func (s *Server) handleFlow(w http.ResponseWriter, r *http.Request) {
 // ─── Source View ──────────────────────────────────────────────
 // v23.37: GET /api/present/source?sym=<symbolID> returns the full contiguous
 // source of a symbol, read from its DefinedIn file between the symbol's span
-// lines. This is what lets the Studio show the REAL code behind a graph node or
-// CFG — not just the per-statement fragments the flow endpoint already emits.
+// lines. This is what lets the Studio show the real code behind a graph node or
+// CFG, beyond the per-statement fragments the flow endpoint already emits.
 // Read-only, bounded to the symbol's own span, never writes.
 
 // SourceLine is one numbered line of source.

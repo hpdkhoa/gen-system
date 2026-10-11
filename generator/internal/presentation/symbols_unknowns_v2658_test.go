@@ -1,4 +1,4 @@
-// symbols_unknowns_v2658_test.go — v26.58 (D087): handleSymbols parsed a COBOL
+// symbols_unknowns_v2658_test.go (v26.58, D087): handleSymbols parsed a COBOL
 // file that the index did not hold with the copybook aware frontend, but read
 // the unknown nodes only from ast.DefaultCache, where that parse never went.
 // A COPY with no copybook gave an empty unknowns list, so the user did not see

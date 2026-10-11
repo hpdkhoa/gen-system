@@ -1,4 +1,4 @@
-// lock_v2658_test.go — v26.58 (D084, D085, D086): several handlers read s.idx,
+// lock_v2658_test.go (v26.58, D084, D085, D086): several handlers read s.idx,
 // s.root and s.beliefs directly, with no lock, while ReplaceContext and SetRoot
 // write those fields under s.mu. A Studio project load in the middle of a
 // request mixed the old and the new project, and the reads were data races.

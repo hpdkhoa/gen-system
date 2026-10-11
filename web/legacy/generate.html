@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- generate.html — v23.8: idea → code console. Plain-language goal → POST
+<!-- generate.html (v23.8): idea → code console. Plain-language goal → POST
      /api/build → live progress over SSE /api/events (build_started, agent_event
      {phase,dot,text}, build_complete, build_failed) → hand off to studio-v23.html
      to understand the generated code. Vanilla JS, no build, shares the studio
@@ -28,7 +28,7 @@
 body { background:var(--bg); color:var(--text); font:15px/1.55 'Inter',-apple-system,sans-serif; min-height:100vh; }
 .mono { font-family:'IBM Plex Mono',monospace; }
 
-/* top bar — matches studio */
+/* top bar (matches studio) */
 .topbar { height:48px; display:flex; align-items:center; gap:12px; padding:0 18px; border-bottom:1px solid var(--border); background:var(--bg-1); position:sticky; top:0; z-index:10; }
 .logo { font-weight:700; letter-spacing:-0.01em; }
 .logo-badge { font-size:11px; padding:1px 7px; border:1px solid var(--border-2); border-radius:10px; color:var(--cyan); }
@@ -152,7 +152,7 @@ h1 { font-size:30px; line-height:1.15; letter-spacing:-0.02em; font-weight:700; 
 .ide-view .ide-placeholder { color:var(--text-dim); font-size:13px; padding:30px 20px; }
 .ide-view .manifest-frame { width:100%; height:100%; border:0; background:#fff; }
 
-/* modal (folder chooser) — matches studio 📂 modal idiom */
+/* modal (folder chooser), matches the studio 📂 modal idiom */
 .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.6); display:none; align-items:center; justify-content:center; z-index:100; }
 .modal-overlay.show { display:flex; }
 .modal { background:var(--bg-1); border:1px solid var(--border-2); border-radius:12px; width:min(560px,92vw); max-height:80vh; display:flex; flex-direction:column; box-shadow:var(--shadow); }
@@ -189,7 +189,7 @@ h1 { font-size:30px; line-height:1.15; letter-spacing:-0.02em; font-weight:700; 
   <div class="wrap">
     <div class="eyebrow">Idea → running code</div>
     <h1>Describe what you want to build.</h1>
-    <p class="lede">Write the product in plain language. gen-system plans the data model, then generates the full stack — and you watch every step as it happens.</p>
+    <p class="lede">Write the product in plain language. gen-system plans the data model, then generates the full stack. You watch every step as it happens.</p>
 
     <div class="composer">
       <textarea id="goal" placeholder="A task tracker: users create projects, each project has tasks with a title, status, and due date."></textarea>
@@ -239,7 +239,7 @@ h1 { font-size:30px; line-height:1.15; letter-spacing:-0.02em; font-weight:700; 
 
  <div class="pane-gutter" id="pane-gutter"></div>
 
- <!-- v25.6: IDE reviewer (right pane) — the generated design + files -->
+ <!-- v25.6: IDE reviewer (right pane): the generated design + files -->
  <div id="pane-right">
    <div class="ide-head">
      <h2>Output</h2>
@@ -354,7 +354,7 @@ function showResult(ok, title, msg, outputPath) {
   actions.innerHTML = '';
   if (ok) {
     // The Studio indexes the directory gen-server was started with. To explore
-    // THIS generated app, point a Studio at its output dir. Show the exact
+    // this generated app, point a Studio at its output dir. Show the exact
     // command (the running gen-server may be rooted elsewhere), plus the link
     // for the common case where --root already points here.
     if (outputPath) {
@@ -438,18 +438,18 @@ function handleEvent(msg) {
       if (p.output_path) loadTree(p.output_path);
       break;
     case 'design_manifest':
-      // v25.6: manifest written right after planning — open it in the IDE.
+      // v25.6: manifest written right after planning. Open it in the IDE.
       addLine('cyan', 'Design manifest ready.');
       if (p.dir) loadTree(p.dir);
       if (p.html) openManifest(p.html);
       break;
     case 'continue_review':
-      // v25.8: continue produced a delta review — show it with Approve/Reject.
+      // v25.8: continue produced a delta review. Show it with Approve/Reject.
       addLine('cyan', 'Review ready: ' + (p.summary || 'proposed change'));
       showContinueReview(p);
       break;
     case 'continue_rejected':
-      addLine('red', 'Continuation rejected — nothing generated.');
+      addLine('red', 'Continuation rejected. Nothing generated.');
       break;
     case 'build_failed':
       setPhase('generate', 'failed');
@@ -464,7 +464,7 @@ function finishBuild(ok, err, job) {
   building = false;
   $('#build-btn').disabled = false;
   $('#build-btn').textContent = 'Generate';
-  // v25.8.1: also reset the Continue button — a continuation that finishes (or a
+  // v25.8.1: also reset the Continue button. A continuation that finishes (or a
   // no-op "nothing to do") publishes build_complete/build_failed, which land here.
   // Without this the button stays stuck on "Planning…" and disabled.
   const cb = $('#continue-btn');
@@ -514,9 +514,9 @@ async function startBuild() {
       const txt = await res.text();
       throw new Error(txt || ('HTTP ' + res.status));
     }
-    clearDraft(); // accepted — the cached draft has served its purpose
+    clearDraft(); // accepted: the cached draft has served its purpose
     // 202 accepted; progress arrives over SSE. (If a build is already running,
-    // the server returns 409 — surface that clearly.)
+    // the server returns 409; surface that clearly.)
   } catch (e) {
     addLine('red', 'Could not start build: ' + e.message);
     finishBuild(false, e.message);
@@ -525,8 +525,8 @@ async function startBuild() {
 
 // ── Draft caching (localStorage) ─────────────────────────────────────────────
 // The idea you type is saved locally as you write, so a refresh or accidental
-// close never loses it. It is cleared automatically once a build starts. This is
-// purely client-side — nothing is sent anywhere until you press Generate.
+// close never loses it. It is cleared automatically once a build starts. This
+// runs only in the browser. Nothing is sent anywhere until you press Generate.
 const DRAFT_KEY = 'gensys.idea.draft';
 let draftTimer = null;
 
@@ -648,7 +648,7 @@ async function reviewDecision(approve) {
   building = false;
   $('#continue-btn').disabled = false;
   $('#continue-btn').textContent = 'Continue existing';
-  if (approve) { $('#build-btn').disabled = true; addLine('cyan', 'Approved — generating…'); }
+  if (approve) { $('#build-btn').disabled = true; addLine('cyan', 'Approved. Generating…'); }
 }
 $('#continue-btn').onclick = startContinue;
 $('#rev-approve').onclick = () => reviewDecision(true);
@@ -690,7 +690,7 @@ connectSSE();
       $('#tracker').style.display = 'flex';
       markDone('plan'); markDone('generate'); setPhase('done', 'done');
     }
-  } catch { /* idle / no server state — fine */ }
+  } catch { /* idle / no server state: fine */ }
 })();
 
 // ═══════════════ v25.6: output-folder picker ═══════════════
@@ -730,7 +730,7 @@ async function openOutModal() {
   if (!pickerEnabled) return;
   $('#outmodal').classList.add('show');
   $('#outmodal-err').classList.remove('show');
-  $('#outmodal-base').textContent = 'Base: ' + genBase + ' — the current root can\'t be overwritten.';
+  $('#outmodal-base').textContent = 'Base: ' + genBase + '. The current root can\'t be overwritten.';
   const list = $('#outmodal-list');
   list.innerHTML = '<div class="ide-empty">Loading…</div>';
   try {
@@ -739,12 +739,12 @@ async function openOutModal() {
     const data = await res.json();
     list.innerHTML = '';
     // "server root" default option
-    const def = mkDirRow({ name: '(default — server root)', path: '', tag: 'default' });
+    const def = mkDirRow({ name: '(default: server root)', path: '', tag: 'default' });
     list.appendChild(def);
     (data.dirs || []).forEach(d => list.appendChild(mkDirRow(d)));
     if (!data.dirs || !data.dirs.length) {
       const none = document.createElement('div');
-      none.className = 'ide-empty'; none.textContent = 'No sibling folders yet — create one below.';
+      none.className = 'ide-empty'; none.textContent = 'No sibling folders yet. Create one below.';
       list.appendChild(none);
     }
   } catch (e) {

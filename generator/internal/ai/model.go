@@ -1,4 +1,4 @@
-// generator/internal/ai/model.go — v23.35: default models now match the installer
+// generator/internal/ai/model.go (v23.35): default models now match the installer
 // (qwen3:14b for planning, qwen2.5-coder:14b for code). WHAT changed & WHY:
 // the role-based selector (added v23.20) still fell back to a single
 // "deepseek-coder" default when no env var was set, which contradicted what
@@ -8,7 +8,7 @@
 // override contract is unchanged: OLLAMA_MODEL_PLAN / OLLAMA_MODEL_CODE win,
 // then the legacy single OLLAMA_MODEL, then the per-role default below.
 // v23.20: role-based model selection (original rationale retained):
-// a single coder model was doing three different jobs — idea analysis,
+// a single coder model was doing three different jobs: idea analysis,
 // architecture, and code. Coder models are tuned to emit code, not to reason
 // about whether "stock can't go negative" is an entity or a rule, which is what
 // caused entity over-generation. The planner (analysis/architecture) and the
@@ -62,7 +62,7 @@ func Model() string {
 // This means: users who set only OLLAMA_MODEL (the old behaviour) get that one
 // model for everything, exactly as before. Users who want the recommended split
 // set OLLAMA_MODEL_PLAN and OLLAMA_MODEL_CODE (a Qwen3 14B for planning and a
-// Qwen2.5-Coder 14B for code — what install.sh pulls) and each phase uses the
+// Qwen2.5-Coder 14B for code, which is what install.sh pulls) and each phase uses the
 // right tool. With nothing set at all, each role now falls back to its own
 // installer default rather than one shared model.
 func ModelFor(role ModelRole) string {

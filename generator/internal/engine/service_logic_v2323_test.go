@@ -10,9 +10,9 @@ import (
 	"github.com/hpdkhoa/gen-system/generator/internal/schema"
 )
 
-// repairingProvider returns a body that does NOT compile on the first call
-// (uses the payload without a type assertion), then — when asked to repair with
-// the build error — returns a correct body. This proves the v23.23 loop turns a
+// repairingProvider returns a body that does not compile on the first call
+// (uses the payload without a type assertion). When asked to repair with the
+// build error, it returns a correct body. This proves the v23.23 loop turns a
 // near-miss into real logic instead of stubbing it.
 type repairingProvider struct{ repairs int }
 
@@ -70,8 +70,8 @@ func TestRepairLoop_FixesInsteadOfStub_v2323(t *testing.T) {
 	}
 }
 
-// A provider with no repair capability (replay) must still stub a broken body —
-// the containment guarantee is unchanged when repair isn't available.
+// A provider with no repair capability (replay) must still stub a broken body.
+// The containment guarantee is unchanged when repair isn't available.
 func TestNoRepairer_StillStubs_v2323(t *testing.T) {
 	e := schema.Entity{Name: "Order", Fields: []schema.Field{{Name: "Total", Type: "float"}}}
 	ops := []ai.Operation{{Name: "Bad", HTTPMethod: "POST", Body: "p.Stock += in[\"x\"]"}}

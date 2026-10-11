@@ -1,11 +1,11 @@
-// generator/internal/planner_v2/entity_validation.go — v23.25 (task A): a
+// generator/internal/planner_v2/entity_validation.go, v23.25 (task A): a
 // deterministic guard that every planned entity traces to a noun in the idea.
-// The planner historically over-generated (5 entities for a 2-noun idea —
+// The planner historically over-generated (5 entities for a 2-noun idea,
 // adding OrderItem / Customer / Discount that the idea never mentioned). The
 // v23.20 prompt got the simple idea down to ~2, but a prompt is probabilistic;
 // this is the durable backstop: tokenize the idea, and for each planned entity
 // require a token match (exact, singular/plural, or substring). Entities with
-// NO anchor get one re-prompt; if still unanchored they are dropped with a
+// no anchor get one re-prompt; if still unanchored they are dropped with a
 // logged warning rather than silently shipped.
 package planner_v2
 
@@ -28,11 +28,11 @@ func validateEntities(specs []EntitySpec, goal string, features []string, archTy
 
 	kept, unanchored := partitionByAnchor(specs, anchors)
 	if len(unanchored) == 0 {
-		return specs // all anchored — nothing to do
+		return specs // all anchored: nothing to do
 	}
 
 	for _, u := range unanchored {
-		fmt.Printf("     ⚠️  entity %q has no anchor in the idea — re-checking\n", u.Name)
+		fmt.Printf("     ⚠️  entity %q has no anchor in the idea; checking again\n", u.Name)
 	}
 
 	// One re-prompt. The prompt already nudges toward idea nouns (v23.20); a
@@ -54,7 +54,7 @@ func validateEntities(specs []EntitySpec, goal string, features []string, archTy
 		}
 	}
 
-	// Re-prompt didn't help — drop the first-pass unanchored entities.
+	// Re-prompt didn't help: drop the first-pass unanchored entities.
 	for _, d := range unanchored {
 		fmt.Printf("     ⚠️  dropping unanchored entity %q (not traceable to the idea)\n", d.Name)
 	}
@@ -120,7 +120,7 @@ func ideaTokens(goal string, features []string) map[string]bool {
 	return set
 }
 
-// singular/plural are intentionally tiny — enough for the common -s / -es / -ies
+// singular/plural are intentionally tiny: enough for the common -s / -es / -ies
 // English noun shapes the planner produces, no linguistics library (offline).
 func singular(w string) string {
 	switch {

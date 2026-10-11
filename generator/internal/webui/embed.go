@@ -1,9 +1,9 @@
-// generator/internal/webui/embed.go — v23.9 (Phase 3 step 2): embeds the
+// generator/internal/webui/embed.go (v23.9, Phase 3 step 2): embeds the
 // enterprise Studio UI into the binary so the understand-server ships as a
 // single self-contained, tamper-evident file (no loose web/ directory required
-// on the customer's box). Only studio-v23.html is embedded — the legacy
-// web/legacy/studio.html and web/legacy/generate.html are internal/dev assets and are intentionally
-// NOT part of the enterprise artifact.
+// on the customer's box). Only studio-v23.html is embedded. The legacy
+// web/legacy/studio.html and web/legacy/generate.html are internal/dev assets, and
+// they stay out of the enterprise artifact on purpose.
 //
 // The embedded FS serves "/" -> studio-v23.html so the appliance opens straight
 // into the Studio with no path needed.
