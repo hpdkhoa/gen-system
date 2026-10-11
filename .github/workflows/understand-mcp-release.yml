@@ -1,0 +1,97 @@
+# Release of understand-mcp: binaries on GitHub, the npm wrapper, the MCP Registry listing.
+#
+# Trigger: push a tag understand-mcp-vX.Y.Z, where X.Y.Z equals the version in
+# npm/gen-understand/package.json and in both version fields of its server.json.
+# Needs the repository secret NPM_TOKEN (an npm automation token).
+# The MCP Registry step signs in with GitHub OIDC, so it needs no secret.
+
+name: understand-mcp release
+
+on:
+  push:
+    tags: ["understand-mcp-v*"]
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  binaries:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.ver.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check the versions agree
+        id: ver
+        run: |
+          tag="${GITHUB_REF_NAME#understand-mcp-v}"
+          pkg=$(node -p "require('./npm/gen-understand/package.json').version")
+          srv=$(node -p "require('./npm/gen-understand/server.json').version")
+          srvpkg=$(node -p "require('./npm/gen-understand/server.json').packages[0].version")
+          echo "tag=$tag package.json=$pkg server.json=$srv server.json package=$srvpkg"
+          if [ "$tag" != "$pkg" ] || [ "$tag" != "$srv" ] || [ "$tag" != "$srvpkg" ]; then
+            echo "::error::tag, package.json and server.json must carry the same version"; exit 1
+          fi
+          echo "version=$tag" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Test
+        run: cd generator && go test ./internal/mcp/ ./cmd/understand-mcp/ ./internal/archtest/
+
+      - name: Build six binaries
+        env:
+          VERSION: ${{ steps.ver.outputs.version }}
+        run: |
+          mkdir -p dist
+          for target in linux/amd64 linux/arm64 darwin/amd64 darwin/arm64 windows/amd64 windows/arm64; do
+            goos="${target%/*}"; goarch="${target#*/}"
+            out="dist/understand-mcp-${goos}-${goarch}"
+            [ "$goos" = windows ] && out="${out}.exe"
+            CGO_ENABLED=0 GOOS="$goos" GOARCH="$goarch" go build -trimpath \
+              -ldflags "-s -w -X main.version=${VERSION}" -o "$out" ./generator/cmd/understand-mcp
+          done
+          cd dist && sha256sum understand-mcp-* > checksums.txt && cat checksums.txt
+
+      - name: GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" dist/* \
+            --title "understand-mcp ${{ steps.ver.outputs.version }}" \
+            --notes "The Understand half of gen-system as an MCP server. Run it with npx -y gen-understand --root <your repo>, or download the binary for your platform. Each binary is listed in checksums.txt. Docs: docs/mcp.md."
+
+  npm:
+    needs: binaries
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+      - name: Test the launcher
+        run: cd npm/gen-understand && npm test
+      - name: Publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          cd npm/gen-understand && npm publish --access public --provenance
+
+  registry:
+    needs: npm
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install mcp-publisher
+        run: |
+          curl -sL "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_linux_amd64.tar.gz" | tar xz mcp-publisher
+      - name: Publish to the MCP Registry
+        run: |
+          cd npm/gen-understand
+          ../../mcp-publisher login github-oidc
+          ../../mcp-publisher publish
