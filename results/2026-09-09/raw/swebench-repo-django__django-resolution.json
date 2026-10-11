@@ -1,0 +1,96 @@
+{
+  "schema": "genbench/v1",
+  "started_at": "2026-09-10T06:23:32.17302301+07:00",
+  "finished_at": "2026-09-10T06:24:36.7496222+07:00",
+  "host": {
+    "os": "linux",
+    "arch": "amd64",
+    "num_cpu": 16,
+    "go_version": "go1.25.0"
+  },
+  "model": {
+    "name": "qwen2.5-coder:14b",
+    "endpoint": "http://localhost:11434"
+  },
+  "project_root": "/home/kai-hoang/Project/git/gen-system/results/2026-09-09/swebench/repos/django__django",
+  "suites": [
+    {
+      "name": "resolution_recall",
+      "cases": [
+        {
+          "name": "internal_recall_at_least_90%",
+          "pass": true,
+          "got": "96.10% (48625/50596 internal calls resolved)",
+          "want": "\u003e=90.00%"
+        },
+        {
+          "name": "internal_recall_python_at_least_85%",
+          "pass": true,
+          "got": "96.10% (48625/50596)",
+          "want": "\u003e=85%"
+        },
+        {
+          "name": "symbols_have_definedin",
+          "pass": true,
+          "got": "0 symbols with empty DefinedIn",
+          "want": "0"
+        }
+      ],
+      "metrics": [
+        {
+          "name": "resolution_recall_internal",
+          "value": 0.9610443513321211,
+          "unit": "ratio",
+          "higher_is_better": true
+        },
+        {
+          "name": "resolution_recall_overall",
+          "value": 0.5825795243515246,
+          "unit": "ratio",
+          "higher_is_better": true
+        },
+        {
+          "name": "external_call_ratio",
+          "value": 0.3938057868567663,
+          "unit": "ratio"
+        },
+        {
+          "name": "call_edges_total",
+          "value": 83465,
+          "unit": "edges",
+          "higher_is_better": true
+        },
+        {
+          "name": "call_edges_internal",
+          "value": 50596,
+          "unit": "edges",
+          "higher_is_better": true
+        },
+        {
+          "name": "call_edges_resolved",
+          "value": 48625,
+          "unit": "edges",
+          "higher_is_better": true
+        },
+        {
+          "name": "call_edges_external",
+          "value": 32869,
+          "unit": "edges"
+        },
+        {
+          "name": "call_edges_literal",
+          "value": 0,
+          "unit": "edges"
+        },
+        {
+          "name": "recall_internal_python",
+          "value": 0.9610443513321211,
+          "unit": "ratio",
+          "higher_is_better": true
+        }
+      ],
+      "duration_ns": 64576595080,
+      "notes": "symbols=53915 total=83465 internal=50596 resolved=48625 external=32869"
+    }
+  ]
+}

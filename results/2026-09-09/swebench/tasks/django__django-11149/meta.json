@@ -1,0 +1,8 @@
+{
+  "instance_id": "django__django-11149",
+  "repo": "django/django",
+  "base_commit": "e245046bb6e8b32360aa48b8a41fb7050f0fc730",
+  "version": "3.0",
+  "seeds": 13,
+  "gold_files": 1
+}

@@ -495,8 +495,11 @@ if [[ $UNDERSTAND_ONLY -eq 1 ]]; then
     # Enterprise: a single self-contained binary with the Studio UI embedded.
     CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" \
         -o "${INSTALL_PREFIX}/bin/understand-server" ./generator/cmd/understand-server
-    chmod 755 "${INSTALL_PREFIX}/bin/understand-server"
+    CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" \
+        -o "${INSTALL_PREFIX}/bin/understand-mcp" ./generator/cmd/understand-mcp
+    chmod 755 "${INSTALL_PREFIX}/bin/understand-server" "${INSTALL_PREFIX}/bin/understand-mcp"
     echo "      built ${INSTALL_PREFIX}/bin/understand-server (enterprise, UI embedded)"
+    echo "      built ${INSTALL_PREFIX}/bin/understand-mcp (the same engine for MCP agents)"
 else
     CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" \
         -o "${INSTALL_PREFIX}/bin/gen" ./generator/cmd/gen
@@ -504,11 +507,14 @@ else
         -o "${INSTALL_PREFIX}/bin/gen-server" ./generator/cmd/gen-server
     CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" \
         -o "${INSTALL_PREFIX}/bin/understand-server" ./generator/cmd/understand-server
+    CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" \
+        -o "${INSTALL_PREFIX}/bin/understand-mcp" ./generator/cmd/understand-mcp
     chmod 755 "${INSTALL_PREFIX}/bin/gen" "${INSTALL_PREFIX}/bin/gen-server" \
-              "${INSTALL_PREFIX}/bin/understand-server"
+              "${INSTALL_PREFIX}/bin/understand-server" "${INSTALL_PREFIX}/bin/understand-mcp"
     echo "      built ${INSTALL_PREFIX}/bin/gen"
     echo "      built ${INSTALL_PREFIX}/bin/gen-server"
     echo "      built ${INSTALL_PREFIX}/bin/understand-server"
+    echo "      built ${INSTALL_PREFIX}/bin/understand-mcp"
 fi
 
 # Copy the web/ assets next to the binary so the dev gen-server can serve them.

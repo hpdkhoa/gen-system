@@ -1,0 +1,26 @@
+{
+  "name": "gen-understand",
+  "version": "0.1.0",
+  "description": "gen-system's Understand engine as an MCP server: parser facts about a codebase for AI agents",
+  "mcpName": "io.github.hpdkhoa/gen-understand",
+  "license": "Apache-2.0",
+  "author": "Khoa Hoang",
+  "homepage": "https://github.com/hpdkhoa/gen-system/blob/main/docs/mcp.md",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hpdkhoa/gen-system.git",
+    "directory": "npm/gen-understand"
+  },
+  "bugs": "https://github.com/hpdkhoa/gen-system/issues",
+  "keywords": ["mcp", "model-context-protocol", "code-intelligence", "static-analysis", "call-graph", "cobol", "go"],
+  "bin": {
+    "gen-understand": "bin/gen-understand.js"
+  },
+  "files": ["bin/", "lib/", "README.md", "LICENSE"],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "node --test test/install.test.js"
+  }
+}

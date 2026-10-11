@@ -1,0 +1,44 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.hpdkhoa/gen-understand",
+  "title": "gen-system Understand",
+  "description": "Parser facts about a codebase: architecture, call graphs, control flow, effects, beliefs",
+  "version": "0.1.0",
+  "repository": {
+    "url": "https://github.com/hpdkhoa/gen-system",
+    "source": "github",
+    "subfolder": "npm/gen-understand"
+  },
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "gen-understand",
+      "version": "0.1.0",
+      "transport": {
+        "type": "stdio"
+      },
+      "packageArguments": [
+        {
+          "type": "named",
+          "name": "--root",
+          "description": "The project to understand",
+          "valueHint": "path",
+          "default": ".",
+          "isRequired": false
+        }
+      ],
+      "environmentVariables": [
+        {
+          "name": "UNDERSTAND_MCP_BINARY",
+          "description": "Path of a local understand-mcp binary; skips the download, for offline machines",
+          "isRequired": false
+        },
+        {
+          "name": "UNDERSTAND_MCP_CACHE",
+          "description": "Folder for the downloaded binary; defaults to the user cache folder",
+          "isRequired": false
+        }
+      ]
+    }
+  ]
+}

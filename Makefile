@@ -1,4 +1,4 @@
-.PHONY: server cli build-all
+.PHONY: server cli build-all mcp
 
 # Start the web studio server (serves UI + API on :28080)
 server:
@@ -8,6 +8,10 @@ server:
 # Build the CLI binary
 cli:
 	cd generator && go build -o ../gen ./cmd/gen && cd ..
+
+# Build the Understand MCP server (stdio; register it with your agent)
+mcp:
+	cd generator && go build -o ../understand-mcp ./cmd/understand-mcp && cd ..
 
 # Build both binaries
 build-all: cli server

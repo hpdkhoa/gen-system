@@ -24,6 +24,8 @@ It runs offline on one 16 GB GPU, with no token cost.
 - **Team style profiles.** Your conventions go into every prompt, and the parser checks the same
   rules on the output.
 - **Air gapped review.** The read only Understand half installs with no model dependency.
+- **MCP server.** `understand-mcp` gives Claude Code, Codex, Cursor and other agents the same
+  parser facts: architecture, call graphs, control flow, effects, source and beliefs.
 
 ## Quickstart
 
@@ -59,6 +61,16 @@ gen-system writes the beliefs to `./your-repo/.gen/beliefs.json`. Correct one in
 POST to `/api/present/beliefs/correct`. Your correction wins from then on. If the source later
 changes under it, gen-system flags the belief as out of date and shows your value next to the new
 one.
+
+### Give your agent the facts (MCP)
+
+```bash
+claude mcp add gen-understand -- understand-mcp --root ./your-repo
+```
+
+`understand-mcp` serves the same Understand engine over the Model Context Protocol, read only.
+Your agent can search symbols, walk call graphs, read control flow and effects, and list the
+beliefs, each answer straight from the parser. `docs/mcp.md` covers Codex, Cursor and the tool list.
 
 ### Generate a new service
 
@@ -145,6 +157,7 @@ To add a language, see `docs/adding-a-language.md`.
 ## Documentation
 
 - `docs/understand-pipeline.md`: the parse pipeline from source file to control flow graph.
+- `docs/mcp.md`: the Understand half as an MCP server, its tools and how to register it.
 - `docs/beliefs.md`: the belief record, a worked example, and how staleness spreads.
 - `docs/model-contact.md`: the single path to the model, its determinism pins and runtime knobs.
 - `docs/style-gate.md`: what a style profile can say, and how the gate checks it.

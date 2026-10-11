@@ -1,0 +1,74 @@
+{
+  "schema": "genbench/v1",
+  "started_at": "2026-09-09T23:52:53.342925659+07:00",
+  "finished_at": "2026-09-09T23:52:53.366557451+07:00",
+  "host": {
+    "os": "linux",
+    "arch": "amd64",
+    "num_cpu": 16,
+    "go_version": "go1.25.0"
+  },
+  "model": {
+    "name": "qwen2.5-coder:14b",
+    "endpoint": "http://localhost:11434"
+  },
+  "project_root": "/home/kai-hoang/Project/git/gen-system/results/2026-09-09/corpus/cobolcraft",
+  "suites": [
+    {
+      "name": "parse_throughput",
+      "cases": [
+        {
+          "name": "files_found",
+          "pass": true,
+          "got": "268",
+          "want": "\u003e0"
+        },
+        {
+          "name": "parse_errors_zero",
+          "pass": true,
+          "got": "0",
+          "want": "0"
+        }
+      ],
+      "metrics": [
+        {
+          "name": "files_per_sec_cobol",
+          "value": 14298.712699700463,
+          "unit": "files/s",
+          "higher_is_better": true
+        },
+        {
+          "name": "kb_per_sec_cobol",
+          "value": 57382.056644803866,
+          "unit": "kB/s",
+          "higher_is_better": true
+        },
+        {
+          "name": "files_total_cobol",
+          "value": 268,
+          "unit": "files",
+          "higher_is_better": true
+        },
+        {
+          "name": "files_per_sec_overall",
+          "value": 14294.716299486254,
+          "unit": "files/s",
+          "higher_is_better": true
+        },
+        {
+          "name": "kb_per_sec_overall",
+          "value": 57366.018721091204,
+          "unit": "kB/s",
+          "higher_is_better": true
+        },
+        {
+          "name": "parse_errors",
+          "value": 0,
+          "unit": "errors"
+        }
+      ],
+      "duration_ns": 23629362,
+      "notes": "languages: 1, files: 268, bytes: 1101321"
+    }
+  ]
+}

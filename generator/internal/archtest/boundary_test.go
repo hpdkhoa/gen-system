@@ -98,3 +98,12 @@ func TestCoreHasNoGenerationDeps(t *testing.T) {
 func TestUnderstandServerHasNoGenDeps(t *testing.T) {
 	assertNoGenerationDeps(t, "github.com/hpdkhoa/gen-system/generator/cmd/understand-server")
 }
+
+// TestUnderstandMCPHasNoGenDeps: cmd/understand-mcp (the Understand half as an
+// MCP server) and its protocol package hold the same boundary as
+// understand-server. An agent that calls it must not be able to reach a model
+// or the generator through it.
+func TestUnderstandMCPHasNoGenDeps(t *testing.T) {
+	assertNoGenerationDeps(t, "github.com/hpdkhoa/gen-system/generator/cmd/understand-mcp")
+	assertNoGenerationDeps(t, "github.com/hpdkhoa/gen-system/generator/internal/mcp")
+}
