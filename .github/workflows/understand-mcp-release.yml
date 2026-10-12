@@ -90,8 +90,23 @@ jobs:
       - name: Install mcp-publisher
         run: |
           curl -sL "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_linux_amd64.tar.gz" | tar xz mcp-publisher
+      - name: Wait until npm serves the new version
+        run: |
+          v=$(node -p "require('./npm/gen-understand/package.json').version")
+          for i in $(seq 1 30); do
+            if curl -sf "https://registry.npmjs.org/gen-understand/$v" > /dev/null; then
+              echo "npm serves gen-understand@$v"; exit 0
+            fi
+            echo "npm does not serve gen-understand@$v yet, waiting 10 s"; sleep 10
+          done
+          echo "::error::npm did not serve gen-understand@$v within 5 minutes"; exit 1
       - name: Publish to the MCP Registry
         run: |
           cd npm/gen-understand
           ../../mcp-publisher login github-oidc
-          ../../mcp-publisher publish
+          # The registry reads npm through its own cache, which can lag behind npm itself.
+          for i in 1 2 3 4 5; do
+            ../../mcp-publisher publish && exit 0
+            echo "publish failed (try $i of 5), retrying in 30 s"; sleep 30
+          done
+          exit 1
