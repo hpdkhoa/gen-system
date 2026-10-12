@@ -2,6 +2,12 @@
 
 **Parser facts about a codebase, and Go services from local models that must compile before they ship.**
 
+![The gen-system Studio showing the call graph of a COBOL payroll run and the control flow graph of its CALC-TAX paragraph](docs/img/studio-cobol-cfg.png)
+
+*The Studio on [`examples/payroll`](examples/payroll). Left: what `MAIN-PARA` calls, two levels
+deep. Right: the control flow graph of `CALC-TAX`. The `EVALUATE` on the pay grade fans out into
+four arms, then the region check adds a branch.*
+
 A model that writes code for an existing system has to guess about it. What does this routine
 call? Which data does it write? What does a COBOL paragraph pull in from a copybook? gen-system
 answers those questions with parsers, one hand written parser each for Go, COBOL with copybooks,
@@ -78,6 +84,20 @@ your value next to the new one.
 Python files need `python3` 3.9 or newer on the host. The other five parsers are pure Go. A
 construct a parser cannot model becomes an unknown node that carries the reason.
 
+To try it before you point it at your own code, open one of the two examples:
+
+```bash
+understand-server --root examples/payroll --copybooks examples/payroll/copybooks
+understand-server --root examples/shop
+```
+
+![The Studio's Architecture page for CobolCraft: 1,034 symbols in 268 files, all COBOL](docs/img/studio-cobolcraft-architecture.png)
+
+*The Architecture page for [CobolCraft](https://github.com/meyfa/CobolCraft), a Minecraft server
+written in COBOL. "Edge resolution 31%" counts every call edge, including calls into the GnuCOBOL
+runtime and C helpers that have no COBOL definition to resolve to. Every call between CobolCraft's
+own programs resolves; the baseline in `generator/internal/bench/baselines/` explains the split.*
+
 ## Give your agent the facts (MCP)
 
 ```bash
@@ -100,6 +120,26 @@ claude mcp add gen-understand -- understand-mcp --root ./your-repo
 | `source`, `file_symbols` | the code of one symbol; every symbol in one file |
 | `effects` | functions grouped by what they touch: database, files, network, pure or unknown |
 | `beliefs` | the belief records with their source (parser, model or person), filtered by routine, kind or verified state |
+
+Ask your agent "who calls CALC-TAX, and which paragraphs touch the database?" on
+`examples/payroll`, and it calls two tools. These are the real answers, shortened:
+
+```jsonc
+// call_graph {"symbol": "…PAYROLL.cbl#func:CALC-TAX", "direction": "callers", "depth": 3}
+"edges": [
+  { "from": "…#func:PROCESS-EMPLOYEE", "to_name": "CALC-TAX",         "unresolved": false },
+  { "from": "…#func:MAIN-PARA",        "to_name": "PROCESS-EMPLOYEE", "unresolved": false }
+]
+
+// effects {}
+"by_effect": {
+  "db":   [ { "name": "RECORD-RUN", "line": 78 } ],
+  "pure": [ { "name": "CALC-GROSS", "line": 53 }, { "name": "CALC-TAX", "line": 62 } ]
+}
+```
+
+`RECORD-RUN` is the only paragraph with an `EXEC SQL` block, and the parser found it without a
+model.
 
 `correct_belief` exists only when you start the server with `--allow-corrections`. The server
 runs locally and sends nothing anywhere. [docs/mcp.md](docs/mcp.md) covers Codex, Cursor, the
@@ -143,15 +183,7 @@ Copy `gen-system.env.example` to `.env`. A variable in your shell wins over the 
 
 ## How it works
 
-```
-source ─▶ parsers ─▶ symbol index ─▶ call graph ─▶ control flow graphs ─▶ effects
-                                         │
-                                  parser beliefs ◀── model claims (checked against the parser)
-                                         │
-                                  your corrections (the only beliefs that steer)
-                                         │
-plan ─▶ generate ─▶ compile each operation ─▶ vet, build, test ─▶ the parsers read the result
-```
+![How gen-system works: the Understand half builds the graph and the beliefs; the Generate half writes Go and passes the compile gate](docs/img/pipeline.svg)
 
 - `generator/internal/ast`: one parser per language, all into one tree format.
 - `generator/internal/symbols`, `flow`: the symbol index, call resolution and control flow graphs.

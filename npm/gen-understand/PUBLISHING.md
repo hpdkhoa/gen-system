@@ -53,6 +53,13 @@ mcp-publisher login github
 mcp-publisher publish
 ```
 
+## When a job fails
+
+Open the run in the Actions tab and choose **Re-run failed jobs**. The jobs that passed stay done.
+Do not push a new tag for the same version: the release and the npm version already exist, and
+both refuse a second publish. If the binaries job failed after it made the release, delete that
+release first.
+
 ## Check it
 
 - `npx -y gen-understand --version` prints the version.
