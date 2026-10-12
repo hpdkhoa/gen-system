@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>gen-system</title>
+<meta name="description" content="gen-system builds a call graph and control flow graphs of your code with parsers, no model in the loop. Go, COBOL with copybooks, CA Gen, Java, TypeScript and Python. Try the Studio in your browser."/>
+<meta property="og:title" content="gen-system: parser facts about your codebase"/>
+<meta property="og:description" content="Call graphs, control flow graphs, effects and correctable beliefs for Go, COBOL, CA Gen, Java, TypeScript and Python. Open source, runs offline."/>
+<meta property="og:image" content="img/studio-cobol-cfg.png"/>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231f6feb'/%3E%3Ctext x='16' y='22' font-family='Arial' font-size='18' font-weight='700' fill='white' text-anchor='middle'%3EG%3C/text%3E%3C/svg%3E"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg: #ffffff; --bg-2: #f6f8fa; --card: #ffffff; --line: #d0d7de;
+  --text: #1f2328; --text-2: #59636e; --accent: #0969da; --accent-2: #8250df;
+  --ok: #1a7f37; --warn: #9a6700; --code-bg: #f6f8fa; --shadow: 0 10px 30px rgba(31,35,40,.08);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d1117; --bg-2: #11161d; --card: #161b22; --line: #30363d;
+    --text: #e6edf3; --text-2: #9198a1; --accent: #4493f8; --accent-2: #ab7df8;
+    --ok: #3fb950; --warn: #d29922; --code-bg: #0b0f14; --shadow: 0 10px 30px rgba(0,0,0,.45);
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0d1117; --bg-2: #11161d; --card: #161b22; --line: #30363d;
+  --text: #e6edf3; --text-2: #9198a1; --accent: #4493f8; --accent-2: #ab7df8;
+  --ok: #3fb950; --warn: #d29922; --code-bg: #0b0f14; --shadow: 0 10px 30px rgba(0,0,0,.45);
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0; background: var(--bg); color: var(--text);
+  font: 400 16px/1.6 Inter, system-ui, -apple-system, Segoe UI, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+code, pre { font-family: "IBM Plex Mono", ui-monospace, Consolas, monospace; }
+.wrap { max-width: 1120px; margin: 0 auto; padding: 0 16px; }
+img { max-width: 100%; height: auto; display: block; }
+
+nav { position: sticky; top: 0; z-index: 10; background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+nav .wrap { display: flex; align-items: center; gap: 20px; height: 58px; }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 700; color: var(--text); white-space: nowrap; }
+.brand:hover { text-decoration: none; }
+.mark { width: 28px; height: 28px; border-radius: 7px; display: grid; place-items: center;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #fff; font-weight: 800; font-size: 15px; }
+nav .links { margin-left: auto; display: flex; gap: 18px; font-size: 14px; }
+nav .links a { color: var(--text-2); }
+nav .links a:hover { color: var(--text); text-decoration: none; }
+
+.hero { padding: 72px 0 40px; }
+.eyebrow { display: inline-block; font: 500 12px/1 "IBM Plex Mono", monospace; letter-spacing: .04em;
+  color: var(--text-2); border: 1px solid var(--line); border-radius: 999px; padding: 7px 12px; margin-bottom: 22px; }
+h1 { font-size: clamp(34px, 5.4vw, 60px); line-height: 1.05; letter-spacing: -.03em; margin: 0 0 20px; font-weight: 800; max-width: 15ch; }
+h1 span { background: linear-gradient(90deg, var(--accent), var(--accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.lede { font-size: clamp(17px, 2vw, 20px); color: var(--text-2); max-width: 62ch; margin: 0 0 30px; }
+.ctas { display: flex; gap: 12px; flex-wrap: wrap; }
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 18px; border-radius: 10px; font-weight: 600; font-size: 15px;
+  border: 1px solid var(--line); color: var(--text); background: var(--card); }
+.btn:hover { text-decoration: none; border-color: var(--text-2); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn.primary:hover { filter: brightness(1.08); }
+.shot { margin-top: 44px; border-radius: 14px; overflow: hidden; border: 1px solid var(--line); box-shadow: var(--shadow); }
+.caption { font-size: 14px; color: var(--text-2); margin: 12px 2px 0; }
+
+section { padding: 64px 0; border-top: 1px solid var(--line); }
+h2 { font-size: clamp(26px, 3.2vw, 36px); letter-spacing: -.02em; line-height: 1.15; margin: 0 0 12px; }
+.sub { color: var(--text-2); max-width: 66ch; margin: 0 0 32px; }
+.grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 22px; }
+.card h3 { margin: 0 0 8px; font-size: 18px; }
+.card p { margin: 0; color: var(--text-2); font-size: 15px; }
+.demo-card { display: flex; flex-direction: column; gap: 10px; color: var(--text); transition: border-color .15s, transform .15s; }
+.demo-card:hover { text-decoration: none; border-color: var(--accent); transform: translateY(-2px); }
+.demo-card .tag { font: 500 12px "IBM Plex Mono", monospace; color: var(--accent); }
+.demo-card .go { margin-top: auto; font-weight: 600; color: var(--accent); font-size: 14px; }
+
+.split { display: grid; gap: 40px; grid-template-columns: 1fr 1fr; align-items: center; }
+.split > * { min-width: 0; }
+@media (max-width: 860px) { .split { grid-template-columns: 1fr; } }
+@media (max-width: 520px) { nav .links { gap: 12px; font-size: 13px; } nav .wrap { gap: 12px; } }
+
+.stats { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.stat { border: 1px solid var(--line); border-radius: 12px; padding: 20px; background: var(--card); }
+.stat .n { font-size: 34px; font-weight: 800; letter-spacing: -.02em; }
+.stat .l { color: var(--text-2); font-size: 14px; }
+.note { font-size: 14px; color: var(--text-2); margin-top: 18px; max-width: 80ch; }
+
+pre { background: var(--code-bg); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; overflow-x: auto;
+  font-size: 14px; line-height: 1.55; margin: 0 0 14px; }
+pre .c { color: var(--text-2); }
+.diagram { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 18px; }
+ul.plain { padding-left: 20px; color: var(--text-2); }
+ul.plain li { margin: 6px 0; }
+footer { border-top: 1px solid var(--line); padding: 36px 0 60px; color: var(--text-2); font-size: 14px; }
+footer .wrap { display: flex; gap: 24px; flex-wrap: wrap; justify-content: space-between; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a class="brand" href="./"><span class="mark">G</span>gen-system</a>
+    <div class="links">
+      <a href="#demo">Demo</a>
+      <a href="#mcp">MCP</a>
+      <a href="#numbers">Numbers</a>
+      <a href="https://github.com/hpdkhoa/gen-system">GitHub</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="eyebrow">Open source · Apache-2.0 · runs offline</span>
+    <h1>Parser facts about <span>your codebase</span></h1>
+    <p class="lede">gen-system reads Go, COBOL with copybooks, CA Gen, Java, TypeScript and Python into a
+      call graph and a control flow graph for every routine. No model takes part, so the same code
+      always gives the same graph. Then it can write Go services with local models, and every
+      operation must compile before it ships.</p>
+    <div class="ctas">
+      <a class="btn primary" href="demo/?p=payroll#/graph/root=examples%2Fpayroll%2FPAYROLL.cbl%23func%3AMAIN-PARA">Open the live demo</a>
+      <a class="btn" href="https://github.com/hpdkhoa/gen-system">View on GitHub</a>
+    </div>
+    <div class="shot"><img src="img/studio-cobol-cfg.png" width="1600" height="874"
+      alt="The gen-system Studio: the call graph of a COBOL payroll run and the control flow graph of its CALC-TAX paragraph"/></div>
+    <p class="caption">The Studio on a COBOL payroll example. Left: what MAIN-PARA calls. Right: the
+      control flow graph of CALC-TAX, where the EVALUATE on the pay grade fans out into four arms.</p>
+  </div>
+</header>
+
+<section id="demo">
+  <div class="wrap">
+    <h2>Try the Studio in your browser</h2>
+    <p class="sub">This is the real Studio page, running on saved answers from gen-system. Click any
+      routine to see its callers, its callees, its control flow graph and its source. The demo is
+      read only, so Verify and Correct are off.</p>
+    <div class="grid">
+      <a class="card demo-card" href="demo/?p=payroll#/graph/root=examples%2Fpayroll%2FPAYROLL.cbl%23func%3AMAIN-PARA">
+        <span class="tag">COBOL · 1 program, 2 copybooks</span>
+        <h3>Batch payroll run</h3>
+        <p>File I/O, an EVALUATE on the pay grade and an EXEC SQL insert. The Beliefs page lists what
+          each paragraph reads and writes.</p>
+        <span class="go">Open the call graph →</span>
+      </a>
+      <a class="card demo-card" href="demo/?p=shop#/beliefs">
+        <span class="tag">Go · 3 files</span>
+        <h3>Checkout service</h3>
+        <p>A SQL transaction, pricing and a receipt file. Effects sort every function into database,
+          files, network or pure.</p>
+        <span class="go">Open the beliefs →</span>
+      </a>
+      <a class="card demo-card" href="demo/?p=cobolcraft#/architecture">
+        <span class="tag">COBOL · 268 files</span>
+        <h3>CobolCraft</h3>
+        <p>A Minecraft server written in COBOL, MIT licensed. 1,034 symbols from real code, with
+          every call between its own programs resolved.</p>
+        <span class="go">Open the architecture →</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap split">
+    <div>
+      <h2>Beliefs you can check and correct</h2>
+      <p class="sub" style="margin-bottom:18px">For each routine, gen-system lists the inputs, the calls,
+        the data it writes and the action its name suggests. It calls each line a belief.</p>
+      <ul class="plain">
+        <li>A local model may add claims. gen-system marks any claim the parser contradicts and never uses it.</li>
+        <li>You can verify or correct any belief. Your correction wins on every rebuild.</li>
+        <li>When the code changes under a correction, gen-system marks it out of date and shows both values.</li>
+        <li>Only beliefs a person verified steer generation.</li>
+      </ul>
+    </div>
+    <div class="shot" style="margin-top:0"><img src="img/studio-cobol-beliefs.png" width="1400" height="933"
+      alt="The Beliefs page for the COBOL payroll example, with inputs and data written for each paragraph"/></div>
+  </div>
+</section>
+
+<section id="mcp">
+  <div class="wrap split">
+    <div>
+      <h2>Give your agent the facts</h2>
+      <p class="sub" style="margin-bottom:18px">The read only half runs as an MCP server. Claude Code,
+        Codex, Cursor or any MCP client can search symbols, walk call graphs, read control flow
+        graphs and effects, and list the beliefs. The server runs locally and sends nothing anywhere.</p>
+      <p class="sub" style="margin-bottom:0">It links no generation code and no model client, and an
+        architecture test fails the build if that ever changes.</p>
+    </div>
+    <div>
+<pre><span class="c"># Claude Code</span>
+claude mcp add gen-understand -- npx -y gen-understand --root .
+
+<span class="c"># or with Go</span>
+go install github.com/hpdkhoa/gen-system/generator/cmd/understand-mcp@latest</pre>
+<pre><span class="c">// "who calls CALC-TAX?" on examples/payroll</span>
+call_graph CALC-TAX, callers, depth 3
+  PROCESS-EMPLOYEE → CALC-TAX
+  MAIN-PARA        → PROCESS-EMPLOYEE
+
+effects
+  db:   RECORD-RUN
+  pure: CALC-GROSS, CALC-TAX</pre>
+    </div>
+  </div>
+</section>
+
+<section id="numbers">
+  <div class="wrap">
+    <h2>Measured, with the limits next to the numbers</h2>
+    <p class="sub">One RTX 4060 Ti with 16 GB, campaign of 2026-09-09. The raw files and a SHA-256
+      manifest are in the repository under <code>results/2026-09-09/</code>.</p>
+    <div class="stats">
+      <div class="stat"><div class="n">0</div><div class="l">parse errors on 405 files from four public repositories pinned to a commit, 268 of them COBOL</div></div>
+      <div class="stat"><div class="n">100%</div><div class="l">of calls between each project's own symbols resolved, in all four repositories</div></div>
+      <div class="stat"><div class="n">1,302</div><div class="l">control flow graphs built, none with a structural issue</div></div>
+      <div class="stat"><div class="n">0.674</div><div class="l">file recall on 60 SWE-bench Verified tasks, two call graph hops from the names in each issue</div></div>
+    </div>
+    <p class="note">The SWE-bench number is localization recall, not a solve rate: gen-system writes no
+      fix. The walk reaches a median of 422 files per task, and zero hops already reach 0.615.
+      "Internal calls" leaves out calls into the standard library and runtime, which have no project
+      definition to resolve to.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>How it works</h2>
+    <p class="sub">The Understand half builds the graph and the beliefs. The Generate half plans a
+      Go service with qwen3:14b, writes each operation with qwen2.5-coder:14b, and passes every
+      operation through a compile gate. An operation that still fails after two repairs becomes a
+      stub, and the run counts it.</p>
+    <div class="diagram"><img src="img/pipeline.svg" width="1040" height="560"
+      alt="How gen-system works: parsers, symbol index, call graph, control flow and effects feed the beliefs; the generate half plans, writes, compiles and tests Go code, and the parsers read the result again"/></div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Run it on your code</h2>
+    <p class="sub">You need Go 1.25 or newer. The read only half needs nothing else.</p>
+<pre>git clone https://github.com/hpdkhoa/gen-system.git
+cd gen-system
+./install.sh --understand            <span class="c"># the read only half</span>
+understand-server --root ./your-repo <span class="c"># then open http://localhost:28080/</span></pre>
+    <div class="ctas" style="margin-top:20px">
+      <a class="btn primary" href="https://github.com/hpdkhoa/gen-system">Read the README</a>
+      <a class="btn" href="https://www.npmjs.com/package/gen-understand">npm: gen-understand</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div>gen-system is open source under Apache-2.0. Built by Khoa Hoang.</div>
+    <div>Demo data: <a href="https://github.com/meyfa/CobolCraft">CobolCraft</a> by Fabian Meyer, MIT
+      (<a href="demo/data/cobolcraft/LICENSE.txt">license</a>).</div>
+  </div>
+</footer>
+
+</body>
+</html>

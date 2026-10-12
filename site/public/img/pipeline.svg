@@ -1,0 +1,141 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 560" width="1040" height="560" font-family="-apple-system, Segoe UI, Helvetica, Arial, sans-serif">
+  <title>How gen-system works</title>
+  <desc>The Understand half parses source into a symbol index, call graph, control flow graphs and effects, and lists beliefs that a model may add claims to and a person may correct. The Generate half plans and writes Go code with local models, compiles each operation, runs vet, build and test, and the parsers read the result again.</desc>
+  <style>
+    .bg { fill: #ffffff; }
+    .band { fill: #f4f6f8; stroke: #d0d7de; }
+    .box { fill: #ffffff; stroke: #8c959f; stroke-width: 1.2; }
+    .key { fill: #ddf4ff; stroke: #0969da; stroke-width: 1.4; }
+    .model { fill: #fff8c5; stroke: #9a6700; stroke-width: 1.2; }
+    .gate { fill: #ffebe9; stroke: #cf222e; stroke-width: 1.4; }
+    .out { fill: #dafbe1; stroke: #1a7f37; stroke-width: 1.2; }
+    .t { fill: #1f2328; font-size: 13px; }
+    .b { fill: #1f2328; font-size: 13px; font-weight: 600; }
+    .s { fill: #59636e; font-size: 11.5px; }
+    .h { fill: #1f2328; font-size: 15px; font-weight: 700; }
+    .hs { fill: #59636e; font-size: 12px; }
+    .a { stroke: #59636e; stroke-width: 1.4; fill: none; }
+    .ad { stroke: #59636e; stroke-width: 1.4; fill: none; stroke-dasharray: 5 4; }
+    .ah { fill: #59636e; }
+    @media (prefers-color-scheme: dark) {
+      .bg { fill: #0d1117; }
+      .band { fill: #161b22; stroke: #30363d; }
+      .box { fill: #0d1117; stroke: #6e7681; }
+      .key { fill: #0c2d4d; stroke: #4493f8; }
+      .model { fill: #3a2d00; stroke: #d29922; }
+      .gate { fill: #3d1214; stroke: #f85149; }
+      .out { fill: #0f2d1a; stroke: #3fb950; }
+      .t, .b, .h { fill: #e6edf3; }
+      .s, .hs { fill: #9198a1; }
+      .a, .ad { stroke: #9198a1; }
+      .ah { fill: #9198a1; }
+    }
+  </style>
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path class="ah" d="M0,0 L10,5 L0,10 z"/>
+    </marker>
+  </defs>
+  <rect class="bg" x="0" y="0" width="1040" height="560"/>
+
+  <!-- Understand band -->
+  <rect class="band" x="16" y="16" width="1008" height="300" rx="10"/>
+  <text class="h" x="36" y="44">Understand</text>
+  <text class="hs" x="130" y="44">read only, no model; the Studio and the MCP server show these facts</text>
+
+  <rect class="box" x="36" y="64" width="150" height="62" rx="6"/>
+  <text class="b" x="111" y="88" text-anchor="middle">Source code</text>
+  <text class="s" x="111" y="106" text-anchor="middle">Go, COBOL + copybooks,</text>
+  <text class="s" x="111" y="120" text-anchor="middle">CA Gen, Java, TS, Python</text>
+
+  <rect class="box" x="216" y="64" width="128" height="62" rx="6"/>
+  <text class="b" x="280" y="90" text-anchor="middle">Parsers</text>
+  <text class="s" x="280" y="108" text-anchor="middle">one tree format</text>
+
+  <rect class="box" x="374" y="64" width="128" height="62" rx="6"/>
+  <text class="b" x="438" y="90" text-anchor="middle">Symbol index</text>
+  <text class="s" x="438" y="108" text-anchor="middle">every defined name</text>
+
+  <rect class="box" x="532" y="64" width="128" height="62" rx="6"/>
+  <text class="b" x="596" y="90" text-anchor="middle">Call graph</text>
+  <text class="s" x="596" y="108" text-anchor="middle">gaps stay visible</text>
+
+  <rect class="box" x="690" y="64" width="140" height="62" rx="6"/>
+  <text class="b" x="760" y="90" text-anchor="middle">Control flow</text>
+  <text class="s" x="760" y="108" text-anchor="middle">one graph per routine</text>
+
+  <rect class="box" x="860" y="64" width="144" height="62" rx="6"/>
+  <text class="b" x="932" y="90" text-anchor="middle">Effects</text>
+  <text class="s" x="932" y="108" text-anchor="middle">db, files, network, pure</text>
+
+  <path class="a" d="M186,95 H214" marker-end="url(#arr)"/>
+  <path class="a" d="M344,95 H372" marker-end="url(#arr)"/>
+  <path class="a" d="M502,95 H530" marker-end="url(#arr)"/>
+  <path class="a" d="M660,95 H688" marker-end="url(#arr)"/>
+  <path class="a" d="M830,95 H858" marker-end="url(#arr)"/>
+
+  <rect class="key" x="374" y="176" width="292" height="72" rx="6"/>
+  <text class="b" x="520" y="200" text-anchor="middle">Beliefs, one record per line</text>
+  <text class="s" x="520" y="219" text-anchor="middle">inputs, calls, data written, the action the</text>
+  <text class="s" x="520" y="234" text-anchor="middle">name suggests; only verified ones steer</text>
+  <path class="a" d="M596,126 V174" marker-end="url(#arr)"/>
+  <path class="a" d="M932,126 V150 H640 V174" marker-end="url(#arr)"/>
+
+  <rect class="model" x="36" y="176" width="292" height="72" rx="6"/>
+  <text class="b" x="182" y="200" text-anchor="middle">Model claims (gen-enrich)</text>
+  <text class="s" x="182" y="219" text-anchor="middle">checked against the parser; a claim</text>
+  <text class="s" x="182" y="234" text-anchor="middle">that contradicts it is marked, never used</text>
+  <path class="a" d="M328,212 H372" marker-end="url(#arr)"/>
+
+  <rect class="out" x="712" y="176" width="292" height="72" rx="6"/>
+  <text class="b" x="858" y="200" text-anchor="middle">Your corrections</text>
+  <text class="s" x="858" y="219" text-anchor="middle">win on every rebuild; go stale, with both</text>
+  <text class="s" x="858" y="234" text-anchor="middle">values shown, when the code changes</text>
+  <path class="a" d="M712,212 H668" marker-end="url(#arr)"/>
+
+  <text class="s" x="36" y="288">Studio: understand-server --root .</text>
+  <text class="s" x="36" y="306">MCP: npx -y gen-understand --root .  (Claude Code, Codex, Cursor)</text>
+
+  <!-- Generate band -->
+  <rect class="band" x="16" y="336" width="1008" height="208" rx="10"/>
+  <text class="h" x="36" y="364">Generate</text>
+  <text class="hs" x="116" y="364">two local 14B models on one 16 GB GPU, temperature 0, seed 42</text>
+
+  <rect class="box" x="36" y="388" width="128" height="62" rx="6"/>
+  <text class="b" x="100" y="414" text-anchor="middle">Idea or schema</text>
+  <text class="s" x="100" y="432" text-anchor="middle">gen idea "..."</text>
+
+  <rect class="model" x="194" y="388" width="140" height="62" rx="6"/>
+  <text class="b" x="264" y="414" text-anchor="middle">Plan</text>
+  <text class="s" x="264" y="432" text-anchor="middle">qwen3:14b</text>
+
+  <rect class="model" x="364" y="388" width="160" height="62" rx="6"/>
+  <text class="b" x="444" y="414" text-anchor="middle">Write each operation</text>
+  <text class="s" x="444" y="432" text-anchor="middle">qwen2.5-coder:14b</text>
+
+  <rect class="gate" x="554" y="388" width="170" height="62" rx="6"/>
+  <text class="b" x="639" y="410" text-anchor="middle">Compile gate</text>
+  <text class="s" x="639" y="427" text-anchor="middle">per operation; after two</text>
+  <text class="s" x="639" y="441" text-anchor="middle">failed repairs, a stub</text>
+
+  <rect class="gate" x="754" y="388" width="124" height="62" rx="6"/>
+  <text class="b" x="816" y="414" text-anchor="middle">vet, build, test</text>
+  <text class="s" x="816" y="432" text-anchor="middle">whole service</text>
+
+  <rect class="out" x="908" y="388" width="96" height="62" rx="6"/>
+  <text class="b" x="956" y="414" text-anchor="middle">Go service</text>
+  <text class="s" x="956" y="432" text-anchor="middle">stubs counted</text>
+
+  <path class="a" d="M164,419 H192" marker-end="url(#arr)"/>
+  <path class="a" d="M334,419 H362" marker-end="url(#arr)"/>
+  <path class="a" d="M524,419 H552" marker-end="url(#arr)"/>
+  <path class="a" d="M724,419 H752" marker-end="url(#arr)"/>
+  <path class="a" d="M878,419 H906" marker-end="url(#arr)"/>
+
+  <!-- beliefs steer the prompts -->
+  <path class="ad" d="M500,248 V386" marker-end="url(#arr)"/>
+  <text class="s" x="510" y="300">verified beliefs and the style profile go into the prompt</text>
+  <!-- the parsers read the result again -->
+  <path class="ad" d="M956,450 V512 H26 V95 H34" marker-end="url(#arr)"/>
+  <text class="s" x="560" y="528" text-anchor="middle">the parsers read the generated code again and report what it calls and touches</text>
+</svg>

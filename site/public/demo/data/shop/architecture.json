@@ -1,0 +1,1 @@
+{"edges":{"resolved":5,"total":32},"entry_points":null,"languages":[{"files":3,"language":"go","symbols":29}],"packages":[{"files":3,"path":"(root)","symbols":29}],"provenance":{"edges_into_stdlib":0,"project_symbols":29,"stdlib_symbols":0},"stdlib":{"mode":"none","roots":null},"total_files":3,"total_symbols":29,"unknowns":null}

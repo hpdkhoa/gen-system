@@ -1,0 +1,13 @@
+// The gen-system landing page and the static Studio demo, served as a
+// Cloudflare Worker with static assets. Deploy from this folder:
+//   npx wrangler deploy
+// Rebuild the demo data first when the Studio or the examples change:
+//   python site/build.py
+{
+  "name": "gen-system-site",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./public",
+    "not_found_handling": "404-page"
+  }
+}

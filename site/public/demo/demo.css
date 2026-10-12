@@ -1,0 +1,23 @@
+/* Demo only: hide the generation half and add the project switcher. */
+a[href="legacy/generate.html"] { display: none !important; }
+.panel:has(#heal-log) { display: none !important; }
+/* No live connection in a static demo; the bar below says it is read only. */
+#conn-dot, #conn-text { display: none !important; }
+
+#demo-bar {
+  position: fixed; left: 14px; bottom: 14px; z-index: 9999;
+  display: flex; align-items: center; gap: 4px; flex-wrap: wrap;
+  max-width: calc(100vw - 28px);
+  padding: 6px 8px; border-radius: 10px;
+  background: rgba(22, 27, 34, 0.94); border: 1px solid #30363d;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.45);
+  font: 500 12px/1.2 Inter, system-ui, sans-serif;
+}
+#demo-bar a { color: #c9d1d9; text-decoration: none; padding: 5px 9px; border-radius: 6px; }
+#demo-bar a:hover { background: #21262d; }
+#demo-bar a.on { background: #1f6feb; color: #fff; }
+#demo-bar .demo-home { font-weight: 700; color: #e6edf3; }
+#demo-bar .demo-tag {
+  color: #8b949e; padding: 4px 8px; border-left: 1px solid #30363d; border-right: 1px solid #30363d;
+  margin-right: 2px;
+}
