@@ -20,7 +20,7 @@
 //	    Subgraph rooted at one symbol. Caps at depth=4 to keep payloads
 //	    reasonable. Each node carries its dominant effect for colouring.
 //
-//	GET /api/present/v23/effects
+//	GET /api/present/v23/effects[?include_stdlib=1]
 //	    All inferred function effects, grouped by kind, for the effect-facet
 //	    UI in Wave 4.
 //
@@ -633,6 +633,11 @@ func (s *Server) handleEffectsV23(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	resp := EffectsListResponse{ByEffect: map[string][]EffectListEntry{}}
+	// v26.66: like search and the call graph, the list hides standard library
+	// and third party functions unless include_stdlib=1. Before, a small Go
+	// project listed 27 GOROOT functions among its 29 "db" entries.
+	includeStdlib := r.URL.Query().Get("include_stdlib") == "1" ||
+		r.URL.Query().Get("include_stdlib") == "true"
 	// v26.58 (D084): one locked snapshot of the index for the whole request,
 	// as in handleCallgraphV23. The direct reads of s.idx raced with
 	// ReplaceContext.
@@ -653,7 +658,7 @@ func (s *Server) handleEffectsV23(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 		sym, ok := idx.ByID(id)
-		if !ok {
+		if !ok || (!includeStdlib && sym.Provenance.IsExternal()) {
 			continue
 		}
 		entry := EffectListEntry{

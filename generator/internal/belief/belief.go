@@ -271,6 +271,7 @@ func (bs *Store) RebuildFromIndex(idx *symbols.Index, efx map[string]*flow.FuncE
 	factsBySym := make(map[string]parserFacts)
 	// file -> module/PROGRAM-ID, for grouping flat languages (v26.21).
 	moduleByFile := buildModuleByFile(idx)
+	dataNames := buildDataNames(idx)
 	groupBySym := make(map[string]string)
 
 	// Only describe project functions/methods/procedures, the things a human
@@ -282,7 +283,7 @@ func (bs *Store) RebuildFromIndex(idx *symbols.Index, efx map[string]*flow.FuncE
 		if !isCallable(sym.Kind) {
 			continue
 		}
-		parserBeliefs := deriveParserBeliefs(sym, idx, efx, moduleByFile)
+		parserBeliefs := deriveParserBeliefs(sym, idx, efx, moduleByFile, dataNames)
 		for _, b := range parserBeliefs {
 			bs.applyCorrectionLocked(b)
 			bs.beliefs[b.ID] = b
@@ -501,14 +502,29 @@ func isCallable(k symbols.SymbolKind) bool {
 // Object is written as the human-readable value that the UI shows and that a human
 // verifies/corrects; each belief's ID is stable across re-parses so corrections and
 // staleness fingerprints (session 2) keep matching.
-func deriveParserBeliefs(sym *symbols.Symbol, idx *symbols.Index, efx map[string]*flow.FuncEffects, moduleByFile map[string]string) []*Belief {
+func deriveParserBeliefs(sym *symbols.Symbol, idx *symbols.Index, efx map[string]*flow.FuncEffects, moduleByFile map[string]string, dataNames map[string]bool) []*Belief {
 	var out []*Belief
 	subj := sym.QualName
 	if subj == "" {
 		subj = sym.Name
 	}
 
-	// inputs: from the declared parameters.
+	e := efx[sym.ID]
+
+	// inputs: from the declared parameters. v26.66: a COBOL paragraph has none;
+	// its inputs are the data items its statements read.
+	if len(sym.Params) == 0 && e != nil {
+		if names := knownData(e.DataReads, dataNames); len(names) > 0 {
+			out = append(out, &Belief{
+				ID:        "inputs:" + sym.ID,
+				Kind:      KindInputs,
+				Subject:   subj,
+				Predicate: "takes_inputs",
+				Object:    strings.Join(names, ", "),
+				Source:    SourceParser,
+			})
+		}
+	}
 	if len(sym.Params) > 0 {
 		out = append(out, &Belief{
 			ID:        "inputs:" + sym.ID,
@@ -546,7 +562,21 @@ func deriveParserBeliefs(sym *symbols.Symbol, idx *symbols.Index, efx map[string
 				Source:    SourceParser,
 			})
 		}
-		if changes := stateChanges(effs); changes != "" {
+		changes := stateChanges(effs)
+		if sym.Language == ast.LangCOBOL && e.Effects[flow.EffectFS] && !e.FSWrite {
+			// v26.66: OPEN, READ and CLOSE read a file; they change no stored state.
+			changes = stateChanges(withoutEffect(effs, string(flow.EffectFS)))
+		}
+		// v26.66: name the data items a COBOL paragraph writes, before the
+		// stores it touches.
+		if names := knownData(e.DataWrites, dataNames); len(names) > 0 {
+			written := strings.Join(names, ", ")
+			if changes != "" {
+				written += " (" + changes + ")"
+			}
+			changes = written
+		}
+		if changes != "" {
 			out = append(out, &Belief{
 				ID:        "data-change:" + sym.ID,
 				Kind:      KindDataChange,
@@ -607,6 +637,45 @@ func groupForSymbol(sym *symbols.Symbol, moduleByFile map[string]string) string 
 
 // buildModuleByFile maps each file to the module/program symbol declared in it
 // (COBOL: the PROGRAM-ID). Computed once per rebuild so grouping stays O(n).
+// buildDataNames returns the names of the project's data items (types, fields,
+// variables, constants). v26.66: knownData uses it to keep only real data names
+// from the syntactic COBOL reads and writes in flow.FuncEffects.
+func buildDataNames(idx *symbols.Index) map[string]bool {
+	names := make(map[string]bool)
+	for _, s := range idx.AllSymbols() {
+		if s.Provenance.IsExternal() {
+			continue
+		}
+		switch s.Kind {
+		case symbols.SymType, symbols.SymField, symbols.SymVar, symbols.SymConst:
+			names[strings.ToUpper(s.Name)] = true
+		}
+	}
+	return names
+}
+
+// withoutEffect returns effs without the named effect.
+func withoutEffect(effs []string, drop string) []string {
+	var out []string
+	for _, e := range effs {
+		if e != drop {
+			out = append(out, e)
+		}
+	}
+	return out
+}
+
+// knownData keeps the names that are data items of the project, in order.
+func knownData(names []string, dataNames map[string]bool) []string {
+	var out []string
+	for _, n := range names {
+		if dataNames[n] {
+			out = append(out, n)
+		}
+	}
+	return out
+}
+
 func buildModuleByFile(idx *symbols.Index) map[string]string {
 	out := map[string]string{}
 	if idx == nil {

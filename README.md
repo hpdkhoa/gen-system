@@ -20,6 +20,12 @@ its name suggests. It calls each line a belief. A local model may add claims, an
 any claim the parser contradicts and never uses it. You can correct any belief. Only beliefs a
 person verified steer generation.
 
+![The Studio's Beliefs page for the COBOL payroll example: inputs and data written for each paragraph](docs/img/studio-cobol-beliefs.png)
+
+*The Beliefs page for `examples/payroll`. A COBOL paragraph has no parameters, so gen-system reads
+its inputs and the data it writes from its statements: `CALC-TAX` reads the grade, the region, the
+gross pay and the rate, and writes the tax and the rate. Each line has Verify and Correct.*
+
 The generation half plans a Go service with `qwen3:14b` and writes each operation with
 `qwen2.5-coder:14b`. Each operation must compile on its own before it enters the service file. A
 body that still fails after two repairs becomes a `not implemented` stub, and the run counts it.

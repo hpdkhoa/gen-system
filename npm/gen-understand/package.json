@@ -1,6 +1,6 @@
 {
   "name": "gen-understand",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "gen-system's Understand engine as an MCP server: parser facts about a codebase for AI agents",
   "mcpName": "io.github.hpdkhoa/gen-understand",
   "license": "Apache-2.0",

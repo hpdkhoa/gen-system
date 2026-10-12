@@ -612,6 +612,18 @@ type FuncEffects struct {
 	// that writes. The write is a separate field, not a new EffectKind, so the
 	// Effects map that the Studio, belief and objgraph list stays as it was.
 	DBWrite bool
+
+	// DataReads and DataWrites are the data names a COBOL paragraph reads and
+	// writes (MOVE a TO b, COMPUTE b = a, WRITE rec, conditions), sorted and
+	// without duplicates. v26.66: COBOL paragraphs have no parameters, so the
+	// belief layer had no inputs and no data written to list for them. The
+	// names are syntactic; the belief layer keeps only those the index knows
+	// as data items. Empty for other languages.
+	DataReads  []string
+	DataWrites []string
+	// FSWrite is true when a COBOL paragraph writes a file (WRITE, REWRITE,
+	// DELETE). OPEN, READ and CLOSE touch the filesystem without changing it.
+	FSWrite bool
 }
 
 // dbPatterns: package/function names that indicate DB access.
@@ -668,6 +680,7 @@ func inferNodeEffects(id string, children []*ast.Node, lang ast.Language) *FuncE
 	}
 
 	var callees []string
+	reads, writes := map[string]bool{}, map[string]bool{}
 	var walk func(nodes []*ast.Node)
 	walk = func(nodes []*ast.Node) {
 		for _, n := range nodes {
@@ -686,6 +699,9 @@ func inferNodeEffects(id string, children []*ast.Node, lang ast.Language) *FuncE
 			if n.Kind == ast.NodeAssign && lang == ast.LangCAGen && n.Name != "" {
 				callees = append(callees, n.Name)
 			}
+			if lang == ast.LangCOBOL {
+				cobolDataFlow(n, efx, reads, writes)
+			}
 			walk(n.Children)
 			// v26.57 (D014): the Go, Java and COBOL frontends put else and
 			// catch bodies in n.Else. Walking Children alone tagged a function
@@ -694,6 +710,8 @@ func inferNodeEffects(id string, children []*ast.Node, lang ast.Language) *FuncE
 		}
 	}
 	walk(children)
+	efx.DataReads = sortedKeys(reads)
+	efx.DataWrites = sortedKeys(writes)
 
 	// CA Gen procedures: WRITE/READ/DELETE are DB operations.
 	if lang == ast.LangCAGen {

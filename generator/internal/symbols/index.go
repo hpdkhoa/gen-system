@@ -202,34 +202,67 @@ func (idx *Index) ResolveAll() {
 // whose first segment is not an import (a receiver variable such as
 // s.store.Get) falls back to bare name resolution with the tier preference,
 // unchanged. A function literal called in place never resolves.
+//
+// v26.66: a receiver call (s.store.Get, err.Error) names no type, so it may
+// match a standard library or third party symbol only by its exact qualified
+// name; matching a stdlib method by its bare name produced wrong edges such as
+// err.Error to json.InvalidUnmarshalError.Error. A Go builtin (len, append)
+// never resolves.
 func (idx *Index) resolveEdgeLocked(e CallEdge) *Symbol {
 	name := e.CalleeName
 	if name == "" || strings.HasPrefix(name, ast.FuncLiteralCallee) {
 		return nil
 	}
-	if dot := strings.Index(name, "."); dot >= 0 {
-		qual := name[:dot]
-		if caller, ok := idx.allSymbols[e.CallerID]; ok {
-			if importPath := idx.resolveImportPath(qual, caller.DefinedIn); importPath != "" {
-				return idx.resolveUnderImportLocked(importPath, name[strings.LastIndex(name, ".")+1:])
-			}
+	caller := idx.allSymbols[e.CallerID]
+	dot := strings.Index(name, ".")
+	if dot >= 0 && caller != nil {
+		if importPath := idx.resolveImportPath(name[:dot], caller.DefinedIn); importPath != "" {
+			// json.NewDecoder(r).Decode calls a method on a value the package
+			// returned, so a method of that package may match; http.Error may not.
+			chained := strings.Contains(name[dot+1:], "(")
+			return idx.resolveUnderImportLocked(importPath, name[strings.LastIndex(name, ".")+1:], chained)
 		}
 	}
-	return idx.resolveByNameLocked(name)
+	if dot < 0 && caller != nil && caller.Language == ast.LangGo && goBuiltins[name] {
+		return nil
+	}
+	return idx.resolveByNameForLocked(name, caller, dot >= 0)
+}
+
+// goBuiltins are the predeclared Go functions. A call to one names no symbol in
+// any package, so it must not match a project or stdlib symbol of that name.
+var goBuiltins = map[string]bool{
+	"append": true, "cap": true, "clear": true, "close": true, "complex": true, "copy": true,
+	"delete": true, "imag": true, "len": true, "make": true, "max": true, "min": true, "new": true,
+	"panic": true, "print": true, "println": true, "real": true, "recover": true,
+}
+
+// callable reports whether a symbol of this kind can be the target of a call.
+// Fields, parameters and imports cannot; matching them by name gave edges such
+// as len to the struct field typedPointer.len. A module stays callable: a COBOL
+// CALL "PROGRAM" names the program's module symbol.
+func callable(k SymbolKind) bool {
+	switch k {
+	case SymField, SymParam, SymImport:
+		return false
+	}
+	return true
 }
 
 // resolveUnderImportLocked returns the symbol named bare whose defining
 // directory sits under importPath, preferring an exported one; nil when the
 // package is not in the index (an external package that was not ingested).
+// A package qualified call names a package level symbol, so methods match only
+// when allowMethods is set (a call chained on a value the package returned).
 // Candidates are sorted by ID first, so the choice is deterministic.
-func (idx *Index) resolveUnderImportLocked(importPath, bare string) *Symbol {
+func (idx *Index) resolveUnderImportLocked(importPath, bare string, allowMethods bool) *Symbol {
 	type scored struct {
 		sym   *Symbol
 		score int
 	}
 	var candidates []scored
 	for _, s := range idx.allSymbols {
-		if s.Name != bare || s.Kind == SymImport {
+		if s.Name != bare || !callable(s.Kind) || (s.Kind == SymMethod && !allowMethods) {
 			continue
 		}
 		if n := importMatchScore(s.DefinedIn, importPath); n > 0 {
@@ -461,9 +494,22 @@ func (idx *Index) UpdateFile(filePath string, m *ast.Module) {
 // v26.25: "first" is taken from candidates sorted by SymbolID, not from map
 // order, so the winner is a function of the input alone.
 func (idx *Index) resolveByNameLocked(name string) *Symbol {
+	return idx.resolveByNameForLocked(name, nil, strings.Contains(name, "."))
+}
+
+// resolveByNameForLocked applies the rule above with three limits from v26.66.
+// Only callable kinds are candidates. A stdlib or third party caller resolves
+// only to external symbols: stdlib code never calls into the project. For a
+// receiver call from project code, an external symbol matches only by its
+// exact qualified name, since the receiver's type is unknown. A bare Go call
+// never names a method. caller may be nil (no caller known).
+func (idx *Index) resolveByNameForLocked(name string, caller *Symbol, receiver bool) *Symbol {
+	full := name
 	if dot := strings.LastIndex(name, "."); dot >= 0 {
 		name = name[dot+1:]
 	}
+	externalCaller := caller != nil && caller.Provenance.IsExternal()
+	goCaller := caller != nil && caller.Language == ast.LangGo
 	// v26.25 (determinism fix): collect every candidate first, then choose.
 	// The prior version ranged over idx.allSymbols and took the first match in
 	// each tier. idx.allSymbols is a map, so Go randomizes that order: when two
@@ -475,9 +521,20 @@ func (idx *Index) resolveByNameLocked(name string) *Symbol {
 	// function of the input alone. Tier order is unchanged.
 	var candidates []*Symbol
 	for _, s := range idx.allSymbols {
-		if s.Name == name {
-			candidates = append(candidates, s)
+		if s.Name != name || !callable(s.Kind) {
+			continue
 		}
+		if goCaller && !receiver && s.Kind == SymMethod {
+			continue
+		}
+		if s.Provenance.IsExternal() {
+			if receiver && !externalCaller && s.QualName != full {
+				continue
+			}
+		} else if externalCaller {
+			continue
+		}
+		candidates = append(candidates, s)
 	}
 	if len(candidates) == 0 {
 		return nil

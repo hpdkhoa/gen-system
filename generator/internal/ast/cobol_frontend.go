@@ -1237,7 +1237,7 @@ func (p *cobolParser) parseProcedureDivision(m *Module) {
 		// the verbs below and only when the line wasn't already consumed as a
 		// CALL/PERFORM/IF/EXEC/return above (those set tokens[0] to their verb, so
 		// a simple first-token check is sufficient and non-overlapping).
-		if cobolDataVerbs[l.tokens[0]] {
+		if cobolDataVerbs[l.tokens[0]] || cobolFileVerbs[l.tokens[0]] {
 			add(&Node{
 				Kind:      NodeAssign,
 				Language:  LangCOBOL,
@@ -1383,6 +1383,15 @@ var cobolDataVerbs = map[string]bool{
 	"DIVIDE": true, "COMPUTE": true, "DISPLAY": true, "ACCEPT": true,
 	"INITIALIZE": true, "SET": true, "STRING": true, "UNSTRING": true,
 	"INSPECT": true, "ADDRESS": false,
+}
+
+// cobolFileVerbs are the file I/O statements. v26.66: they produced no node,
+// so a paragraph that only read or wrote files showed no step for it in the
+// CFG and no effect. They are emitted like the data verbs, as NodeAssign with
+// the verb in Name; flow.InferEffects reads them as file effects.
+var cobolFileVerbs = map[string]bool{
+	"OPEN": true, "CLOSE": true, "READ": true, "WRITE": true,
+	"REWRITE": true, "DELETE": true, "START": true,
 }
 
 // appendChild attaches a child node to current; if current is nil it goes

@@ -3,7 +3,7 @@
   "name": "io.github.hpdkhoa/gen-understand",
   "title": "gen-system Understand",
   "description": "Parser facts about a codebase: architecture, call graphs, control flow, effects, beliefs",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "repository": {
     "url": "https://github.com/hpdkhoa/gen-system",
     "source": "github",
@@ -13,7 +13,7 @@
     {
       "registryType": "npm",
       "identifier": "gen-understand",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "transport": {
         "type": "stdio"
       },

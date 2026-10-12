@@ -2943,9 +2943,11 @@ async function renderBeliefs() {
     ]),
   ]));
   if (!state.beliefs) {
-    page.appendChild(el('div', { class: 'loader' }, 'Loading beliefs…'));
+    // v26.66: remove the loader once the request ends; it stayed on the page.
+    const loader = page.appendChild(el('div', { class: 'loader' }, 'Loading beliefs…'));
     try { state.beliefs = await api('/api/present/beliefs'); }
-    catch (e) { page.appendChild(el('div', { class: 'right-empty' }, 'Failed: ' + e.message)); return; }
+    catch (e) { loader.remove(); page.appendChild(el('div', { class: 'right-empty' }, 'Failed: ' + e.message)); return; }
+    loader.remove();
   }
   const data = state.beliefs;
   $('#nav-badge-beliefs').textContent = fmt(data.pending_review);
@@ -3227,9 +3229,11 @@ async function renderEffects() {
     el('div', { class: 'page-subtitle' }, 'Every function grouped by inferred side-effect.'),
   ]));
   if (!state.effects) {
-    page.appendChild(el('div', { class: 'loader' }, 'Loading effects…'));
+    // v26.66: remove the loader once the request ends; it stayed on the page.
+    const loader = page.appendChild(el('div', { class: 'loader' }, 'Loading effects…'));
     try { state.effects = await api('/api/present/v23/effects'); }
-    catch (e) { page.appendChild(el('div', { class: 'right-empty' }, 'Failed: ' + e.message)); return; }
+    catch (e) { loader.remove(); page.appendChild(el('div', { class: 'right-empty' }, 'Failed: ' + e.message)); return; }
+    loader.remove();
   }
   const data = state.effects;
   if (!data.total) { page.appendChild(el('div', { class: 'right-empty' }, 'No effects inferred yet.')); return; }
