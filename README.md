@@ -3,6 +3,7 @@
 <p align="center"><strong>Parser facts about a codebase, and Go services from local models that must compile before they ship.</strong></p>
 
 <p align="center">
+  <a href="https://gen-system.500kv.co/"><img alt="demo: live" src="https://img.shields.io/badge/demo-live-2ea44f"></a>
   <a href="LICENSE"><img alt="license: Apache 2.0" src="https://img.shields.io/badge/license-Apache%202.0-blue"></a>
   <a href="go.mod"><img alt="Go version" src="https://img.shields.io/github/go-mod/go-version/hpdkhoa/gen-system?label=Go&logo=go&logoColor=white"></a>
   <a href="https://www.npmjs.com/package/gen-understand"><img alt="npm: gen-understand" src="https://img.shields.io/npm/v/gen-understand?label=npm&logo=npm&color=cb3837"></a>
@@ -98,7 +99,9 @@ your value next to the new one.
 Python files need `python3` 3.9 or newer on the host. The other five parsers are pure Go. A
 construct a parser cannot model becomes an unknown node that carries the reason.
 
-To try it before you point it at your own code, open one of the two examples:
+To try it before you install anything, open the [live demo](https://gen-system.500kv.co/demo/):
+the Studio runs in your browser on both examples and on CobolCraft, read only. To run it
+yourself, open one of the two examples:
 
 ```bash
 understand-server --root examples/payroll --copybooks examples/payroll/copybooks
