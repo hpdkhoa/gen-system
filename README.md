@@ -1,6 +1,14 @@
-# gen-system
+<h1 align="center">gen-system</h1>
 
-**Parser facts about a codebase, and Go services from local models that must compile before they ship.**
+<p align="center"><strong>Parser facts about a codebase, and Go services from local models that must compile before they ship.</strong></p>
+
+<p align="center">
+  <a href="LICENSE"><img alt="license: Apache 2.0" src="https://img.shields.io/badge/license-Apache%202.0-blue"></a>
+  <a href="go.mod"><img alt="Go version" src="https://img.shields.io/github/go-mod/go-version/hpdkhoa/gen-system?label=Go&logo=go&logoColor=white"></a>
+  <a href="https://www.npmjs.com/package/gen-understand"><img alt="npm: gen-understand" src="https://img.shields.io/npm/v/gen-understand?label=npm&logo=npm&color=cb3837"></a>
+  <a href="https://registry.modelcontextprotocol.io/v0/servers?search=gen-understand"><img alt="MCP Registry: gen-understand" src="https://img.shields.io/badge/MCP%20Registry-gen--understand-6f42c1"></a>
+  <a href="docs/understand-pipeline.md#the-six-parsers"><img alt="parsers: 6 languages" src="https://img.shields.io/badge/parsers-6%20languages-orange"></a>
+</p>
 
 ![The gen-system Studio showing the call graph of a COBOL payroll run and the control flow graph of its CALC-TAX paragraph](docs/img/studio-cobol-cfg.png)
 
