@@ -74,7 +74,9 @@ def snapshot(tool, tmp, name, src, display, copybooks=None, stdlib='none'):
     cmd = [tool, '--root', work, '--name', display, '--stdlib', stdlib, '--out', out]
     if copybooks:
         cmd += ['--copybooks', os.pathsep.join(os.path.join(work, c) for c in copybooks)]
-    run(cmd)
+    # The parser cache path is relative (.gen/ast_cache), so run from the temp
+    # folder; from the repository root it would leave a .gen folder behind.
+    run(cmd, cwd=tmp)
 
 
 def main():
