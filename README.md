@@ -11,7 +11,7 @@
   <a href="docs/understand-pipeline.md#the-six-parsers"><img alt="parsers: 6 languages" src="https://img.shields.io/badge/parsers-6%20languages-orange"></a>
 </p>
 
-![The gen-system Studio showing the call graph of a COBOL payroll run and the control flow graph of its CALC-TAX paragraph](docs/img/studio-cobol-cfg.png)
+![gen-system-demo](docs/img/gen-system-demo.gif)
 
 *The Studio on [`examples/payroll`](examples/payroll). Left: what `MAIN-PARA` calls, two levels
 deep. Right: the control flow graph of `CALC-TAX`. The `EVALUATE` on the pay grade fans out into
