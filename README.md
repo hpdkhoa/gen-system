@@ -259,7 +259,7 @@ stub, and stubs compile. Read the stub rate and the repair counts.
 ## Contributing
 
 Open an issue and attach the belief file (`.gen/beliefs.json`). It shows where gen-system read the
-code wrong.
+code wrong. [CONTRIBUTING.md](CONTRIBUTING.md) covers bug reports, setup, tests and pull requests.
 
 ## License
 
