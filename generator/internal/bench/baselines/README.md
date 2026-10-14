@@ -41,8 +41,8 @@ The baseline freezes three deterministic, parser-path suites (no model, no GPU):
 
 ### resolution_recall
 - `resolution_recall_internal = 1.000`: the resolver resolves **100% of internal
-  COBOL call edges** (302 / 302) to their exact definitions. It resolves these symbols at compiler
-  accuracy and does not guess.
+  COBOL call edges** (302 / 302) to their exact definitions in the source. It does not guess.
+  No other COBOL parser or compiler cross reference has checked these edges yet.
 - `call_edges_total = 1063`, `call_edges_internal = 302`,
   `call_edges_external = 761`.
 - `resolution_recall_overall = 0.284`. 761 of 1063 edges are calls into the

@@ -1,7 +1,7 @@
 // generator/internal/cli/continue.go, v23.24 (task 4A): `gen continue` takes
 // an existing codebase plus a free-text idea and continues building it. It loads
 // the existing code through gen-system's own Understand engine
-// (context.LoadContext → compiler-accurate entities/fields/ops), asks the
+// (context.LoadContext → parsed entities/fields/ops), asks the
 // planner for a delta grounded in what already exists, stages the result via the
 // v23.19 evolve-review safety path (source untouched until --apply), and runs
 // the same agent loop (compile-gate + per-operation repair) as every other

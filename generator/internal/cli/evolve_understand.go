@@ -64,7 +64,7 @@ func EvolveWithUnderstanding() {
 		return
 	}
 
-	// ── 1. Understand: read the existing code at compiler accuracy ──
+	// ── 1. Understand: parse the existing code ──
 	fmt.Println("🔬 Understanding existing code at", path, "…")
 	ctx := context.LoadContextWithOpts(path, loadOpts()) // v26.34: stdlib auto detected
 	resolvedPct, nSyms, nEdges := resolutionStats(ctx.Index)

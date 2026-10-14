@@ -109,6 +109,11 @@ with the change.
 You may use AI tools. You are responsible for every line you send: you read it, you run the tests,
 and you can explain it in review. Do not send pull requests that you have not run.
 
+## Conduct and security
+
+Everyone here follows the [code of conduct](CODE_OF_CONDUCT.md). Report a security problem
+privately, as [SECURITY.md](SECURITY.md) describes, and not in a public issue.
+
 ## License
 
 gen-system is Apache-2.0. By sending a contribution you agree to license it under the same terms,

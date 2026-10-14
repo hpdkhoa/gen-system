@@ -2,7 +2,7 @@
 // compact "what already exists" block that grounds the continue-planner so the
 // model proposes a delta against the real codebase rather than re-describing it.
 //
-// Entities + fields come from the loaded context's IR (compiler-accurate).
+// Entities + fields come from the loaded context's IR (parsed, not inferred).
 // Operations are detected index-first (resolved methods whose receiver is an
 // <Entity>Service) with a deterministic file-scan fallback over
 // service/<entity>_service.go, per the chosen design.
