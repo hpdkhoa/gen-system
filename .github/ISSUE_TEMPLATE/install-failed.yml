@@ -1,0 +1,35 @@
+name: Install or start failed
+description: install.sh, go install, npx gen-understand or a server would not run.
+labels: ["install"]
+body:
+  - type: dropdown
+    id: how
+    attributes:
+      label: How you installed
+      options:
+        - npx -y gen-understand
+        - go install .../understand-mcp@latest
+        - ./install.sh
+        - ./install.sh --understand
+        - make, from a clone
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: Operating system and CPU
+      placeholder: macOS 15 on Apple silicon, Ubuntu 24.04 on x64, Windows 11 on x64
+    validations:
+      required: true
+  - type: input
+    id: tools
+    attributes:
+      label: Tool versions
+      description: The output of `go version` and `node --version`, whichever you used.
+  - type: textarea
+    id: output
+    attributes:
+      label: The command and its full output
+      render: text
+    validations:
+      required: true

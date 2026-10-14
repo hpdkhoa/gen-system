@@ -685,6 +685,15 @@ func (s *Server) methodsWithCFGFor(typeSym *symbols.Symbol) []map[string]string 
 		}
 	}
 	s.mu.RUnlock()
+	// v26.68: AllSymbols comes from a map, so the list came back in a different
+	// order on each load. Sort by name, then ID, so the same project always
+	// gives the same answer.
+	sort.Slice(out, func(i, j int) bool {
+		if out[i]["name"] != out[j]["name"] {
+			return out[i]["name"] < out[j]["name"]
+		}
+		return out[i]["id"] < out[j]["id"]
+	})
 	return out
 }
 

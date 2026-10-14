@@ -10,6 +10,7 @@
 package webui
 
 import (
+	"bytes"
 	"embed"
 	"io/fs"
 	"net/http"
@@ -21,14 +22,42 @@ var assets embed.FS
 // FS returns the embedded UI file system.
 func FS() fs.FS { return assets }
 
+// readOnlyStyle hides the parts of the Studio that belong to the generation
+// half. v26.68: understand-server only serves this embedded copy, links no
+// generation code, and does not embed legacy/generate.html, so its "Build from
+// idea" link led nowhere and its Self-healing panel could never fill. gen-server
+// serves its own copy from web/ and keeps both.
+const readOnlyStyle = `<style id="read-only-studio">
+a[href="legacy/generate.html"] { display: none !important; }
+.panel:has(#heal-log) { display: none !important; }
+</style>
+`
+
+// studioPage returns the embedded Studio with readOnlyStyle added to its head.
+func studioPage() ([]byte, error) {
+	page, err := assets.ReadFile("studio-v23.html")
+	if err != nil {
+		return nil, err
+	}
+	return bytes.Replace(page, []byte("</head>"), []byte(readOnlyStyle+"</head>"), 1), nil
+}
+
 // Handler returns an http.Handler that serves the embedded Studio. A request to
 // "/" (or "/index.html") is rewritten to studio-v23.html so the appliance opens
-// directly into the Studio.
+// directly into the Studio, and the page goes out with readOnlyStyle.
 func Handler() http.Handler {
 	fileServer := http.FileServer(http.FS(assets))
+	page, pageErr := studioPage()
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path == "/" || r.URL.Path == "/index.html" {
-			r.URL.Path = "/studio-v23.html"
+		switch r.URL.Path {
+		case "/", "/index.html", "/studio-v23.html":
+			if pageErr != nil {
+				http.Error(w, pageErr.Error(), http.StatusInternalServerError)
+				return
+			}
+			w.Header().Set("Content-Type", "text/html; charset=utf-8")
+			_, _ = w.Write(page)
+			return
 		}
 		fileServer.ServeHTTP(w, r)
 	})

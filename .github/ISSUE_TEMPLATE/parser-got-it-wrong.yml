@@ -1,0 +1,52 @@
+name: The parser got my code wrong
+description: A wrong or missing call, control flow graph, effect or belief.
+labels: ["parser"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for checking gen-system against real code. The belief file shows exactly what gen-system read, so it is the most useful thing you can attach.
+  - type: dropdown
+    id: language
+    attributes:
+      label: Language
+      options: [Go, COBOL, CA Gen, Java, TypeScript, Python]
+    validations:
+      required: true
+  - type: dropdown
+    id: what
+    attributes:
+      label: What is wrong
+      options:
+        - A call is missing or points to the wrong routine
+        - The control flow graph is wrong
+        - An effect is wrong (database, files, network, pure)
+        - A belief is wrong (inputs, calls, data written, action)
+        - A construct shows as an unknown node
+        - Something else
+    validations:
+      required: true
+  - type: textarea
+    id: code
+    attributes:
+      label: The smallest code that shows it
+      description: Paste a short snippet, or link a public file at a commit. Remove anything private.
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected, and what gen-system shows
+    validations:
+      required: true
+  - type: textarea
+    id: beliefs
+    attributes:
+      label: The belief file
+      description: Attach `.gen/beliefs.json` from the project root, or the lines for the routine in question.
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: The output of `understand-mcp --version`, or the commit you built from.

@@ -40,9 +40,13 @@ type stdlibProgress struct {
 	roots []StdlibRootReport
 }
 
-// stdlibMaxFileSize caps the per-file size we will parse from a stdlib tree:
-// the same 64 KiB bound the project walk uses.
-const stdlibMaxFileSize = 64 * 1024
+// stdlibMaxFileSize caps the per-file size we will parse from a stdlib tree.
+// v26.68: it was the 64 KiB bound of the project walk, which skipped files such
+// as net/http/server.go (128 KiB), so a call to http.Error had no definition to
+// resolve to. The walk only covers the packages the project imports, so a
+// larger bound stays affordable. 512 KiB takes in server.go and also the
+// generated net/http/h2_bundle.go (388 KiB).
+const stdlibMaxFileSize = 512 * 1024
 
 // loadStdlibRoots walks the configured stdlib roots (scoped to each root's
 // ImportScope when set), parses each source file read-only, and adds it to the

@@ -36,6 +36,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/hpdkhoa/gen-system/generator/internal/ast"
 	"github.com/hpdkhoa/gen-system/generator/internal/flow"
 	"github.com/hpdkhoa/gen-system/generator/internal/symbols"
 )
@@ -247,7 +248,17 @@ func classifyEntry(sym *symbols.Symbol) string {
 		name = sym.QualName
 	}
 	switch sym.Kind {
-	case symbols.SymFunc:
+	case symbols.SymFunc, symbols.SymMethod:
+		// v26.68: a Go function or method with the net/http handler signature is a
+		// handler whatever its name. Before, only names were checked, so the
+		// method Shop.Checkout(w http.ResponseWriter, r *http.Request) was missed
+		// and a Go web service showed 0 entry points.
+		if isHTTPHandlerSignature(sym) {
+			return "handler"
+		}
+		if sym.Kind != symbols.SymFunc {
+			break
+		}
 		if name == "main" {
 			return "main"
 		}
@@ -260,6 +271,19 @@ func classifyEntry(sym *symbols.Symbol) string {
 		}
 	}
 	return ""
+}
+
+// isHTTPHandlerSignature reports whether sym takes exactly
+// (http.ResponseWriter, *http.Request), the net/http handler shape. A type
+// with no package qualifier also counts, for code that dot-imports net/http.
+func isHTTPHandlerSignature(sym *symbols.Symbol) bool {
+	if sym.Language != ast.LangGo || len(sym.Params) != 2 {
+		return false
+	}
+	w, r := sym.Params[0].Type, sym.Params[1].Type
+	httpPkg := func(p string) bool { return p == "http" || p == "" }
+	return w.Name == "ResponseWriter" && !w.IsPtr && httpPkg(w.Package) &&
+		r.Name == "Request" && r.IsPtr && httpPkg(r.Package)
 }
 
 // ─── /api/present/v23/search ──────────────────────────────────────────
@@ -675,7 +699,15 @@ func (s *Server) handleEffectsV23(w http.ResponseWriter, r *http.Request) {
 	}
 	for k := range resp.ByEffect {
 		entries := resp.ByEffect[k]
-		sort.Slice(entries, func(i, j int) bool { return entries[i].Name < entries[j].Name })
+		// v26.68: tie-break on the ID. COBOL projects reuse paragraph names
+		// across programs, and the map walk above put equal names in a
+		// different order on each load.
+		sort.Slice(entries, func(i, j int) bool {
+			if entries[i].Name != entries[j].Name {
+				return entries[i].Name < entries[j].Name
+			}
+			return entries[i].SymbolID < entries[j].SymbolID
+		})
 		resp.ByEffect[k] = entries
 	}
 	writeJSON(w, resp)
