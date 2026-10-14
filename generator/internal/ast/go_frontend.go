@@ -237,7 +237,8 @@ func (c *goConverter) convertField(f *goast.Field) []Field {
 	if len(f.Names) == 0 {
 		// Embedded type
 		name := typ.Name
-		return []Field{{Name: name, Type: typ, Tag: tag, Exported: isExported(name)}}
+		return []Field{{Name: name, Type: typ, Tag: tag, Exported: isExported(name),
+			Line: c.span(f.Pos(), f.End()).Start.Line}}
 	}
 	var fields []Field
 	for _, name := range f.Names {
@@ -247,6 +248,7 @@ func (c *goConverter) convertField(f *goast.Field) []Field {
 			Tag:        tag,
 			Exported:   isExported(name.Name),
 			DocComment: docText(f.Comment),
+			Line:       c.span(name.Pos(), name.End()).Start.Line,
 		})
 	}
 	return fields
@@ -394,10 +396,13 @@ func (c *goConverter) convertStmt(s goast.Stmt) []*Node {
 	case *goast.IfStmt:
 		n := &Node{Kind: NodeBranch, Language: LangGo, Name: "if", RawSource: exprText(st.Cond), Span: c.span(st.Pos(), st.End())}
 		// v26.58 (D059): the calls in the Init (`if err := f(); ...`) were
-		// dropped, so the call graph missed f. The Init runs before the
-		// condition, so its calls come first.
-		n.Children = append(n.Children, c.callsIn(st.Init)...)
-		n.Children = append(n.Children, c.callsIn(st.Cond)...)
+		// dropped, so the call graph missed f.
+		// v26.68: they went into Children, the then-body, so the CFG drew
+		// `err := f()` inside the yes arm, after the decision. The Init and the
+		// calls in the condition run before the branch, so they now come before
+		// the node. An "else if" keeps working: Else holds a list of nodes.
+		pre := c.initStmt(st.Init)
+		pre = append(pre, c.callsIn(st.Cond)...)
 		n.Children = append(n.Children, c.convertStmtList(st.Body.List)...)
 		// v23.7: else / else-if goes into Else (a distinct block in the CFG),
 		// not flattened into the then-body. An "else if" nests as a single
@@ -405,7 +410,7 @@ func (c *goConverter) convertStmt(s goast.Stmt) []*Node {
 		if st.Else != nil {
 			n.Else = c.convertStmt(st.Else)
 		}
-		return []*Node{n}
+		return append(pre, n)
 
 	case *goast.ForStmt:
 		// v23.49: capture the loop condition so the CFG loop decision shows the
@@ -416,7 +421,9 @@ func (c *goConverter) convertStmt(s goast.Stmt) []*Node {
 			cond = exprText(st.Cond)
 		}
 		n := &Node{Kind: NodeLoop, Language: LangGo, Name: "for", RawSource: cond, Span: c.span(st.Pos(), st.End())}
-		n.Children = append(n.Children, c.callsIn(st.Init)...) // v26.58 (D059): Init calls were dropped
+		// v26.58 (D059): Init calls were dropped. v26.68: the Init runs once,
+		// before the loop, so it comes before the node, not inside the body.
+		pre := c.initStmt(st.Init)
 		if st.Cond != nil {
 			n.Children = append(n.Children, c.callsIn(st.Cond)...)
 		}
@@ -425,7 +432,7 @@ func (c *goConverter) convertStmt(s goast.Stmt) []*Node {
 		// out of the call graph. Post runs after each pass of the body, so its
 		// calls follow the body statements. callsIn returns nil for a nil Post.
 		n.Children = append(n.Children, c.callsIn(st.Post)...)
-		return []*Node{n}
+		return append(pre, n)
 
 	case *goast.RangeStmt:
 		// v23.49: "range <x>" as the loop label.
@@ -447,13 +454,15 @@ func (c *goConverter) convertStmt(s goast.Stmt) []*Node {
 		// into a cascade of fake decisions whose conditions were borrowed from
 		// the `if`s *inside* the case bodies.
 		n := &Node{Kind: NodeBranch, Language: LangGo, Name: "switch", Span: c.span(st.Pos(), st.End())}
-		n.Children = append(n.Children, c.callsIn(st.Init)...) // v26.58 (D059): Init calls were dropped
+		// v26.58 (D059): Init calls were dropped. v26.68: the Init and the tag
+		// run once, before the cases, so they come before the node.
+		pre := c.initStmt(st.Init)
 		if st.Tag != nil {
 			n.RawSource = exprText(st.Tag)
-			n.Children = append(n.Children, c.callsIn(st.Tag)...)
+			pre = append(pre, c.callsIn(st.Tag)...)
 		}
 		n.Children = append(n.Children, c.caseClauses(st.Body.List)...)
-		return []*Node{n}
+		return append(pre, n)
 
 	case *goast.TypeSwitchStmt:
 		// v25.9: same multi-way treatment. The "tag" is the type-switch guard.
@@ -461,10 +470,12 @@ func (c *goConverter) convertStmt(s goast.Stmt) []*Node {
 		// read, so their calls were lost and RawSource was empty. The guard text
 		// now labels the node, and the calls in both come before the cases.
 		n := &Node{Kind: NodeBranch, Language: LangGo, Name: "type-switch", RawSource: stmtText(st.Assign), Span: c.span(st.Pos(), st.End())}
-		n.Children = append(n.Children, c.callsIn(st.Init)...)
-		n.Children = append(n.Children, c.callsIn(st.Assign)...)
+		// v26.68: the Init and the guard run before the cases, so their calls
+		// come before the node.
+		pre := c.initStmt(st.Init)
+		pre = append(pre, c.callsIn(st.Assign)...)
 		n.Children = append(n.Children, c.caseClauses(st.Body.List)...)
-		return []*Node{n}
+		return append(pre, n)
 
 	case *goast.SelectStmt:
 		// v25.9: select is multi-way too; each CommClause becomes a case child
@@ -541,6 +552,15 @@ func (c *goConverter) convertStmt(s goast.Stmt) []*Node {
 		})
 		return out
 	}
+}
+
+// initStmt converts the Init of an if, for or switch (`if err := f(); ...`)
+// into the nodes that run before the statement; nil when there is none.
+func (c *goConverter) initStmt(s goast.Stmt) []*Node {
+	if s == nil {
+		return nil
+	}
+	return c.convertStmt(s)
 }
 
 // callNode builds a NodeCall from a call expression.

@@ -131,6 +131,10 @@ type Field struct {
 	Optional   bool   // TypeScript ?
 	Exported   bool
 	DocComment string
+	// Line is the source line of the field's declaration; 0 when the frontend
+	// does not record it. v26.68: fields had no position, so every field
+	// symbol reported line 0.
+	Line int `json:",omitempty"`
 }
 
 // EnumMember represents one value in an enum.

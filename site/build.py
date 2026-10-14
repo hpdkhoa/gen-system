@@ -59,8 +59,10 @@ def build_page():
     html = html.replace('<head>', '<head>\n' + DEMO_HEAD, 1)
     html = html.replace('<body>', '<body>\n' + DEMO_BODY, 1)
     html = html.replace('<title>', '<title>Demo: ', 1)
-    # The badge shows the Studio's internal version; the demo says what it is.
-    html = re.sub(r'(<span class="logo-badge mono">)[^<]*(</span>)', r'\1demo\2', html, count=1)
+    # The badge reads "Studio"; the demo says what it is.
+    html, n = re.subn(r'(<span class="logo-badge mono"[^>]*>)[^<]*(</span>)', r'\1demo\2', html, count=1)
+    if n != 1:
+        sys.exit('studio page: expected one logo badge')
     with open(os.path.join(DEMO, 'index.html'), 'w', encoding='utf-8', newline='\n') as f:
         f.write(html)
 

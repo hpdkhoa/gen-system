@@ -165,6 +165,12 @@ func extractNode(t *Table, n *ast.Node, filePath string, lang ast.Language, laye
 		t.Add(s)
 		// Fields
 		for _, f := range n.Fields {
+			// v26.68: a field had no span, so it reported line 0. It takes its own
+			// line when the frontend records one, else its parent's.
+			span := n.Span
+			if f.Line > 0 {
+				span = ast.Span{Start: ast.Pos{Line: f.Line}, End: ast.Pos{Line: f.Line}}
+			}
 			t.Add(&Symbol{
 				ID:        SymbolID(filePath, SymField, n.Name+"."+f.Name),
 				Name:      f.Name,
@@ -172,6 +178,7 @@ func extractNode(t *Table, n *ast.Node, filePath string, lang ast.Language, laye
 				Kind:      SymField,
 				Language:  lang,
 				DefinedIn: filePath,
+				Span:      span,
 				Type:      f.Type,
 				Exported:  f.Exported,
 				Layer:     layer,

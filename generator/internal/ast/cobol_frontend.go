@@ -728,12 +728,16 @@ func (p *cobolParser) parse01Level(m *Module, sectionName string) {
 				Type:     TypeRef{Name: "cond"},
 				Exported: isExportedCOBOL(condName),
 				Tag:      "level=88",
+				Line:     sub.lineNo,
 			})
 			p.consume()
 			continue
 		}
 		if lvl >= 2 && lvl <= 49 && len(sub.tokens) >= 2 {
 			fieldName := strings.TrimSuffix(sub.tokens[1], ".")
+			// A copybook line carries the line of its COPY statement, so a
+			// copybook field points at the COPY in the program.
+			fieldLine := sub.lineNo
 
 			// COBOL field clauses can span multiple lines until a "."
 			// terminator is encountered. Coalesce so OCCURS/PIC/USAGE/etc.
@@ -791,6 +795,7 @@ func (p *cobolParser) parse01Level(m *Module, sectionName string) {
 				Type:     TypeRef{Name: pic},
 				Exported: isExportedCOBOL(fieldName),
 				Tag:      encodeTag(tagMap),
+				Line:     fieldLine,
 			})
 			continue
 		}
