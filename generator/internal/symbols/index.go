@@ -143,15 +143,19 @@ func (idx *Index) extractCallEdges(n *ast.Node, filePath string, lang ast.Langua
 		nodeID = ownerID
 	}
 
-	for _, child := range n.Children {
-		if child.Kind == ast.NodeCall && nodeID != "" {
-			idx.callEdges = append(idx.callEdges, CallEdge{
-				CallerID:   nodeID,
-				CalleeName: child.Callee,
-				Span:       child.Span,
-			})
+	// v26.69: walk Else too. Go, Java, Python and COBOL put an else arm (and a
+	// Java catch) in Else, so a call made only there never became an edge.
+	for _, list := range [][]*ast.Node{n.Children, n.Else} {
+		for _, child := range list {
+			if child.Kind == ast.NodeCall && nodeID != "" {
+				idx.callEdges = append(idx.callEdges, CallEdge{
+					CallerID:   nodeID,
+					CalleeName: child.Callee,
+					Span:       child.Span,
+				})
+			}
+			idx.extractCallEdges(child, filePath, lang, nodeID, childOwner)
 		}
-		idx.extractCallEdges(child, filePath, lang, nodeID, childOwner)
 	}
 }
 
