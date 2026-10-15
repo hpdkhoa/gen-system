@@ -158,8 +158,8 @@ footer .wrap { display: flex; gap: 24px; flex-wrap: wrap; justify-content: space
       <a class="card demo-card" href="demo/?p=cobolcraft#/architecture">
         <span class="tag">COBOL · 268 files</span>
         <h3>CobolCraft</h3>
-        <p>A Minecraft server written in COBOL, MIT licensed. 1,034 symbols from real code, with
-          every call between its own programs resolved.</p>
+        <p>A Minecraft server written in COBOL, MIT licensed. 632 programs in 268 files, with
+          every call between its own programs and paragraphs resolved.</p>
         <span class="go">Open the architecture →</span>
       </a>
     </div>
@@ -215,18 +215,21 @@ effects
 <section id="numbers">
   <div class="wrap">
     <h2>Measured, with the limits next to the numbers</h2>
-    <p class="sub">One RTX 4060 Ti with 16 GB, campaign of 2026-09-09. The raw files and a SHA-256
-      manifest are in the repository under <code>results/2026-09-09/</code>.</p>
+    <p class="sub">Parsers measured on 2026-10-15 and checked by CI on every push. The SWE-bench run
+      is from 2026-09-09, on one RTX 4060 Ti with 16 GB; its raw files and a SHA-256 manifest are in
+      <code>results/2026-09-09/</code>.</p>
     <div class="stats">
       <div class="stat"><div class="n">0</div><div class="l">parse errors on 405 files from four public repositories pinned to a commit, 268 of them COBOL</div></div>
-      <div class="stat"><div class="n">100%</div><div class="l">of calls between each project's own symbols resolved, in all four repositories</div></div>
-      <div class="stat"><div class="n">1,302</div><div class="l">control flow graphs built, none with a structural issue</div></div>
+      <div class="stat"><div class="n">4,018</div><div class="l">calls between CobolCraft's own programs and paragraphs, all resolved; 98.0% to 99.8% in the three Go repositories</div></div>
+      <div class="stat"><div class="n">1,435</div><div class="l">control flow graphs built, none with a structural issue</div></div>
       <div class="stat"><div class="n">0.674</div><div class="l">file recall on 60 SWE-bench Verified tasks, two call graph hops from the names in each issue</div></div>
     </div>
     <p class="note">The SWE-bench number is localization recall, not a solve rate: gen-system writes no
       fix. The walk reaches a median of 422 files per task, and zero hops already reach 0.615.
       "Internal calls" leaves out calls into the standard library and runtime, which have no project
-      definition to resolve to.</p>
+      definition to resolve to. An earlier version of this page said 100% in all four repositories;
+      that run missed most calls between CobolCraft's programs. No comparison with another COBOL
+      parser yet.</p>
   </div>
 </section>
 

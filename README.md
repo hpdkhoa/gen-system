@@ -4,6 +4,7 @@
 
 <p align="center">
   <a href="https://gen-system.500kv.co/"><img alt="demo: live" src="https://img.shields.io/badge/demo-live-2ea44f"></a>
+  <a href="https://github.com/hpdkhoa/gen-system/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/hpdkhoa/gen-system/actions/workflows/ci.yml/badge.svg"></a>
   <a href="LICENSE"><img alt="license: Apache 2.0" src="https://img.shields.io/badge/license-Apache%202.0-blue"></a>
   <a href="go.mod"><img alt="Go version" src="https://img.shields.io/github/go-mod/go-version/hpdkhoa/gen-system?label=Go&logo=go&logoColor=white"></a>
   <a href="https://www.npmjs.com/package/gen-understand"><img alt="npm: gen-understand" src="https://img.shields.io/npm/v/gen-understand?label=npm&logo=npm&color=cb3837"></a>
@@ -41,9 +42,21 @@ body that still fails after two repairs becomes a `not implemented` stub, and th
 Then `go vet`, `go build` and `go test` run on the whole service, and the parsers read the result
 again.
 
-I measured the parsers on 2026-09-09, on four public repositories pinned to a commit: 405 files,
-268 of them COBOL. They hit 0 parse errors and resolved 100% of the calls between each project's
-own symbols. They built 1,302 control flow graphs, and none had an issue. On 60 SWE-bench Verified
+I measured the parsers on 2026-10-15, on four public repositories pinned to a commit: 405 files,
+268 of them COBOL, with 0 parse errors. In CobolCraft, a Minecraft server written in COBOL, all
+4,018 calls between its programs and paragraphs resolve. The 494 calls left go to intrinsic
+functions, the GnuCOBOL runtime and C helpers, which have no COBOL definition. A plain text scan of
+the source finds 3,037 `CALL` and `PERFORM` lines, and gen-system finds 3,023 of them at the same
+line; the other 14 are template fragments or mistakes of the scan. In the three Go repositories,
+98.0% to 99.8% of the calls between the project's own symbols resolve; the rest are calls through
+function values, which have no static target. The parsers built 1,435 control flow graphs, and
+none had an issue. I have not compared gen-system with another COBOL parser yet.
+
+An earlier version of this README said 100% for all four repositories. That run missed most calls
+between CobolCraft's programs: the parser read only the first program in each file.
+[The baseline history](generator/internal/bench/baselines/README.md#history) lists what changed.
+
+On 2026-09-09, on 60 SWE-bench Verified
 tasks, gen-system took the names in each issue and walked two hops through the call graph. The
 walk reached 0.674 of the files the real fix touched, and a median of 422 files per task. That
 is localization recall, not a solve rate: gen-system writes no fix. The raw files are in
@@ -108,12 +121,13 @@ understand-server --root examples/payroll --copybooks examples/payroll/copybooks
 understand-server --root examples/shop
 ```
 
-![The Studio's Architecture page for CobolCraft: 1,034 symbols in 268 files, all COBOL](docs/img/studio-cobolcraft-architecture.png)
+![The Studio's Architecture page for CobolCraft: 1,617 symbols in 268 files, all COBOL](docs/img/studio-cobolcraft-architecture.png)
 
 *The Architecture page for [CobolCraft](https://github.com/meyfa/CobolCraft), a Minecraft server
-written in COBOL. "Edge resolution 31%" counts every call edge, including calls into the GnuCOBOL
-runtime and C helpers that have no COBOL definition to resolve to. Every call between CobolCraft's
-own programs resolves; the baseline in `generator/internal/bench/baselines/` explains the split.*
+written in COBOL. "Edge resolution 94%" counts every call edge, including 256 intrinsic calls
+that resolve to the built-in runtime catalog. The calls left go to GnuCOBOL runtime routines, the C
+helpers and intrinsics the catalog lacks. Every call between CobolCraft's own programs and
+paragraphs resolves; the baseline in `generator/internal/bench/baselines/` explains the split.*
 
 ## Give your agent the facts (MCP)
 
