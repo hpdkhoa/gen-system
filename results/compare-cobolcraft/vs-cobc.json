@@ -1,0 +1,43 @@
+{
+ "summary": {
+  "reference": "cobc",
+  "files_compared": 178,
+  "files_rejected_by_reference": 0,
+  "sites_in_file": {
+   "reference": 3054,
+   "gen_system": 3054,
+   "matched": 3054,
+   "only_reference": 0,
+   "only_gen_system": 0
+  },
+  "sites_from_copybooks": {
+   "reference": 1078,
+   "gen_system": 1078,
+   "matched": 1078,
+   "only_reference": 0,
+   "only_gen_system": 0
+  },
+  "gen_system_left_out": {
+   "FUNCTION": 407
+  },
+  "gen_system_unclassified": 0,
+  "callers": {
+   "checked": 3054,
+   "agree": 3054,
+   "differ": 0
+  },
+  "resolution": {
+   "call_outside_ok": 83,
+   "call_to_program_ok": 2514,
+   "dynamic": 34,
+   "perform_ok": 423
+  }
+ },
+ "only_reference": [],
+ "only_gen_system": [],
+ "copybook_only_reference": [],
+ "copybook_only_gen_system": [],
+ "gen_system_unclassified": [],
+ "caller_differences": [],
+ "resolution_wrong": []
+}

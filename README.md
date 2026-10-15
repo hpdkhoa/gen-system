@@ -44,13 +44,20 @@ again.
 
 I measured the parsers on 2026-10-15, on four public repositories pinned to a commit: 405 files,
 268 of them COBOL, with 0 parse errors. In CobolCraft, a Minecraft server written in COBOL, all
-4,018 calls between its programs and paragraphs resolve. The 494 calls left go to intrinsic
-functions, the GnuCOBOL runtime and C helpers, which have no COBOL definition. A plain text scan of
-the source finds 3,037 `CALL` and `PERFORM` lines, and gen-system finds 3,023 of them at the same
-line; the other 14 are template fragments or mistakes of the scan. In the three Go repositories,
-98.0% to 99.8% of the calls between the project's own symbols resolve; the rest are calls through
-function values, which have no static target. The parsers built 1,435 control flow graphs, and
-none had an issue. I have not compared gen-system with another COBOL parser yet.
+4,018 calls between its programs and paragraphs resolve. The 524 calls left go to intrinsic
+functions, the GnuCOBOL runtime and C helpers, which have no COBOL definition. In the three Go
+repositories, 98.0% to 99.8% of the calls between the project's own symbols resolve; the rest are
+calls through function values, which have no static target. The parsers built 1,435 control flow
+graphs, and none had an issue.
+
+I checked the COBOL side against GnuCOBOL's compiler. `cobc` translates each CobolCraft file to C,
+which marks every `CALL` and `PERFORM` with its line, its target and its caller.
+[`bench/compare/`](bench/compare/README.md) diffs that with gen-system's edges. On the 178 files
+cobc compiles, the two agree on all 3,054 call sites in the files and all 1,078 that copybooks
+bring in, on the calling program and paragraph of each, and on every resolution. The first run
+did not agree: it found two parser bugs, now fixed. CI runs the comparison on every push. It is
+one corpus in one dialect, free format GnuCOBOL; there are no numbers yet for IBM Enterprise
+COBOL.
 
 An earlier version of this README said 100% for all four repositories. That run missed most calls
 between CobolCraft's programs: the parser read only the first program in each file.
