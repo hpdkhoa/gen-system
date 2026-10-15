@@ -41,12 +41,12 @@ The baseline freezes three deterministic, parser-path suites (no model, no GPU):
   drift. The contract covers the counts and not the rates.
 
 ### resolution_recall
-- `call_edges_total = 4512`: every `CALL`, `PERFORM` and intrinsic `FUNCTION`
+- `call_edges_total = 4542`: every `CALL`, `PERFORM` and intrinsic `FUNCTION`
   the parser found.
 - `call_edges_internal = 4018`: calls to a program of the corpus, or to a
   paragraph or section of the caller's own program. All 4018 resolve
   (`resolution_recall_internal = 1.000`), to the exact program or paragraph.
-- `call_edges_external = 494`: intrinsic functions (`TRIM`, `LENGTH`,
+- `call_edges_external = 524`: intrinsic functions (`TRIM`, `LENGTH`,
   `NUMVAL`), GnuCOBOL runtime routines (`CBL_OPEN_FILE` and the others), the C
   helpers in `cpp/` (sockets, gzip, directories), and `CALL` through a program
   pointer. None of these has a COBOL definition in the corpus, so the resolver
@@ -55,14 +55,13 @@ The baseline freezes three deterministic, parser-path suites (no model, no GPU):
   so every resolved symbol traces to a real file:line.
 
 Recall here checks the resolver against the parser's own symbol index. It says
-nothing about calls the parser never saw. For that I compared the edges with a
-plain text scan of the source on 2026-10-15: of 3037 `CALL "..."` and
-`PERFORM <paragraph>` lines, gen-system found 3023 at the same file and line.
-The other 14 sit in the code generation templates in `codegen/templates/`,
-which are fragments with placeholders, not programs, and two lines where the
-scan mistook `PERFORM X(I) TIMES` for a call. That script is a one-off and not
-in the repository yet. No other COBOL parser or compiler cross reference has
-checked these edges yet.
+nothing about calls the parser never saw. `bench/compare/` checks that against
+GnuCOBOL: cobc translates every file, and the harness diffs each `CALL` and
+`PERFORM` site, its caller and its resolution with gen-system's. On 2026-10-15,
+on the 178 files cobc compiles (the 28 code generation templates are fragments,
+not programs), the two agree on all 3,054 sites written in the files and all
+1,078 sites that copybooks bring in, and on the calling program and paragraph of
+every site. See `bench/compare/README.md` and `results/compare-cobolcraft/`.
 
 ### cfg_correctness
 - `cfgs_total = 463` control-flow graphs, one per paragraph and section,
@@ -116,6 +115,7 @@ git diff generator/internal/bench/baselines/cobolcraft_v23.24.json   # review
 | frozen at v23.24 | 302 | 761 | 330 | First baseline. |
 | 2026-09-29 | 294 | 1381 | 329 | `END-PERFORM.` no longer opens a false paragraph. Statements under `WHEN` and a second `COPY` of a book are no longer dropped, so 583 calls appeared. The baseline was not refrozen then, and the 5% gate hid part of the drift. |
 | 2026-10-15 | 4018 | 494 | 463 | Every program of a file is indexed, not only the first: 97 files hold several. Statements before the first paragraph now belong to their program; before, their calls had no caller and did not count at all. Together, most of the 2,517 calls between CobolCraft's programs were either missing or counted as external. A `PERFORM` resolves only inside the caller's program; before, 66 of them resolved to a paragraph of another file. Calls in `ELSE` branches became edges. Paragraphs of the same name in one file no longer overwrite each other's CFG. |
+| 2026-10-15 | 4018 | 524 | 463 | Found by the first diff against cobc. The tokenizer chose fixed or free format per line, so a long free format line was cut at column 72: intrinsics after that column were lost or cut (`STORED-CHAR-LE`), and a line with `D` in column 7 was dropped. The format is now decided per file. `PERFORM X(I, J) TIMES` no longer reads the subscripted count as a paragraph. |
 
 The first two rows overstated the result: "100% internal recall" held only for
 the calls the parser saw, and most calls between CobolCraft's own programs were

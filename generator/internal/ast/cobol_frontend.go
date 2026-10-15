@@ -153,6 +153,7 @@ type cobolLine struct {
 // merges continuation lines.
 func tokenizeCOBOL(src []byte) []cobolLine {
 	rawLines := strings.Split(string(src), "\n")
+	fixed := isFixedFormat(rawLines)
 	var out []cobolLine
 	for i, raw := range rawLines {
 		lineNo := i + 1
@@ -160,7 +161,7 @@ func tokenizeCOBOL(src []byte) []cobolLine {
 
 		text := line
 		isContinuation := false
-		if len(line) >= 7 {
+		if fixed && len(line) >= 7 {
 			seq := strings.TrimSpace(line[:6])
 			if isNumericOrBlank(seq) {
 				indicator := ' '
@@ -219,6 +220,67 @@ func tokenizeCOBOL(src []byte) []cobolLine {
 		})
 	}
 	return out
+}
+
+// isFixedFormat decides the source format once for the whole file (v26.70).
+// It used to be decided per line: a free format line whose first six columns
+// were blank or digits was read as fixed format, so it was cut at column 72,
+// lost its first seven columns ("    01 X" lost its level number), and was
+// dropped as a debug line when column 7 held a D ("      DISPLAY X").
+//
+// A >>SOURCE directive wins. Otherwise the file is fixed format only when every
+// line fits it: columns 1 to 6 blank or a sequence number, and column 7 blank or
+// an indicator. A single line that does not fit, such as a division header in
+// column 1, makes the file free format.
+func isFixedFormat(lines []string) bool {
+	for _, raw := range lines {
+		line := strings.TrimRight(raw, "\r")
+		if strings.TrimSpace(line) == "" {
+			continue
+		}
+		up := strings.ToUpper(line)
+		if i := strings.Index(up, ">>SOURCE"); i >= 0 {
+			rest := up[i:]
+			switch {
+			case strings.Contains(rest, "FREE"):
+				return false
+			case strings.Contains(rest, "FIXED"):
+				return true
+			}
+		}
+		if len(line) < 7 {
+			if !isSequenceArea(line) {
+				return false
+			}
+			continue
+		}
+		if !isSequenceArea(line[:6]) {
+			return false
+		}
+		switch line[6] {
+		case ' ', '*', '/':
+		case '-', 'D', 'd', '$':
+			// An indicator stands alone in column 7; "DISPLAY" there is code.
+			if len(line) > 7 && line[7] != ' ' && line[7] != '"' && line[7] != '\'' {
+				return false
+			}
+		default:
+			return false
+		}
+	}
+	return true
+}
+
+// isSequenceArea reports whether columns 1 to 6 hold a sequence number or
+// nothing: blank, or digits followed by blanks. "    01" (a level number
+// indented by four) is not one.
+func isSequenceArea(s string) bool {
+	for _, c := range strings.TrimRight(s, " ") {
+		if c < '0' || c > '9' {
+			return false
+		}
+	}
+	return true
 }
 
 func isNumericOrBlank(s string) bool {
@@ -1142,6 +1204,12 @@ func (p *cobolParser) parseProcedureDivision(m *Module) {
 			// paragraph; an intrinsic is the loop count.
 			isParaCall := target != "UNTIL" && target != "VARYING" &&
 				target != "THROUGH" && target != "THRU" && target != "TIMES" && target != "FUNCTION"
+			// v26.70: a paragraph name never holds a parenthesis. "PERFORM
+			// LEN(I, J) TIMES" splits the subscript over two tokens, so TIMES
+			// is not the third token and the count read as a paragraph.
+			if strings.Contains(target, "(") {
+				isParaCall = false
+			}
 			// v26.58 (D063): "PERFORM 5 TIMES" (or "PERFORM WS-N TIMES") took the
 			// count as a paragraph name, pushed no loop scope, and left the body
 			// outside the loop; its END-PERFORM then closed the enclosing IF. With

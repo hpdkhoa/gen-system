@@ -102,18 +102,18 @@
         },
         {
           "name": "resolution_recall_overall",
-          "value": 0.8905141843971631,
+          "value": 0.8846323205636284,
           "unit": "ratio",
           "higher_is_better": true
         },
         {
           "name": "external_call_ratio",
-          "value": 0.10948581560283688,
+          "value": 0.11536767943637165,
           "unit": "ratio"
         },
         {
           "name": "call_edges_total",
-          "value": 4512,
+          "value": 4542,
           "unit": "edges",
           "higher_is_better": true
         },
@@ -131,7 +131,7 @@
         },
         {
           "name": "call_edges_external",
-          "value": 494,
+          "value": 524,
           "unit": "edges"
         },
         {
@@ -147,7 +147,7 @@
         }
       ],
       "duration_ns": 0,
-      "notes": "symbols=7012 total=4512 internal=4018 resolved=4018 external=494"
+      "notes": "symbols=9984 total=4542 internal=4018 resolved=4018 external=524"
     },
     {
       "name": "cfg_correctness",
