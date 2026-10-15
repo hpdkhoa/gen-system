@@ -6,8 +6,11 @@
 #                 control flow graphs). Any change fails, even an improvement;
 #                 move the baseline on purpose as
 #                 generator/internal/bench/baselines/README.md explains.
+# cobol-vs-cobc:  compile CobolCraft with GnuCOBOL's cobc and diff every CALL and
+#                 PERFORM site, its caller and its resolution with gen-system's.
+#                 Any difference fails; bench/compare/README.md explains.
 #
-# Neither job needs Ollama, Postgres or a GPU. The model tests run against a
+# No job needs Ollama, Postgres or a GPU. The model tests run against a
 # local fake server.
 
 name: CI
@@ -64,3 +67,29 @@ jobs:
 
       - name: CobolCraft baseline, exact
         run: generator/internal/bench/baselines/freeze-cobol-baseline.sh verify
+
+  cobol-vs-cobc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Install GnuCOBOL
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq gnucobol3 || sudo apt-get install -y -qq gnucobol
+          cobc --version | head -n 1
+
+      - name: gen-system against cobc on CobolCraft
+        run: STRICT=1 bash bench/compare/run-cobolcraft.sh "$RUNNER_TEMP/compare"
+
+      - name: Report
+        if: always()
+        run: |
+          if [ -f "$RUNNER_TEMP/compare/vs-cobc.md" ]; then
+            cat "$RUNNER_TEMP/compare/vs-cobc.md" >> "$GITHUB_STEP_SUMMARY"
+          fi

@@ -69,6 +69,9 @@ SUBCOMMANDS
   all           Run every suite and write one JSON
   regression    Diff a new JSON against an older JSON or the committed baseline
   diag          v19.8b: print raw resolution state for debugging 0% recall
+  edges         v26.70: every call edge as JSON lines (file, line, callee, caller,
+                class, resolved symbol) for a diff against another parser; see
+                bench/compare/. --out file, default stdout
 
 COMMON FLAGS
   --root        project root for codebase suites (default ".")
@@ -145,6 +148,8 @@ func main() {
 		cmdRegression(args)
 	case "diag":
 		cmdDiag(args)
+	case "edges":
+		cmdEdges(args)
 	case "help", "-h", "--help":
 		fmt.Print(usage)
 	default:
@@ -680,6 +685,31 @@ func findBaseline(root string) (string, error) {
 	}
 	return "", fmt.Errorf("baseline not found (looked for %s walking up from root/cwd); "+
 		"pass --old <path> explicitly or run from inside the repo", rel)
+}
+
+// ─── subcommand: edges ───────────────────────────────────────────────
+
+// cmdEdges writes every call edge as JSON lines, to --out or stdout.
+func cmdEdges(args []string) {
+	fs := flag.NewFlagSet("edges", flag.ExitOnError)
+	cf := parseCommon(fs, args)
+	abs, _ := filepath.Abs(cf.root)
+	edges := bench.CallEdges(abs, splitCopybooks(cf.copybooks))
+	w := os.Stdout
+	if cf.out != "" {
+		f, err := os.Create(cf.out)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "edges:", err)
+			os.Exit(2)
+		}
+		defer f.Close()
+		w = f
+	}
+	if err := bench.WriteEdgesJSONL(w, edges); err != nil {
+		fmt.Fprintln(os.Stderr, "edges:", err)
+		os.Exit(2)
+	}
+	fmt.Fprintf(os.Stderr, "edges: %d call edges\n", len(edges))
 }
 
 // ─── subcommand: diag ────────────────────────────────────────────────
