@@ -210,6 +210,20 @@ type Node struct {
 	// for if-without-else and for switch/select (whose cases are in Children).
 	Children []*Node
 	Else     []*Node
+
+	// Program is the COBOL PROGRAM-ID that holds this paragraph or section. The
+	// frontend sets it only in a file that holds more than one program, where
+	// two programs may each have a paragraph of the same name (v26.69).
+	Program string `json:",omitempty"`
+}
+
+// SymbolName is the name a function or procedure symbol ID uses: Program.Name
+// for a paragraph in a file with several programs, else Name.
+func (n *Node) SymbolName() string {
+	if n.Program != "" {
+		return n.Program + "." + n.Name
+	}
+	return n.Name
 }
 
 // ─── Module ──────────────────────────────────────────────────

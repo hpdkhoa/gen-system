@@ -61,8 +61,8 @@ func TestReport_Model(t *testing.T) {
 	for _, h := range m.Highlights {
 		if h.Label == "Internal-call recall" {
 			sawRecall = true
-			if !strings.Contains(h.Value, "302/302") {
-				t.Errorf("recall highlight = %q, want substring 302/302", h.Value)
+			if !strings.Contains(h.Value, "4018/4018") {
+				t.Errorf("recall highlight = %q, want substring 4018/4018", h.Value)
 			}
 		}
 	}
@@ -78,7 +78,7 @@ func TestReport_Model(t *testing.T) {
 	if strings.Contains(html, "{{") || strings.Contains(html, "}}") {
 		t.Error("rendered HTML contains unresolved template delimiters")
 	}
-	if !strings.Contains(html, "302/302") {
+	if !strings.Contains(html, "4018/4018") {
 		t.Error("rendered HTML missing the recall evidence string")
 	}
 	if !strings.Contains(html, "cfg_correctness") {

@@ -174,6 +174,7 @@ type commonFlags struct {
 	newPath    string
 	baseline   bool
 	strict     bool
+	exact      bool
 	labels     string
 	runs       int
 	threshold  float64
@@ -195,6 +196,7 @@ func parseCommon(fs *flag.FlagSet, args []string) commonFlags {
 	fs.StringVar(&cf.newPath, "new", "", "new run JSON for regression")
 	fs.BoolVar(&cf.baseline, "baseline", false, "regression: use the committed COBOL baseline as --old")
 	fs.BoolVar(&cf.strict, "strict", false, "regression: exit non-zero when a metric regresses beyond tolerance")
+	fs.BoolVar(&cf.exact, "exact", false, "regression: any change in either direction, or a missing metric, is drift (ignores --tolerance)")
 	fs.StringVar(&cf.labels, "labels", "", "effect-labels JSON path")
 	fs.IntVar(&cf.runs, "runs", 5, "number of runs (gen/determinism)")
 	fs.Float64Var(&cf.threshold, "threshold", 0.90, "resolution-recall pass threshold (0..1)")
@@ -615,13 +617,18 @@ func cmdRegression(args []string) {
 		os.Exit(2)
 	}
 	lines, ok := bench.Regression(oldRun, newRun, cf.tolerance)
+	tol := fmt.Sprintf("tolerance=%.0f%%", cf.tolerance*100)
+	if cf.exact {
+		lines, ok = bench.RegressionExact(oldRun, newRun)
+		tol = "exact"
+	}
 	gate := "report-only"
 	if cf.strict {
 		gate = "strict"
 	}
-	fmt.Printf("regression [%s]: tolerance=%.0f%%  %s → %s\n",
+	fmt.Printf("regression [%s]: %s  %s → %s\n",
 		gate,
-		cf.tolerance*100,
+		tol,
 		oldRun.StartedAt.Format(time.RFC3339),
 		newRun.StartedAt.Format(time.RFC3339))
 	if cf.baseline {
@@ -633,13 +640,13 @@ func cmdRegression(args []string) {
 	}
 	fmt.Println(strings.Repeat("─", 70))
 	if !ok {
-		fmt.Println("DRIFT: at least one metric regressed beyond tolerance")
+		fmt.Println("DRIFT: at least one metric changed more than the gate allows")
 		if cf.strict {
 			os.Exit(1)
 		}
 		return
 	}
-	fmt.Println("OK: no metric regressed beyond tolerance")
+	fmt.Println("OK: every metric is within the gate")
 }
 
 // findBaseline locates the committed COBOL baseline JSON. It walks up from the

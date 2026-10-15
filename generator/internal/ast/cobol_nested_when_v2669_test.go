@@ -61,3 +61,36 @@ func TestCOBOL_NestedIfUnderWhenOtherKeepsEveryCall(t *testing.T) {
 		}
 	}
 }
+
+const intrinsicCountSrc = `
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. INTRIN.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01 A PIC 9.
+       01 B PIC 9.
+       01 X PIC 9V9.
+       PROCEDURE DIVISION.
+       MAIN-PARA.
+           PERFORM FUNCTION MIN(A, B) TIMES
+               ADD 1 TO A
+           END-PERFORM
+           COMPUTE X = (FUNCTION RANDOM)
+           STOP RUN.
+`
+
+// v26.69: "PERFORM FUNCTION MIN(A, B) TIMES" called a paragraph named FUNCTION,
+// and "(FUNCTION RANDOM)" called RANDOM) with the parenthesis.
+func TestCOBOL_IntrinsicLoopCountAndParenthesis(t *testing.T) {
+	m := parseCobolMust(t, intrinsicCountSrc)
+	fn := cobolFunctions(m)["MAIN-PARA"]
+	if hasCallTo(fn, "FUNCTION") {
+		t.Error("PERFORM FUNCTION MIN(...) TIMES made a call to FUNCTION")
+	}
+	if hasCallTo(fn, "RANDOM)") || !hasCallTo(fn, "RANDOM") {
+		t.Error("(FUNCTION RANDOM) did not become a call to RANDOM")
+	}
+	if !hasCallTo(fn, "MIN") {
+		t.Error("the MIN intrinsic is missing")
+	}
+}

@@ -95,6 +95,18 @@ func RenderTerminal(w io.Writer, r Run) {
 //
 // Returns (delta lines for printing, ok bool).
 func Regression(oldRun, newRun Run, tolerance float64) ([]string, bool) {
+	return regression(oldRun, newRun, tolerance, false)
+}
+
+// RegressionExact fails on any change, in either direction, and on a metric
+// that disappeared (v26.69). A frozen count baseline uses it: a parser change
+// that moves a count, even one Regression would call an improvement, must
+// refreeze the baseline on purpose. Volatile metrics are zero in both runs.
+func RegressionExact(oldRun, newRun Run) ([]string, bool) {
+	return regression(oldRun, newRun, 0, true)
+}
+
+func regression(oldRun, newRun Run, tolerance float64, exact bool) ([]string, bool) {
 	if tolerance < 0 {
 		tolerance = 0
 	}
@@ -109,8 +121,10 @@ func Regression(oldRun, newRun Run, tolerance float64) ([]string, bool) {
 
 	var lines []string
 	ok := true
+	seen := map[key]bool{}
 	for _, s := range newRun.Suites {
 		for _, m := range s.Metrics {
+			seen[key{s.Name, m.Name}] = true
 			om, found := oldMetrics[key{s.Name, m.Name}]
 			if !found {
 				lines = append(lines, fmt.Sprintf("  +  %s.%s = %.3f %s (new)", s.Name, m.Name, m.Value, m.Unit))
@@ -122,9 +136,12 @@ func Regression(oldRun, newRun Run, tolerance float64) ([]string, bool) {
 				rel = delta / math.Abs(om.Value)
 			}
 			worse := false
-			if m.HigherIsBetter {
+			switch {
+			case exact:
+				worse = math.Abs(delta) > 1e-9
+			case m.HigherIsBetter:
 				worse = rel < -tolerance
-			} else {
+			default:
 				worse = rel > tolerance
 			}
 			sign := "Δ"
@@ -134,6 +151,14 @@ func Regression(oldRun, newRun Run, tolerance float64) ([]string, bool) {
 			}
 			lines = append(lines, fmt.Sprintf("  %s  %s.%s: %.3f → %.3f (%+.1f%%)  %s",
 				sign, s.Name, m.Name, om.Value, m.Value, rel*100, m.Unit))
+		}
+	}
+	if exact {
+		for k, om := range oldMetrics {
+			if !seen[k] {
+				lines = append(lines, fmt.Sprintf("  ✗  %s.%s = %.3f %s (missing)", k.suite, k.metric, om.Value, om.Unit))
+				ok = false
+			}
 		}
 	}
 	sort.Strings(lines)

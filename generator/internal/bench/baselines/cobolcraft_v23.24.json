@@ -77,13 +77,13 @@
         {
           "name": "internal_recall_at_least_90%",
           "pass": true,
-          "got": "100.00% (302/302 internal calls resolved)",
+          "got": "100.00% (4018/4018 internal calls resolved)",
           "want": ">=90.00%"
         },
         {
           "name": "internal_recall_cobol_at_least_85%",
           "pass": true,
-          "got": "100.00% (302/302)",
+          "got": "100.00% (4018/4018)",
           "want": ">=85%"
         },
         {
@@ -102,36 +102,41 @@
         },
         {
           "name": "resolution_recall_overall",
-          "value": 0.28410159924741296,
+          "value": 0.8905141843971631,
           "unit": "ratio",
           "higher_is_better": true
         },
         {
           "name": "external_call_ratio",
-          "value": 0.715898400752587,
+          "value": 0.10948581560283688,
           "unit": "ratio"
         },
         {
           "name": "call_edges_total",
-          "value": 1063,
+          "value": 4512,
           "unit": "edges",
           "higher_is_better": true
         },
         {
           "name": "call_edges_internal",
-          "value": 302,
+          "value": 4018,
           "unit": "edges",
           "higher_is_better": true
         },
         {
           "name": "call_edges_resolved",
-          "value": 302,
+          "value": 4018,
           "unit": "edges",
           "higher_is_better": true
         },
         {
           "name": "call_edges_external",
-          "value": 761,
+          "value": 494,
+          "unit": "edges"
+        },
+        {
+          "name": "call_edges_literal",
+          "value": 0,
           "unit": "edges"
         },
         {
@@ -142,7 +147,7 @@
         }
       ],
       "duration_ns": 0,
-      "notes": "symbols=6345 total=1063 internal=302 resolved=302 external=761"
+      "notes": "symbols=7012 total=4512 internal=4018 resolved=4018 external=494"
     },
     {
       "name": "cfg_correctness",
@@ -150,32 +155,32 @@
         {
           "name": "rule1_entry_in_range",
           "pass": true,
-          "got": "330 ok, 0 bad",
+          "got": "463 ok, 0 bad",
           "want": "all ok"
         },
         {
           "name": "rule2_exits_in_range",
           "pass": true,
-          "got": "330 ok, 0 bad",
+          "got": "463 ok, 0 bad",
           "want": "all ok"
         },
         {
           "name": "rule3_no_orphan_blocks",
           "pass": true,
-          "got": "330 ok, 0 bad",
+          "got": "463 ok, 0 bad",
           "want": "all ok"
         },
         {
           "name": "rule4_successors_in_range",
           "pass": true,
-          "got": "330 ok, 0 bad",
+          "got": "463 ok, 0 bad",
           "want": "all ok"
         }
       ],
       "metrics": [
         {
           "name": "cfgs_total",
-          "value": 330,
+          "value": 463,
           "unit": "cfgs",
           "higher_is_better": true
         },

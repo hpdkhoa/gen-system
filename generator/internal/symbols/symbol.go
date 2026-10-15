@@ -104,6 +104,11 @@ type Symbol struct {
 	Exported   bool
 	DocComment string
 
+	// Program is the COBOL program that holds this paragraph, section or
+	// program, set only in a file with several programs (v26.69). A PERFORM
+	// resolves only to a paragraph of the caller's own program.
+	Program string `json:",omitempty"`
+
 	// Layer is an optional architectural classification:
 	// "model", "repo", "service", "handler", "frontend", "mobile"
 	// Inferred from directory structure or explicit annotation.

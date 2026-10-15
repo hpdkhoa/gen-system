@@ -77,11 +77,11 @@ func Build(m *ast.Module, idx *symbols.Index) CFGSet {
 				id := symbols.SymbolID(m.FilePath, symKind, recvName+"."+n.Name)
 				cfgs[id] = buildFuncCFG(id, n, m.Language)
 			} else {
-				id := symbols.SymbolID(m.FilePath, symKind, n.Name)
+				id := symbols.SymbolID(m.FilePath, symKind, n.SymbolName())
 				cfgs[id] = buildFuncCFG(id, n, m.Language)
 			}
 		case ast.NodeProcedure:
-			id := symbols.SymbolID(m.FilePath, symbols.SymProcedure, n.Name)
+			id := symbols.SymbolID(m.FilePath, symbols.SymProcedure, n.SymbolName())
 			cfgs[id] = buildProcedureCFG(id, n)
 		}
 	}
@@ -656,7 +656,7 @@ func InferEffects(m *ast.Module, cfgSet CFGSet) map[string]*FuncEffects {
 	for _, n := range m.Nodes {
 		switch n.Kind {
 		case ast.NodeFunction:
-			id := symbols.SymbolID(m.FilePath, symbols.SymFunc, n.Name)
+			id := symbols.SymbolID(m.FilePath, symbols.SymFunc, n.SymbolName())
 			out[id] = inferNodeEffects(id, n.Children, m.Language)
 		case ast.NodeMethod:
 			recvName := ""
@@ -666,7 +666,7 @@ func InferEffects(m *ast.Module, cfgSet CFGSet) map[string]*FuncEffects {
 			id := symbols.SymbolID(m.FilePath, symbols.SymMethod, recvName+"."+n.Name)
 			out[id] = inferNodeEffects(id, n.Children, m.Language)
 		case ast.NodeProcedure:
-			id := symbols.SymbolID(m.FilePath, symbols.SymProcedure, n.Name)
+			id := symbols.SymbolID(m.FilePath, symbols.SymProcedure, n.SymbolName())
 			out[id] = inferNodeEffects(id, n.Children, m.Language)
 		}
 	}

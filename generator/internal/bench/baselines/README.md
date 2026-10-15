@@ -12,7 +12,8 @@ real COBOL codebase. This directory freezes both, and a regression check gates t
 COBOL, **MIT licensed** (© 2024 to 2025 Fabian Meyer).
 
 - Pinned commit: `c6f34f90ecdff94c3171c2b67334f9a5dc6acffb` (2026-03-08)
-- ~30,300 lines of COBOL across 206 `.cob` programs + 62 `.cpy` copybooks
+- ~30,300 lines of COBOL: 632 programs in 206 `.cob` files, plus 62 `.cpy`
+  copybooks. 97 files hold more than one program.
 - Real-world constructs: `CALL`/`PERFORM`/`COPY` graph, `REDEFINES`, `LINKAGE`
   sections, a custom copybook-based unit-test framework, and one `.cpp` interop
   file (the parser skips it because there is no frontend for it).
@@ -40,24 +41,34 @@ The baseline freezes three deterministic, parser-path suites (no model, no GPU):
   drift. The contract covers the counts and not the rates.
 
 ### resolution_recall
-- `resolution_recall_internal = 1.000`: the resolver resolves **100% of internal
-  COBOL call edges** (302 / 302) to their exact definitions in the source. It does not guess.
-  No other COBOL parser or compiler cross reference has checked these edges yet.
-- `call_edges_total = 1063`, `call_edges_internal = 302`,
-  `call_edges_external = 761`.
-- `resolution_recall_overall = 0.284`. 761 of 1063 edges are calls into the
-  GnuCOBOL runtime or system intrinsics (`CALL "..."` targets that have no
-  definition inside the corpus). The system classifies them as *external* and does
-  not invent a definition. Overall recall is low because the resolver refuses to
-  make up a resolution for a symbol whose source it never received. Quote the
-  **internal recall (100%)** together with the external ratio (71.6%).
+- `call_edges_total = 4512`: every `CALL`, `PERFORM` and intrinsic `FUNCTION`
+  the parser found.
+- `call_edges_internal = 4018`: calls to a program of the corpus, or to a
+  paragraph or section of the caller's own program. All 4018 resolve
+  (`resolution_recall_internal = 1.000`), to the exact program or paragraph.
+- `call_edges_external = 494`: intrinsic functions (`TRIM`, `LENGTH`,
+  `NUMVAL`), GnuCOBOL runtime routines (`CBL_OPEN_FILE` and the others), the C
+  helpers in `cpp/` (sockets, gzip, directories), and `CALL` through a program
+  pointer. None of these has a COBOL definition in the corpus, so the resolver
+  leaves them unresolved and does not invent one.
 - The `symbols_have_definedin` case passes: 0 symbols carry an empty `DefinedIn`,
   so every resolved symbol traces to a real file:line.
 
+Recall here checks the resolver against the parser's own symbol index. It says
+nothing about calls the parser never saw. For that I compared the edges with a
+plain text scan of the source on 2026-10-15: of 3037 `CALL "..."` and
+`PERFORM <paragraph>` lines, gen-system found 3023 at the same file and line.
+The other 14 sit in the code generation templates in `codegen/templates/`,
+which are fragments with placeholders, not programs, and two lines where the
+scan mistook `PERFORM X(I) TIMES` for a call. That script is a one-off and not
+in the repository yet. No other COBOL parser or compiler cross reference has
+checked these edges yet.
+
 ### cfg_correctness
-- `cfgs_total = 330` control-flow graphs, `cfgs_with_issue = 0`. All four
-  structural invariants (entry-in-range, exits-in-range, no-orphan-blocks,
-  successors-in-range) hold across every CFG.
+- `cfgs_total = 463` control-flow graphs, one per paragraph and section,
+  `cfgs_with_issue = 0`. All four structural invariants (entry-in-range,
+  exits-in-range, no-orphan-blocks, successors-in-range) hold across every CFG.
+  A program with no paragraphs has no CFG yet; its calls still count above.
 
 ### Determinism
 The parser path is **content-deterministic**. Repeated runs produce
@@ -71,7 +82,7 @@ file itself stays stable in version control.
 From anywhere inside the repo:
 
 ```bash
-# verify a fresh run matches the frozen baseline (exits 1 on drift)
+# verify a fresh run matches the frozen baseline (exits 1 on any change)
 generator/internal/bench/baselines/freeze-cobol-baseline.sh verify
 
 # or, equivalently, by hand:
@@ -79,21 +90,33 @@ genbench parse      --root /path/to/CobolCraft --copybooks <dirs> --out p.json
 genbench resolution --root /path/to/CobolCraft --copybooks <dirs> --out r.json
 genbench cfg        --root /path/to/CobolCraft --copybooks <dirs> --out c.json
 # (merge the three suites, then:)
-genbench regression --baseline --new merged.json --strict
+genbench regression --baseline --new merged.json --strict --exact
 ```
 
 `--baseline` points `--old` at this directory's `cobolcraft_v23.24.json` on its
-own (it walks up from `--root` / cwd). `--strict` makes a drift exit non-zero, so
-it can gate CI. Without `--strict` it prints the diff and exits 0.
+own (it walks up from `--root` / cwd). `--strict` makes a drift exit non-zero.
+`--exact` fails on any change in either direction and on a missing metric;
+without it the check allows 5% drift and only in the worse direction. CI runs
+the script on every push, with `--exact`.
 
 ## Moving the baseline
 
-Move it only when a parser change improves a number on purpose:
+Any change to a count fails the check, even an improvement. Move the baseline on
+purpose, in its own commit, and add a line to the history below:
 
 ```bash
 generator/internal/bench/baselines/freeze-cobol-baseline.sh freeze
 git diff generator/internal/bench/baselines/cobolcraft_v23.24.json   # review
 ```
 
-A baseline move should be its own reviewed commit. It should never be a side effect
-of another change.
+## History
+
+| Date | Internal calls | External calls | CFGs | Why it moved |
+|---|---|---|---|---|
+| frozen at v23.24 | 302 | 761 | 330 | First baseline. |
+| 2026-09-29 | 294 | 1381 | 329 | `END-PERFORM.` no longer opens a false paragraph. Statements under `WHEN` and a second `COPY` of a book are no longer dropped, so 583 calls appeared. The baseline was not refrozen then, and the 5% gate hid part of the drift. |
+| 2026-10-15 | 4018 | 494 | 463 | Every program of a file is indexed, not only the first: 97 files hold several. Statements before the first paragraph now belong to their program; before, their calls had no caller and did not count at all. Together, most of the 2,517 calls between CobolCraft's programs were either missing or counted as external. A `PERFORM` resolves only inside the caller's program; before, 66 of them resolved to a paragraph of another file. Calls in `ELSE` branches became edges. Paragraphs of the same name in one file no longer overwrite each other's CFG. |
+
+The first two rows overstated the result: "100% internal recall" held only for
+the calls the parser saw, and most calls between CobolCraft's own programs were
+counted as runtime calls.

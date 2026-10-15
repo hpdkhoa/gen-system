@@ -97,10 +97,11 @@ func extractNode(t *Table, n *ast.Node, filePath string, lang ast.Language, laye
 	switch n.Kind {
 	case ast.NodeFunction:
 		s := &Symbol{
-			ID:         SymbolID(filePath, SymFunc, n.Name),
+			ID:         SymbolID(filePath, SymFunc, n.SymbolName()),
 			Name:       n.Name,
-			QualName:   qualName(ownerName, n.Name),
+			QualName:   qualName(ownerName, n.SymbolName()),
 			Kind:       SymFunc,
+			Program:    n.Program,
 			Language:   lang,
 			DefinedIn:  filePath,
 			Span:       n.Span,
@@ -267,10 +268,11 @@ func extractNode(t *Table, n *ast.Node, filePath string, lang ast.Language, laye
 
 	case ast.NodeProcedure:
 		t.Add(&Symbol{
-			ID:         SymbolID(filePath, SymProcedure, n.Name),
+			ID:         SymbolID(filePath, SymProcedure, n.SymbolName()),
 			Name:       n.Name,
-			QualName:   n.Name,
+			QualName:   n.SymbolName(),
 			Kind:       SymProcedure,
+			Program:    n.Program,
 			Language:   lang,
 			DefinedIn:  filePath,
 			Span:       n.Span,
@@ -281,6 +283,32 @@ func extractNode(t *Table, n *ast.Node, filePath string, lang ast.Language, laye
 		for _, child := range n.Children {
 			extractNode(t, child, filePath, lang, layer, n.Name, n.Kind)
 		}
+
+	// v26.69: a COBOL file may hold several programs. Only the first one became
+	// a module symbol (from PackageName), so a CALL to any later program of the
+	// file found no definition and counted as external.
+	case ast.NodeModule:
+		if lang != ast.LangCOBOL || n.Name == "" {
+			return
+		}
+		id := SymbolID(filePath, SymModule, n.Name)
+		if s, ok := t.Symbols[id]; ok {
+			s.Span = n.Span
+			s.Program = n.Program
+			return
+		}
+		t.Add(&Symbol{
+			ID:        id,
+			Name:      n.Name,
+			QualName:  n.Name,
+			Kind:      SymModule,
+			Language:  lang,
+			DefinedIn: filePath,
+			Span:      n.Span,
+			Exported:  true,
+			Program:   n.Program,
+			Layer:     layer,
+		})
 
 	// Calls embedded in function bodies
 	case ast.NodeCall:

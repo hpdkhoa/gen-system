@@ -53,19 +53,25 @@ type EdgeClassifier struct {
 	idx          *Index
 	projectNames map[string]bool
 	projectDirs  []string
+	// cobolSyms holds the project's COBOL symbols by name, so a COBOL edge
+	// counts as internal only when a symbol it could reach carries the name.
+	cobolSyms map[string][]*Symbol
 }
 
 // NewEdgeClassifier builds the snapshot.
 func (idx *Index) NewEdgeClassifier() *EdgeClassifier {
 	idx.mu.RLock()
 	defer idx.mu.RUnlock()
-	c := &EdgeClassifier{idx: idx, projectNames: map[string]bool{}}
+	c := &EdgeClassifier{idx: idx, projectNames: map[string]bool{}, cobolSyms: map[string][]*Symbol{}}
 	dirs := map[string]bool{}
 	for _, s := range idx.allSymbols {
 		if s.Provenance != ProvProject || s.Kind == SymImport {
 			continue
 		}
 		c.projectNames[s.Name] = true
+		if s.Language == ast.LangCOBOL {
+			c.cobolSyms[s.Name] = append(c.cobolSyms[s.Name], s)
+		}
 		dirs[filepath.ToSlash(filepath.Dir(s.DefinedIn))] = true
 	}
 	for d := range dirs {
@@ -102,6 +108,17 @@ func (c *EdgeClassifier) Classify(e CallEdge) (EdgeClass, bool) {
 	bare := name
 	if dot := strings.LastIndex(bare, "."); dot >= 0 {
 		bare = bare[dot+1:]
+	}
+	// v26.69: an unresolved COBOL call is internal only when a program, or a
+	// paragraph of the caller's own program, carries the name. A paragraph of
+	// another file that shares the name of a C helper made the C call internal.
+	if caller, ok := c.idx.allSymbols[e.CallerID]; ok && caller.Language == ast.LangCOBOL && caller.Provenance == ProvProject {
+		for _, s := range c.cobolSyms[bare] {
+			if cobolTarget(s, caller) {
+				return EdgeInternal, false
+			}
+		}
+		return EdgeExternal, false
 	}
 	if c.projectNames[bare] {
 		return EdgeInternal, false

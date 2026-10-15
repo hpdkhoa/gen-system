@@ -122,7 +122,7 @@ func (idx *Index) extractCallEdges(n *ast.Node, filePath string, lang ast.Langua
 	childOwner := ownerName
 	switch n.Kind {
 	case ast.NodeFunction:
-		nodeID = SymbolID(filePath, SymFunc, n.Name)
+		nodeID = SymbolID(filePath, SymFunc, n.SymbolName())
 		childOwner = n.Name
 	case ast.NodeMethod:
 		// v26.58 (D102): TS and Python methods have no Receiver, so every one got
@@ -134,11 +134,20 @@ func (idx *Index) extractCallEdges(n *ast.Node, filePath string, lang ast.Langua
 		}
 		nodeID = SymbolID(filePath, SymMethod, recvName+"."+n.Name)
 	case ast.NodeProcedure:
-		nodeID = SymbolID(filePath, SymProcedure, n.Name)
+		nodeID = SymbolID(filePath, SymProcedure, n.SymbolName())
 		childOwner = n.Name
 	case ast.NodeStruct, ast.NodeClass, ast.NodeInterface:
 		nodeID = ownerID
 		childOwner = n.Name
+	case ast.NodeModule:
+		// v26.69: the statements of a COBOL program that come before its first
+		// paragraph belong to the program itself. Many programs have no
+		// paragraph at all, and their calls had no caller.
+		if lang == ast.LangCOBOL && n.Name != "" {
+			nodeID = SymbolID(filePath, SymModule, n.Name)
+		} else {
+			nodeID = ownerID
+		}
 	default:
 		nodeID = ownerID
 	}
@@ -231,6 +240,21 @@ func (idx *Index) resolveEdgeLocked(e CallEdge) *Symbol {
 		return nil
 	}
 	return idx.resolveByNameForLocked(name, caller, dot >= 0)
+}
+
+// cobolTarget reports whether project symbol s can be the target of a PERFORM
+// or CALL written in COBOL caller: a program anywhere in the project, or a
+// paragraph or section of the caller's own program (v26.69). Matching by name
+// across the project sent PERFORM AssertOk to the AssertOk of another file
+// whose ID sorted first, and PERFORM LONG-ARRAY-LENGTH TIMES to a data item.
+func cobolTarget(s, caller *Symbol) bool {
+	switch s.Kind {
+	case SymModule:
+		return true
+	case SymFunc, SymProcedure:
+		return s.DefinedIn == caller.DefinedIn && s.Program == caller.Program
+	}
+	return false
 }
 
 // goBuiltins are the predeclared Go functions. A call to one names no symbol in
@@ -514,6 +538,7 @@ func (idx *Index) resolveByNameForLocked(name string, caller *Symbol, receiver b
 	}
 	externalCaller := caller != nil && caller.Provenance.IsExternal()
 	goCaller := caller != nil && caller.Language == ast.LangGo
+	cobolCaller := caller != nil && caller.Language == ast.LangCOBOL && !externalCaller
 	// v26.25 (determinism fix): collect every candidate first, then choose.
 	// The prior version ranged over idx.allSymbols and took the first match in
 	// each tier. idx.allSymbols is a map, so Go randomizes that order: when two
@@ -529,6 +554,9 @@ func (idx *Index) resolveByNameForLocked(name string, caller *Symbol, receiver b
 			continue
 		}
 		if goCaller && !receiver && s.Kind == SymMethod {
+			continue
+		}
+		if cobolCaller && !s.Provenance.IsExternal() && !cobolTarget(s, caller) {
 			continue
 		}
 		if s.Provenance.IsExternal() {

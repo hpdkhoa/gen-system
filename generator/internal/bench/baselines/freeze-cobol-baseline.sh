@@ -103,7 +103,9 @@ if [ "${MODE}" = "freeze" ]; then
   exit 0
 fi
 
-# verify: diff fresh run against the committed baseline, fail on drift.
-echo "── regression vs committed baseline (strict) ────────────────────────"
-"${GENBENCH}" regression --baseline --new "${RAW}" --root "${REPO_ROOT}" --strict
+# verify: diff fresh run against the committed baseline, fail on any change.
+# --exact: every count must match. A parser change that moves one, even for
+# the better, refreezes the baseline on purpose (mode freeze) with a reason.
+echo "── regression vs committed baseline (strict, exact) ─────────────────"
+"${GENBENCH}" regression --baseline --new "${RAW}" --root "${REPO_ROOT}" --strict --exact
 echo "VERIFY OK — fresh CobolCraft run matches the frozen baseline."

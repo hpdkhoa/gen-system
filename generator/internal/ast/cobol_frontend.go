@@ -101,6 +101,13 @@ func (c *CobolFrontend) Parse(filePath string, source []byte) (*Module, error) {
 	// the line numbering simple (copybook lines are inlined as if they
 	// had appeared at the COPY site).
 	p.lines = p.expandCopybooks(p.lines)
+	programs := 0
+	for i := range p.lines {
+		if strings.HasPrefix(p.lines[i].upper, "PROGRAM-ID") {
+			programs++
+		}
+	}
+	p.multiProgram = programs > 1
 
 	p.parseFile(m)
 
@@ -240,6 +247,13 @@ type cobolParser struct {
 
 	// pending NodeUnknown copy_unresolved nodes (added to module post-parse)
 	pendingUnresolvedCopies []*Node
+
+	// v26.69: one file may hold several programs (IDENTIFICATION DIVISION ...
+	// END PROGRAM, one after another). program is the NodeModule being parsed;
+	// multiProgram is true when the file has more than one PROGRAM-ID, and then
+	// paragraphs carry their program's name so equal names stay apart.
+	program      *Node
+	multiProgram bool
 }
 
 func (p *cobolParser) peek() *cobolLine {
@@ -444,12 +458,35 @@ func (p *cobolParser) parseFile(m *Module) {
 			p.parseDataDivision(m)
 		case tok0 == "PROCEDURE":
 			p.parseProcedureDivision(m)
+		case isEndProgram(l):
+			p.endProgram(l.lineNo)
+			p.consume()
 		default:
 			p.consume()
 		}
 	}
+	p.endProgram(p.lastLine())
 	// Attach any unresolved/cycled COPY records to the module.
 	m.Nodes = append(m.Nodes, p.pendingUnresolvedCopies...)
+}
+
+// endProgram closes the open program's span at line, if a program is open.
+func (p *cobolParser) endProgram(line int) {
+	if p.program != nil {
+		if line > p.program.Span.End.Line {
+			p.program.Span.End = Pos{Line: line}
+		}
+		p.program = nil
+	}
+}
+
+// programName is the name paragraphs and sections carry: the PROGRAM-ID in a
+// file with several programs, else "".
+func (p *cobolParser) programName() string {
+	if p.multiProgram && p.program != nil {
+		return p.program.Name
+	}
+	return ""
 }
 
 // parseIdentificationDivision extracts PROGRAM-ID.
@@ -484,6 +521,11 @@ func (p *cobolParser) parseIdentificationDivision(m *Module) {
 				Span:     Span{Start: Pos{Line: startLine}, End: Pos{Line: l.lineNo}},
 				Exported: true,
 			}
+			if p.multiProgram {
+				n.Program = name
+			}
+			p.endProgram(startLine - 1)
+			p.program = n
 			m.Nodes = append(m.Nodes, n)
 		}
 		p.consume()
@@ -864,6 +906,13 @@ func (p *cobolParser) parseProcedureDivision(m *Module) {
 			}
 			return
 		}
+		// v26.69: a statement before the first paragraph belongs to the program
+		// itself. It used to land at file level with no owner, so its calls
+		// had no caller.
+		if current == nil && p.program != nil {
+			p.program.Children = append(p.program.Children, child)
+			return
+		}
 		appendChild(current, m, child)
 	}
 	popDotScopes := func() {
@@ -907,6 +956,14 @@ func (p *cobolParser) parseProcedureDivision(m *Module) {
 			flush()
 			break
 		}
+		// v26.69: END PROGRAM closes the paragraph and the program; the next
+		// program of the file starts with its own IDENTIFICATION DIVISION.
+		if isEndProgram(l) {
+			flush()
+			p.endProgram(l.lineNo)
+			p.consume()
+			break
+		}
 
 		// SECTION header
 		if isSection(l) {
@@ -919,6 +976,7 @@ func (p *cobolParser) parseProcedureDivision(m *Module) {
 				Language: LangCOBOL,
 				Span:     Span{Start: Pos{Line: l.lineNo}},
 				Exported: isExportedCOBOL(name),
+				Program:  p.programName(),
 			}
 			p.consume()
 			continue
@@ -934,6 +992,7 @@ func (p *cobolParser) parseProcedureDivision(m *Module) {
 				Language: LangCOBOL,
 				Span:     Span{Start: Pos{Line: l.lineNo}},
 				Exported: isExportedCOBOL(name),
+				Program:  p.programName(),
 			}
 			p.consume()
 			continue
@@ -1025,7 +1084,9 @@ func (p *cobolParser) parseProcedureDivision(m *Module) {
 		// against the synthetic COBOL runtime catalog. This code does not
 		// consume the statement. It still falls through to whatever verb owns the line.
 		for ti := 0; ti+1 < len(l.tokens); ti++ {
-			if l.tokens[ti] == "FUNCTION" {
+			// v26.69: "(FUNCTION RANDOM" and "-(FUNCTION SIN(X))" open with an
+			// operator or a parenthesis, so the token was not "FUNCTION".
+			if strings.TrimLeft(l.tokens[ti], "(+-*/") == "FUNCTION" {
 				fn := strings.TrimRight(l.tokens[ti+1], ".")
 				fn = strings.Trim(fn, `"'`)
 				// The argument list often tokenises onto the name, e.g.
@@ -1034,7 +1095,8 @@ func (p *cobolParser) parseProcedureDivision(m *Module) {
 				if lp := strings.IndexByte(fn, '('); lp >= 0 {
 					fn = fn[:lp]
 				}
-				fn = strings.TrimRight(fn, ",")
+				// v26.69: "(FUNCTION RANDOM)" kept the closing parenthesis.
+				fn = strings.TrimRight(fn, ",)")
 				if fn != "" {
 					add(&Node{
 						Kind:     NodeCall,
@@ -1076,8 +1138,10 @@ func (p *cobolParser) parseProcedureDivision(m *Module) {
 			// empty "until …" diamond. `PERFORM <para> UNTIL <cond>` = loop over a
 			// call; `PERFORM UNTIL <cond> … END-PERFORM` (inline body) keeps the
 			// scope-stack path below via the loop's own scope (future work).
+			// v26.69: "PERFORM FUNCTION MIN(A, B) TIMES" took FUNCTION as the
+			// paragraph; an intrinsic is the loop count.
 			isParaCall := target != "UNTIL" && target != "VARYING" &&
-				target != "THROUGH" && target != "THRU" && target != "TIMES"
+				target != "THROUGH" && target != "THRU" && target != "TIMES" && target != "FUNCTION"
 			// v26.58 (D063): "PERFORM 5 TIMES" (or "PERFORM WS-N TIMES") took the
 			// count as a paragraph name, pushed no loop scope, and left the body
 			// outside the loop; its END-PERFORM then closed the enclosing IF. With
@@ -1500,6 +1564,11 @@ func (p *cobolParser) lastLine() int {
 }
 
 // ─── Helpers ──────────────────────────────────────────────────
+
+// isEndProgram reports whether the line is "END PROGRAM name."
+func isEndProgram(l *cobolLine) bool {
+	return len(l.tokens) >= 2 && l.tokens[0] == "END" && strings.TrimSuffix(l.tokens[1], ".") == "PROGRAM"
+}
 
 // isDivision returns true if the line starts a top-level COBOL division.
 func isDivision(l *cobolLine) bool {
