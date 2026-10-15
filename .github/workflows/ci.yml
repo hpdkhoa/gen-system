@@ -1,0 +1,66 @@
+# CI: on every push to main and every pull request.
+#
+# test:           gofmt, go vet and go test on the whole generator tree.
+# cobol-baseline: parse CobolCraft at its pinned commit and compare every count
+#                 with the frozen baseline (files, parse errors, call edges,
+#                 control flow graphs). Any change fails, even an improvement;
+#                 move the baseline on purpose as
+#                 generator/internal/bench/baselines/README.md explains.
+#
+# Neither job needs Ollama, Postgres or a GPU. The model tests run against a
+# local fake server.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: gofmt
+        run: |
+          out=$(gofmt -l generator)
+          if [ -n "$out" ]; then
+            echo "::error::gofmt would change these files:"
+            echo "$out"
+            exit 1
+          fi
+
+      - name: go vet
+        working-directory: generator
+        run: go vet ./...
+
+      - name: go test
+        working-directory: generator
+        run: go test ./...
+
+  cobol-baseline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: CobolCraft baseline, exact
+        run: generator/internal/bench/baselines/freeze-cobol-baseline.sh verify
