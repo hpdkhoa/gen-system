@@ -69,7 +69,9 @@ tail -n 1 "${WORK}/compare.log"
 
 {
   echo "date:        $(date -u +%Y-%m-%dT%H:%M:%SZ)"
-  echo "gen-system:  $(git -C "${REPO_ROOT}" rev-parse --short HEAD)$(git -C "${REPO_ROOT}" diff --quiet || echo ' (uncommitted changes)')"
+  # autocrlf: a Windows checkout read from WSL differs only in line endings.
+  dirty="$(git -C "${REPO_ROOT}" -c core.autocrlf=true -c core.filemode=false diff --quiet -- generator bench || echo ' (uncommitted changes)')"
+  echo "gen-system:  $(git -C "${REPO_ROOT}" rev-parse --short HEAD)${dirty}"
   echo "CobolCraft:  ${PIN}"
   echo "cobc:        $(cobc --version | head -n1)"
   echo "python:      $(python3 --version)"
