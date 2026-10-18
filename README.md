@@ -156,14 +156,28 @@ checks that on every push. In three Go repositories, 98.0% to 99.8% of internal 
 - Generation writes Go, on one GPU. Body rewriting works for Go and Python only.
 - The model's security review warns and never blocks.
 
-## SEE ALSO
+## DOCUMENTATION
 
-[docs/understand-pipeline.md](docs/understand-pipeline.md) (source to control flow graph),
-[docs/beliefs.md](docs/beliefs.md), [docs/mcp.md](docs/mcp.md),
-[docs/style-gate.md](docs/style-gate.md), [docs/model-contact.md](docs/model-contact.md),
-[docs/adding-a-language.md](docs/adding-a-language.md), [docs/results.md](docs/results.md),
-[bench/README.md](bench/README.md), [CONTRIBUTING.md](CONTRIBUTING.md),
-[SECURITY.md](SECURITY.md).
+| Document | Covers |
+|---|---|
+| [Understand pipeline](docs/understand-pipeline.md) | how a source file becomes a symbol index, a call graph and control flow graphs |
+| [Beliefs](docs/beliefs.md) | the belief record, a worked example, corrections and staleness |
+| [MCP server](docs/mcp.md) | setup for Claude Code, Codex and Cursor, the flags and every tool |
+| [Style gate](docs/style-gate.md) | team style profiles and how generation checks them |
+| [Model contact](docs/model-contact.md) | the single path to the model and its settings |
+| [Adding a language](docs/adding-a-language.md) | every file a new parser touches, with its tests |
+| [Results](docs/results.md) | the measurements, the GnuCOBOL comparison and a correction |
+| [Benchmarks](bench/README.md) | the benchmark drivers and how to rerun a campaign |
+
+## CONTRIBUTING
+
+Found code that gen-system reads wrong? Open an issue and attach `.gen/beliefs.json`.
+[CONTRIBUTING.md](CONTRIBUTING.md) covers bug reports, setup, tests and pull requests. Everyone
+follows the [code of conduct](CODE_OF_CONDUCT.md).
+
+## SECURITY
+
+Report a vulnerability privately, as [SECURITY.md](SECURITY.md) describes, not in a public issue.
 
 ## LICENSE
 
