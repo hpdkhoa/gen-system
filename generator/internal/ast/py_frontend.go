@@ -107,8 +107,8 @@ def _expr_flow(node, out):
         conditionally evaluated, so it becomes a branch whose taken-arm is that
         operand's own sub-flow (nested a-and-b-and-c chains right-fold naturally).
       - ternary        x if c else y         → a two-arm branch (then=x, else=y).
-      - comprehension  [f(x) for x in xs if p(x)] → the loop + its filter + the
-        element expression become a loop with a nested filter branch.
+      - comprehension  [f(x) for x in xs if p(x)] → its calls only (v26.71: no
+        loop or filter branch; it is an expression, not a step).
       - calls anywhere in the expression are still surfaced (so a call inside a
         ternary arm or a comprehension body appears in the graph).
 
@@ -145,29 +145,17 @@ def _expr_flow(node, out):
         return out
 
     # comprehensions: [elt for x in it if cond ...]  (list/set/dict/generator)
+    # v26.71: an expression, not a step of the function. It was drawn as a loop
+    # with a filter branch, so a function showed loop hexagons for every
+    # next(x for x in xs) and tuple(f for f in fs) beside its real for and while
+    # statements. Only the calls inside it surface now, in source order, and no
+    # branch is made for a ternary or and/or in its element or filter.
     if isinstance(node, (ast.ListComp, ast.SetComp, ast.GeneratorExp, ast.DictComp)):
-        # outermost generator becomes the loop; its ifs become a nested filter.
-        gens = node.generators
-        body = []
-        # element expression(s)
-        if isinstance(node, ast.DictComp):
-            _expr_flow(node.key, body); _expr_flow(node.value, body)
-        else:
-            _expr_flow(node.elt, body)
-        # fold inner generators + filters into the body (innermost first)
-        for gen in reversed(gens):
-            filt = []
-            for cnd in gen.ifs:
-                fbody = body
-                body = []
-                body.append({'kind': 'branch', 'name': 'comp-if', 'line': ln, 'col': col,
-                             'cond': cond_text(cnd), 'expr': True, 'body': fbody, 'orelse': []})
-                _expr_flow(cnd, body)
-            loopn = {'kind': 'loop', 'name': 'comp-for', 'line': ln, 'col': col,
-                     'cond': 'for ' + cond_text(gen.target) + ' in ' + cond_text(gen.iter),
-                     'expr': True, 'body': body}
-            body = [loopn]
-        out.extend(body)
+        calls = [sub for sub in ast.walk(node) if isinstance(sub, ast.Call)]
+        calls.sort(key=lambda c: (getattr(c, 'lineno', ln), getattr(c, 'col_offset', col)))
+        for sub in calls:
+            out.append({'kind': 'call', 'callee': safe_name(sub.func),
+                        'line': getattr(sub, 'lineno', ln), 'col': getattr(sub, 'col_offset', col)})
         return out
 
     # walrus (assignment expression): named := value — surface the value's flow.

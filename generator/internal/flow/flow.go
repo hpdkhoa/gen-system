@@ -643,6 +643,62 @@ var fsPatterns = []string{
 	"Create", "Open", "WriteFile", "ReadFile", "Remove", "Rename",
 }
 
+// notFileSegs name the calls the fs patterns catch that touch no file: the
+// environment and the process (os.environ, os.getenv, os.Getenv, os.Exit). v26.71.
+var notFileSegs = map[string]bool{
+	"environ": true, "getenv": true, "putenv": true, "unsetenv": true, "getpid": true, "getppid": true,
+	"getuid": true, "uname": true, "cpu_count": true, "_exit": true, "getlogin": true,
+	"Getenv": true, "Setenv": true, "Unsetenv": true, "LookupEnv": true, "Environ": true, "Clearenv": true,
+	"ExpandEnv": true, "Expand": true, "Getpid": true, "Getppid": true, "Getuid": true, "Hostname": true,
+	"Exit": true, "Args": true,
+}
+
+// purePathFuncs work on a path string without the file system: Python's
+// os.path.join, Go's filepath.Join. A call that looks (exists, isfile, Walk,
+// Glob, Abs, EvalSymlinks) is not here and stays a file call. v26.71.
+var purePathFuncs = map[string]bool{
+	"join": true, "basename": true, "dirname": true, "split": true, "splitext": true, "splitdrive": true,
+	"normpath": true, "normcase": true, "relpath": true, "commonpath": true, "commonprefix": true,
+	"isabs": true, "expanduser": true, "expandvars": true,
+	"Join": true, "Base": true, "Dir": true, "Ext": true, "Clean": true, "Split": true, "ToSlash": true,
+	"FromSlash": true, "Rel": true, "IsAbs": true, "Match": true, "VolumeName": true, "SplitList": true,
+	"IsLocal": true, "Localize": true,
+}
+
+// notFileCall reports whether a callee the fs patterns match touches no file:
+// an environment or process call, or path arithmetic through os.path,
+// filepath or path. os.environ.get was read as file I/O. v26.71.
+func notFileCall(callee string) bool {
+	segs := strings.Split(callee, ".")
+	for _, s := range segs {
+		if notFileSegs[s] {
+			return true
+		}
+	}
+	if len(segs) >= 2 {
+		pkg := segs[len(segs)-2]
+		if (pkg == "path" || pkg == "filepath") && purePathFuncs[segs[len(segs)-1]] {
+			return true
+		}
+	}
+	return false
+}
+
+// pyFileCall reports Python's own file calls, which the Go-shaped patterns
+// miss: the open() builtin, shutil, and pathlib's read, write and directory
+// methods (called on a path, so with a receiver). Exact names, so a project
+// function called open_dir is no file call. v26.71.
+func pyFileCall(callee string) bool {
+	if callee == "open" || strings.HasPrefix(callee, "shutil.") || strings.Contains(callee, ".shutil.") {
+		return true
+	}
+	switch callee[strings.LastIndex(callee, ".")+1:] {
+	case "read_text", "write_text", "read_bytes", "write_bytes", "mkdir", "rmdir", "unlink", "touch", "iterdir":
+		return strings.Contains(callee, ".")
+	}
+	return false
+}
+
 var netPatterns = []string{
 	"http.", "grpc.", "net.", "rpc.", "websocket.",
 	"Get", "Post", "Do", "Dial", "Connect",
@@ -735,7 +791,7 @@ func inferNodeEffects(id string, children []*ast.Node, lang ast.Language) *FuncE
 				efx.DBWrite = true // v26.58 (D100)
 			}
 		}
-		if matchesAny(callee, fsPatterns) {
+		if (matchesAny(callee, fsPatterns) && !notFileCall(callee)) || pyFileCall(callee) {
 			efx.Effects[EffectFS] = true
 		}
 		if matchesAny(callee, netPatterns) {

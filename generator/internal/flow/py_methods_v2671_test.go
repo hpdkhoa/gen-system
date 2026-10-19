@@ -196,3 +196,62 @@ def run():
 		t.Errorf("no edge for %s", k)
 	}
 }
+
+// v26.71: a comprehension is an expression, not a step: no loop header and no
+// filter branch in the CFG, and the calls inside it are still call edges.
+func TestPythonComprehensionIsNoLoop(t *testing.T) {
+	fe := &ast.PyFrontend{}
+	if !fe.Available() {
+		t.Skip("python3/python not found in PATH")
+	}
+	src := `
+def pick(xs):
+    first = next(x for x in xs if keep(x))
+    return [shape(x) for x in xs if x]
+
+def walk(xs):
+    for x in xs:
+        shape(x)
+
+def keep(x):
+    return x
+
+def shape(x):
+    return x
+`
+	const file = "pkg/c.py"
+	m, err := fe.Parse(file, []byte(src))
+	if err != nil || len(m.ParseErrors) > 0 {
+		t.Fatalf("parse: %v %v", err, m.ParseErrors)
+	}
+	idx := symbols.NewIndex()
+	idx.AddModule(m)
+	idx.ResolveAll()
+	cfgs := Build(m, idx)
+	loops := func(name string) int {
+		n := 0
+		for _, b := range cfgs[symbols.SymbolID(file, symbols.SymFunc, name)].Blocks {
+			if b.Label == "loop_header" {
+				n++
+			}
+		}
+		return n
+	}
+	if n := loops("pick"); n != 0 {
+		t.Errorf("pick: %d loop headers, want 0 (its loops are comprehensions)", n)
+	}
+	if n := loops("walk"); n != 1 {
+		t.Errorf("walk: %d loop headers, want 1 (one for statement)", n)
+	}
+	got := map[string]bool{}
+	for _, e := range idx.AllCallEdges() {
+		if e.CallerID == symbols.SymbolID(file, symbols.SymFunc, "pick") {
+			got[e.CalleeName] = true
+		}
+	}
+	for _, c := range []string{"next", "keep", "shape"} {
+		if !got[c] {
+			t.Errorf("pick: no call edge to %s", c)
+		}
+	}
+}

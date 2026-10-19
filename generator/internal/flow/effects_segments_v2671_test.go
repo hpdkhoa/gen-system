@@ -29,3 +29,22 @@ func TestEffectPatternsMatchWholeSegments(t *testing.T) {
 		}
 	}
 }
+
+// v26.71: environment, process and path-string calls are no file I/O; calls
+// that look at the disk still are.
+func TestEnvironmentAndPathStringCallsAreNoFileIO(t *testing.T) {
+	isFile := func(c string) bool { return (matchesAny(c, fsPatterns) && !notFileCall(c)) || pyFileCall(c) }
+	for c, want := range map[string]bool{
+		"os.environ.get": false, "os.getenv": false, "os.Getenv": false, "os.LookupEnv": false,
+		"os.Exit": false, "os.cpu_count": false, "os.path.join": false, "os.path.basename": false,
+		"filepath.Join": false, "filepath.Ext": false,
+		"os.path.exists": true, "os.makedirs": true, "os.Open": true, "os.WriteFile": true,
+		"filepath.Walk": true, "filepath.Glob": true, "ioutil.ReadFile": true,
+		"open": true, "shutil.copytree": true, "p.write_text": true, "path.read_bytes": true,
+		"d.mkdir": true, "open_dir": false, "self.open_dir": false, "mkdir": false,
+	} {
+		if got := isFile(c); got != want {
+			t.Errorf("%s: file I/O %v, want %v", c, got, want)
+		}
+	}
+}
