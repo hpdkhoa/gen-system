@@ -10,9 +10,15 @@ I measured the parsers on 2026-10-15, on four public repositories pinned to a co
 - **CobolCraft**, a Minecraft server written in COBOL: all 4,018 calls between its programs and
   paragraphs resolve. The 524 calls left go to intrinsic functions, the GnuCOBOL runtime and C
   helpers, which have no COBOL definition.
-- **go-chi, gorilla/mux, spf13/cobra**: 98.0% to 99.8% of the calls between the project's own
+- **go-chi, gorilla/mux, spf13/cobra**: 98.0% to 99.9% of the calls between the project's own
   symbols resolve. The rest are calls through function values, which have no static target.
-- The parsers built 1,435 control flow graphs, and none had an issue.
+- The parsers built 1,697 control flow graphs, and none had an issue.
+
+Measured again on 2026-10-20. The loader used to skip every source file over 64 KB without a
+word, and three test files were that big (`mux_test.go`, cobra's `command_test.go` and
+`completions_test.go`). The limit is now 512 KB, and a file past it shows in the scan log.
+gorilla/mux now has 228 control flow graphs (was 158) and 99.92% recall (was 99.76%); spf13/cobra
+has 595 (was 403) and 98.04% (was 98.00%). go-chi and CobolCraft did not change.
 
 CI checks the CobolCraft counts on every push and fails on any change. The
 [baseline README](../generator/internal/bench/baselines/README.md) explains each number.

@@ -2,12 +2,14 @@
 
 It copies the current Studio page (generator/internal/webui/studio-v23.html)
 into public/demo/index.html with the demo shim and a small switcher, and
-snapshots three projects into public/demo/data/ with studio-snapshot.
+snapshots three projects into public/demo/data/ with studio-snapshot: the
+hold code (Python: Pose Lab and Weapon Lab, the hand hold solver for FPS
+assets), the Go shop example and the COBOL payroll example.
 
 Usage, from the repository root:
 
-    python site/build.py                  # clones CobolCraft at the pinned commit into a temp folder
-    python site/build.py --cobolcraft DIR # uses an existing CobolCraft checkout
+    python site/build.py                  # clones the hold code's two repositories at their pinned commits
+    python site/build.py --poselab DIR --weaponlab DIR  # uses existing checkouts at the pinned commits
 
 Needs Go and git. The snapshot loads each project from a temporary copy, so
 the .gen cache the loader writes never lands in the repository.
@@ -23,20 +25,23 @@ import tempfile
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SITE = os.path.join(REPO, 'site')
 DEMO = os.path.join(SITE, 'public', 'demo')
-COBOLCRAFT_URL = 'https://github.com/meyfa/CobolCraft.git'
-COBOLCRAFT_PIN = 'c6f34f90ecdff94c3171c2b67334f9a5dc6acffb'  # the benchmark's pinned commit
+# The hold code: two Python packages read as one project (both MIT, Khoa Hoang).
+POSELAB_URL = 'https://github.com/hpdkhoa/poselab-mcp.git'
+POSELAB_PIN = '66b5663775ec5ba83c1d405a385d676607cb8b8a'
+WEAPONLAB_URL = 'https://github.com/hpdkhoa/weaponlab-mcp.git'
+WEAPONLAB_PIN = '09e5dbaa6ee3aea0bb0a8e06f12fd2fbfd25ded1'
 
 DEMO_HEAD = '<script src="shim.js"></script>\n<link rel="stylesheet" href="demo.css"/>\n'
 DEMO_BODY = '''<div id="demo-bar">
   <a class="demo-home" href="../">gen-system</a>
   <span class="demo-tag">read only demo</span>
-  <a data-p="payroll" href="?p=payroll">COBOL payroll</a>
+  <a data-p="hold" href="?p=hold">Hold code (Python)</a>
   <a data-p="shop" href="?p=shop">Go shop</a>
-  <a data-p="cobolcraft" href="?p=cobolcraft">CobolCraft</a>
+  <a data-p="payroll" href="?p=payroll">COBOL payroll</a>
 </div>
 <script>
 (function () {
-  var p = new URLSearchParams(location.search).get('p') || 'payroll';
+  var p = new URLSearchParams(location.search).get('p') || 'hold';
   document.querySelectorAll('#demo-bar [data-p]').forEach(function (a) {
     if (a.getAttribute('data-p') === p) a.classList.add('on');
   });
@@ -83,7 +88,8 @@ def snapshot(tool, tmp, name, src, display, copybooks=None, stdlib='none'):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('--cobolcraft', help='an existing CobolCraft checkout at the pinned commit')
+    ap.add_argument('--poselab', help='an existing poselab-mcp checkout at the pinned commit')
+    ap.add_argument('--weaponlab', help='an existing weaponlab-mcp checkout at the pinned commit')
     args = ap.parse_args()
     os.makedirs(os.path.join(DEMO, 'data'), exist_ok=True)
     build_page()
@@ -98,15 +104,23 @@ def main():
         snapshot(tool, tmp, 'payroll', os.path.join(ex, 'payroll'), 'examples/payroll',
                  copybooks=['copybooks'], stdlib='auto')
         snapshot(tool, tmp, 'shop', os.path.join(ex, 'shop'), 'examples/shop')
-        cc = args.cobolcraft
-        if not cc:
-            cc = os.path.join(tmp, 'src', 'cobolcraft')
-            run(['git', 'clone', '-q', '--filter=blob:none', COBOLCRAFT_URL, cc])
-            run(['git', 'checkout', '-q', COBOLCRAFT_PIN], cwd=cc)
-        snapshot(tool, tmp, 'cobolcraft', cc, 'CobolCraft',
-                 copybooks=[os.path.join('src', '_copybooks'), os.path.join('codegen', '_copybooks')],
-                 stdlib='auto')
-        shutil.copy(os.path.join(cc, 'LICENSE'), os.path.join(DEMO, 'data', 'cobolcraft', 'LICENSE.txt'))
+        # the hold code: each repository's Python package side by side in one folder
+        repos = {}
+        for key, url, pin, given in (('poselab', POSELAB_URL, POSELAB_PIN, args.poselab),
+                                     ('weaponlab', WEAPONLAB_URL, WEAPONLAB_PIN, args.weaponlab)):
+            d = given or os.path.join(tmp, 'src', key + '-repo')
+            if not given:
+                run(['git', 'clone', '-q', '--filter=blob:none', url, d])
+                run(['git', 'checkout', '-q', pin], cwd=d)
+            repos[key] = d
+        hold = os.path.join(tmp, 'src', 'hold')
+        shutil.copytree(os.path.join(repos['poselab'], 'src', 'poselab_mcp'), os.path.join(hold, 'poselab_mcp'),
+                        ignore=shutil.ignore_patterns('__pycache__', '.gen'))
+        shutil.copytree(os.path.join(repos['weaponlab'], 'src', 'weaponlab'), os.path.join(hold, 'weaponlab'),
+                        ignore=shutil.ignore_patterns('__pycache__', '.gen'))
+        snapshot(tool, tmp, 'hold', hold, 'hold-code', stdlib='auto')
+        for key in ('poselab', 'weaponlab'):
+            shutil.copy(os.path.join(repos[key], 'LICENSE'), os.path.join(DEMO, 'data', 'hold', 'LICENSE-' + key + '.txt'))
     print('demo built in', DEMO)
 
 

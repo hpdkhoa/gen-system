@@ -124,7 +124,7 @@ footer .wrap { display: flex; gap: 24px; flex-wrap: wrap; justify-content: space
       always gives the same graph. Then it can write Go services with local models, and every
       operation must compile before it ships.</p>
     <div class="ctas">
-      <a class="btn primary" href="demo/?p=payroll#/graph/root=examples%2Fpayroll%2FPAYROLL.cbl%23func%3AMAIN-PARA">Open the live demo</a>
+      <a class="btn primary" href="demo/?p=hold#/graph/root=hold-code%2Fposelab_mcp%2Fblender%2Fholdlab.py%23func%3Atarget_hold">Open the live demo</a>
       <a class="btn" href="https://github.com/hpdkhoa/gen-system">View on GitHub</a>
     </div>
     <div class="shot"><img src="img/studio-cobol-cfg.png" width="1600" height="874"
@@ -155,12 +155,12 @@ footer .wrap { display: flex; gap: 24px; flex-wrap: wrap; justify-content: space
           files, network or pure.</p>
         <span class="go">Open the beliefs →</span>
       </a>
-      <a class="card demo-card" href="demo/?p=cobolcraft#/architecture">
-        <span class="tag">COBOL · 268 files</span>
-        <h3>CobolCraft</h3>
-        <p>A Minecraft server written in COBOL, MIT licensed. 632 programs in 268 files, with
-          every call between its own programs and paragraphs resolved.</p>
-        <span class="go">Open the architecture →</span>
+      <a class="card demo-card" href="demo/?p=hold#/graph/root=hold-code%2Fposelab_mcp%2Fblender%2Fholdlab.py%23func%3Atarget_hold">
+        <span class="tag">Python · 2 packages</span>
+        <h3>Hand hold solver</h3>
+        <p>Pose Lab and Weapon Lab, which pose a game character's hands on a gun. Open the solver's
+          main loop and follow its rounds, fits and wall checks.</p>
+        <span class="go">Open the control flow →</span>
       </a>
     </div>
   </div>
@@ -215,13 +215,13 @@ effects
 <section id="numbers">
   <div class="wrap">
     <h2>Measured, with the limits next to the numbers</h2>
-    <p class="sub">Parsers measured on 2026-10-15 and checked by CI on every push. The SWE-bench run
+    <p class="sub">Parsers measured on 2026-10-20 and checked by CI on every push. The SWE-bench run
       is from 2026-09-09, on one RTX 4060 Ti with 16 GB; its raw files and a SHA-256 manifest are in
       <code>results/2026-09-09/</code>.</p>
     <div class="stats">
       <div class="stat"><div class="n">0</div><div class="l">parse errors on 405 files from four public repositories pinned to a commit, 268 of them COBOL</div></div>
-      <div class="stat"><div class="n">4,018</div><div class="l">calls between CobolCraft's own programs and paragraphs, all resolved; 98.0% to 99.8% in the three Go repositories</div></div>
-      <div class="stat"><div class="n">1,435</div><div class="l">control flow graphs built, none with a structural issue</div></div>
+      <div class="stat"><div class="n">4,018</div><div class="l">calls between CobolCraft's own programs and paragraphs, all resolved; 98.0% to 99.9% in the three Go repositories</div></div>
+      <div class="stat"><div class="n">1,697</div><div class="l">control flow graphs built, none with a structural issue</div></div>
       <div class="stat"><div class="n">0.674</div><div class="l">file recall on 60 SWE-bench Verified tasks, two call graph hops from the names in each issue</div></div>
     </div>
     <p class="note">The SWE-bench number is localization recall, not a solve rate: gen-system writes no
@@ -263,8 +263,10 @@ understand-server --root ./your-repo <span class="c"># then open http://localhos
 <footer>
   <div class="wrap">
     <div>gen-system is open source under Apache-2.0. Built by Khoa Hoang.</div>
-    <div>Demo data: <a href="https://github.com/meyfa/CobolCraft">CobolCraft</a> by Fabian Meyer, MIT
-      (<a href="demo/data/cobolcraft/LICENSE.txt">license</a>).</div>
+    <div>Demo data: <a href="https://github.com/hpdkhoa/poselab-mcp">Pose Lab</a> and
+      <a href="https://github.com/hpdkhoa/weaponlab-mcp">Weapon Lab</a>, MIT
+      (<a href="demo/data/hold/LICENSE-poselab.txt">license</a>,
+      <a href="demo/data/hold/LICENSE-weaponlab.txt">license</a>).</div>
   </div>
 </footer>
 

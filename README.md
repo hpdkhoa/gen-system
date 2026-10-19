@@ -146,7 +146,7 @@ whole service.
 On four public repositories (405 files, 268 of them COBOL) the parsers report 0 parse errors. In
 CobolCraft, a Minecraft server in COBOL, all 4,018 calls between its own programs and paragraphs
 resolve. GnuCOBOL's compiler agrees with gen-system on all 4,132 `CALL` and `PERFORM` sites, and CI
-checks that on every push. In three Go repositories, 98.0% to 99.8% of internal calls resolve.
+checks that on every push. In three Go repositories, 98.0% to 99.9% of internal calls resolve.
 [docs/results.md](docs/results.md) has the method, the limits and a correction to an earlier claim.
 
 ## LIMITS

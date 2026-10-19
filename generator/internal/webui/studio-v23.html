@@ -421,6 +421,7 @@ svg.graph .cfg-node .dia-text { fill: var(--text); font-family: 'IBM Plex Mono',
 svg.graph .cfg-node .title { fill: var(--text); font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; }
 svg.graph .cfg-node .stmt { fill: var(--text-2); font-family: 'IBM Plex Mono', monospace; font-size: 10px; }
 svg.graph .cfg-node .stmt .gutter { fill: var(--text-dim); }
+svg.graph .cfg-node .stmt-ln { fill: var(--text-dim); font-family: 'IBM Plex Mono', monospace; font-size: 8px; }
 /* v26.4: IDE-style syntax colouring for CFG code tokens (theme-aware). */
 svg.graph .cfg-node .stmt .t-kw   { fill: var(--syn-kw); }
 svg.graph .cfg-node .stmt .t-str  { fill: var(--syn-str); }
@@ -741,6 +742,22 @@ svg.graph .viewport { transition: none; }
   </div>
 </div>
 
+<script id="vendor-dagre">
+/*! dagre 3.1.1 (https://github.com/dagrejs/dagre), the CFG layout. MIT License.
+Copyright (c) 2012-2014 Chris Pettitt
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
+rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit
+persons to whom the Software is furnished to do so, subject to the following conditions:
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the
+Software.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
+"use strict";var dagre=(()=>{var J=Object.defineProperty;var Sn=Object.getOwnPropertyDescriptor;var Mn=Object.getOwnPropertyNames;var Pn=Object.prototype.hasOwnProperty;var Fn=(e,n,t)=>n in e?J(e,n,{enumerable:!0,configurable:!0,writable:!0,value:t}):e[n]=t;var je=(e,n)=>{for(var t in n)J(e,t,{get:n[t],enumerable:!0})},An=(e,n,t,r)=>{if(n&&typeof n=="object"||typeof n=="function")for(let o of Mn(n))!Pn.call(e,o)&&o!==t&&J(e,o,{get:()=>n[o],enumerable:!(r=Sn(n,o))||r.enumerable});return e};var Vn=e=>An(J({},"__esModule",{value:!0}),e);var Re=(e,n,t)=>Fn(e,typeof n!="symbol"?n+"":n,t);var Ir={};je(Ir,{Graph:()=>T,debug:()=>de,default:()=>Rr,graphlib:()=>ee,layout:()=>ae,util:()=>Tr,version:()=>re});var ee={};je(ee,{Graph:()=>T,alg:()=>H});var Dn=Object.defineProperty,Me=(e,n)=>{for(var t in n)Dn(e,t,{get:n[t],enumerable:!0})},Z=class{constructor(e){this._isDirected=!0,this._isMultigraph=!1,this._isCompound=!1,this._nodes={},this._in={},this._preds={},this._out={},this._sucs={},this._edgeObjs={},this._edgeLabels={},this._nodeCount=0,this._edgeCount=0,this._defaultNodeLabelFn=()=>{},this._defaultEdgeLabelFn=()=>{},e&&(this._isDirected="directed"in e?e.directed:!0,this._isMultigraph="multigraph"in e?e.multigraph:!1,this._isCompound="compound"in e?e.compound:!1),this._isCompound&&(this._parent={},this._children={},this._children["\0"]={})}isDirected(){return this._isDirected}isMultigraph(){return this._isMultigraph}isCompound(){return this._isCompound}setGraph(e){return this._label=e,this}graph(){return this._label}setDefaultNodeLabel(e){return typeof e!="function"?this._defaultNodeLabelFn=()=>e:this._defaultNodeLabelFn=e,this}nodeCount(){return this._nodeCount}nodes(){return Object.keys(this._nodes)}sources(){return this.nodes().filter(e=>Object.keys(this._in[e]).length===0)}sinks(){return this.nodes().filter(e=>Object.keys(this._out[e]).length===0)}setNodes(e,n){return e.forEach(t=>{n!==void 0?this.setNode(t,n):this.setNode(t)}),this}setNode(e,n){return e in this._nodes?(arguments.length>1&&(this._nodes[e]=n),this):(this._nodes[e]=arguments.length>1?n:this._defaultNodeLabelFn(e),this._isCompound&&(this._parent[e]="\0",this._children[e]={},this._children["\0"][e]=!0),this._in[e]={},this._preds[e]={},this._out[e]={},this._sucs[e]={},++this._nodeCount,this)}node(e){return this._nodes[e]}hasNode(e){return e in this._nodes}removeNode(e){if(e in this._nodes){let n=t=>this.removeEdge(this._edgeObjs[t]);delete this._nodes[e],this._isCompound&&(this._removeFromParentsChildList(e),delete this._parent[e],this.children(e).forEach(t=>{this.setParent(t)}),delete this._children[e]),Object.keys(this._in[e]).forEach(n),delete this._in[e],delete this._preds[e],Object.keys(this._out[e]).forEach(n),delete this._out[e],delete this._sucs[e],--this._nodeCount}return this}setParent(e,n){if(!this._isCompound)throw new Error("Cannot set parent in a non-compound graph");if(n===void 0)n="\0";else{n+="";for(let t=n;t!==void 0;t=this.parent(t))if(t===e)throw new Error("Setting "+n+" as parent of "+e+" would create a cycle");this.setNode(n)}return this.setNode(e),this._removeFromParentsChildList(e),this._parent[e]=n,this._children[n][e]=!0,this}parent(e){if(this._isCompound){let n=this._parent[e];if(n!=="\0")return n}}children(e="\0"){if(this._isCompound){let n=this._children[e];if(n)return Object.keys(n)}else{if(e==="\0")return this.nodes();if(this.hasNode(e))return[]}return[]}predecessors(e){let n=this._preds[e];if(n)return Object.keys(n)}successors(e){let n=this._sucs[e];if(n)return Object.keys(n)}neighbors(e){let n=this.predecessors(e);if(n){let t=new Set(n),r=this.successors(e);if(r)for(let o of r)t.add(o);return Array.from(t.values())}}isLeaf(e){var n;let t;return this.isDirected()?t=this.successors(e):t=this.neighbors(e),((n=t==null?void 0:t.length)!=null?n:0)===0}filterNodes(e){let n=new this.constructor({directed:this._isDirected,multigraph:this._isMultigraph,compound:this._isCompound});n.setGraph(this.graph()),Object.entries(this._nodes).forEach(([o,i])=>{e(o)&&n.setNode(o,i)}),Object.values(this._edgeObjs).forEach(o=>{n.hasNode(o.v)&&n.hasNode(o.w)&&n.setEdge(o,this.edge(o))});let t={},r=o=>{let i=this.parent(o);return!i||n.hasNode(i)?(t[o]=i,i):i in t?t[i]:r(i)};return this._isCompound&&n.nodes().forEach(o=>n.setParent(o,r(o))),n}setDefaultEdgeLabel(e){return typeof e!="function"?this._defaultEdgeLabelFn=()=>e:this._defaultEdgeLabelFn=e,this}edgeCount(){return this._edgeCount}edges(){return Object.values(this._edgeObjs)}setPath(e,n){return e.reduce((t,r)=>(n!==void 0?this.setEdge(t,r,n):this.setEdge(t,r),r)),this}setEdge(e,n,t,r){let o,i,s,a,l=!1;typeof e=="object"&&e!==null&&"v"in e?(o=e.v,i=e.w,s=e.name,arguments.length===2&&(a=n,l=!0)):(o=e,i=n,s=r,arguments.length>2&&(a=t,l=!0)),o=""+o,i=""+i,s!==void 0&&(s=""+s);let u=z(this._isDirected,o,i,s);if(u in this._edgeLabels)return l&&(this._edgeLabels[u]=a),this;if(s!==void 0&&!this._isMultigraph)throw new Error("Cannot set a named edge when isMultigraph = false");this.setNode(o),this.setNode(i),this._edgeLabels[u]=l?a:this._defaultEdgeLabelFn(o,i,s);let d=Yn(this._isDirected,o,i,s);return o=d.v,i=d.w,Object.freeze(d),this._edgeObjs[u]=d,Ie(this._preds[i],o),Ie(this._sucs[o],i),this._in[i][u]=d,this._out[o][u]=d,this._edgeCount++,this}edge(e,n,t){let r=arguments.length===1?le(this._isDirected,e):z(this._isDirected,e,n,t);return this._edgeLabels[r]}edgeAsObj(e,n,t){let r=arguments.length===1?this.edge(e):this.edge(e,n,t);return typeof r!="object"||r===null?{label:r}:r}hasEdge(e,n,t){return(arguments.length===1?le(this._isDirected,e):z(this._isDirected,e,n,t))in this._edgeLabels}removeEdge(e,n,t){let r=arguments.length===1?le(this._isDirected,e):z(this._isDirected,e,n,t),o=this._edgeObjs[r];if(o){let i=o.v,s=o.w;delete this._edgeLabels[r],delete this._edgeObjs[r],Se(this._preds[s],i),Se(this._sucs[i],s),delete this._in[s][r],delete this._out[i][r],this._edgeCount--}return this}inEdges(e,n){return this.isDirected()?this.filterEdges(this._in[e],e,n):this.nodeEdges(e,n)}outEdges(e,n){return this.isDirected()?this.filterEdges(this._out[e],e,n):this.nodeEdges(e,n)}nodeEdges(e,n){if(e in this._nodes)return this.filterEdges({...this._in[e],...this._out[e]},e,n)}_removeFromParentsChildList(e){delete this._children[this._parent[e]][e]}filterEdges(e,n,t){if(!e)return;let r=Object.values(e);return t?r.filter(o=>o.v===n&&o.w===t||o.v===t&&o.w===n):r}};function Ie(e,n){e[n]?e[n]++:e[n]=1}function Se(e,n){e[n]!==void 0&&!--e[n]&&delete e[n]}function z(e,n,t,r){let o=""+n,i=""+t;if(!e&&o>i){let s=o;o=i,i=s}return o+""+i+""+(r===void 0?"\0":r)}function Yn(e,n,t,r){let o=""+n,i=""+t;if(!e&&o>i){let a=o;o=i,i=a}let s={v:o,w:i};return r&&(s.name=r),s}function le(e,n){return z(e,n.v,n.w,n.name)}var Wn={};Me(Wn,{read:()=>Hn,write:()=>Bn});function Bn(e){let n={options:{directed:e.isDirected(),multigraph:e.isMultigraph(),compound:e.isCompound()},nodes:Xn(e),edges:zn(e)},t=e.graph();return t!==void 0&&(n.value=structuredClone(t)),n}function Xn(e){return e.nodes().map(n=>{let t=e.node(n),r=e.parent(n),o={v:n};return t!==void 0&&(o.value=t),r!==void 0&&(o.parent=r),o})}function zn(e){return e.edges().map(n=>{let t=e.edge(n),r={v:n.v,w:n.w};return n.name!==void 0&&(r.name=n.name),t!==void 0&&(r.value=t),r})}function Hn(e){let n=new Z(e.options);return e.value!==void 0&&n.setGraph(e.value),e.nodes.forEach(t=>{n.setNode(t.v,t.value),t.parent&&n.setParent(t.v,t.parent)}),e.edges.forEach(t=>{n.setEdge({v:t.v,w:t.w,name:t.name},t.value)}),n}var H={};Me(H,{CycleException:()=>Q,bellmanFord:()=>Pe,components:()=>Un,dijkstra:()=>K,dijkstraAll:()=>Qn,findCycles:()=>Zn,floydWarshall:()=>nt,isAcyclic:()=>rt,postorder:()=>it,preorder:()=>st,prim:()=>at,shortestPaths:()=>dt,tarjan:()=>Ae,topsort:()=>Ve});var qn=()=>1;function Pe(e,n,t,r){return $n(e,String(n),t||qn,r||function(o){var i;return(i=e.outEdges(o))!=null?i:[]})}function $n(e,n,t,r){let o={},i,s=0,a=e.nodes(),l=function(c){let f=o[c.v],h=o[c.w];if(!f||!h)return;let p=t(c);f.distance+p<h.distance&&(o[c.w]={distance:f.distance+p,predecessor:c.v},i=!0)},u=function(){a.forEach(function(c){r(c).forEach(function(f){let h=f.v===c?f.v:f.w,p=h===f.v?f.w:f.v;l({v:h,w:p})})})};a.forEach(function(c){let f=c===n?0:Number.POSITIVE_INFINITY;o[c]={distance:f,predecessor:""}});let d=a.length;for(let c=1;c<d&&(i=!1,s++,u(),!!i);c++);if(s===d-1&&(i=!1,u(),i))throw new Error("The graph contains a negative weight cycle");return o}function Un(e){let n={},t=[],r;function o(i){var s,a;i in n||(n[i]=!0,r.push(i),(s=e.successors(i))==null||s.forEach(o),(a=e.predecessors(i))==null||a.forEach(o))}return e.nodes().forEach(function(i){r=[],o(i),r.length&&t.push(r)}),t}var Fe=class{constructor(){this._arr=[],this._keyIndices={}}size(){return this._arr.length}keys(){return this._arr.map(e=>e.key)}has(e){return e in this._keyIndices}priority(e){let n=this._keyIndices[e];if(n!==void 0)return this._arr[n].priority}min(){if(this.size()===0)throw new Error("Queue underflow");return this._arr[0].key}add(e,n){let t=this._keyIndices,r=String(e);if(!(r in t)){let o=this._arr,i=o.length;return t[r]=i,o.push({key:r,priority:n}),this._decrease(i),!0}return!1}removeMin(){if(this.size()===0)throw new Error("Queue underflow");this._swap(0,this._arr.length-1);let e=this._arr.pop();return delete this._keyIndices[e.key],this._heapify(0),e.key}decrease(e,n){let t=this._keyIndices[e];if(t===void 0)throw new Error(`Key not found: ${e}`);let r=this._arr[t].priority;if(n>r)throw new Error(`New priority is greater than current priority. Key: ${e} Old: ${r} New: ${n}`);this._arr[t].priority=n,this._decrease(t)}_heapify(e){let n=this._arr,t=2*e,r=t+1,o=e;t<n.length&&(o=n[t].priority<n[o].priority?t:o,r<n.length&&(o=n[r].priority<n[o].priority?r:o),o!==e&&(this._swap(e,o),this._heapify(o)))}_decrease(e){let n=this._arr,t=n[e].priority,r;for(;e!==0&&(r=e>>1,!(n[r].priority<t));)this._swap(e,r),e=r}_swap(e,n){let t=this._arr,r=this._keyIndices,o=t[e],i=t[n];t[e]=i,t[n]=o,r[i.key]=e,r[o.key]=n}},Jn=()=>1;function K(e,n,t,r){let o=function(i){var s;return(s=e.outEdges(i))!=null?s:[]};return Kn(e,String(n),t||Jn,r||o)}function Kn(e,n,t,r){let o={},i=new Fe,s,a,l=function(u){let d=u.v!==s?u.v:u.w,c=o[d];if(!c)return;let f=t(u),h=a.distance+f;if(f<0)throw new Error("dijkstra does not allow negative edge weights. Bad edge: "+u+" Weight: "+f);h<c.distance&&(c.distance=h,c.predecessor=s,i.decrease(d,h))};for(e.nodes().forEach(function(u){let d=u===n?0:Number.POSITIVE_INFINITY;o[u]={distance:d,predecessor:""},i.add(u,d)});i.size()>0;){s=i.removeMin();let u=o[s];if(!u||u.distance===Number.POSITIVE_INFINITY)break;a=u,r(s).forEach(l)}return o}function Qn(e,n,t){return e.nodes().reduce(function(r,o){return r[o]=K(e,o,n,t),r},{})}function Ae(e){let n=0,t=[],r={},o=[];function i(s){var a;let l=r[s]={onStack:!0,lowlink:n,index:n++};if(t.push(s),(a=e.successors(s))==null||a.forEach(function(u){if(u in r){let d=r[u];d!=null&&d.onStack&&(l.lowlink=Math.min(l.lowlink,d.index))}else{i(u);let d=r[u];d&&(l.lowlink=Math.min(l.lowlink,d.lowlink))}}),l.lowlink===l.index){let u=[],d;do{d=t.pop();let c=r[d];c&&(c.onStack=!1),u.push(d)}while(s!==d);o.push(u)}}return e.nodes().forEach(function(s){s in r||i(s)}),o}function Zn(e){return Ae(e).filter(function(n){var t;let r=n[0];return r?n.length>1||n.length===1&&((t=e.outEdges(r,r))!=null?t:[]).length>0:!1})}var et=()=>1;function nt(e,n,t){return tt(e,n||et,t||function(r){var o;return(o=e.outEdges(r))!=null?o:[]})}function tt(e,n,t){let r={},o=e.nodes();return o.forEach(function(i){let s={};r[i]=s,s[i]={distance:0,predecessor:""},o.forEach(function(a){i!==a&&(s[a]={distance:Number.POSITIVE_INFINITY,predecessor:""})}),t(i).forEach(function(a){let l=a.v===i?a.w:a.v,u=n(a);s[l]={distance:u,predecessor:i}})}),o.forEach(function(i){let s=r[i];s&&o.forEach(function(a){let l=r[a];l&&o.forEach(function(u){let d=l[i],c=s[u],f=l[u];if(d&&c&&f){let h=d.distance+c.distance;h<f.distance&&(f.distance=h,f.predecessor=c.predecessor)}})})}),r}var Q=class extends Error{constructor(e){super(e),this.name="CycleException"}};function Ve(e){let n={},t={},r=[];function o(i){var s;if(i in t)throw new Q;i in n||(t[i]=!0,n[i]=!0,(s=e.predecessors(i))==null||s.forEach(o),delete t[i],r.push(i))}if(e.sinks().forEach(o),Object.keys(n).length!==e.nodeCount())throw new Q;return r}function rt(e){try{Ve(e)}catch(n){if(n instanceof Q)return!1;throw n}return!0}function ot(e,n,t,r,o){Array.isArray(n)||(n=[n]);let i=(a=>{var l;return(l=e.isDirected()?e.successors(a):e.neighbors(a))!=null?l:[]}),s={};return n.forEach(function(a){if(!e.hasNode(a))throw new Error("Graph does not have node: "+a);o=De(e,a,t==="post",s,i,r,o)}),o}function De(e,n,t,r,o,i,s){return n in r||(r[n]=!0,t||(s=i(s,n)),o(n).forEach(function(a){s=De(e,a,t,r,o,i,s)}),t&&(s=i(s,n))),s}function Ye(e,n,t){return ot(e,n,t,function(r,o){return r.push(o),r},[])}function it(e,n){return Ye(e,n,"post")}function st(e,n){return Ye(e,n,"pre")}function at(e,n){var t;let r=new Z,o={},i=new Fe,s;function a(d){let c=d.v===s?d.w:d.v,f=i.priority(c);if(f!==void 0){let h=n(d);h<f&&(o[c]=s,i.decrease(c,h))}}if(e.nodeCount()===0)return r;e.nodes().forEach(function(d){i.add(d,Number.POSITIVE_INFINITY),r.setNode(d)});let l=e.nodes()[0];l!==void 0&&i.decrease(l,0);let u=!1;for(;i.size()>0;){if(s=i.removeMin(),s in o)r.setEdge(s,o[s]);else{if(u)throw new Error("Input graph is not connected: "+e);u=!0}(t=e.nodeEdges(s))==null||t.forEach(a)}return r}function dt(e,n,t,r){return lt(e,n,t,r!=null?r:(o=>{var i;return(i=e.outEdges(o))!=null?i:[]}))}function lt(e,n,t,r){if(t===void 0)return K(e,n,t,r);let o=!1,i=e.nodes();for(let s=0;s<i.length;s++){let a=i[s];if(a===void 0)continue;let l=r(a);for(let u=0;u<l.length;u++){let d=l[u];if(!d)continue;let c=d.v===a?d.v:d.w,f=c===d.v?d.w:d.v;t({v:c,w:f})<0&&(o=!0)}if(o)return Pe(e,n,t,r)}return K(e,n,t,r)}var T=Z;function M(e,n,t,r){let o=r;for(;e.hasNode(o);)o=$(r);return t.dummy=n,e.setNode(o,t),o}function We(e){let n=new T().setGraph(e.graph());return e.nodes().forEach(t=>n.setNode(t,e.node(t))),e.edges().forEach(t=>{let r=n.edge(t.v,t.w)||{weight:0,minlen:1},o=e.edge(t);n.setEdge(t.v,t.w,{weight:r.weight+o.weight,minlen:Math.max(r.minlen,o.minlen)})}),n}function ne(e){let n=new T({multigraph:e.isMultigraph()}).setGraph(e.graph());return e.nodes().forEach(t=>{e.children(t).length||n.setNode(t,e.node(t))}),e.edges().forEach(t=>{n.setEdge(t,e.edge(t))}),n}function ue(e,n){let t=e.x,r=e.y,o=n.x-t,i=n.y-r,s=e.width/2,a=e.height/2;if(!o&&!i)throw new Error("Not possible to find intersection inside of the rectangle");let l,u;return Math.abs(i)*s>Math.abs(o)*a?(i<0&&(a=-a),l=a*o/i,u=a):(o<0&&(s=-s),l=s,u=s*i/o),{x:t+l,y:r+u}}function P(e){let n=A(fe(e)+1).map(()=>[]);return e.nodes().forEach(t=>{let r=e.node(t),o=r.rank;o!==void 0&&(n[o]||(n[o]=[]),n[o][r.order]=t)}),n}function Be(e){let n=e.nodes().map(r=>{let o=e.node(r).rank;return o===void 0?Number.MAX_VALUE:o}),t=R(Math.min,n);e.nodes().forEach(r=>{let o=e.node(r);Object.hasOwn(o,"rank")&&(o.rank-=t)})}function Xe(e){let n=e.nodes().map(s=>e.node(s).rank).filter(s=>s!==void 0),t=R(Math.min,n),r=[];e.nodes().forEach(s=>{let a=e.node(s).rank-t;r[a]||(r[a]=[]),r[a].push(s)});let o=0,i=e.graph().nodeRankFactor;Array.from(r).forEach((s,a)=>{s===void 0&&a%i!==0?--o:s!==void 0&&o&&s.forEach(l=>e.node(l).rank+=o)})}function ce(e,n,t,r){let o={width:0,height:0};return arguments.length>=4&&(o.rank=t,o.order=r),M(e,"border",o,n)}function ut(e,n=ze){let t=[];for(let r=0;r<e.length;r+=n){let o=e.slice(r,r+n);t.push(o)}return t}var ze=65535;function R(e,n){if(n.length>ze){let t=ut(n);return e(...t.map(r=>e(...r)))}else return e(...n)}function fe(e){let t=e.nodes().map(r=>{let o=e.node(r).rank;return o===void 0?Number.MIN_VALUE:o});return R(Math.max,t)}function He(e,n){let t={lhs:[],rhs:[]};return e.forEach(r=>{n(r)?t.lhs.push(r):t.rhs.push(r)}),t}function he(e,n){let t=Date.now();try{return n()}finally{console.log(e+" time: "+(Date.now()-t)+"ms")}}function q(e,n){return n()}var ct=0;function $(e){let n=++ct;return e+(""+n)}function A(e,n,t=1){n==null&&(n=e,e=0);let r=i=>i<n;t<0&&(r=i=>n<i);let o=[];for(let i=e;r(i);i+=t)o.push(i);return o}function B(e,n){let t={};for(let r of n)e[r]!==void 0&&(t[r]=e[r]);return t}function X(e,n){let t;return typeof n=="string"?t=r=>r[n]:t=n,Object.entries(e).reduce((r,[o,i])=>(r[o]=t(i,o),r),{})}function qe(e,n){return e.reduce((t,r,o)=>(t[r]=n[o],t),{})}var D="\0";function te(e,n,t){var u,d,c,f,h,p;if(!(e&&n&&t&&n.dummy==="edge"&&t.dummy==="edge"&&n.edgeObj&&t.edgeObj&&e[n.edgeObj.v]&&e[t.edgeObj.v]&&e[n.edgeObj.w]&&e[t.edgeObj.w]))return 0;let r=!0;n.edgeObj.w===t.edgeObj.w&&(r=!1);let o=r?(d=(u=e[n.edgeObj.v])==null?void 0:u.rank)!=null?d:NaN+1:(f=(c=e[n.edgeObj.w])==null?void 0:c.rank)!=null?f:NaN-1,i=Object.entries(e).find(E=>{var y,L;return((y=E[1].edgeObj)==null?void 0:y.v)===n.edgeObj.v&&((L=E[1].edgeObj)==null?void 0:L.w)===n.edgeObj.w&&E[1].rank===o}),s=Object.entries(e).find(E=>{var y,L;return((y=E[1].edgeObj)==null?void 0:y.v)===t.edgeObj.v&&((L=E[1].edgeObj)==null?void 0:L.w)===t.edgeObj.w&&E[1].rank===o});if(!i||!s)return 0;let a=(h=i[1].order)!=null?h:NaN,l=(p=s[1].order)!=null?p:NaN;return isNaN(a-l)?0:a-l}var re="3.1.1";var be=class{constructor(){Re(this,"_sentinel");let n={};n._next=n._prev=n,this._sentinel=n}dequeue(){let n=this._sentinel,t=n._prev;if(t!==n)return $e(t),t}enqueue(n){let t=this._sentinel;n._prev&&n._next&&$e(n),n._next=t._next,t._next._prev=n,t._next=n,n._prev=t}toString(){let n=[],t=this._sentinel,r=t._prev;for(;r!==t;)n.push(JSON.stringify(r,ft)),r=r._prev;return"["+n.join(", ")+"]"}};function $e(e){e._prev._next=e._next,e._next._prev=e._prev,delete e._next,delete e._prev}function ft(e,n){if(e!=="_next"&&e!=="_prev")return n}var Ue=be;var ht=()=>1;function me(e,n){if(e.nodeCount()<=1)return[];let t=gt(e,n||ht);return bt(t.graph,t.buckets,t.zeroIdx).flatMap(o=>e.outEdges(o.v,o.w)||[])}function bt(e,n,t){var a;let r=[],o=n[n.length-1],i=n[0],s;for(;e.nodeCount();){for(;s=i.dequeue();)ge(e,n,t,s);for(;s=o.dequeue();)ge(e,n,t,s);if(e.nodeCount()){for(let l=n.length-2;l>0;--l)if(s=(a=n[l])==null?void 0:a.dequeue(),s){r=r.concat(ge(e,n,t,s,!0)||[]);break}}}return r}function ge(e,n,t,r,o){let i=[],s=o?i:void 0;return(e.inEdges(r.v)||[]).forEach(a=>{let l=e.edge(a),u=e.node(a.v);o&&i.push({v:a.v,w:a.w}),u.out-=l,pe(n,t,u)}),(e.outEdges(r.v)||[]).forEach(a=>{let l=e.edge(a),u=a.w,d=e.node(u);d.in-=l,pe(n,t,d)}),e.removeNode(r.v),s}function gt(e,n){let t=new T,r=0,o=0;e.nodes().forEach(a=>{t.setNode(a,{v:a,in:0,out:0})}),e.edges().forEach(a=>{let l=t.edge(a.v,a.w)||0,u=n(a),d=l+u;t.setEdge(a.v,a.w,d);let c=t.node(a.v),f=t.node(a.w);o=Math.max(o,c.out+=u),r=Math.max(r,f.in+=u)});let i=pt(o+r+3).map(()=>new Ue),s=r+1;return t.nodes().forEach(a=>{pe(i,s,t.node(a))}),{graph:t,buckets:i,zeroIdx:s}}function pe(e,n,t){var r,o,i;t.out?t.in?(i=e[t.out-t.in+n])==null||i.enqueue(t):(o=e[e.length-1])==null||o.enqueue(t):(r=e[0])==null||r.enqueue(t)}function pt(e){let n=[];for(let t=0;t<e;t++)n.push(t);return n}function Je(e,n){(e.graph().acyclicer==="greedy"?me(e,r(e)):mt(e,n!=null?n:null)).forEach(o=>{let i=e.edge(o);e.removeEdge(o),i.forwardName=o.name,i.reversed=!0,e.setEdge(o.w,o.v,i,$("rev"))});function r(o){return i=>o.edge(i).weight}}function mt(e,n){let t=[],r={},o={};function i(l){Object.hasOwn(o,l)||(o[l]=!0,r[l]=!0,e.outEdges(l).forEach(u=>{Object.hasOwn(r,u.w)?t.push(u):i(u.w)}),delete r[l])}function s(l){var u;Object.hasOwn(o,l)||(o[l]=!0,r[l]=!0,(u=e.outEdges(l))==null||u.forEach(d=>{var c,f;Object.hasOwn(r,d.w)||((c=n.node(l))==null?void 0:c.rank)>((f=n.node(d.w))==null?void 0:f.rank)&&Et(e,d.w,d)?t.push(d):s(d.w)}),delete r[l])}let a=i;return n&&typeof n.node=="function"&&(a=s),e.sources().forEach(a),e.nodes().forEach(a),t}function Ke(e){e.edges().forEach(n=>{let t=e.edge(n);if(t.reversed){e.removeEdge(n);let r=t.forwardName;delete t.reversed,delete t.forwardName,e.setEdge(n.w,n.v,t,r)}})}function Et(e,n,t){let r=new Set;function o(i){var s;if(e.sources().includes(i))return!0;r.add(i);for(let a of(s=e.inEdges(i))!=null?s:[])if(!(a.v===t.v&&a.w===t.w)&&!r.has(a.v)&&o(a.v))return!0;return!1}return o(n)}function Qe(e){e.graph().dummyChains=[],e.edges().forEach(n=>yt(e,n))}function yt(e,n){let t=n.v,r=e.node(t).rank,o=n.w,i=e.node(o).rank,s=n.name,a=e.edge(n),l=a.labelRank;if(i===r+1)return;e.removeEdge(n);let u,d,c;for(c=0,++r;r<i;++c,++r)a.points=[],d={width:0,height:0,edgeLabel:a,edgeObj:n,rank:r},u=M(e,"edge",d,"_d"),r===l&&(d.width=a.width,d.height=a.height,d.dummy="edge-label",d.labelpos=a.labelpos),e.setEdge(t,u,{weight:a.weight},s),c===0&&e.graph().dummyChains.push(u),t=u;e.setEdge(t,o,{weight:a.weight},s)}function Ze(e){e.graph().dummyChains.forEach(n=>{let t=e.node(n),r=t.edgeLabel,o;for(e.setEdge(t.edgeObj,r);t.dummy;)o=e.successors(n)[0],e.removeNode(n),r.points.push({x:t.x,y:t.y}),t.dummy==="edge-label"&&(r.x=t.x,r.y=t.y,r.width=t.width,r.height=t.height),n=o,t=e.node(n)})}function U(e){let n={};function t(r){let o=e.node(r);if(Object.hasOwn(n,r))return o.rank;n[r]=!0;let i=e.outEdges(r),s=i?i.map(l=>l==null?Number.POSITIVE_INFINITY:t(l.w)-e.edge(l).minlen):[],a=R(Math.min,s);return a===Number.POSITIVE_INFINITY&&(a=0),o.rank=a}e.sources().forEach(t)}function V(e,n){return e.node(n.w).rank-e.node(n.v).rank-e.edge(n).minlen}var oe=Nt;function Nt(e){let n=new T({directed:!1}),t=e.nodes();if(t.length===0)throw new Error("Graph must have at least one node");let r=t[0],o=e.nodeCount();n.setNode(r,{});let i,s;for(;Gt(n,e)<o&&(i=vt(n,e),!!i);)s=n.hasNode(i.v)?V(e,i):-V(e,i),kt(n,e,s);return n}function Gt(e,n){function t(r){let o=n.nodeEdges(r);o&&o.forEach(i=>{let s=i.v,a=r===s?i.w:s;!e.hasNode(a)&&!V(n,i)&&(e.setNode(a,{}),e.setEdge(r,a,{}),t(a))})}return e.nodes().forEach(t),e.nodeCount()}function vt(e,n){return n.edges().reduce((r,o)=>{let i=Number.POSITIVE_INFINITY;return e.hasNode(o.v)!==e.hasNode(o.w)&&(i=V(n,o)),i<r[0]?[i,o]:r},[Number.POSITIVE_INFINITY,null])[1]}function kt(e,n,t){e.nodes().forEach(r=>n.node(r).rank+=t)}var{preorder:xt,postorder:_t}=H,nn=Y;Y.initLowLimValues=Le;Y.initCutValues=Ee;Y.calcCutValue=tn;Y.leaveEdge=on;Y.enterEdge=sn;Y.exchangeEdges=an;function Y(e){e=We(e),U(e);let n=oe(e);Le(n),Ee(n,e);let t,r;for(;t=on(n);)r=sn(n,e,t),an(n,e,t,r)}function Ee(e,n){let t=_t(e,e.nodes());t=t.slice(0,t.length-1),t.forEach(r=>Ot(e,n,r))}function Ot(e,n,t){let o=e.node(t).parent,i=e.edge(t,o);i.cutvalue=tn(e,n,t)}function tn(e,n,t){let o=e.node(t).parent,i=!0,s=n.edge(t,o),a=0;s||(i=!1,s=n.edge(o,t)),a=s.weight;let l=n.nodeEdges(t);return l&&l.forEach(u=>{let d=u.v===t,c=d?u.w:u.v;if(c!==o){let f=d===i,h=n.edge(u).weight;if(a+=f?h:-h,Tt(e,t,c)){let E=e.edge(t,c).cutvalue;a+=f?-E:E}}}),a}function Le(e,n){arguments.length<2&&(n=e.nodes()[0]),rn(e,{},1,n)}function rn(e,n,t,r,o){let i=t,s=e.node(r);n[r]=!0;let a=e.neighbors(r);return a&&a.forEach(l=>{Object.hasOwn(n,l)||(t=rn(e,n,t,l,r))}),s.low=i,s.lim=t++,o?s.parent=o:delete s.parent,t}function on(e){return e.edges().find(n=>e.edge(n).cutvalue<0)}function sn(e,n,t){let r=t.v,o=t.w;n.hasEdge(r,o)||(r=t.w,o=t.v);let i=e.node(r),s=e.node(o),a=i,l=!1;return i.lim>s.lim&&(a=s,l=!0),n.edges().filter(d=>l===en(e,e.node(d.v),a)&&l!==en(e,e.node(d.w),a)).reduce((d,c)=>V(n,c)<V(n,d)?c:d)}function an(e,n,t,r){let o=t.v,i=t.w;e.removeEdge(o,i),e.setEdge(r.v,r.w,{}),Le(e),Ee(e,n),Ct(e,n)}function Ct(e,n){let t=e.nodes().find(o=>!e.node(o).parent);if(!t)return;let r=xt(e,[t]);r=r.slice(1),r.forEach(o=>{let s=e.node(o).parent,a=n.edge(o,s),l=!1;a||(a=n.edge(s,o),l=!0),n.node(o).rank=n.node(s).rank+(l?a.minlen:-a.minlen)})}function Tt(e,n,t){return e.hasEdge(n,t)}function en(e,n,t){return t.low<=n.lim&&n.lim<=t.lim}var ln=jt;function jt(e){let n=e.graph().ranker;if(typeof n=="function")return n(e);switch(n){case"network-simplex":dn(e);break;case"tight-tree":It(e);break;case"longest-path":Rt(e);break;case"none":break;default:dn(e)}}var Rt=U;function It(e){U(e),oe(e)}function dn(e){nn(e)}var un=St;function St(e){let n=Pt(e),t=e.graph();if(!Array.isArray(t.dummyChains))return;t.dummyChains.forEach(o=>{let i=e.node(o),s=i.edgeObj,a=Mt(e,n,s.v,s.w),l=a.path,u=a.lca,d=0,c=l[d],f=!0;for(;o!==s.w;){if(i=e.node(o),f){for(;(c=l[d])!==u&&e.node(c).maxRank<i.rank;)d++;c===u&&(f=!1)}if(!f){for(;d<l.length-1&&e.node(l[d+1]).minRank<=i.rank;)d++;c=l[d]}c!==void 0&&e.setParent(o,c),o=e.successors(o)[0]}})}function Mt(e,n,t,r){let o=[],i=[],s=Math.min(n[t].low,n[r].low),a=Math.max(n[t].lim,n[r].lim),l;l=t;do l=e.parent(l),o.push(l);while(l&&(n[l].low>s||a>n[l].lim));let u=l,d=r;for(;(d=e.parent(d))!==u;)i.push(d);return{path:o.concat(i.reverse()),lca:u}}function Pt(e){let n={},t=0;function r(o){let i=t;e.children(o).forEach(r),n[o]={low:i,lim:t++}}return e.children(D).forEach(r),n}function cn(e){let n=M(e,"root",{},"_root"),t=Ft(e),r=Object.values(t),o=R(Math.max,r)-1,i=2*o+1;e.graph().nestingRoot=n,e.edges().forEach(a=>e.edge(a).minlen*=i);let s=At(e)+1;e.children(D).forEach(a=>{fn(e,n,i,s,o,t,a)}),e.graph().nodeRankFactor=i}function fn(e,n,t,r,o,i,s){var c;let a=e.children(s);if(!a.length){s!==n&&e.setEdge(n,s,{weight:0,minlen:t});return}let l=ce(e,"_bt"),u=ce(e,"_bb"),d=e.node(s);e.setParent(l,s),d.borderTop=l,e.setParent(u,s),d.borderBottom=u,a.forEach(f=>{var b;fn(e,n,t,r,o,i,f);let h=e.node(f),p=h.borderTop?h.borderTop:f,E=h.borderBottom?h.borderBottom:f,y=h.borderTop?r:2*r,L=p!==E?1:o-((b=i[s])!=null?b:0)+1;e.setEdge(l,p,{weight:y,minlen:L,nestingEdge:!0}),e.setEdge(E,u,{weight:y,minlen:L,nestingEdge:!0})}),e.parent(s)||e.setEdge(n,l,{weight:0,minlen:o+((c=i[s])!=null?c:0)})}function Ft(e){let n={};function t(r,o){let i=e.children(r);i&&i.length&&i.forEach(s=>t(s,o+1)),n[r]=o}return e.children(D).forEach(r=>t(r,1)),n}function At(e){return e.edges().reduce((n,t)=>n+e.edge(t).weight,0)}function hn(e){let n=e.graph();e.removeNode(n.nestingRoot),delete n.nestingRoot,e.edges().forEach(t=>{e.edge(t).nestingEdge&&e.removeEdge(t)})}var gn=Dt;function Dt(e){function n(t){let r=e.children(t),o=e.node(t);if(r.length&&r.forEach(n),o&&Object.hasOwn(o,"minRank")){o.borderLeft=[],o.borderRight=[];for(let i=o.minRank,s=o.maxRank+1;i<s;++i)bn(e,"borderLeft","_bl",t,o,i),bn(e,"borderRight","_br",t,o,i)}}e.children(D).forEach(n)}function bn(e,n,t,r,o,i){let s={width:0,height:0,rank:i,borderType:n},a=o[n][i-1],l=M(e,"border",s,t);o[n][i]=l,e.setParent(l,r),a&&e.setEdge(a,l,{weight:1})}function mn(e){var t;let n=(t=e.graph().rankdir)==null?void 0:t.toLowerCase();(n==="lr"||n==="rl")&&Ln(e)}function En(e){var t;let n=(t=e.graph().rankdir)==null?void 0:t.toLowerCase();(n==="bt"||n==="rl")&&Yt(e),(n==="lr"||n==="rl")&&(Wt(e),Ln(e))}function Ln(e){e.nodes().forEach(n=>pn(e.node(n))),e.edges().forEach(n=>pn(e.edge(n)))}function pn(e){let n=e.width;e.width=e.height,e.height=n}function Yt(e){e.nodes().forEach(n=>ye(e.node(n))),e.edges().forEach(n=>{var r;let t=e.edge(n);(r=t.points)==null||r.forEach(ye),Object.hasOwn(t,"y")&&ye(t)})}function ye(e){e.y=-e.y}function Wt(e){e.nodes().forEach(n=>we(e.node(n))),e.edges().forEach(n=>{var r;let t=e.edge(n);(r=t.points)==null||r.forEach(we),Object.hasOwn(t,"x")&&we(t)})}function we(e){let n=e.x;e.x=e.y,e.y=n}function Ne(e,n=null){let t={},r=e.nodes().filter(d=>!e.children(d).length),o=r.map(d=>e.node(d).rank),i=R(Math.max,o),s=A(i+1).map(()=>[]);function a(d){if(t[d])return;t[d]=!0;let c=e.node(d);s[c.rank].push(d);let f=e.successors(d);f&&[...f].sort((p,E)=>u(p,E)).forEach(a)}r.sort((d,c)=>e.node(d).rank-e.node(c).rank).forEach(a);function u(d,c){let f=e.node(d),h=e.node(c);return te(n,f,h)}return s}function Ge(e,n){let t=0;for(let r=1;r<n.length;++r)t+=Xt(e,n[r-1],n[r]);return t}function Xt(e,n,t){let r=qe(t,t.map((u,d)=>d)),o=n.flatMap(u=>{let d=e.outEdges(u);return d?d.map(c=>({pos:r[c.w],weight:e.edge(c).weight})).sort((c,f)=>c.pos-f.pos):[]}),i=1;for(;i<t.length;)i<<=1;let s=2*i-1;i-=1;let a=new Array(s).fill(0),l=0;return o.forEach(u=>{let d=u.pos+i;a[d]+=u.weight;let c=0;for(;d>0;)d%2&&(c+=a[d+1]),d=d-1>>1,a[d]+=u.weight;l+=u.weight*c}),l}function ve(e,n=[]){return n.map(t=>{let r=e.inEdges(t);if(!r||!r.length)return{v:t};{let o=r.reduce((i,s)=>{let a=e.edge(s),l=e.node(s.v);return{sum:i.sum+a.weight*l.order,weight:i.weight+a.weight}},{sum:0,weight:0});return{v:t,barycenter:o.sum/o.weight,weight:o.weight}}})}function ke(e,n){let t={};e.forEach((o,i)=>{let s={indegree:0,in:[],out:[],vs:[o.v],i};o.barycenter!==void 0&&(s.barycenter=o.barycenter,s.weight=o.weight),t[o.v]=s}),n.edges().forEach(o=>{let i=t[o.v],s=t[o.w];i!==void 0&&s!==void 0&&(s.indegree++,i.out.push(s))});let r=Object.values(t).filter(o=>!o.indegree);return zt(r)}function zt(e){let n=[];function t(o){return i=>{i.merged||(i.barycenter===void 0||o.barycenter===void 0||i.barycenter>=o.barycenter)&&Ht(o,i)}}function r(o){return i=>{i.in.push(o),--i.indegree===0&&e.push(i)}}for(;e.length;){let o=e.pop();n.push(o),o.in.reverse().forEach(t(o)),o.out.forEach(r(o))}return n.filter(o=>!o.merged).map(o=>B(o,["vs","i","barycenter","weight"]))}function Ht(e,n){let t=0,r=0;e.weight&&(t+=e.barycenter*e.weight,r+=e.weight),n.weight&&(t+=n.barycenter*n.weight,r+=n.weight),e.vs=n.vs.concat(e.vs),e.barycenter=t/r,e.weight=r,e.i=Math.min(n.i,e.i),n.merged=!0}function xe(e,n,t,r,o){let i={},s=null,a=null,l=o;typeof n=="boolean"?(l=n,i={}):n&&(i=n,s=t!=null?t:null,a=r!=null?r:null);let u=He(e,L=>Object.hasOwn(L,"barycenter")),d=u.lhs,c=u.rhs.sort((L,b)=>b.i-L.i),f=[],h=0,p=0,E=0;d.sort(qt(a,s,!!l));for(let[L,b]of Object.entries(i)){let g=d.findIndex(m=>m.vs[0]===L);d.splice(g+1,0,b)}E=yn(f,c,E),d.forEach(L=>{E+=L.vs.length,f.push(L.vs),h+=L.barycenter*L.weight,p+=L.weight,E=yn(f,c,E)});let y={vs:f.flat(1)};return p&&(y.barycenter=h/p,y.weight=p),y}function yn(e,n,t){let r;for(;n.length&&(r=n[n.length-1]).i<=t;)n.pop(),e.push(r.vs),t++;return t}function qt(e,n,t){return(r,o)=>{if(r.barycenter<o.barycenter)return-1;if(r.barycenter>o.barycenter)return 1;if(e&&(typeof r.vs[0]=="string"||typeof o.vs[0]=="string")){let i=e.node(r.vs[0]),s=e.node(o.vs[0]),a=te(n,i,s);if(a!==0)return a}return t?o.i-r.i:r.i-o.i}}function ie(e,n,t,r,o){var L,b,g,m,w,k,_,C,j,I,S;let i=null,s=o;typeof r=="boolean"?(s=r,i=null):r!==void 0&&(i=r);let a=e.children(n),l=e.node(n),u=l?l.borderLeft:void 0,d=l?l.borderRight:void 0,c={};u&&(a=a.filter(G=>G!==u&&G!==d));let f=ve(e,a);f.forEach(G=>{if(e.children(G.v).length){let{result:x}=ie(e,G.v,t,i,s);c[G.v]=x,Object.hasOwn(x,"barycenter")&&Ut(G,x)}});let h=ke(f,t);$t(h,c);let p={},E=!1;for(let G=0;G<h.length;G++)for(let x=G+1;x<h.length;x++)if(!(!h[G]||!h[x]||!((L=h[G])!=null&&L.barycenter)||!((b=h[x])!=null&&b.barycenter))&&((g=h[G])==null?void 0:g.barycenter)===h[x].barycenter){let v=(w=(m=h[G])==null?void 0:m.vs[0])!=null?w:"",N=(_=(k=h[x])==null?void 0:k.vs[0])!=null?_:"",O=e.node(v),W=e.node(N);if(O.dummy==="edge"&&W.dummy==="edge"&&((C=O.edgeObj)==null?void 0:C.v)===((j=W.edgeObj)==null?void 0:j.v)&&((I=O.edgeObj)==null?void 0:I.w)===((S=W.edgeObj)==null?void 0:S.w))if(O.edgeLabel.reversed){p[N]=h[G],h.splice(G,1),G--;break}else p[v]=h[x],h.splice(x,1),x--;else E=!0}let y=xe(h,p,i,e,s);if(u&&d){y.vs=[u,y.vs,d].flat(1);let G=e.predecessors(u);if(G&&G.length){let x=e.node(G[0]),v=e.predecessors(d),N=e.node(v[0]);Object.hasOwn(y,"barycenter")||(y.barycenter=0,y.weight=0),y.barycenter=(y.barycenter*y.weight+x.order+N.order)/(y.weight+2),y.weight+=2}}return Object.defineProperty(y,"result",{value:y,enumerable:!1,configurable:!0,writable:!0}),Object.defineProperty(y,"usedBias",{value:E,enumerable:!1,configurable:!0,writable:!0}),y}function $t(e,n){e.forEach(t=>{t.vs=t.vs.flatMap(r=>n[r]?n[r].vs:r)})}function Ut(e,n){e.barycenter!==void 0?(e.barycenter=(e.barycenter*e.weight+n.barycenter*n.weight)/(e.weight+n.weight),e.weight+=n.weight):(e.barycenter=n.barycenter,e.weight=n.weight)}function _e(e,n,t,r){r||(r=e.nodes());let o=Jt(e),i=new T({compound:!0}).setGraph({root:o}).setDefaultNodeLabel(s=>e.node(s));return r.forEach(s=>{let a=e.node(s),l=e.parent(s);if(a.rank===n||a.minRank<=n&&n<=a.maxRank){i.setNode(s),i.setParent(s,l||o);let u=e[t](s);u&&u.forEach(d=>{let c=d.v===s?d.w:d.v,f=i.edge(c,s),h=f!==void 0?f.weight:0;i.setEdge(c,s,{weight:e.edge(d).weight+h})}),Object.hasOwn(a,"minRank")&&i.setNode(s,{borderLeft:a.borderLeft[n],borderRight:a.borderRight[n]})}}),i}function Jt(e){let n;for(;e.hasNode(n=$("_root")););return n}function Oe(e,n,t){let r={},o;t.forEach(i=>{let s=e.parent(i),a,l;for(;s;){if(a=e.parent(s),a?(l=r[a],r[a]=s):(l=o,o=s),l&&l!==s){n.setEdge(l,s);return}s=a}})}function se(e,n={},t=null){if(typeof n.customOrder=="function"){n.customOrder(e,se);return}let r=fe(e),o=wn(e,A(1,r+1),"inEdges"),i=wn(e,A(r-1,-1,-1),"outEdges"),s=Ne(e,t);if(Nn(e,s),n.disableOptimalOrderHeuristic)return;let a=Number.POSITIVE_INFINITY,l,u=n.constraints||[];for(let d=0,c=0;c<4;++d,++c){Kt(d%2?o:i,d%4>=2,u,t),s=P(e);let f=Ge(e,s);f<a?(c=0,l=Object.assign({},s),a=f):f===a&&(l=structuredClone(s))}Nn(e,l)}function wn(e,n,t){let r=new Map,o=(i,s)=>{r.has(i)||r.set(i,[]),r.get(i).push(s)};for(let i of e.nodes()){let s=e.node(i);if(typeof s.rank=="number"&&o(s.rank,i),typeof s.minRank=="number"&&typeof s.maxRank=="number")for(let a=s.minRank;a<=s.maxRank;a++)a!==s.rank&&o(a,i)}return n.map(function(i){return _e(e,i,t,r.get(i)||[])})}function Kt(e,n,t,r){let o=!0,i=new T;e.forEach(function(s){t.forEach(d=>i.setEdge(d.left,d.right));let a=s.graph().root,{result:l,usedBias:u}=ie(s,a,i,r,o);n&&u&&(o=!o),l.vs.forEach((d,c)=>s.node(d).order=c),Oe(s,i,l.vs)})}function Nn(e,n){Object.values(n).forEach(t=>t.forEach((r,o)=>e.node(r).order=o))}function Qt(e,n){let t={};function r(o,i){let s=0,a=0,l=o.length,u=i[i.length-1];return i.forEach((d,c)=>{let f=er(e,d),h=f?e.node(f).order:l;(f||d===u)&&(i.slice(a,c+1).forEach(p=>{let E=e.predecessors(p);E&&E.forEach(y=>{let L=e.node(y),b=L.order;(b<s||h<b)&&!(L.dummy&&e.node(p).dummy)&&vn(t,y,p)})}),a=c+1,s=h)}),i}return n.length&&n.reduce(r),t}function Zt(e,n){let t={};function r(i,s,a,l,u){A(s,a).forEach(d=>{let c=i[d];if(c!==void 0&&e.node(c).dummy){let f=e.predecessors(c);f&&f.forEach(h=>{if(h===void 0)return;let p=e.node(h);p.dummy&&(p.order<l||p.order>u)&&vn(t,h,c)})}})}function o(i,s){let a=-1,l=-1,u=0;return s.forEach((d,c)=>{if(e.node(d).dummy==="border"){let f=e.predecessors(d);if(f&&f.length){let h=f[0];if(h===void 0)return;l=e.node(h).order,r(s,u,c,a,l),u=c,a=l}}r(s,u,s.length,l,i.length)}),s}return n.length&&n.reduce(o),t}function er(e,n){if(e.node(n).dummy){let t=e.predecessors(n);if(t)return t.find(r=>e.node(r).dummy)}}function vn(e,n,t){if(n>t){let o=n;n=t,t=o}let r=e[n];r||(e[n]=r={}),r[t]=!0}function nr(e,n,t){if(n>t){let o=n;n=t,t=o}let r=e[n];return r!==void 0&&Object.hasOwn(r,t)}function tr(e,n,t,r,o){let i={},s={},a={};return n.forEach(l=>{l.forEach((u,d)=>{i[u]=u,s[u]=u,a[u]=d})}),n.forEach(l=>{let u=-1,d=-1,c=!1,f=l,h=l.findIndex(p=>(o==null?void 0:o.includes(p))||Gn(p,e,o));h>0&&(f=[l[h],...l.slice(0,h),...l.slice(h+1)],c=!0),f.forEach(p=>{var y;let E=r(p);if(E&&E.length){o!=null&&o.includes(p)&&(E=E.filter(g=>Gn(g,e,o)));let L=E.sort((g,m)=>{let w=a[g],k=a[m];return(w!==void 0?w:0)-(k!==void 0?k:0)}),b=(L.length-1)/2;for(let g=Math.floor(b),m=Math.ceil(b);g<=m;++g){let w=L[g];if(w===void 0)continue;let k=a[w];if(k!==void 0&&s[p]===p&&u<k&&a[w]!==d&&!nr(t,p,w)){let _=i[w];_!==void 0&&(s[w]=p,s[p]=i[p]=_,u=k,c&&(u=-1,d=(y=a[w])!=null?y:-1,c=!1))}}}})}),{root:i,align:s}}function rr(e,n,t,r,o=!1){let i={},s=or(e,n,t,o),a=o?"borderLeft":"borderRight";function l(h,p){let E=s.nodes().slice(),y={},L=E.pop();for(;L;){if(y[L])h(L);else{y[L]=!0,E.push(L);for(let b of p(L))E.push(b)}L=E.pop()}}function u(h){let p=s.inEdges(h);p?i[h]=p.reduce((E,y)=>{var g;let L=(g=i[y.v])!=null?g:0,b=s.edge(y);return Math.max(E,L+(b!==void 0?b:0))},0):i[h]=0}function d(h){let p=s.outEdges(h),E=Number.POSITIVE_INFINITY;p&&(E=p.reduce((L,b)=>{let g=i[b.w],m=s.edge(b);return Math.min(L,(g!==void 0?g:0)-(m!==void 0?m:0))},Number.POSITIVE_INFINITY));let y=e.node(h);E!==Number.POSITIVE_INFINITY&&y.borderType!==a&&(i[h]=Math.max(i[h]!==void 0?i[h]:0,E))}function c(h){return s.predecessors(h)||[]}function f(h){return s.successors(h)||[]}return l(u,c),l(d,f),Object.keys(r).forEach(h=>{var E;let p=t[h];p!==void 0&&(i[h]=(E=i[p])!=null?E:0)}),i}function or(e,n,t,r){let o=new T,i=e.graph(),s=dr(i.nodesep,i.edgesep,r);return n.forEach(a=>{let l;a.forEach(u=>{let d=t[u];if(d!==void 0){if(o.setNode(d),l!==void 0){let c=t[l];if(c!==void 0){let f=o.edge(c,d);o.setEdge(c,d,Math.max(s(e,u,l),f||0))}}l=u}})}),o}function ir(e,n){return Object.values(n).reduce((t,r)=>{let o=Number.NEGATIVE_INFINITY,i=Number.POSITIVE_INFINITY;Object.entries(r).forEach(([a,l])=>{let u=lr(e,a)/2;o=Math.max(l+u,o),i=Math.min(l-u,i)});let s=o-i;return s<t[0]&&(t=[s,r]),t},[Number.POSITIVE_INFINITY,null])[1]}function sr(e,n){let t=Object.values(n),r=R(Math.min,t),o=R(Math.max,t);["u","d"].forEach(i=>{["l","r"].forEach(s=>{let a=i+s,l=e[a];if(!l||l===n)return;let u=Object.values(l),d=r-R(Math.min,u);s!=="l"&&(d=o-R(Math.max,u)),d&&(e[a]=X(l,c=>c+d))})})}function ar(e,n=void 0){let t=e.ul;return t?X(t,(r,o)=>{var s,a;if(n){let l=n.toLowerCase(),u=e[l];if(u&&u[o]!==void 0)return u[o]}let i=Object.values(e).map(l=>{let u=l[o];return u!==void 0?u:0}).sort((l,u)=>l-u);return(((s=i[1])!=null?s:0)+((a=i[2])!=null?a:0))/2}):{}}function kn(e,n){let t=P(e),r=Object.assign(Qt(e,t),Zt(e,t)),o={},i;["u","d"].forEach(a=>{i=a==="u"?t:Object.values(t).reverse(),["l","r"].forEach(l=>{l==="r"&&(i=i.map(f=>Object.values(f).reverse()));let d=tr(e,i,r,f=>(a==="u"?e.predecessors(f):e.successors(f))||[],n),c=rr(e,i,d.root,d.align,l==="r");l==="r"&&(c=X(c,f=>-f)),o[a+l]=c})});let s=ir(e,o);return sr(o,s),ar(o,e.graph().align)}function dr(e,n,t){return(r,o,i)=>{let s=r.node(o),a=r.node(i),l=0,u;if(l+=s.width/2,Object.hasOwn(s,"labelpos"))switch(s.labelpos.toLowerCase()){case"l":u=-s.width/2;break;case"r":u=s.width/2;break}if(u&&(l+=t?u:-u),u=void 0,l+=(s.dummy?n:e)/2,l+=(a.dummy?n:e)/2,l+=a.width/2,Object.hasOwn(a,"labelpos"))switch(a.labelpos.toLowerCase()){case"l":u=a.width/2;break;case"r":u=-a.width/2;break}return u&&(l+=t?u:-u),l}}function lr(e,n){return e.node(n).width}function Gn(e,n,t){var s;if(!t)return!1;let r=(s=n.node(e))==null?void 0:s.edgeObj;if(!r||n.node(e).edgeLabel.reversed)return!1;let o=t.indexOf(r==null?void 0:r.v),i=t.indexOf(r==null?void 0:r.w);return o!==-1&&i!==-1&&o===(i+1)%t.length||o===(i-1)%t.length}function xn(e,n){e=ne(e),ur(e),Object.entries(kn(e,n)).forEach(([t,r])=>e.node(t).x=r)}function ur(e){let n=P(e),t=e.graph(),r=t.ranksep,o=t.rankalign,i=0;n.forEach(s=>{let a=s.reduce((l,u)=>{var c;let d=(c=e.node(u).height)!=null?c:0;return l>d?l:d},0);s.forEach(l=>{let u=e.node(l);o==="top"?u.y=i+u.height/2:o==="bottom"?u.y=i+a-u.height/2:u.y=i+a/2}),i+=a+r})}var _n=new WeakMap;function ae(e,n={}){return In(e,q,n),e}function On(e,n,t){let r=n;for(;r!==void 0;){let o=e.parent(r);if(o===t)return r;r=o}}function In(e,n,t){var L;let r=e.nodes().filter(b=>e.children(b).length),o={};r.forEach(b=>{let g=e.node(b);if(g&&g.rankdir){let m=new T({multigraph:!0,compound:!0});m.setGraph({rankdir:g.rankdir});let w=e.children(b);w.forEach(v=>{let N={...e.node(v)};m.setNode(v,N);let O=e.parent(v);O&&O!==b&&w.includes(O)&&m.setParent(v,O)});let k=new Set;e.edges().forEach(v=>{let N=On(e,v.v,b),O=On(e,v.w,b);if(N&&O&&N!==O){let W=`${N}\0${O}`;k.has(W)||(k.add(W),m.setEdge(N,O,{...e.edge(v)}))}}),In(m,n,t);let _=Rn(m);Cn(_,n,t,null),Tn(m,_);let C=1/0,j=1/0,I=-1/0,S=-1/0;m.nodes().forEach(v=>{if(v===b)return;let N=m.node(v);N&&typeof N.x=="number"&&typeof N.y=="number"&&typeof N.width=="number"&&typeof N.height=="number"&&(C=Math.min(C,N.x-N.width/2),I=Math.max(I,N.x+N.width/2),j=Math.min(j,N.y-N.height/2),S=Math.max(S,N.y+N.height/2))}),(!isFinite(C)||!isFinite(j)||!isFinite(I)||!isFinite(S))&&(C=j=0,I=S=0);let G=I-C,x=S-j;o[b]={minX:C,minY:j,maxX:I,maxY:S,width:G,height:x,offsetX:C,offsetY:j},g._dagreClusterSubgraph=m}});let i=[],s=b=>{let g=[],m=(e.children(b)||[]).filter(w=>w!==b);for(;m.length>0;){let w=m.shift();g.push(w),(e.children(w)||[]).filter(k=>k!==w).forEach(k=>m.push(k))}return g},a=new Map;r.forEach(b=>{let g=e.node(b);g&&g.rankdir&&o[b]&&a.set(b,(e.children(b)||[]).filter(m=>m!==b))});let l=new Set([...a.values()].flat()),u=new Map;a.forEach((b,g)=>{l.has(g)||u.set(g,s(g))});let d=new Set([...u.values()].flat()),c=b=>{for(let[g,m]of u)if(m.includes(b))return g;return b},f=[];e.edges().forEach(b=>{(d.has(b.v)||d.has(b.w))&&f.push({edge:b,label:e.edge(b)})});let h=new Map;d.forEach(b=>{let g=e.parent(b);h.set(b,typeof g=="string"?g:void 0)}),u.forEach((b,g)=>{let m=e.node(g),w=[];b.forEach(C=>{let j=e.node(C);j&&(w.push({id:C,node:j,parent:h.get(C)}),e.removeNode(C))});let k=f.filter(({edge:C})=>b.includes(C.v)||b.includes(C.w)),_=o[g];m&&(i.push({clusterId:g,subgraph:m._dagreClusterSubgraph,bounds:_,children:b,removedNodes:w,removedEdges:k}),m.width=_.width,m.height=_.height)});let p=new Set;f.forEach(({edge:b,label:g})=>{let m=c(b.v),w=c(b.w);if(m!==w&&e.hasNode(m)&&e.hasNode(w)){let k=`${m}\0${w}`;p.has(k)||(p.add(k),e.setEdge(m,w,{...g,width:0,height:0}))}});let E=Rn(e),y=Cn(E,n,t,(L=_n.get(e))!=null?L:null);_n.set(e,y),Tn(e,E),p.forEach(b=>{let g=b.indexOf("\0"),m=b.slice(0,g),w=b.slice(g+1);e.hasEdge(m,w)&&e.removeEdge(m,w)}),i.forEach(({clusterId:b,subgraph:g,bounds:m,removedNodes:w,removedEdges:k})=>{var G,x;let _=e.node(b),C=(G=_==null?void 0:_.x)!=null?G:0,j=(x=_==null?void 0:_.y)!=null?x:0,I=(m.minX+m.maxX)/2,S=(m.minY+m.maxY)/2;w.forEach(({id:v,node:N,parent:O})=>{e.setNode(v,N),O!==void 0&&e.setParent(v,O)}),k.forEach(({edge:v,label:N})=>{e.setEdge(v,N)}),g.nodes().forEach(v=>{if(v===b)return;let N=g.node(v),O=e.node(v);O&&N&&typeof N.x=="number"&&typeof N.y=="number"&&(O.x=C+(N.x-I),O.y=j+(N.y-S))}),delete _._dagreClusterSubgraph}),r.forEach(b=>{var w,k;let g=e.node(b),m=o[b];if(g&&g.rankdir&&g._dagreClusterSubgraph&&m){let _=g._dagreClusterSubgraph,C=(w=g.x)!=null?w:0,j=(k=g.y)!=null?k:0,I=(m.minX+m.maxX)/2,S=(m.minY+m.maxY)/2;_.nodes().forEach(G=>{if(G===b)return;let x=_.node(G),v=e.node(G);if(v&&x&&typeof x.x=="number"&&typeof x.y=="number"){let N=x.x-I,O=x.y-S;v.x=C+N,v.y=j+O}}),delete g._dagreClusterSubgraph}})}function Cn(e,n,t,r=null){var l,u;let o=(t==null?void 0:t.useDynamic)!==!1,i=o&&(l=r==null?void 0:r.graph)!=null?l:null,s=o&&(u=r==null?void 0:r.rawNodes)!=null?u:null;n("    makeSpaceForEdgeLabels",()=>Er(e)),n("    removeSelfEdges",()=>_r(e)),n("    acyclic",()=>Je(e,i)),n("    nestingGraph.run",()=>cn(e)),n("    rank",()=>ln(ne(e))),n("    injectEdgeLabelProxies",()=>Lr(e)),n("    removeEmptyRanks",()=>Xe(e)),n("    nestingGraph.cleanup",()=>hn(e)),n("    normalizeRanks",()=>Be(e)),n("    assignRankMinMax",()=>yr(e)),n("    removeEdgeLabelProxies",()=>wr(e)),n("    normalize.run",()=>Qe(e)),n("    parentDummyChains",()=>un(e)),n("    addBorderSegments",()=>gn(e)),n("    order",()=>se(e,t,s)),n("    insertSelfEdges",()=>Or(e)),n("    adjustCoordinateSystem",()=>mn(e)),n("    position",()=>xn(e,t.corePath)),n("    positionSelfEdges",()=>Cr(e));let a=JSON.parse(JSON.stringify(e._nodes));return n("    removeBorderNodes",()=>xr(e)),n("    normalize.undo",()=>Ze(e)),n("    fixupEdgeLabelCoords",()=>vr(e)),n("    undoCoordinateSystem",()=>En(e)),n("    translateGraph",()=>Nr(e)),n("    assignNodeIntersects",()=>Gr(e)),n("    reversePoints",()=>kr(e)),n("    acyclic.undo",()=>Ke(e)),{graph:e,rawNodes:a}}function Tn(e,n){e.nodes().forEach(t=>{let r=e.node(t),o=n.node(t);r&&(r.x=o.x,r.y=o.y,r.order=o.order,r.rank=o.rank,n.children(t).length&&(r.width=o.width,r.height=o.height))}),e.edges().forEach(t=>{let r=e.edge(t),o=n.edge(t);r.points=o.points,Object.hasOwn(o,"x")&&(r.x=o.x,r.y=o.y)}),e.graph().width=n.graph().width,e.graph().height=n.graph().height}var cr=["nodesep","edgesep","ranksep","marginx","marginy"],fr={ranksep:50,edgesep:20,nodesep:50,rankdir:"TB",rankalign:"center"},hr=["acyclicer","ranker","rankdir","align","rankalign"],br=["width","height","rank"],jn={width:0,height:0},gr=["minlen","weight","width","height","labeloffset"],pr={minlen:1,weight:1,width:0,height:0,labeloffset:10,labelpos:"r"},mr=["labelpos"];function Rn(e){let n=new T({multigraph:!0,compound:!0}),t=Te(e.graph());return n.setGraph(Object.assign({},fr,Ce(t,cr),B(t,hr))),e.nodes().forEach(r=>{let o=Te(e.node(r)),i=Ce(o,br);Object.keys(jn).forEach(a=>{i[a]===void 0&&(i[a]=jn[a])}),n.setNode(r,i);let s=e.parent(r);s!==void 0&&n.setParent(r,s)}),e.edges().forEach(r=>{let o=Te(e.edge(r));n.setEdge(r,Object.assign({},pr,Ce(o,gr),B(o,mr)))}),n}function Er(e){let n=e.graph();n.ranksep/=2,e.edges().forEach(t=>{var o;let r=e.edge(t);r.minlen*=2,((o=r.labelpos)!=null?o:"r").toLowerCase()!=="c"&&(n.rankdir==="TB"||n.rankdir==="BT"?r.width+=r.labeloffset:r.height+=r.labeloffset)})}function Lr(e){e.edges().forEach(n=>{let t=e.edge(n);if(t.width&&t.height){let r=e.node(n.v),i={rank:(e.node(n.w).rank-r.rank)/2+r.rank,e:n};M(e,"edge-proxy",i,"_ep")}})}function yr(e){let n=0;e.nodes().forEach(t=>{let r=e.node(t);r.borderTop&&(r.minRank=e.node(r.borderTop).rank,r.maxRank=e.node(r.borderBottom).rank,n=Math.max(n,r.maxRank))}),e.graph().maxRank=n}function wr(e){e.nodes().forEach(n=>{let t=e.node(n);if(t.dummy==="edge-proxy"){let r=t;e.edge(r.e).labelRank=t.rank,e.removeNode(n)}})}function Nr(e){let n=Number.POSITIVE_INFINITY,t=0,r=Number.POSITIVE_INFINITY,o=0,i=e.graph(),s=i.marginx||0,a=i.marginy||0;function l(u){let d=u.x,c=u.y,f=u.width,h=u.height;n=Math.min(n,d-f/2),t=Math.max(t,d+f/2),r=Math.min(r,c-h/2),o=Math.max(o,c+h/2)}e.nodes().forEach(u=>l(e.node(u))),e.edges().forEach(u=>{let d=e.edge(u);Object.hasOwn(d,"x")&&l(d)}),n-=s,r-=a,e.nodes().forEach(u=>{let d=e.node(u);d.x-=n,d.y-=r}),e.edges().forEach(u=>{let d=e.edge(u);d.points.forEach(c=>{c.x-=n,c.y-=r}),Object.hasOwn(d,"x")&&(d.x-=n),Object.hasOwn(d,"y")&&(d.y-=r)}),i.width=t-n+s,i.height=o-r+a}function Gr(e){e.edges().forEach(n=>{if(n.v===n.w)return;let t=e.edge(n),r=e.node(n.v),o=e.node(n.w),i,s;t.points?(i=t.points[0],s=t.points[t.points.length-1]):(t.points=[],i=o,s=r),t.points.unshift(ue(r,i)),t.points.push(ue(o,s))})}function vr(e){e.edges().forEach(n=>{let t=e.edge(n);if(Object.hasOwn(t,"x"))switch((t.labelpos==="l"||t.labelpos==="r")&&(t.width-=t.labeloffset),t.labelpos){case"l":t.x-=t.width/2+t.labeloffset;break;case"r":t.x+=t.width/2+t.labeloffset;break}})}function kr(e){e.edges().forEach(n=>{let t=e.edge(n);t.reversed&&t.points.reverse()})}function xr(e){e.nodes().forEach(n=>{if(e.children(n).length){let t=e.node(n),r=e.node(t.borderTop),o=e.node(t.borderBottom),i=e.node(t.borderLeft[t.borderLeft.length-1]),s=e.node(t.borderRight[t.borderRight.length-1]);t.width=Math.abs(s.x-i.x),t.height=Math.abs(o.y-r.y),t.x=i.x+t.width/2,t.y=r.y+t.height/2}}),e.nodes().forEach(n=>{e.node(n).dummy==="border"&&e.removeNode(n)})}function _r(e){e.edges().forEach(n=>{if(n.v===n.w){let t=e.node(n.v);t.selfEdges||(t.selfEdges=[]),t.selfEdges.push({e:n,label:e.edge(n)}),e.removeEdge(n)}})}function Or(e){P(e).forEach(t=>{let r=0;t.forEach((o,i)=>{let s=e.node(o);typeof s.rank!="number"&&(s.rank=0),s.order=i+r,(s.selfEdges||[]).forEach(a=>{M(e,"selfedge",{width:a.label.width,height:a.label.height,rank:s.rank,order:i+ ++r,e:a.e,edgeLabel:a.label},"_se"),(!Array.isArray(a.label.points)||a.label.points.length!==7)&&(a.label.points=[{x:0,y:-10},{x:0,y:-10},{x:0,y:0},{x:0,y:10},{x:0,y:10},{x:0,y:0},{x:0,y:0}])}),delete s.selfEdges})})}function Cr(e){e.nodes().forEach(n=>{let t=e.node(n),r=o=>typeof o=="number"&&isFinite(o);if(t.dummy==="selfedge"){let o=t,i=e.node(o.e.v),s=r(i==null?void 0:i.x)?i.x:0,a=r(i==null?void 0:i.y)?i.y:0,l=r(i==null?void 0:i.width)?i.width:0,u=r(i==null?void 0:i.height)?i.height:0,d=r(t.x)?t.x:s,c=r(t.y)?t.y:a,f=l/2,h=u/2;o.edgeLabel.points=[{x:d+f,y:c-h},{x:d+f,y:c-h},{x:d,y:c},{x:d-f,y:c+h},{x:d-f,y:c+h},{x:d,y:c},{x:d,y:c}],o.edgeLabel.x=d,o.edgeLabel.y=c,e.setEdge(o.e,o.edgeLabel),e.removeNode(n)}else t&&Array.isArray(t.selfEdges)&&t.selfEdges.forEach(o=>{if(!Array.isArray(o.label.points)||o.label.points.length!==7){let i=r(t.x)?t.x:0,s=r(t.y)?t.y:0,a=r(t.width)?t.width:0,l=r(t.height)?t.height:0,u=a/2,d=l/2;o.label.points=[{x:i+u,y:s-d},{x:i+u,y:s-d},{x:i,y:s},{x:i-u,y:s+d},{x:i-u,y:s+d},{x:i,y:s},{x:i,y:s}]}})})}function Ce(e,n){return X(B(e,n),Number)}function Te(e){let n={};return e&&Object.entries(e).forEach(([t,r])=>{typeof t=="string"&&(t=t.toLowerCase()),n[t]=r}),n}function de(e){let n=P(e),t=new T({compound:!0,multigraph:!0}).setGraph({});return e.nodes().forEach(r=>{t.setNode(r,{label:r}),t.setParent(r,"layer"+e.node(r).rank)}),e.edges().forEach(r=>t.setEdge(r.v,r.w,{},r.name)),n.forEach((r,o)=>{let i="layer"+o;t.setNode(i,{rank:"same"}),r.reduce((s,a)=>(t.setEdge(s,a,{style:"invis"}),a))}),t}var Tr={time:he,notime:q},jr={graphlib:ee,version:re,layout:ae,debug:de,util:{time:he,notime:q}},Rr=jr;return Vn(Ir);})();
+/*! For license information please see dagre.min.js.LEGAL.txt */
+</script>
 <script>
 'use strict';
 const state = {
@@ -2165,6 +2182,9 @@ function renderCFG(flow) {
 
   // For each real block, produce a process node (if it has work) and/or a
   // decision node (if it branches).
+  // v26.71: one process node per basic block again, holding all its lines. The
+  // v24 split into one node per statement answered lines cut with "…"; long lines
+  // now wrap inside the box, and a block reads as one unit of straight-line work.
   const blockEntryKey = {};   // block id -> key of first display node for that block
   const blockExitKey = {};    // block id -> key of last display node (edges leave here)
   kept.forEach(b => {
@@ -2172,18 +2192,9 @@ function renderCFG(flow) {
     const work = dec ? workLines(b) : realLines(b);
     let firstKey = null, lastKey = null;
     if (work.length) {
-      // v24: one process node per statement (was: a single node holding every
-      // line of the basic block, which made a straight-line function look like
-      // one giant block and truncated long lines with "…"). Each statement is
-      // its own node, chained top-to-bottom; the full text is kept (the node
-      // widens / the renderer wraps rather than eliding meaning).
-      work.forEach((L, i) => {
-        const k = 'p' + b.id + '_' + i;
-        addNode({ key: k, kind: 'process', block: b, lines: [L] });
-        if (lastKey) dedges.push({ from: lastKey, to: k });
-        else firstKey = k;
-        lastKey = k;
-      });
+      const k = 'p' + b.id;
+      addNode({ key: k, kind: 'process', block: b, lines: work });
+      firstKey = k; lastKey = k;
     }
     if (dec) {
       const k = 'd' + b.id;
@@ -2277,519 +2288,166 @@ function renderCFG(flow) {
     }
   });
 
-  // ── layout: main spine + side lanes (v23.43) ─────────────
-  // The prior BFS row-packing scattered a decision's yes/no targets onto
-  // arbitrary x-positions, so "no" edges doubled back and their arrowheads
-  // landed beside the End box instead of on it. New model: assign each display
-  // node a (depth, lane). The main flow (Start → work → the primary/yes path →
-  // End) runs straight down lane 0. A decision's secondary exit (the "no" of a
-  // 2-way, or a terminating side-branch) goes to lane +1 at (near) the
-  // decision's own depth, so its End sits to the right of the diamond with a
-  // clean elbow. Multi-way (EVALUATE) keeps the spread-row treatment.
-  const depth = { '__start__': 0 };
-  const lane = { '__start__': 0 };
-  const order = ['__start__'];
+  // ── layout (v26.71): dagre ───────────────────────────────
+  // The hand-made spine and side lanes (v23.43 to v26.3) gave way to dagre's
+  // layered layout (vendored above, MIT): it ranks the nodes, orders each rank to
+  // cut crossings and routes every edge, so a branch sits beside its decision
+  // and a long function stays readable without special cases per shape.
+  //
+  // Loops come from depth-first back edges from Start: an edge into a node still
+  // on the current path is a back edge, and its target is a loop header. The old
+  // test ("exactly one successor reaches back") also caught an if inside a loop
+  // body, whose continuing branch goes round the loop and back to it, and drew it
+  // as a loop.
   const outEdges = {};
-  dedges.forEach(e => { (outEdges[e.from] = outEdges[e.from] || []).push(e); });
-
-  // v23.48: loop awareness. A loop-header is a decision one of whose successors
-  // can reach back to it (a cycle / back-edge, e.g. PERFORM … UNTIL). For a
-  // loop, the body (the successor on the cycle) belongs in a side lane and loops
-  // back up; the exit (the other successor) is the main flow and must stay on the
-  // spine going straight down. The previous code treated a loop-header like a
-  // plain if (body on spine, exit shunted sideways), which made the continuation
-  // "hang in the air" to the right. Detect, per decision, which successor is the
-  // body vs the exit.
-  const displaySucc = {};
-  dnodes.forEach(n => { displaySucc[n.key] = (outEdges[n.key] || []).map(e => e.to); });
-  function reaches(from, targetKey, seen) {
-    seen = seen || new Set();
-    if (from === targetKey) return true;
-    if (seen.has(from)) return false;
-    seen.add(from);
-    for (const s of (displaySucc[from] || [])) {
-      if (reaches(s, targetKey, seen)) return true;
+  dedges.forEach((e, i) => { e.i = i; (outEdges[e.from] = outEdges[e.from] || []).push(e); });
+  const backEdge = new Set();   // edge indices
+  const backInto = {};          // header key -> the back edges into it
+  {
+    const seenState = { '__start__': 1 };   // 1 on the path, 2 done
+    const stack = [['__start__', 0]];
+    while (stack.length) {
+      const top = stack[stack.length - 1];
+      const es = outEdges[top[0]] || [];
+      if (top[1] >= es.length) { seenState[top[0]] = 2; stack.pop(); continue; }
+      const e = es[top[1]++];
+      if (seenState[e.to] === 1) { backEdge.add(e.i); (backInto[e.to] = backInto[e.to] || []).push(e); }
+      else if (seenState[e.to] === undefined) { seenState[e.to] = 1; stack.push([e.to, 0]); }
+    }
+  }
+  function reachesForward(from, to) {
+    const seen = new Set(), st = [from];
+    while (st.length) {
+      const x = st.pop();
+      if (x === to) return true;
+      if (seen.has(x)) continue;
+      seen.add(x);
+      (outEdges[x] || []).forEach(e => { if (!backEdge.has(e.i)) st.push(e.to); });
     }
     return false;
   }
-  // For each key, note {bodyKey, exitKey} if it's a loop-header.
+  // loopInfo[header] = { body: the header's successor that leads round to the back
+  // edge }: a decision with a back edge into it draws as a hexagon (the loop
+  // brackets read the body too).
   const loopInfo = {};
-  dnodes.forEach(n => {
-    const es = outEdges[n.key] || [];
-    if (n.kind !== 'decision' || es.length !== 2) return;
-    const [a, b] = es.map(e => e.to);
-    // a successor is the "body" if it can loop back to this header
-    const aBack = reaches(a, n.key);
-    const bBack = reaches(b, n.key);
-    if (aBack && !bBack) loopInfo[n.key] = { body: a, exit: b };
-    else if (bBack && !aBack) loopInfo[n.key] = { body: b, exit: a };
-    // if both or neither loop back, treat as a normal if (no loopInfo)
+  Object.keys(backInto).forEach(h => {
+    const nd = dindex[h];
+    if (!nd || nd.kind !== 'decision') return;
+    const srcs = backInto[h].map(e => e.from);
+    const body = (outEdges[h] || []).map(e => e.to).find(s => srcs.some(u => s === u || reachesForward(s, u)));
+    loopInfo[h] = { body: body };
   });
 
-  // v26.1: multi-way awareness (Go switch / COBOL EVALUATE / select). A decision
-  // with 3+ forward successors is a fan-out: the previous layout gave every arm
-  // (and its whole subtree) the same (depth,lane) as the decision, so all N case
-  // bodies collapsed onto one point and rendered stacked on top of each other
-  // (the reported overlap). A multi-way decision must instead spread its arms
-  // into parallel columns. Each arm gets its own lane, laid out as a vertical
-  // column, exactly like a human reads a switch. This is language-agnostic: it
-  // keys only on "decision with >=3 non-back-edge successors", so Go switch,
-  // COBOL EVALUATE and select all get the same treatment with no per-language code.
-  //
-  // multiInfo[key] = { arms:[armKey…], merge:mergeKey|null }.
-  //   arms:  the immediate successor display nodes, one per case (in edge order).
-  //   merge: the single node where the arms reconverge (the switch's join). It is
-  //          not an arm; it returns to the decision's own lane below the columns
-  //           so the spine continues straight (otherwise it would inherit some
-  //           arm's lane and drift sideways).
-  const multiInfo = {};
-  dnodes.forEach(n => {
-    if (n.kind !== 'decision') return;
-    const es = outEdges[n.key] || [];
-    if (es.length < 3) return;               // 2-way handled by loop/twoWay logic
-    if (loopInfo[n.key]) return;             // a loop-header is never a fan-out
-    const targets = es.map(e => e.to);
-    const inDeg = {};
-    targets.forEach(t => { inDeg[t] = (inDeg[t] || 0) + 1; });
-    // Arms are the distinct direct successors. A direct merge is a target hit by
-    // >1 arm edge. But in the common case (switch/EVALUATE with a tail after the
-    // block) the arms converge further down at a shared descendant (the
-    // reconvergence join). That join must return to the decision's own lane so the
-    // spine continues straight (else it drifts into whichever arm reached it
-    // first). Detect that join as the shallowest display node reachable from 2+
-    // distinct arms without passing back through the decision.
-    const arms = targets.filter((t, i) => targets.indexOf(t) === i && inDeg[t] === 1);
-    let merge = targets.find(t => inDeg[t] > 1) || null;
-    if (!merge && arms.length >= 2) {
-      // BFS each arm, record reach-depth of every node; the join is a node reached
-      // by >=2 arms at minimal max-depth. Stop crossing the decision itself.
-      const reachCount = {};      // nodeKey -> set of arm indices that reach it
-      const reachDepth = {};      // nodeKey -> min BFS depth across arms
-      arms.forEach((armKey, ai) => {
-        const seen = new Set([armKey]);
-        let frontier = [[armKey, 0]];
-        while (frontier.length) {
-          const [cur, dd] = frontier.shift();
-          if (cur === n.key) continue;
-          (reachCount[cur] = reachCount[cur] || new Set()).add(ai);
-          if (reachDepth[cur] === undefined || dd < reachDepth[cur]) reachDepth[cur] = dd;
-          (displaySucc[cur] || []).forEach(s => {
-            if (!seen.has(s)) { seen.add(s); frontier.push([s, dd + 1]); }
-          });
-        }
-      });
-      let best = null, bestDepth = Infinity;
-      Object.keys(reachCount).forEach(k => {
-        if (reachCount[k].size >= 2 && arms.indexOf(k) === -1) {
-          if (reachDepth[k] < bestDepth) { bestDepth = reachDepth[k]; best = k; }
-        }
-      });
-      merge = best;
+  // sizes: every box fits its own text (IBM Plex Mono: code at 10px, conditions at 11px)
+  const CW = 6.1, DCW = 6.7, LH = 15, WRAP = 60, CWRAP = 30, GUT = 36;
+  function wrapText(s, n) {
+    const out = [];
+    let rest = (s || '').replace(/\s+$/, '');
+    while (rest.length > n) {
+      let at = rest.lastIndexOf(' ', n);
+      if (at < n * 0.5) at = n;                  // no good space: cut inside the word
+      out.push(rest.slice(0, at));
+      rest = rest.slice(at).replace(/^ /, '');
     }
-    multiInfo[n.key] = { arms, merge };
-  });
-
-  // v26.1: per-arm lane packing for multi-way fan-outs. An arm may contain its
-  // own inner if/else or nested switch, so its subtree can occupy several lanes.
-  // Giving arms consecutive single lanes therefore let a wide arm bleed into its
-  // neighbour (adjacent case columns overlapped). Instead we (1) collect each
-  // arm's subtree, (2) lay each subtree out locally to learn how many lanes it
-  // spans (its [minLane,maxLane] about 0), then (3) pack the arms left→right,
-  // giving each a lane base so its span never intersects the next arm's span.
-  // Nested decisions inside a case therefore get their own lanes.
-  //
-  // armBaseLane[armKey] = the lane offset (relative to the decision) applied to
-  //   the whole arm subtree. armSubtreeLane[armKey][node] = that node's local lane
-  //   within the arm (0 = arm's own column). Final lane = decisionLane + base + local.
-  const armBaseLane = {};
-  const localLaneOf = {};   // nodeKey -> local lane inside its arm subtree
-  const armOfNode = {};     // nodeKey -> armKey it belongs to (for base lookup)
-  const multiArmRoots = new Set();
-
-  // collect the subtree of an arm: all nodes reachable from it without going
-  // through the owning decision or any sibling arm root or the merge.
-  function collectArmSubtree(armKey, decisionKey, stopSet) {
-    const nodes = [];
-    const seen = new Set();
-    const stack = [armKey];
-    while (stack.length) {
-      const cur = stack.pop();
-      if (seen.has(cur) || stopSet.has(cur) || cur === decisionKey) continue;
-      seen.add(cur); nodes.push(cur);
-      (displaySucc[cur] || []).forEach(s => { if (!seen.has(s)) stack.push(s); });
-    }
-    return { nodes, seen };
+    out.push(rest);
+    return out;
   }
-
-  // local layout of an arm subtree → local lanes (mirrors the main BFS rules but
-  // rooted at the arm, lane 0). Returns {minLane,maxLane,local,depthSpan}.
-  function layoutArm(armKey, subtreeSet) {
-    const ll = { [armKey]: 0 };
-    const ld = { [armKey]: 0 };
-    const seen = new Set([armKey]);
-    const qq = [armKey];
-    while (qq.length) {
-      const k = qq.shift();
-      const es = (outEdges[k] || []).filter(e => subtreeSet.has(e.to));
-      const fromNode = dindex[k];
-      const twoWay = fromNode && fromNode.kind === 'decision' &&
-        (outEdges[k] || []).length === 2 &&
-        (outEdges[k] || []).some(e => e.label === 'yes') &&
-        (outEdges[k] || []).some(e => e.label === 'no');
-      const li2 = loopInfo[k];
-      const mi2 = multiInfo[k];
-      es.forEach(e => {
-        const t = e.to;
-        let tl, td = (ld[k] || 0) + 1;
-        if (mi2 && mi2.arms.indexOf(t) !== -1) {
-          // nested multi-way inside this arm: spread its arms too (simple spread;
-          // deep nesting is rare, and each still gets a distinct local lane).
-          const idx = mi2.arms.indexOf(t);
-          tl = (ll[k] || 0) + (idx - Math.floor(mi2.arms.length / 2));
-        } else if (li2) {
-          tl = (t === li2.exit) ? (ll[k] || 0) : (ll[k] || 0) + 1;
-        } else if (twoWay && e.label === 'no') {
-          tl = (ll[k] || 0) + 1; td = ld[k] || 0;
-        } else {
-          tl = ll[k] || 0;
-        }
-        if (ll[t] === undefined) ll[t] = tl;
-        if (ld[t] === undefined) ld[t] = td;
-        if (!seen.has(t)) { seen.add(t); qq.push(t); }
-      });
-    }
-    let mn = 0, mx = 0, dmax = 0;
-    Object.values(ll).forEach(v => { if (v < mn) mn = v; if (v > mx) mx = v; });
-    Object.values(ld).forEach(v => { if (v > dmax) dmax = v; });
-    return { minLane: mn, maxLane: mx, local: ll, depthSpan: dmax };
-  }
-
-  // Precompute arm packing for every multi-way decision.
-  const mergeOfDecision = {};   // mergeKey -> decisionKey (force merge onto spine)
-  const armMaxDepthBelow = {};  // decisionKey -> deepest relative depth in any arm
-  Object.keys(multiInfo).forEach(decKey => {
-    const mi = multiInfo[decKey];
-    const arms = mi.arms;
-    const stopSet = new Set(arms.filter(a => a !== undefined));
-    if (mi.merge) { stopSet.add(mi.merge); mergeOfDecision[mi.merge] = decKey; }
-    // measure each arm subtree
-    let deepest = 1;
-    const spans = arms.map(armKey => {
-      const sib = new Set(stopSet); sib.delete(armKey);   // don't stop at self
-      const { seen } = collectArmSubtree(armKey, decKey, sib);
-      const { minLane, maxLane, local, depthSpan } = layoutArm(armKey, seen);
-      Object.entries(local).forEach(([nk, lv]) => {
-        // only claim a node for this arm if not already claimed (disjoint in practice)
-        if (armOfNode[nk] === undefined) { localLaneOf[nk] = lv; armOfNode[nk] = armKey; }
-      });
-      seen.forEach(nk => multiArmRoots.add(nk));
-      if (depthSpan + 1 > deepest) deepest = depthSpan + 1;
-      return { armKey, minLane, maxLane, width: maxLane - minLane + 1 };
-    });
-    armMaxDepthBelow[decKey] = deepest;
-    // pack arms left→right, centered about the decision lane. Each arm occupies
-    // [base+min, base+max]; the next arm starts one lane past the previous max.
-    const totalWidth = spans.reduce((a, s) => a + s.width, 0) + (spans.length - 1) * 1;
-    let cursor = -Math.floor(totalWidth / 2);
-    spans.forEach(s => {
-      // base places this arm's local 0 so that its local-min sits at `cursor`.
-      const base = cursor - s.minLane;
-      armBaseLane[s.armKey] = base;
-      cursor += s.width + 1;   // +1 lane gutter between arm columns
-    });
-  });
-
-  // v26.3: for a two-way decision, decide which branch is the main continuation
-  // and keep it on the spine; the other peels into the side lane. Normally "yes"
-  // (then) is the spine and "no" peels off. But in the very common guard pattern
-  // (`if bad { print; os.Exit }` / `if err != nil { return }`) the then branch
-  // dead-ends quickly while the "no"/fall-through carries the real work. We measure
-  // how many nodes each branch runs before it terminates without branching again
-  // (deadEndLen: a finite count if the branch is a straight run to an End, or
-  // Infinity if it branches/loops/is long). When the then side is a short dead-end
-  // and the no side runs longer (or branches), we swap so no stays on the spine
-  // and the short guard peels to the side lane. That matches how the code reads.
-  function deadEndLen(startKey) {
-    let cur = startKey, hops = 0;
-    const seen = new Set();
-    while (cur !== undefined && !seen.has(cur) && hops < 400) {
-      seen.add(cur);
-      const nd = dindex[cur];
-      if (nd && nd.kind === 'terminal') return hops;         // reached End → this many hops
-      if (nd && nd.kind === 'decision') return Infinity;     // branches again → not a simple dead-end
-      const outs = displaySucc[cur] || [];
-      if (outs.length === 0) return hops;                    // nowhere to go → ends here
-      if (outs.length > 1) return Infinity;
-      cur = outs[0]; hops++;
-    }
-    return Infinity;
-  }
-  const spineNoOf = {};   // decisionKey -> true if its "no" branch should be the spine
-  dnodes.forEach(n => {
-    if (n.kind !== 'decision') return;
-    const es = outEdges[n.key] || [];
-    const isTwo = es.length === 2 && es.some(e => e.label === 'yes') && es.some(e => e.label === 'no');
-    if (!isTwo || loopInfo[n.key]) return;
-    const yesE = es.find(e => e.label === 'yes'), noE = es.find(e => e.label === 'no');
-    if (!yesE || !noE) return;
-    const yLen = deadEndLen(yesE.to), nLen = deadEndLen(noE.to);
-    // swap only when then is a real dead-end and it is shorter than the no path
-    // (a strictly longer or branching no side is the true continuation). Ties and
-    // the plain if/else (both reach a shared merge, both finite & equal-ish) keep
-    // the default yes-on-spine so nothing else shifts.
-    if (yLen !== Infinity && nLen > yLen) spineNoOf[n.key] = true;
-  });
-
-  const visited = new Set(['__start__']);
-  const q = ['__start__'];
-  while (q.length) {
-    const k = q.shift();
-    const es = outEdges[k] || [];
-    const fromNode = dindex[k];
-    const twoWay = fromNode && fromNode.kind === 'decision' &&
-      es.length === 2 && es.some(e => e.label === 'yes') && es.some(e => e.label === 'no');
-    const li = loopInfo[k];
-    const mi = multiInfo[k];
-    const swapNo = spineNoOf[k];    // v26.3: "no" is the spine, "yes" peels off
-    es.forEach((e) => {
-      const t = e.to;
-      let tLane, tDepth;
-      if (mergeOfDecision[t] !== undefined) {
-        // reconvergence join of a multi-way switch/EVALUATE: pin it to the
-        // decision's lane (back on the spine) and below the deepest arm, so the
-        // flow visibly rejoins one column instead of trailing off a random arm.
-        const decKey = mergeOfDecision[t];
-        tLane = lane[decKey] || 0;
-        tDepth = (depth[decKey] || 0) + (armMaxDepthBelow[decKey] || 1) + 1;
-      } else if (mi && mi.arms.indexOf(t) !== -1) {
-        // multi-way arm root: lane = decisionLane + this arm's packed base.
-        tLane = (lane[k] || 0) + (armBaseLane[t] || 0);
-        tDepth = (depth[k] || 0) + 1;
-      } else if (armOfNode[t] !== undefined && t !== (mi && mi.merge)) {
-        // a node inside some arm subtree: lane = decisionLane(of that arm's owner,
-        // already baked into the arm root's lane). We reconstruct it as the arm
-        // root's lane + (localLane[t] - localLane[armRoot]). Simpler: arm root lane
-        // is known once placed; use armRoot lane + local offset.
-        const armKey = armOfNode[t];
-        const armRootLane = lane[armKey];
-        if (armRootLane !== undefined) {
-          tLane = armRootLane + ((localLaneOf[t] || 0) - (localLaneOf[armKey] || 0));
-        } else {
-          tLane = lane[k] || 0;   // arm root not placed yet; fall back (rare)
-        }
-        tDepth = (depth[k] || 0) + 1;
-      } else if (li) {
-        // loop-header: exit stays on the spine (below), body goes to a side lane
-        if (t === li.exit) { tLane = lane[k] || 0; tDepth = (depth[k] || 0) + 1; }
-        else { tLane = (lane[k] || 0) + 1; tDepth = (depth[k] || 0) + 1; } // body beside/below
-      } else if (twoWay && swapNo && e.label === 'yes') {
-        // guard pattern: then dead-ends → peel it to the side lane.
-        tLane = (lane[k] || 0) + 1; tDepth = depth[k];
-      } else if (twoWay && swapNo && e.label === 'no') {
-        // …and the "no" continuation stays on the spine going straight down.
-        tLane = lane[k] || 0; tDepth = (depth[k] || 0) + 1;
-      } else if (twoWay && e.label === 'no') {
-        tLane = (lane[k] || 0) + 1; tDepth = depth[k]; // if's "no" beside the diamond
-      } else {
-        tLane = lane[k] || 0; tDepth = (depth[k] || 0) + 1;
-      }
-      if (depth[t] === undefined) depth[t] = tDepth;
-      if (lane[t] === undefined) lane[t] = tLane;
-      if (!visited.has(t)) { visited.add(t); order.push(t); q.push(t); }
-    });
-  }
-  // any unreached node → append at the bottom of the spine
-  let maxDepth = 0; Object.values(depth).forEach(d => { if (d > maxDepth) maxDepth = d; });
-  dnodes.forEach(n => { if (depth[n.key] === undefined) { maxDepth++; depth[n.key] = maxDepth; lane[n.key] = 0; } });
-
-  // sizes
-  const PADTOP2 = 24, GY = 60;
-  const PW = 300, TW = 120, DW = 280, DH = 84;
-  const LANEGAP = 60;   // horizontal gap between the spine and a side lane
   function dsize(n) {
-    if (n.kind === 'terminal') return { w: TW, h: 38 };
-    if (n.kind === 'decision') return { w: DW, h: DH };
-    const c = Math.max((n.lines || []).length, 1);
-    const longest = Math.max(6, ...(n.lines || []).map(L => (L.text || '').length + 6));
-    return { w: Math.min(Math.max(PW, longest * 7), 720), h: 24 + c * 15 + 8 };
+    if (n.kind === 'terminal') return { w: 110, h: 34 };
+    if (n.kind === 'decision') {
+      n.tlines = wrapText(n.text, CWRAP).slice(0, 6);
+      const tw = Math.max(...n.tlines.map(s => s.length)) * DCW, th = n.tlines.length * 14;
+      if (loopInfo[n.key]) {
+        // the hexagon: as tall as its text plus a margin, its cut corners clear of it
+        const h = th + 28, cutX = Math.min(24, h / 2);
+        return { w: Math.max(150, tw + 2 * cutX + 28), h: h, cut: cutX };
+      }
+      // a diamond holds a w x h text box when tw/w + th/h <= 1/2: twice the text plus a margin
+      return { w: Math.max(130, 2 * tw + 34), h: Math.max(64, 2 * th + 34) };
+    }
+    n.rows = [];
+    (n.lines || []).forEach(L => {
+      wrapText(L.text || '', WRAP).forEach((seg, i) => n.rows.push({ ln: i === 0 ? L.ln : 0, cont: i > 0, text: seg }));
+    });
+    n.gut = (n.lines || []).some(L => L.ln) ? GUT : 0;
+    const longest = Math.max(10, ...n.rows.map(R => R.text.length + (R.cont ? 2 : 0)));
+    return { w: Math.max(150, 24 + n.gut + longest * CW), h: 14 + Math.max(n.rows.length, 1) * LH + 4 };
   }
   const dsz = {}; dnodes.forEach(n => dsz[n.key] = dsize(n));
 
-  // group by depth for vertical rows; each depth row height = tallest node there
-  const rowsByDepth = {};
-  dnodes.forEach(n => { (rowsByDepth[depth[n.key]] = rowsByDepth[depth[n.key]] || []).push(n); });
-  const depthKeys = Object.keys(rowsByDepth).map(Number).sort((a, b) => a - b);
-  const rowH = {}; depthKeys.forEach(d => rowH[d] = Math.max(...rowsByDepth[d].map(n => dsz[n.key].h)));
-  const rowY = {}; let acc = PADTOP2; depthKeys.forEach(d => { rowY[d] = acc + rowH[d] / 2; acc += rowH[d] + GY; });
-  const dTotalH = acc + 10;
-
-  // horizontal: lane-column model (v26.1). Every node sits in a column keyed by
-  // its (now possibly negative) lane. Each lane column is as wide as its widest
-  // member, and adjacent columns are separated by LANEGAP. Lane 0 is the spine.
-  // This replaces the old "spine + right-only offset" placement, which (a) could
-  // not represent lanes left of the spine and (b) collapsed every node sharing a
-  // (depth,lane) cell onto one x (the multi-way switch overlap). With one lane
-  // per arm, a switch now renders as parallel vertical columns; a plain function
-  // (all lane 0) is byte-identical to before (single centered spine).
-  const widestNode = Math.max(PW, DW, ...dnodes.map(n => dsz[n.key].w));
-  const lanesUsed = Array.from(new Set(dnodes.map(n => lane[n.key] || 0))).sort((a, b) => a - b);
-  // width of each lane column = widest node assigned to that lane.
-  const laneW = {};
-  lanesUsed.forEach(L => {
-    const members = dnodes.filter(n => (lane[n.key] || 0) === L);
-    laneW[L] = Math.max(TW, ...members.map(n => dsz[n.key].w));
+  const G = new dagre.graphlib.Graph({ multigraph: true });
+  G.setGraph({ rankdir: 'TB', nodesep: 30, ranksep: 44, edgesep: 16, marginx: 24, marginy: 20 });
+  G.setDefaultEdgeLabel(() => ({}));
+  dnodes.forEach(n => G.setNode(n.key, { width: dsz[n.key].w, height: dsz[n.key].h }));
+  dedges.forEach(e => {
+    if (!dindex[e.from] || !dindex[e.to]) return;
+    const shown = e.label || (backEdge.has(e.i) ? 'loop' : '');
+    const lab = shown ? { width: Math.min(shown.length, 18) * 6.2 + 10, height: 14, labelpos: 'c' } : {};
+    G.setEdge(e.from, e.to, lab, 'e' + e.i);
   });
-  // assign each lane a center-x, left→right in lane order, gap between columns.
-  const laneCenterX = {};
-  let cursor = 60;   // left margin
-  lanesUsed.forEach(L => {
-    laneCenterX[L] = cursor + laneW[L] / 2;
-    cursor += laneW[L] + LANEGAP;
-  });
-  const dTotalW0 = cursor + 20;
-
+  dagre.layout(G);
   const DC = {};
-  dnodes.forEach(n => {
-    const L = lane[n.key] || 0;
-    const d = depth[n.key];
-    if (d === undefined || laneCenterX[L] === undefined) return;
-    DC[n.key] = { x: laneCenterX[L], y: rowY[d] };
-  });
-  // v26.1: per-row overlap resolution (final safety net, language-agnostic).
-  // The lane-column model prevents most overlaps, but two nodes in different
-  // branches can still land in adjacent/near columns whose actual box widths (a
-  // wide 300px process step beside another) exceed the column pitch, or an
-  // unrelated spine node (e.g. a top-level if's then-branch) can sit at the same
-  // depth as a switch arm. Rather than special-case each, we guarantee no two
-  // boxes in the same depth-row overlap: sort the row by x, then sweep left→right
-  // pushing any node that would collide with its left neighbour rightwards by the
-  // exact overlap + a gap. This preserves left→right order and only ever adds
-  // space, so a clean single-spine function is untouched (nothing overlaps, so
-  // nothing moves). MINGAP is the minimum air between two boxes.
-  const MINGAP = 26;
-  depthKeys.forEach(d => {
-    const row = rowsByDepth[d].filter(n => DC[n.key]).slice()
-      .sort((a, b) => DC[a.key].x - DC[b.key].x);
-    for (let i = 1; i < row.length; i++) {
-      const prev = row[i - 1], cur = row[i];
-      const prevRight = DC[prev.key].x + dsz[prev.key].w / 2;
-      const curLeft = DC[cur.key].x - dsz[cur.key].w / 2;
-      const need = prevRight + MINGAP - curLeft;
-      if (need > 0) DC[cur.key].x += need;   // push this node (and only it) right
-    }
-  });
-  let dTotalW = Math.max(dTotalW0, 420);
-  // ensure every node fits
-  dnodes.forEach(n => { const c = DC[n.key]; if (c) dTotalW = Math.max(dTotalW, c.x + dsz[n.key].w / 2 + 40); });
-
+  dnodes.forEach(n => { const p = G.node(n.key); if (p) DC[n.key] = { x: p.x, y: p.y }; });
+  const dTotalW = Math.max(G.graph().width || 0, 320), dTotalH = Math.max(G.graph().height || 0, 80);
   svg.setAttribute('viewBox', '0 0 ' + dTotalW + ' ' + dTotalH);
   svg.setAttribute('width', dTotalW); svg.setAttribute('height', dTotalH);
   svg.dataset.baseW = dTotalW; svg.dataset.baseH = dTotalH;
 
-  // edges
+  // edges: dagre's route, its ends moved onto the real outline (a diamond's sides,
+  // not its bounding box), drawn as a smooth curve through the route's points
+  function onOutline(key, toward) {
+    const n = dindex[key], c = DC[key], s = dsz[key];
+    const dx = toward.x - c.x, dy = toward.y - c.y;
+    if (!dx && !dy) return { x: c.x, y: c.y };
+    if (n.kind === 'decision' && !loopInfo[key]) {
+      const k = 1 / (Math.abs(dx) / (s.w / 2) + Math.abs(dy) / (s.h / 2));
+      return { x: c.x + dx * k, y: c.y + dy * k };
+    }
+    const k = Math.min((s.w / 2) / (Math.abs(dx) || 1e-9), (s.h / 2) / (Math.abs(dy) || 1e-9));
+    return { x: c.x + dx * k, y: c.y + dy * k };
+  }
+  function smooth(pts) {
+    let d = 'M' + pts[0].x + ',' + pts[0].y;
+    if (pts.length === 2) return d + ' L' + pts[1].x + ',' + pts[1].y;
+    for (let i = 1; i < pts.length - 1; i++) {
+      const last = i === pts.length - 2;
+      const ex = last ? pts[i + 1].x : (pts[i].x + pts[i + 1].x) / 2;
+      const ey = last ? pts[i + 1].y : (pts[i].y + pts[i + 1].y) / 2;
+      d += ' Q' + pts[i].x + ',' + pts[i].y + ' ' + ex + ',' + ey;
+    }
+    return d;
+  }
   dedges.forEach(e => {
-    const A = DC[e.from], B = DC[e.to]; if (!A || !B) return;
-    const na = dindex[e.from], nb = dindex[e.to];
-    const sa = dsz[e.from], sb = dsz[e.to];
+    const ge = G.edge(e.from, e.to, 'e' + e.i);
+    if (!ge || !DC[e.from] || !DC[e.to]) return;
+    const pts = (ge.points || []).map(p => ({ x: p.x, y: p.y }));
+    if (pts.length < 2) return;
+    pts[0] = onOutline(e.from, pts[1]);
+    pts[pts.length - 1] = onOutline(e.to, pts[pts.length - 2]);
+    const back = backEdge.has(e.i);
+    const up = back || pts[pts.length - 1].y < pts[0].y - 1;
     const g = document.createElementNS(svgNS, 'g');
     const p = document.createElementNS(svgNS, 'path');
-    const yn = e.label === 'yes' || e.label === 'no';
-    const multiway = na && na.kind === 'decision' && e.label && !yn;
-    const sideways = Math.abs(B.y - A.y) < 8;   // target on ~same row (side lane)
-
-    let ax, ay, tx, ty, d;
-    // v23.50: a loop back-edge (body → loop-header) must not aim at the header
-    // diamond's top vertex: that's where the incoming edge from above already
-    // lands, so the back-arrow was drawn on top of it and looked missing. Route
-    // the back-edge into the header's side vertex (the side the body sits on)
-    // with its own elbow, so the return arrow is clearly visible.
-    const targetIsLoopHeader = nb && nb.kind === 'decision' && loopInfo[e.to] && loopInfo[e.to].body === e.from;
-    if (targetIsLoopHeader) {
-      const bodyOnRight = A.x >= B.x;
-      // leave the body from its top, go up, enter the diamond's right/left vertex
-      ax = A.x; ay = A.y - sa.h / 2;
-      tx = B.x + (bodyOnRight ? sb.w / 2 : -sb.w / 2);
-      ty = B.y;
-      const midX = bodyOnRight ? Math.max(ax, tx) + 40 : Math.min(ax, tx) - 40;
-      d = 'M' + ax + ',' + ay +
-          ' C' + midX + ',' + ay + ' ' + midX + ',' + ty + ' ' + tx + ',' + ty;
-      p.setAttribute('class', 'edge-path up loop-back');
-      p.setAttribute('marker-end', 'url(#arrow-up)');
-      p.setAttribute('d', d);
-      g.appendChild(p);
-      // "loop" label near the back-edge midpoint
-      const lab = document.createElementNS(svgNS, 'text');
-      lab.setAttribute('class', 'edge-label loop-label');
-      lab.setAttribute('x', midX + (bodyOnRight ? 4 : -4));
-      lab.setAttribute('y', (ay + ty) / 2);
-      lab.setAttribute('text-anchor', bodyOnRight ? 'start' : 'end');
-      lab.textContent = 'loop';
-      g.appendChild(lab);
-      vp.appendChild(g);
-      return;
-    }
-
-    if (na && na.kind === 'decision' && yn) {
-      // leave from the diamond's left(yes)/right(no) point
-      ax = A.x + (e.label === 'yes' ? -sa.w / 2 : sa.w / 2);
-      ay = A.y;
-    } else {
-      ax = A.x; ay = A.y + sa.h / 2;
-    }
-
-    if (sideways) {
-      // horizontal into the target's left edge (side-lane End sits to the right)
-      tx = B.x - sb.w / 2; ty = B.y;
-      const mx = (ax + tx) / 2;
-      d = 'M' + ax + ',' + ay + ' C' + mx + ',' + ay + ' ' + mx + ',' + ty + ' ' + tx + ',' + ty;
-      p.setAttribute('marker-end', 'url(#arrow)');
-    } else {
-      // vertical into the target's top
-      tx = B.x; ty = B.y - sb.h / 2;
-      const my = (ay + ty) / 2;
-      const up = B.y < A.y;
-      p.setAttribute('marker-end', up ? 'url(#arrow-up)' : 'url(#arrow)');
-      p.setAttribute('class', 'edge-path' + (up ? ' up' : ''));
-      d = 'M' + ax + ',' + ay + ' C' + ax + ',' + my + ' ' + tx + ',' + my + ' ' + tx + ',' + ty;
-    }
-    if (!p.getAttribute('class')) p.setAttribute('class', 'edge-path');
-    p.setAttribute('d', d);
+    p.setAttribute('class', 'edge-path' + (up ? ' up' : '') + (back ? ' loop-back' : ''));
+    p.setAttribute('marker-end', up ? 'url(#arrow-up)' : 'url(#arrow)');
+    p.setAttribute('d', smooth(pts));
     g.appendChild(p);
-
-    if (e.label) {
-      let lx, ly, anchor;
-      if (yn) {
-        // v25.4: yes/no labels must not collide when guards chain horizontally
-        // (a Go multi-`if` pattern: decision A's "no" hops sideways to decision B
-        // on the same row, so A's right-tip "no" and B's left-tip "yes" landed at
-        // the same x+y and merged into "noyes"). Fix: (1) put "yes" above the row
-        // and "no" below it so they never share a text line even at equal x; and
-        // (2) for a sideways "no" that targets another decision, anchor the label
-        // at the source diamond's tip (not the hop midpoint, which sits under the
-        // next diamond) so it stays with its own decision.
-        const yesAbove = (e.label === 'yes') ? -8 : 12;
-        if (sideways) {
-          const toDecision = nb && nb.kind === 'decision';
-          if (toDecision) { lx = ax + (e.label === 'yes' ? -6 : 6); anchor = e.label === 'yes' ? 'end' : 'start'; }
-          else { lx = (ax + tx) / 2; anchor = 'middle'; }
-          ly = ay + yesAbove;
-        } else {
-          lx = ax + (e.label === 'yes' ? -6 : 6); ly = ay + yesAbove; anchor = e.label === 'yes' ? 'end' : 'start';
-        }
-      } else { lx = tx; ly = ty - 7; anchor = 'middle'; }
-      const txt = clamp(e.label, 18);
-      if (multiway) {
+    const shown = e.label || (back ? 'loop' : '');
+    if (shown && ge.x !== undefined) {
+      const yn = e.label === 'yes' || e.label === 'no';
+      const txt = clamp(shown, 18);
+      if (!yn && !back) {
         const bg = document.createElementNS(svgNS, 'rect');
         const w = txt.length * 6.2 + 8, h = 14;
-        bg.setAttribute('x', lx - w / 2); bg.setAttribute('y', ly - 11);
+        bg.setAttribute('x', ge.x - w / 2); bg.setAttribute('y', ge.y - 7);
         bg.setAttribute('width', w); bg.setAttribute('height', h);
         bg.setAttribute('rx', 3); bg.setAttribute('class', 'case-chip');
         g.appendChild(bg);
       }
       const lab = document.createElementNS(svgNS, 'text');
-      lab.setAttribute('class', 'edge-label' + (yn ? ' branch-yn' : ' case-label'));
-      lab.setAttribute('x', lx); lab.setAttribute('y', ly);
-      lab.setAttribute('text-anchor', anchor);
+      lab.setAttribute('class', 'edge-label' + (back && !e.label ? ' loop-label' : (yn ? ' branch-yn' : ' case-label')));
+      lab.setAttribute('x', ge.x); lab.setAttribute('y', ge.y + 3.5);
+      lab.setAttribute('text-anchor', 'middle');
       lab.textContent = txt;
       g.appendChild(lab);
     }
@@ -2849,34 +2507,28 @@ function renderCFG(flow) {
     g.setAttribute('transform', 'translate(' + (c.x - s.w / 2) + ',' + (c.y - s.h / 2) + ')');
 
     if (n.kind === 'decision') {
-      // v23.50: a loop-header renders as a hexagon (the standard flowchart
-      // Preparation / loop symbol), so a loop is instantly distinguishable from
-      // a one-time if/EVALUATE decision (which stay diamonds). loopInfo, computed
-      // in the layout pass, identifies loop-headers precisely by their back-edge.
-      const isLoopHeader = !!(n.block && loopInfo[n.key]);
+      // a loop-header renders as a hexagon (the flowchart preparation / loop
+      // symbol), a one-time if / EVALUATE as a diamond; both sized to their text
+      const isLoopHeader = !!loopInfo[n.key];
+      const shape = document.createElementNS(svgNS, 'polygon');
       if (isLoopHeader) {
         g.setAttribute('class', 'cfg-node loop-header');
-        const cut = Math.min(22, s.w / 4);
-        const hex = document.createElementNS(svgNS, 'polygon');
-        hex.setAttribute('points',
-          cut + ',0 ' + (s.w - cut) + ',0 ' + s.w + ',' + (s.h / 2) + ' ' +
-          (s.w - cut) + ',' + s.h + ' ' + cut + ',' + s.h + ' 0,' + (s.h / 2));
-        g.appendChild(hex);
-        const t = document.createElementNS(svgNS, 'text');
-        t.setAttribute('class', 'dia-text'); t.setAttribute('x', s.w / 2); t.setAttribute('y', s.h / 2 + 4);
-        t.setAttribute('text-anchor', 'middle');
-        t.textContent = clamp(n.text, 44);
-        g.appendChild(t);
+        shape.setAttribute('points',
+          s.cut + ',0 ' + (s.w - s.cut) + ',0 ' + s.w + ',' + (s.h / 2) + ' ' +
+          (s.w - s.cut) + ',' + s.h + ' ' + s.cut + ',' + s.h + ' 0,' + (s.h / 2));
       } else {
-        const dia = document.createElementNS(svgNS, 'polygon');
-        dia.setAttribute('points', (s.w / 2) + ',0 ' + s.w + ',' + (s.h / 2) + ' ' + (s.w / 2) + ',' + s.h + ' 0,' + (s.h / 2));
-        g.appendChild(dia);
-        const t = document.createElementNS(svgNS, 'text');
-        t.setAttribute('class', 'dia-text'); t.setAttribute('x', s.w / 2); t.setAttribute('y', s.h / 2 + 4);
-        t.setAttribute('text-anchor', 'middle');
-        t.textContent = clamp(n.text, 40);
-        g.appendChild(t);
+        shape.setAttribute('points', (s.w / 2) + ',0 ' + s.w + ',' + (s.h / 2) + ' ' + (s.w / 2) + ',' + s.h + ' 0,' + (s.h / 2));
       }
+      g.appendChild(shape);
+      const lines = n.tlines || [n.text];
+      lines.forEach((ln, i) => {
+        const t = document.createElementNS(svgNS, 'text');
+        t.setAttribute('class', 'dia-text'); t.setAttribute('x', s.w / 2);
+        t.setAttribute('y', s.h / 2 + 4 + (i - (lines.length - 1) / 2) * 14);
+        t.setAttribute('text-anchor', 'middle');
+        t.textContent = ln;
+        g.appendChild(t);
+      });
     } else if (n.kind === 'terminal') {
       const rect = document.createElementNS(svgNS, 'rect');
       rect.setAttribute('width', s.w); rect.setAttribute('height', s.h);
@@ -2892,25 +2544,19 @@ function renderCFG(flow) {
       rect.setAttribute('width', s.w); rect.setAttribute('height', s.h);
       rect.setAttribute('rx', 5); rect.setAttribute('ry', 5);
       g.appendChild(rect);
-      let i = 0;
-      (n.lines || []).forEach(L => {
-        const t = document.createElementNS(svgNS, 'text');
-        t.setAttribute('class', 'stmt'); t.setAttribute('x', 12); t.setAttribute('y', 19 + i * 15);
-        t.setAttribute('xml:space', 'preserve');   // v26.4: keep token spacing
-        if (L.ln) {
-          const g1 = document.createElementNS(svgNS, 'tspan');
-          g1.setAttribute('class', 'gutter'); // v23.41: smaller/dimmer, clearly metadata not code
-          g1.setAttribute('fill', 'var(--text-dim)');
-          g1.setAttribute('font-size', '8');
-          g1.textContent = 'L' + L.ln + '  ';
-          t.appendChild(g1);
+      (n.rows || []).forEach((R, i) => {
+        const y = 19 + i * LH;
+        if (R.ln) {
+          const gl = document.createElementNS(svgNS, 'text');
+          gl.setAttribute('class', 'stmt-ln'); gl.setAttribute('x', 12); gl.setAttribute('y', y);
+          gl.textContent = 'L' + R.ln;
+          g.appendChild(gl);
         }
-        const codeText = clamp(L.text || '', 92);
-        // v26.4: colour each token like an editor line. clamp() may have added a
-        // trailing ellipsis; tokenize the (possibly truncated) text and emit a
-        // coloured <tspan> per token. Falls back to one plain span if tokenizing
-        // yields nothing (blank line).
-        const toks = tokenizeCode(codeText);
+        const t = document.createElementNS(svgNS, 'text');
+        t.setAttribute('class', 'stmt'); t.setAttribute('x', 12 + n.gut + (R.cont ? 2 * CW : 0)); t.setAttribute('y', y);
+        t.setAttribute('xml:space', 'preserve');   // v26.4: keep token spacing
+        // v26.4: colour each token like an editor line
+        const toks = tokenizeCode(R.text);
         if (toks.length) {
           toks.forEach(tk => {
             const sp = document.createElementNS(svgNS, 'tspan');
@@ -2920,10 +2566,10 @@ function renderCFG(flow) {
           });
         } else {
           const g2 = document.createElementNS(svgNS, 'tspan');
-          g2.textContent = codeText;
+          g2.textContent = R.text;
           t.appendChild(g2);
         }
-        g.appendChild(t); i++;
+        g.appendChild(t);
       });
     }
     vp.appendChild(g);

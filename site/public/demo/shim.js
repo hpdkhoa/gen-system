@@ -8,9 +8,9 @@
 (function () {
   'use strict';
 
-  var PROJECTS = { payroll: 1, shop: 1, cobolcraft: 1 };
+  var PROJECTS = { hold: 1, shop: 1, payroll: 1 };
   var params = new URLSearchParams(location.search);
-  var project = PROJECTS[params.get('p')] ? params.get('p') : 'payroll';
+  var project = PROJECTS[params.get('p')] ? params.get('p') : 'hold';
   var BASE = 'data/' + project + '/';
   var realFetch = window.fetch.bind(window);
   var cache = {};

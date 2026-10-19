@@ -192,6 +192,12 @@ func LoadContext(root string) Context {
 	return LoadContextWithOpts(root, LoadContextOpts{})
 }
 
+// maxSourceFileSize is the largest source file the project walk parses. v26.71:
+// raised from 64 KB, which dropped real modules without a word (a 245 KB Python
+// file, a 109 KB Blender script); a file past it is now counted in the scan log
+// as too_large and logged at info level.
+const maxSourceFileSize = 512 * 1024
+
 // LoadContextWithOpts is the explicit variant accepting LoadContextOpts.
 // It performs the same full-tree parse as LoadContext and additionally
 // honours COBOL copybook resolution when opts.CopybookPath (or the
@@ -227,6 +233,7 @@ func LoadContextWithOpts(root string, opts LoadContextOpts) Context {
 		filesParsed     int
 		filesParseFail  int
 		filesNoFrontend int
+		filesTooLarge   int
 	)
 	parseCtx := trace.WithPhase(tctx, "parse")
 
@@ -247,8 +254,9 @@ func LoadContextWithOpts(root string, opts LoadContextOpts) Context {
 		}
 		filesSeen++
 
-		if info.Size() > 64*1024 {
-			trace.Trace(parseCtx, "skip oversized", "file", rel, "size", info.Size())
+		if info.Size() > maxSourceFileSize {
+			filesTooLarge++
+			trace.Info(parseCtx, "skip oversized", "file", rel, "size", info.Size(), "max", maxSourceFileSize)
 			return nil
 		}
 
@@ -316,6 +324,7 @@ func LoadContextWithOpts(root string, opts LoadContextOpts) Context {
 		"parsed", filesParsed,
 		"parse_failed", filesParseFail,
 		"no_frontend", filesNoFrontend,
+		"too_large", filesTooLarge,
 	)
 
 	// ── v23.32: read-only stdlib ingest ───────────────────────

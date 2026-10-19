@@ -58,8 +58,8 @@ func buildJavaMethodCFG(t *testing.T, src, file, recv, name string) *CFG {
 }
 
 // reachesBack reports whether, following Succs, `from` can reach `target`
-// (a cycle). This is the exact back-edge test renderCFG's loopInfo uses to
-// classify a loop header, ported to the block graph.
+// (a cycle). A loop header lies on such a cycle; renderCFG (v26.71) marks the
+// header by the depth-first back edge into it, which needs this cycle to exist.
 func reachesBack(cfg *CFG, from, target int, seen map[int]bool) bool {
 	if seen == nil {
 		seen = map[int]bool{}
@@ -210,9 +210,9 @@ public class T2 {
 }
 
 // ── GOLDEN: loop builds a back-edge (renders as a hexagon) ────────────────
-// renderCFG's loopInfo classifies a header as a loop iff a successor reaches
-// back to it. Assert that cycle exists and the loop condition text survived to
-// a block Cond (the hexagon label).
+// renderCFG classifies a header as a loop when a depth-first back edge enters
+// it, so the loop must form a cycle. Assert that cycle exists and the loop
+// condition text survived to a block Cond (the hexagon label).
 func TestGoldenCFG_Java_LoopBackEdge(t *testing.T) {
 	src := `
 package com.example;
