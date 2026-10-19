@@ -436,6 +436,13 @@ svg.graph .edge-label.case-label { font-weight: 600; fill: var(--amber); font-si
 svg.graph .case-chip { fill: var(--bg-1); stroke: var(--amber); stroke-width: 0.8; opacity: 0.95; }
 svg.graph .cfg-node .more { fill: var(--text-dim); font-family: 'IBM Plex Mono', monospace; font-size: 9px; font-style: italic; }
 .root-ring rect { stroke-width: 2.4 !important; stroke: var(--cyan) !important; }
+.ref-row { display: flex; justify-content: space-between; gap: 8px; padding: 5px 6px; border-radius: 5px; cursor: pointer; font-family: 'IBM Plex Mono', monospace; font-size: 11px; }
+.ref-row:hover { background: var(--bg-2); }
+.ref-row .ref-name { color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ref-row .ref-loc { color: var(--text-dim); flex-shrink: 0; }
+.graph-pane:fullscreen, .graph-pane.pane-max { border-radius: 0; }
+.graph-pane.pane-max { position: fixed; inset: 0; z-index: 10000; }
+.graph-pane:fullscreen > .graph-body, .graph-pane.pane-max > .graph-body { flex: 1; }
 .graph-legend { position: absolute; bottom: 10px; left: 10px; z-index: 5; display: flex; gap: 12px; background: var(--bg-1); border: 1px solid var(--border-2); border-radius: 6px; padding: 5px 10px; font-size: 10px; color: var(--text-dim); }
 .graph-legend span { display: inline-flex; align-items: center; gap: 4px; }
 .graph-legend i { width: 16px; height: 0; border-top: 2px solid currentColor; display: inline-block; }
@@ -994,7 +1001,15 @@ async function renderArchitecture() {
   const resolvedPct = a.edges.total ? Math.round((a.edges.resolved / a.edges.total) * 100) : 0;
   cards.appendChild(buildCard('Symbols indexed', fmt(a.total_symbols), fmt(a.total_files) + ' files'));
   cards.appendChild(buildCard('Languages', (a.languages || []).length, (a.languages || []).slice(0,3).map(l => l.language).join(' · '), 'accent'));
-  cards.appendChild(buildCard('Edge resolution', resolvedPct + '%', fmt(a.edges.resolved) + ' / ' + fmt(a.edges.total) + ' resolved', resolvedPct >= 90 ? 'accent' : 'warn'));
+  // v26.71: lead with the calls into the project's own code; calls into
+  // libraries and builtins resolve only when a runtime is attached.
+  if (a.edges.internal) {
+    const ip = Math.round((a.edges.internal_resolved / a.edges.internal) * 100);
+    cards.appendChild(buildCard('Project calls resolved', ip + '%', fmt(a.edges.internal_resolved) + ' / ' + fmt(a.edges.internal) +
+      ' calls into the project · all calls ' + resolvedPct + '% (' + fmt(a.edges.resolved) + ' / ' + fmt(a.edges.total) + ')', ip >= 90 ? 'accent' : 'warn'));
+  } else {
+    cards.appendChild(buildCard('Edge resolution', resolvedPct + '%', fmt(a.edges.resolved) + ' / ' + fmt(a.edges.total) + ' resolved', resolvedPct >= 90 ? 'accent' : 'warn'));
+  }
   cards.appendChild(buildCard('Entry points', fmt((a.entry_points || []).length), 'mains, handlers, transactions'));
   if (a.provenance && a.provenance.stdlib_symbols > 0) {
     cards.appendChild(buildCard('Into the runtime', fmt(a.provenance.edges_into_stdlib),
@@ -1332,6 +1347,7 @@ async function loadCFGInto(symbolId) {
       el('button', { title: 'Zoom out', onclick: () => cfgSvg._z && cfgSvg._z._zoomOut() }, '−'),
       el('button', { title: 'Actual size (100%)', onclick: () => cfgSvg._z && cfgSvg._z._actual(), style: 'font-size:11px;' }, '1:1'),
       el('button', { title: 'Fit (or double-click canvas)', onclick: () => cfgSvg._z && cfgSvg._z._fit(), style: 'font-size:12px;' }, '⊡'),
+      el('button', { class: 'pane-full-btn', title: 'Full screen (Esc to leave)', onclick: () => togglePaneFull(body.closest('.graph-pane'), cfgSvg), style: 'font-size:12px;' }, '⛶'),
     ]);
     body.appendChild(zc2);
     attachZoom(cfgSvg, body);
@@ -1733,6 +1749,42 @@ function layoutCallgraph(cg) {
 // "opens zoomed in and off-screen" symptom. We poll a handful of frames, stop the
 // moment we get a real fit, and give up quietly after ~1s so a hidden pane never
 // spins.
+// v26.71: a graph pane on the whole screen and back. The browser's full screen
+// API when it allows it (the Studio and the demo are top-level pages); else the
+// pane covers the window (.pane-max) until Esc or the button again. The graph
+// refits on the way in and on the way out.
+function paneFullButtons() {
+  document.querySelectorAll('.pane-full-btn').forEach(b => {
+    const pane = b.closest('.graph-pane');
+    const on = !!pane && (document.fullscreenElement === pane || pane.classList.contains('pane-max'));
+    b.textContent = on ? '✕' : '⛶';
+    b.title = on ? 'Leave full screen (Esc)' : 'Full screen (Esc to leave)';
+  });
+}
+function togglePaneFull(pane, svg) {
+  if (!pane) return;
+  const refit = () => { paneFullButtons(); requestAnimationFrame(() => forceFitWhenSized(svg)); };
+  if (document.fullscreenElement === pane) { document.exitFullscreen().then(refit, refit); return; }
+  if (pane.classList.contains('pane-max')) { pane.classList.remove('pane-max'); refit(); return; }
+  const fallback = () => { pane.classList.add('pane-max'); refit(); };
+  if (pane.requestFullscreen) pane.requestFullscreen().then(refit, fallback);
+  else fallback();
+}
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  const m = document.querySelector('.graph-pane.pane-max');
+  if (!m) return;
+  m.classList.remove('pane-max');
+  paneFullButtons();
+  const s = m.querySelector('svg.graph');
+  if (s) requestAnimationFrame(() => forceFitWhenSized(s));
+});
+// Esc in the browser's full screen leaves it without a click: the glyph follows, the graph refits
+document.addEventListener('fullscreenchange', () => {
+  paneFullButtons();
+  document.querySelectorAll('.graph-pane svg.graph').forEach(s => requestAnimationFrame(() => forceFitWhenSized(s)));
+});
+
 function forceFitWhenSized(svg, tries) {
   tries = tries == null ? 60 : tries;
   if (!svg || !svg._z || typeof svg._z._fit !== 'function') return;
@@ -2984,6 +3036,33 @@ async function selectSymbol(symbolId) {
     el('div', { class: 'k' }, 'Name'),  el('div', { class: 'v' }, kindAndName.split(':').slice(1).join(':')),
   ]));
   right.appendChild(el('button', { class: 'btn', style: 'margin-top:10px;', onclick: () => setRoute('graph', { root: symbolId }) }, 'Open in graph'));
+  loadRefsInto(symbolId);
+}
+// v26.71: References lists the selected symbol's direct callers. The panel was
+// never filled: it kept "Pick a symbol to see callers." with a symbol selected.
+async function loadRefsInto(symbolId) {
+  const box = $('#right-refs');
+  if (!box) return;
+  const seq = (state.refsSeq = (state.refsSeq || 0) + 1);
+  box.className = 'right-empty';
+  box.textContent = 'Loading callers…';
+  try {
+    const cg = await api('/api/present/v23/callgraph?root=' + encodeURIComponent(symbolId) + '&depth=1&direction=callers');
+    if (seq !== state.refsSeq) return;   // another symbol was picked meanwhile
+    const callers = (cg.nodes || []).filter(n => n.symbol_id !== symbolId && n.depth === 1);
+    box.innerHTML = '';
+    if (!callers.length) { box.textContent = 'No caller in the project.'; return; }
+    box.className = '';
+    callers.sort((a, b) => (a.file + a.line).localeCompare(b.file + b.line));
+    callers.forEach(c => {
+      box.appendChild(el('div', { class: 'ref-row', title: c.symbol_id, onclick: () => goToSymbol(c.symbol_id, c.file) }, [
+        el('span', { class: 'ref-name' }, c.name || c.symbol_id),
+        el('span', { class: 'ref-loc' }, fileTail(c.file) + (c.line ? ':' + c.line : '')),
+      ]));
+    });
+  } catch (e) {
+    if (seq === state.refsSeq) { box.className = 'right-empty'; box.textContent = 'Callers unavailable: ' + e.message; }
+  }
 }
 function goToSymbol(symbolId, file) {
   state.selectedFile = file;

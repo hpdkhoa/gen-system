@@ -702,6 +702,9 @@ func formatParams(ps []ast.Parameter) string {
 	for _, p := range ps {
 		name := p.Name
 		typ := p.Type.Name
+		if typ == ast.UnknownType.Name {
+			typ = "" // v26.71: an untyped parameter read "x ?"; the name alone says as much
+		}
 		switch {
 		case name != "" && typ != "":
 			parts = append(parts, name+" "+typ)

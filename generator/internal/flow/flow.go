@@ -807,10 +807,25 @@ func multiWayLabel(n *ast.Node) string {
 	}
 }
 
+// matchesAny reports whether callee matches one of the effect patterns.
+// v26.71: a pattern matches whole name segments, no longer any substring. A
+// package pattern ("os.", "ent.", "net.") must be a segment of its own, at the
+// start or after a dot; a verb ("Exec", "Open", "Get") must start a segment. The
+// substring rule read Python's parent.matrix_world as the ent ORM, pos.lerp as
+// the os package and magnet.pull as the network.
 func matchesAny(callee string, patterns []string) bool {
+	segs := strings.Split(callee, ".")
 	for _, p := range patterns {
-		if strings.Contains(callee, p) {
-			return true
+		if strings.HasSuffix(p, ".") {
+			if strings.HasPrefix(callee, p) || strings.Contains(callee, "."+p) {
+				return true
+			}
+			continue
+		}
+		for _, s := range segs {
+			if strings.HasPrefix(s, p) {
+				return true
+			}
 		}
 	}
 	return false

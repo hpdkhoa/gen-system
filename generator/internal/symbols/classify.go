@@ -56,19 +56,26 @@ type EdgeClassifier struct {
 	// cobolSyms holds the project's COBOL symbols by name, so a COBOL edge
 	// counts as internal only when a symbol it could reach carries the name.
 	cobolSyms map[string][]*Symbol
+	// v26.71: the names a Python obj.f() can reach in the project (methods and
+	// classes), and the import paths already checked against the project files.
+	attrNames map[string]bool
+	pyMods    map[string]bool
 }
 
 // NewEdgeClassifier builds the snapshot.
 func (idx *Index) NewEdgeClassifier() *EdgeClassifier {
 	idx.mu.RLock()
 	defer idx.mu.RUnlock()
-	c := &EdgeClassifier{idx: idx, projectNames: map[string]bool{}, cobolSyms: map[string][]*Symbol{}}
+	c := &EdgeClassifier{idx: idx, projectNames: map[string]bool{}, attrNames: map[string]bool{}, pyMods: map[string]bool{}, cobolSyms: map[string][]*Symbol{}}
 	dirs := map[string]bool{}
 	for _, s := range idx.allSymbols {
 		if s.Provenance != ProvProject || s.Kind == SymImport {
 			continue
 		}
 		c.projectNames[s.Name] = true
+		if s.Kind == SymMethod || s.Kind == SymType {
+			c.attrNames[s.Name] = true
+		}
 		if s.Language == ast.LangCOBOL {
 			c.cobolSyms[s.Name] = append(c.cobolSyms[s.Name], s)
 		}
@@ -100,7 +107,29 @@ func (c *EdgeClassifier) Classify(e CallEdge) (EdgeClass, bool) {
 	}
 	if dot := strings.Index(name, "."); dot >= 0 {
 		if caller, ok := c.idx.allSymbols[e.CallerID]; ok {
-			if importPath := c.idx.resolveImportPath(name[:dot], caller.DefinedIn); importPath != "" && !c.projectPackage(importPath) {
+			importPath := c.idx.resolveImportPath(name[:dot], caller.DefinedIn)
+			if caller.Language == ast.LangPython {
+				// v26.71: a Python call through an import is the project's only
+				// when the module is a project file; obj.f() on anything else calls
+				// an attribute, which only a project method or class can be.
+				if importPath != "" {
+					in, seen := c.pyMods[importPath]
+					if !seen {
+						in = c.idx.pyProjectModule(importPath)
+						c.pyMods[importPath] = in
+					}
+					if in {
+						return EdgeInternal, false
+					}
+					return EdgeExternal, false
+				}
+				bare := name[strings.LastIndex(name, ".")+1:]
+				if c.attrNames[bare] {
+					return EdgeInternal, false
+				}
+				return EdgeExternal, false
+			}
+			if importPath != "" && !c.projectPackage(importPath) {
 				return EdgeExternal, false
 			}
 		}

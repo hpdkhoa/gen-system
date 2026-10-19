@@ -45,6 +45,13 @@ DEMO_BODY = '''<div id="demo-bar">
   document.querySelectorAll('#demo-bar [data-p]').forEach(function (a) {
     if (a.getAttribute('data-p') === p) a.classList.add('on');
   });
+  // The switcher sits in the Studio's top bar, so it covers no graph legend.
+  document.addEventListener('DOMContentLoaded', function () {
+    var bar = document.getElementById('demo-bar');
+    var top = document.getElementById('topbar');
+    var right = top && top.querySelector('.topbar-right');
+    if (bar && right) { top.insertBefore(bar, right); bar.classList.add('in-topbar'); }
+  });
 })();
 </script>
 '''

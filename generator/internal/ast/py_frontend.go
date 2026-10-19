@@ -302,63 +302,90 @@ def analyze(source, filepath):
 
     nodes = []
 
-    for node in ast.walk(tree):
-        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-            params = []
-            for arg in node.args.args:
-                params.append({
-                    'name': arg.arg,
-                    'type': type_annotation(arg.annotation) if arg.annotation else {'name': ''}
+    # v26.71: functions and classes are walked with their owner. A def in a
+    # class body is that class's method ('class'); a def inside a function is
+    # that function's helper ('outer' names the enclosing path). Before, ast.walk
+    # reported every def as a module function with its bare name: a method also
+    # got a name-only stub from its class (two symbols, the stub with no body),
+    # and two helpers called err in different functions shared one ID.
+    def function_node(node, cls, outer):
+        params = []
+        for arg in node.args.args:
+            params.append({
+                'name': arg.arg,
+                'type': type_annotation(arg.annotation) if arg.annotation else {'name': ''}
+            })
+        if node.args.vararg:
+            params.append({'name': '*' + node.args.vararg.arg, 'variadic': True, 'type': {'name': ''}})
+        returns = type_annotation(node.returns) if node.returns else {'name': ''}
+        doc = ast.get_docstring(node) or ''
+        return {
+            'kind': 'function',
+            'name': node.name,
+            'class': cls or '',
+            'outer': outer or '',
+            'async': isinstance(node, ast.AsyncFunctionDef),
+            'line': node.lineno,
+            'col': node.col_offset,
+            'end_line': node.end_lineno if hasattr(node, 'end_lineno') else node.lineno,
+            'params': params,
+            'returns': returns,
+            'doc': doc,
+            'exported': not node.name.startswith('_'),
+            'body_nodes': extract_body_nodes(node.body),
+        }
+
+    def class_node(node):
+        fields = []
+        for item in node.body:
+            if isinstance(item, ast.AnnAssign) and isinstance(item.target, ast.Name):
+                fields.append({
+                    'name': item.target.id,
+                    'type': type_annotation(item.annotation),
+                    'optional': False,
+                    'exported': not item.target.id.startswith('_'),
                 })
-            if node.args.vararg:
-                params.append({'name': '*' + node.args.vararg.arg, 'variadic': True, 'type': {'name': ''}})
-            returns = type_annotation(node.returns) if node.returns else {'name': ''}
-            doc = ast.get_docstring(node) or ''
-            body_nodes = extract_body_nodes(node.body)
-            nodes.append({
-                'kind': 'function',
-                'name': node.name,
-                'async': isinstance(node, ast.AsyncFunctionDef),
-                'line': node.lineno,
-                'col': node.col_offset,
-                'end_line': node.end_lineno if hasattr(node, 'end_lineno') else node.lineno,
-                'params': params,
-                'returns': returns,
-                'doc': doc,
-                'exported': not node.name.startswith('_'),
-                'body_nodes': body_nodes,
-            })
+        bases = [safe_name(b) for b in node.bases]
+        doc = ast.get_docstring(node) or ''
+        return {
+            'kind': 'class',
+            'name': node.name,
+            'line': node.lineno,
+            'col': node.col_offset,
+            'end_line': node.end_lineno if hasattr(node, 'end_lineno') else node.lineno,
+            'bases': bases,
+            'fields': fields,
+            'doc': doc,
+            'exported': not node.name.startswith('_'),
+        }
 
-        elif isinstance(node, ast.ClassDef):
-            fields = []
-            methods = []
-            for item in node.body:
-                if isinstance(item, (ast.FunctionDef, ast.AsyncFunctionDef)):
-                    methods.append(item.name)
-                elif isinstance(item, ast.AnnAssign):
-                    if isinstance(item.target, ast.Name):
-                        fields.append({
-                            'name': item.target.id,
-                            'type': type_annotation(item.annotation),
-                            'optional': False,
-                            'exported': not item.target.id.startswith('_'),
-                        })
-            bases = [safe_name(b) for b in node.bases]
-            doc = ast.get_docstring(node) or ''
-            nodes.append({
-                'kind': 'class',
-                'name': node.name,
-                'line': node.lineno,
-                'col': node.col_offset,
-                'end_line': node.end_lineno if hasattr(node, 'end_lineno') else node.lineno,
-                'bases': bases,
-                'fields': fields,
-                'methods': methods,
-                'doc': doc,
-                'exported': not node.name.startswith('_'),
-            })
+    def walk_defs(node, ctx):
+        # ctx: ('module', '') | ('class', class name) | ('func', the enclosing path)
+        for child in ast.iter_child_nodes(node):
+            if isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                if ctx[0] == 'class':
+                    nodes.append(function_node(child, ctx[1], ''))
+                    path = ctx[1] + '.' + child.name
+                elif ctx[0] == 'func':
+                    nodes.append(function_node(child, '', ctx[1]))
+                    path = ctx[1] + '.' + child.name
+                else:
+                    nodes.append(function_node(child, '', ''))
+                    path = child.name
+                walk_defs(child, ('func', path))
+            elif isinstance(child, ast.ClassDef):
+                nodes.append(class_node(child))
+                walk_defs(child, ('class', child.name))
+            else:
+                walk_defs(child, ctx)
 
-        elif isinstance(node, ast.Import):
+    walk_defs(tree, ('module', ''))
+
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+            continue
+
+        if isinstance(node, ast.Import):
             for alias in node.names:
                 nodes.append({
                     'kind': 'import',
@@ -504,7 +531,8 @@ type pyNodeJSON struct {
 	Exported    bool             `json:"exported"`
 	Bases       []string         `json:"bases"`
 	Fields      []pyFieldJSON    `json:"fields"`
-	Methods     []string         `json:"methods"`
+	Class       string           `json:"class"` // v26.71: the class a method belongs to
+	Outer       string           `json:"outer"` // v26.71: the enclosing function path of a nested def
 	Path        string           `json:"path"`
 	Alias       string           `json:"alias"`
 	ImportNames []string         `json:"import_names"`
@@ -686,6 +714,7 @@ func pyParseOutput(filePath string, raw []byte) ([]*Node, []ParseError) {
 				ID:         "func:" + jn.Name,
 				Kind:       NodeFunction,
 				Name:       jn.Name,
+				Program:    jn.Outer, // a nested def: SymbolName is outer.name, so each has its own ID
 				Language:   LangPython,
 				Span:       span,
 				Exported:   jn.Exported,
@@ -712,6 +741,20 @@ func pyParseOutput(filePath string, raw []byte) ([]*Node, []ParseError) {
 			}}
 			children = append(children, pyBodyToNodes(jn.BodyNodes)...)
 			n.Children = children
+			switch {
+			case jn.Class != "":
+				// v26.71: a method, with its body, under the class as receiver (as
+				// Go emits methods). It was a module function plus a body-less stub.
+				// self or cls is the receiver, not an input.
+				if len(n.Params) > 0 && (n.Params[0].Name == "self" || n.Params[0].Name == "cls") {
+					n.Params = n.Params[1:]
+				}
+				n.Kind = NodeMethod
+				n.ID = "method:" + jn.Class + "." + jn.Name
+				n.Receiver = &TypeRef{Name: jn.Class}
+			case jn.Outer != "":
+				n.ID = "func:" + jn.Outer + "." + jn.Name
+			}
 			nodes = append(nodes, n)
 
 		case "class":
@@ -738,25 +781,26 @@ func pyParseOutput(filePath string, raw []byte) ([]*Node, []ParseError) {
 					Exported: f.Exported,
 				})
 			}
-			// Methods listed by name only
-			for _, mname := range jn.Methods {
-				n.Children = append(n.Children, &Node{
-					ID:       "method:" + jn.Name + "." + mname,
-					Kind:     NodeMethod,
-					Name:     mname,
-					Language: LangPython,
-				})
-			}
+			// v26.71: methods arrive as their own nodes with the class as receiver;
+			// the name-only children this added became body-less duplicate symbols.
 			nodes = append(nodes, n)
 
 		case "import":
+			// v26.71: a from-import's path ends in the name it imports, so
+			// `from weaponlab.blueprint import store` is weaponlab.blueprint.store:
+			// the resolver can find the module's file, and two names from one
+			// module no longer share the ID import:weaponlab.blueprint.
+			path := jn.Path
+			if len(jn.ImportNames) > 0 {
+				path = strings.TrimPrefix(strings.Trim(jn.Path, ".")+"."+jn.ImportNames[0], ".")
+			}
 			n := &Node{
-				ID:          "import:" + jn.Path,
+				ID:          "import:" + path,
 				Kind:        NodeImport,
 				Name:        jn.Name,
 				Language:    LangPython,
 				Span:        span,
-				ImportPath:  jn.Path,
+				ImportPath:  path,
 				ImportAlias: jn.Alias,
 				ImportNames: jn.ImportNames,
 			}

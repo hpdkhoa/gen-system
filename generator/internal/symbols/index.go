@@ -228,6 +228,11 @@ func (idx *Index) resolveEdgeLocked(e CallEdge) *Symbol {
 	}
 	caller := idx.allSymbols[e.CallerID]
 	dot := strings.Index(name, ".")
+	if dot >= 0 && caller != nil && caller.Language == ast.LangPython {
+		if mod := idx.resolveImportPath(name[:dot], caller.DefinedIn); mod != "" {
+			return idx.resolvePyImportLocked(mod, name[dot+1:])
+		}
+	}
 	if dot >= 0 && caller != nil {
 		if importPath := idx.resolveImportPath(name[:dot], caller.DefinedIn); importPath != "" {
 			// json.NewDecoder(r).Decode calls a method on a value the package
@@ -255,6 +260,121 @@ func cobolTarget(s, caller *Symbol) bool {
 		return s.DefinedIn == caller.DefinedIn && s.Program == caller.Program
 	}
 	return false
+}
+
+// pyModuleFiles returns the file endings a dotted Python module path maps to:
+// weaponlab.blueprint.store is .../weaponlab/blueprint/store.py or its package's
+// __init__.py (v26.71).
+func pyModuleFiles(mod string) []string {
+	p := strings.ReplaceAll(strings.Trim(mod, "."), ".", "/")
+	if p == "" {
+		return nil
+	}
+	return []string{"/" + p + ".py", "/" + p + "/__init__.py"}
+}
+
+func pyInFiles(definedIn string, ends []string) bool {
+	d := "/" + strings.TrimPrefix(filepath.ToSlash(definedIn), "/")
+	for _, e := range ends {
+		if strings.HasSuffix(d, e) {
+			return true
+		}
+	}
+	return false
+}
+
+// resolvePyImportLocked resolves rest (f, or Class.method) through the import
+// mod of a Python file (v26.71): when mod is a project module, a function or
+// class of that file named f, or the method Class.method in it; when mod names
+// a class imported from a module (from m import Timeline; Timeline.build), the
+// method of that class in m's file. nil for a module outside the project.
+func (idx *Index) resolvePyImportLocked(mod, rest string) *Symbol {
+	segs := strings.Split(rest, ".")
+	try := func(files []string, qual string, kinds ...SymbolKind) *Symbol {
+		var hits []*Symbol
+		for file, tbl := range idx.tables {
+			if !pyInFiles(file, files) {
+				continue
+			}
+			for _, s := range tbl.All() {
+				if s.Provenance != ProvProject || pyNested(s) {
+					continue
+				}
+				want := s.Name
+				if strings.Contains(qual, ".") {
+					want = s.QualName
+				}
+				if want != qual {
+					continue
+				}
+				for _, k := range kinds {
+					if s.Kind == k {
+						hits = append(hits, s)
+						break
+					}
+				}
+			}
+		}
+		if len(hits) == 0 {
+			return nil
+		}
+		sort.Slice(hits, func(i, j int) bool { return hits[i].ID < hits[j].ID })
+		return hits[0]
+	}
+	files := pyModuleFiles(mod)
+	switch len(segs) {
+	case 1:
+		if s := try(files, segs[0], SymFunc, SymType); s != nil {
+			return s
+		}
+	case 2:
+		if s := try(files, segs[0]+"."+segs[1], SymMethod); s != nil {
+			return s
+		}
+	}
+	// mod is a class imported from a module: rest is that class's method
+	if dot := strings.LastIndex(mod, "."); dot > 0 && len(segs) == 1 {
+		return try(pyModuleFiles(mod[:dot]), mod[dot+1:]+"."+segs[0], SymMethod)
+	}
+	return nil
+}
+
+// pyProjectModule reports whether a dotted Python import path names a project
+// file, or a class or function in one (v26.71).
+func (idx *Index) pyProjectModule(mod string) bool {
+	ends := pyModuleFiles(mod)
+	if dot := strings.LastIndex(mod, "."); dot > 0 {
+		ends = append(ends, pyModuleFiles(mod[:dot])...)
+	}
+	for file, tbl := range idx.tables {
+		if !pyInFiles(file, ends) {
+			continue
+		}
+		for _, s := range tbl.All() {
+			if s.Provenance == ProvProject {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// pyNested reports whether s is a Python def inside a function (v26.71): its
+// Program holds the enclosing path, as in func:HoldMixin._fit_thumb.err.
+func pyNested(s *Symbol) bool {
+	return s.Language == ast.LangPython && s.Kind == SymFunc && s.Program != ""
+}
+
+// pyInScope reports whether a nested Python def can be what caller calls: a
+// plain call made inside the function that defines it (or inside another def
+// nested there). A nested def is no attribute of anything, so a receiver call
+// such as touching.add(k) never names it; matching by bare name linked set.add
+// and KDTree.find to helpers called add and find in unrelated methods.
+func pyInScope(s, caller *Symbol, receiver bool) bool {
+	if receiver || caller == nil || caller.DefinedIn != s.DefinedIn {
+		return false
+	}
+	return caller.QualName == s.Program || strings.HasPrefix(caller.QualName, s.Program+".")
 }
 
 // goBuiltins are the predeclared Go functions. A call to one names no symbol in
@@ -290,7 +410,7 @@ func (idx *Index) resolveUnderImportLocked(importPath, bare string, allowMethods
 	}
 	var candidates []scored
 	for _, s := range idx.allSymbols {
-		if s.Name != bare || !callable(s.Kind) || (s.Kind == SymMethod && !allowMethods) {
+		if s.Name != bare || !callable(s.Kind) || (s.Kind == SymMethod && !allowMethods) || pyNested(s) {
 			continue
 		}
 		if n := importMatchScore(s.DefinedIn, importPath); n > 0 {
@@ -557,6 +677,16 @@ func (idx *Index) resolveByNameForLocked(name string, caller *Symbol, receiver b
 			continue
 		}
 		if cobolCaller && !s.Provenance.IsExternal() && !cobolTarget(s, caller) {
+			continue
+		}
+		if pyNested(s) && !pyInScope(s, caller, receiver) {
+			continue
+		}
+		// v26.71: obj.add() in Python calls an attribute of an object: a method,
+		// or a class reached through it, never a module function. A module's
+		// function is reached through its import (resolveUnderImportLocked), so
+		// set.add and KDTree.find no longer link to a project def add or find.
+		if receiver && caller != nil && caller.Language == ast.LangPython && s.Kind == SymFunc {
 			continue
 		}
 		if s.Provenance.IsExternal() {

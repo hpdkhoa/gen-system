@@ -110,6 +110,13 @@ type UnknownStatGroup struct {
 type EdgeStats struct {
 	Total    int `json:"total"`
 	Resolved int `json:"resolved"`
+	// v26.71: the calls aimed at the project's own code (symbols.EdgeClassifier,
+	// the rule the benchmark's internal recall uses) and how many of them
+	// resolve. Total also counts calls into libraries and builtins, which cannot
+	// resolve while no runtime is attached, so the share of Total alone read as
+	// "the parser understood 29%" for Python code that calls numpy and Blender.
+	Internal         int `json:"internal"`
+	InternalResolved int `json:"internal_resolved"`
 }
 
 func (s *Server) handleArchitectureV23(w http.ResponseWriter, r *http.Request) {
@@ -217,12 +224,19 @@ func (s *Server) handleArchitectureV23(w http.ResponseWriter, r *http.Request) {
 	// (which brings its own internal edges) does not move these numbers. Among
 	// project-caller edges, EdgesIntoStdlib is those resolving into the runtime.
 	edges := idx.AllCallEdges()
+	classifier := idx.NewEdgeClassifier()
 	for _, e := range edges {
 		caller, ok := idx.ByID(e.CallerID)
 		if !ok || caller == nil || caller.Provenance.IsExternal() {
 			continue
 		}
 		resp.EdgeStats.Total++
+		if class, _ := classifier.Classify(e); class == symbols.EdgeInternal {
+			resp.EdgeStats.Internal++
+			if e.CalleeID != "" {
+				resp.EdgeStats.InternalResolved++
+			}
+		}
 		if e.CalleeID != "" {
 			resp.EdgeStats.Resolved++
 			if callee, ok := idx.ByID(e.CalleeID); ok && callee != nil && callee.Provenance.IsExternal() {
