@@ -58,6 +58,7 @@ var coreUnderstandPackages = []string{
 	"github.com/hpdkhoa/gen-system/generator/internal/context",
 	"github.com/hpdkhoa/gen-system/generator/internal/trace",
 	"github.com/hpdkhoa/gen-system/generator/internal/presentation",
+	"github.com/hpdkhoa/gen-system/generator/internal/review",
 }
 
 func deps(t *testing.T, target string) ([]string, bool) {
@@ -106,4 +107,9 @@ func TestUnderstandServerHasNoGenDeps(t *testing.T) {
 func TestUnderstandMCPHasNoGenDeps(t *testing.T) {
 	assertNoGenerationDeps(t, "github.com/hpdkhoa/gen-system/generator/cmd/understand-mcp")
 	assertNoGenerationDeps(t, "github.com/hpdkhoa/gen-system/generator/internal/mcp")
+}
+
+// TestUnderstandReviewHasNoGenDeps: cmd/understand-review reviews a change with parser facts only.
+func TestUnderstandReviewHasNoGenDeps(t *testing.T) {
+	assertNoGenerationDeps(t, "github.com/hpdkhoa/gen-system/generator/cmd/understand-review")
 }

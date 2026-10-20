@@ -1,4 +1,4 @@
-.PHONY: server cli build-all mcp
+.PHONY: server cli build-all mcp review
 
 # Start the web studio server (serves UI + API on :28080)
 server:
@@ -12,6 +12,10 @@ cli:
 # Build the Understand MCP server (stdio; register it with your agent)
 mcp:
 	cd generator && go build -o ../understand-mcp ./cmd/understand-mcp && cd ..
+
+# Build the change reviewer (Markdown or JSON; --fail-on break for CI)
+review:
+	cd generator && go build -o ../understand-review ./cmd/understand-review && cd ..
 
 # Build both binaries
 build-all: cli server

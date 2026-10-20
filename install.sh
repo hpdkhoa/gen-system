@@ -24,7 +24,7 @@
 #
 # Usage:
 #   sudo ./install.sh                      # default install (full/internal)
-#   sudo ./install.sh --understand         # enterprise: only understand-server
+#   sudo ./install.sh --understand         # enterprise: only the read only tools (understand-server, -mcp, -review)
 #                                          #   (UI embedded). Forces no Ollama /
 #                                          #   no model / no Postgres: a clean
 #                                          #   air-gapped appliance.
@@ -497,9 +497,12 @@ if [[ $UNDERSTAND_ONLY -eq 1 ]]; then
         -o "${INSTALL_PREFIX}/bin/understand-server" ./generator/cmd/understand-server
     CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" \
         -o "${INSTALL_PREFIX}/bin/understand-mcp" ./generator/cmd/understand-mcp
-    chmod 755 "${INSTALL_PREFIX}/bin/understand-server" "${INSTALL_PREFIX}/bin/understand-mcp"
+    CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" \
+        -o "${INSTALL_PREFIX}/bin/understand-review" ./generator/cmd/understand-review
+    chmod 755 "${INSTALL_PREFIX}/bin/understand-server" "${INSTALL_PREFIX}/bin/understand-mcp" "${INSTALL_PREFIX}/bin/understand-review"
     echo "      built ${INSTALL_PREFIX}/bin/understand-server (enterprise, UI embedded)"
     echo "      built ${INSTALL_PREFIX}/bin/understand-mcp (the same engine for MCP agents)"
+    echo "      built ${INSTALL_PREFIX}/bin/understand-review (reviews a change)"
 else
     CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" \
         -o "${INSTALL_PREFIX}/bin/gen" ./generator/cmd/gen
@@ -509,12 +512,16 @@ else
         -o "${INSTALL_PREFIX}/bin/understand-server" ./generator/cmd/understand-server
     CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" \
         -o "${INSTALL_PREFIX}/bin/understand-mcp" ./generator/cmd/understand-mcp
+    CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" \
+        -o "${INSTALL_PREFIX}/bin/understand-review" ./generator/cmd/understand-review
     chmod 755 "${INSTALL_PREFIX}/bin/gen" "${INSTALL_PREFIX}/bin/gen-server" \
-              "${INSTALL_PREFIX}/bin/understand-server" "${INSTALL_PREFIX}/bin/understand-mcp"
+              "${INSTALL_PREFIX}/bin/understand-server" "${INSTALL_PREFIX}/bin/understand-mcp" \
+              "${INSTALL_PREFIX}/bin/understand-review"
     echo "      built ${INSTALL_PREFIX}/bin/gen"
     echo "      built ${INSTALL_PREFIX}/bin/gen-server"
     echo "      built ${INSTALL_PREFIX}/bin/understand-server"
     echo "      built ${INSTALL_PREFIX}/bin/understand-mcp"
+    echo "      built ${INSTALL_PREFIX}/bin/understand-review"
 fi
 
 # Copy the web/ assets next to the binary so the dev gen-server can serve them.

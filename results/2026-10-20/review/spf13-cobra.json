@@ -1,0 +1,3516 @@
+{
+  "repo": "K:\\genbench-repos\\spf13-cobra",
+  "commit": "adbc8813901bba65827259daa8e22ff94ec1f30e",
+  "date": "2026-10-20",
+  "go_functions": 264,
+  "load_seconds": 0.4583343,
+  "type_errors_before_any_edit": 0,
+  "scores": {
+    "branch": {
+      "cases": 20,
+      "pass": 20,
+      "tp": 20,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1,
+      "recall": 1,
+      "median_seconds": 0.1626222
+    },
+    "control": {
+      "cases": 100,
+      "pass": 100,
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "precision": 0,
+      "recall": 0,
+      "median_seconds": 0.1624994
+    },
+    "db": {
+      "cases": 20,
+      "pass": 20,
+      "tp": 20,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1,
+      "recall": 1,
+      "median_seconds": 0.1624029
+    },
+    "fs": {
+      "cases": 19,
+      "pass": 19,
+      "tp": 19,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1,
+      "recall": 1,
+      "median_seconds": 0.1624658
+    },
+    "network": {
+      "cases": 20,
+      "pass": 20,
+      "tp": 20,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1,
+      "recall": 1,
+      "median_seconds": 0.1625805
+    },
+    "remove": {
+      "cases": 20,
+      "pass": 18,
+      "tp": 91,
+      "fp": 4,
+      "fn": 2,
+      "precision": 0.9578947368421052,
+      "recall": 0.978494623655914,
+      "median_seconds": 0.1606013
+    },
+    "signature": {
+      "cases": 20,
+      "pass": 19,
+      "tp": 91,
+      "fp": 2,
+      "fn": 2,
+      "precision": 0.978494623655914,
+      "recall": 0.978494623655914,
+      "median_seconds": 0.1627256
+    }
+  },
+  "coverage": {
+    "functions": 264,
+    "covered": 232,
+    "go_test_seconds": 9.96852,
+    "by_hops": {
+      "1": {
+        "untested_and_not_covered": 31,
+        "untested_but_covered": 129,
+        "reached_but_not_covered": 1,
+        "reached_and_covered": 103,
+        "precision": 0.19375,
+        "recall": 0.96875,
+        "agreement": 0.5075757575757576
+      },
+      "10": {
+        "untested_and_not_covered": 29,
+        "untested_but_covered": 18,
+        "reached_but_not_covered": 3,
+        "reached_and_covered": 214,
+        "precision": 0.6170212765957447,
+        "recall": 0.90625,
+        "agreement": 0.9204545454545454
+      },
+      "3": {
+        "untested_and_not_covered": 29,
+        "untested_but_covered": 37,
+        "reached_but_not_covered": 3,
+        "reached_and_covered": 195,
+        "precision": 0.4393939393939394,
+        "recall": 0.90625,
+        "agreement": 0.8484848484848485
+      },
+      "6": {
+        "untested_and_not_covered": 29,
+        "untested_but_covered": 18,
+        "reached_but_not_covered": 3,
+        "reached_and_covered": 214,
+        "precision": 0.6170212765957447,
+        "recall": 0.90625,
+        "agreement": 0.9204545454545454
+      },
+      "99": {
+        "untested_and_not_covered": 29,
+        "untested_but_covered": 18,
+        "reached_but_not_covered": 3,
+        "reached_and_covered": 214,
+        "precision": 0.6170212765957447,
+        "recall": 0.90625,
+        "agreement": 0.9204545454545454
+      }
+    },
+    "disagree_at_3_hops": [
+      "says tested, but not covered|flagCompError.Error|completions.go:52|method",
+      "says tested, but not covered|Command.HasFlags|command.go:1801|method",
+      "says untested, but covered|Command.AllChildCommandsHaveGroup|command.go:1376|method",
+      "says untested, but covered|sortedKeys|flag_groups.go:209|func",
+      "says untested, but covered|defaultUsageFunc|command.go:1974|func",
+      "says untested, but covered|Command.HasAvailableInheritedFlags|command.go:1839|method",
+      "says untested, but covered|findFlag|completions.go:932|func",
+      "says untested, but covered|NoFileCompletions|completions.go:151|func",
+      "says untested, but covered|processFlagForGroupAnnotation|flag_groups.go:121|func",
+      "says tested, but not covered|Command.GenPowerShellCompletionWithDesc|powershell_completions.go:348|method",
+      "says untested, but covered|defaultHelpFunc|command.go:2047|func",
+      "says untested, but covered|defaultLinkHandler|doc/rest_docs.go:52|func",
+      "says untested, but covered|NoArgs|args.go:42|func",
+      "says untested, but covered|defaultVersionFunc|command.go:2068|func",
+      "says untested, but covered|hasAllFlags|flag_groups.go:111|func",
+      "says untested, but covered|Command.HasAvailableLocalFlags|command.go:1833|method",
+      "says untested, but covered|OnlyValidArgs|args.go:51|func",
+      "says untested, but covered|preExecHook|command_win.go:30|func",
+      "says untested, but covered|Command.getUsageTemplateFunc|command.go:464|method",
+      "says untested, but covered|NoDuplicateArgs|args.go:69|func",
+      "says untested, but covered|writeShortFlag|bash_completions.go:497|func",
+      "says untested, but covered|Command.SuggestionsFor|command.go:863|method",
+      "says untested, but covered|Command.NamePadding|command.go:583|method",
+      "says untested, but covered|Command.Groups|command.go:1371|method",
+      "says untested, but covered|ArbitraryArgs|args.go:82|func",
+      "says untested, but covered|Command.HasHelpSubCommands|command.go:1648|method",
+      "says untested, but covered|validateExclusiveFlagGroups|flag_groups.go:188|func",
+      "says untested, but covered|writeFlagHandler|bash_completions.go:459|func",
+      "says untested, but covered|writeLocalNonPersistentFlag|bash_completions.go:523|func",
+      "says untested, but covered|validateRequiredFlagGroups|flag_groups.go:144|func",
+      "says untested, but covered|validateOneRequiredFlagGroups|flag_groups.go:167|func",
+      "says untested, but covered|nonCompletableFlag|bash_completions.go:696|func",
+      "says untested, but covered|writeFlag|bash_completions.go:508|func",
+      "says untested, but covered|Command.CommandPathPadding|command.go:573|method",
+      "says untested, but covered|Command.HasPersistentFlags|command.go:1806|method",
+      "says untested, but covered|writeCmdAliases|bash_completions.go:629|func",
+      "says untested, but covered|trimRightSpace|cobra.go:159|func",
+      "says untested, but covered|Command.HasExample|command.go:1591|method",
+      "says untested, but covered|prepareCustomAnnotationsForFlags|bash_completions.go:536|func",
+      "says untested, but covered|CompDebug|completions.go:955|func"
+    ]
+  },
+  "history": [
+    {
+      "commit": "adbc881",
+      "subject": "fix: resolve macOS test link failure and update lint rules (#2429)",
+      "files": 3,
+      "functions": 0,
+      "points": {},
+      "seconds": 0.4388692
+    },
+    {
+      "commit": "ad460ea",
+      "subject": "Add cobra unique args validator (#2397)",
+      "files": 3,
+      "functions": 6,
+      "points": {
+        "size": 2,
+        "test": 1
+      },
+      "seconds": 0.4802129
+    },
+    {
+      "commit": "746ef07",
+      "subject": "fix: prevent completions from mutating os.Args via append side effect (#2356)",
+      "files": 2,
+      "functions": 2,
+      "points": {
+        "size": 1
+      },
+      "seconds": 0.5396544
+    },
+    {
+      "commit": "f2878ba",
+      "subject": "Ignore the linter error (#2390)",
+      "files": 1,
+      "functions": 1,
+      "points": {
+        "test": 1
+      },
+      "seconds": 0.5026229
+    },
+    {
+      "commit": "85c12c2",
+      "subject": "projects_using_cobra: add Ollama (#2389)",
+      "files": 1,
+      "functions": 0,
+      "points": {},
+      "seconds": 0.462387
+    },
+    {
+      "commit": "61968e8",
+      "subject": "fix: quote args in fish shell completion (#2285)",
+      "files": 1,
+      "functions": 1,
+      "points": {},
+      "seconds": 0.4589427
+    },
+    {
+      "commit": "10d4b48",
+      "subject": "perf: Loop over the bash variable directly instead of starting subprocesses. (#2333)",
+      "files": 1,
+      "functions": 1,
+      "points": {},
+      "seconds": 0.4543466
+    },
+    {
+      "commit": "88b30ab",
+      "subject": "chore: Migrate from gopkg.in/yaml.v3 to go.yaml.in/yaml/v3 (#2336)",
+      "files": 3,
+      "functions": 0,
+      "points": {},
+      "seconds": 0.4506022
+    },
+    {
+      "commit": "346d408",
+      "subject": "fix: actions/setup-go v6 (#2337)",
+      "files": 1,
+      "functions": 0,
+      "points": {},
+      "seconds": 0.4432409
+    },
+    {
+      "commit": "fc81d20",
+      "subject": "refactor: change minUsagePadding from var to const (#2325)",
+      "files": 1,
+      "functions": 0,
+      "points": {},
+      "seconds": 0.53196
+    },
+    {
+      "commit": "117698a",
+      "subject": "refactor: replace several vars with consts (#2328)",
+      "files": 1,
+      "functions": 0,
+      "points": {},
+      "seconds": 0.5623645
+    },
+    {
+      "commit": "e2dd29d",
+      "subject": "Add documentation for repeated flags functionality (#2316)",
+      "files": 1,
+      "functions": 0,
+      "points": {},
+      "seconds": 0.4489289
+    },
+    {
+      "commit": "0629892",
+      "subject": "Fix linter (#2327)",
+      "files": 1,
+      "functions": 0,
+      "points": {},
+      "seconds": 0.4121989
+    },
+    {
+      "commit": "7da941c",
+      "subject": "chore: Bump pflag to v1.0.9 (#2305)",
+      "files": 2,
+      "functions": 0,
+      "points": {},
+      "seconds": 0.4374891
+    },
+    {
+      "commit": "51d6751",
+      "subject": "Bump pflag to 1.0.8 (#2303)",
+      "files": 3,
+      "functions": 1,
+      "points": {},
+      "seconds": 0.5490185
+    },
+    {
+      "commit": "3f3b818",
+      "subject": "Update README.md with new logo",
+      "files": 1,
+      "functions": 0,
+      "points": {},
+      "seconds": 0.46131
+    },
+    {
+      "commit": "dcaf42e",
+      "subject": "Add Periscope to the list of projects using Cobra (#2299)",
+      "files": 1,
+      "functions": 0,
+      "points": {},
+      "seconds": 0.4174884
+    },
+    {
+      "commit": "6dec1ae",
+      "subject": "The default ShellCompDirective can be customized for a command and its subcommands (#2238)",
+      "files": 3,
+      "functions": 3,
+      "points": {
+        "size": 1
+      },
+      "seconds": 0.5331624
+    },
+    {
+      "commit": "c8289c1",
+      "subject": "chore(golangci-lint): add some exclusion presets",
+      "files": 1,
+      "functions": 0,
+      "points": {},
+      "seconds": 0.4715841
+    },
+    {
+      "commit": "4af7b64",
+      "subject": "refactor: apply golangci-lint autofixes, work around false positives",
+      "files": 6,
+      "functions": 7,
+      "points": {},
+      "seconds": 0.6071662
+    }
+  ],
+  "cases": [
+    {
+      "kind": "signature",
+      "function": "Command.ContainsGroup",
+      "file": "command.go",
+      "truth": [
+        "command.go:Command.checkCommandGroups"
+      ],
+      "found": [
+        "command.go:Command.checkCommandGroups"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.175126
+    },
+    {
+      "kind": "signature",
+      "function": "Command.DisplayName",
+      "file": "command.go",
+      "truth": [
+        "command.go:Command.CommandPath",
+        "command.go:Command.Flags",
+        "command.go:Command.InheritedFlags",
+        "command.go:Command.InitDefaultHelpCmd",
+        "command.go:Command.InitDefaultHelpFlag",
+        "command.go:Command.InitDefaultVersionFlag",
+        "command.go:Command.LocalFlags",
+        "command.go:Command.LocalNonPersistentFlags",
+        "command.go:Command.PersistentFlags",
+        "command.go:Command.ResetFlags",
+        "command.go:Command.UseLine",
+        "command.go:Command.updateParentsPflags",
+        "command.go:defaultVersionFunc"
+      ],
+      "found": [
+        "command.go:Command.CommandPath",
+        "command.go:Command.Flags",
+        "command.go:Command.InheritedFlags",
+        "command.go:Command.InitDefaultHelpCmd",
+        "command.go:Command.InitDefaultHelpFlag",
+        "command.go:Command.InitDefaultVersionFlag",
+        "command.go:Command.LocalFlags",
+        "command.go:Command.LocalNonPersistentFlags",
+        "command.go:Command.PersistentFlags",
+        "command.go:Command.ResetFlags",
+        "command.go:Command.UseLine",
+        "command.go:Command.updateParentsPflags",
+        "command.go:defaultVersionFunc"
+      ],
+      "tp": 13,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1649445
+    },
+    {
+      "kind": "signature",
+      "function": "Command.InheritedFlags",
+      "file": "command.go",
+      "truth": [
+        "bash_completions.go:writeFlags",
+        "command.go:Command.HasAvailableInheritedFlags",
+        "command.go:Command.HasInheritedFlags",
+        "command.go:defaultUsageFunc",
+        "command_test.go:TestChildFlagShadowsParentPersistentFlag",
+        "command_test.go:TestNormPassedOnInherited",
+        "completions.go:Command.getCompletions",
+        "completions.go:completeRequireFlags",
+        "completions.go:findFlag",
+        "doc/man_docs.go:manPrintOptions",
+        "doc/md_docs.go:printOptions",
+        "doc/rest_docs.go:printOptionsReST",
+        "doc/yaml_docs.go:GenYamlCustom"
+      ],
+      "found": [
+        "bash_completions.go:writeFlags",
+        "command.go:Command.HasAvailableInheritedFlags",
+        "command.go:Command.HasInheritedFlags",
+        "command.go:defaultUsageFunc",
+        "command_test.go:TestChildFlagShadowsParentPersistentFlag",
+        "command_test.go:TestNormPassedOnInherited",
+        "completions.go:Command.getCompletions",
+        "completions.go:completeRequireFlags",
+        "completions.go:findFlag",
+        "doc/man_docs.go:manPrintOptions",
+        "doc/md_docs.go:printOptions",
+        "doc/rest_docs.go:printOptionsReST",
+        "doc/yaml_docs.go:GenYamlCustom"
+      ],
+      "tp": 13,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1635411
+    },
+    {
+      "kind": "signature",
+      "function": "Command.SetUsageTemplate",
+      "file": "command.go",
+      "truth": [
+        "cobra_test.go:TestAddTemplateFunctions",
+        "command_test.go:TestSetUsageTemplate"
+      ],
+      "found": [
+        "cobra_test.go:TestAddTemplateFunctions",
+        "command_test.go:TestSetUsageTemplate"
+      ],
+      "tp": 2,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1642297
+    },
+    {
+      "kind": "signature",
+      "function": "Command.HasSubCommands",
+      "file": "command.go",
+      "truth": [
+        "args.go:legacyArgs",
+        "command.go:Command.DebugFlags",
+        "command.go:Command.InitDefaultHelpCmd",
+        "command.go:defaultHelpFunc"
+      ],
+      "found": [
+        "args.go:legacyArgs",
+        "command.go:Command.DebugFlags",
+        "command.go:Command.InitDefaultHelpCmd",
+        "command.go:defaultHelpFunc"
+      ],
+      "tp": 4,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1644898
+    },
+    {
+      "kind": "signature",
+      "function": "genFishComp",
+      "file": "fish_completions.go",
+      "truth": [
+        "fish_completions.go:Command.GenFishCompletion"
+      ],
+      "found": [
+        "fish_completions.go:Command.GenFishCompletion"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0726552
+    },
+    {
+      "kind": "signature",
+      "function": "Command.MarkFlagsMutuallyExclusive",
+      "file": "flag_groups.go",
+      "truth": [
+        "completions_test.go:TestCompletionForMutuallyExclusiveFlags",
+        "flag_groups_test.go:TestValidateFlagGroups"
+      ],
+      "found": [
+        "completions_test.go:TestCompletionForMutuallyExclusiveFlags",
+        "flag_groups_test.go:TestValidateFlagGroups"
+      ],
+      "tp": 2,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0711119
+    },
+    {
+      "kind": "signature",
+      "function": "manPrintOptions",
+      "file": "doc/man_docs.go",
+      "truth": [
+        "doc/man_docs.go:genMan"
+      ],
+      "found": [
+        "doc/man_docs.go:genMan"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0730069
+    },
+    {
+      "kind": "signature",
+      "function": "GenMan",
+      "file": "doc/man_docs.go",
+      "truth": [
+        "doc/man_docs.go:GenManTreeFromOpts",
+        "doc/man_docs_test.go:BenchmarkGenManToFile",
+        "doc/man_docs_test.go:TestGenManDoc",
+        "doc/man_docs_test.go:TestGenManNoGenTag",
+        "doc/man_docs_test.go:TestGenManNoHiddenParents",
+        "doc/man_docs_test.go:TestGenManSeeAlso",
+        "doc/man_examples_test.go:ExampleGenMan"
+      ],
+      "found": [
+        "doc/man_docs.go:GenManTreeFromOpts",
+        "doc/man_docs_test.go:BenchmarkGenManToFile",
+        "doc/man_docs_test.go:TestGenManDoc",
+        "doc/man_docs_test.go:TestGenManNoGenTag",
+        "doc/man_docs_test.go:TestGenManNoHiddenParents",
+        "doc/man_docs_test.go:TestGenManSeeAlso",
+        "doc/man_examples_test.go:ExampleGenMan"
+      ],
+      "tp": 7,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0663749
+    },
+    {
+      "kind": "signature",
+      "function": "Command.getHelpTemplateFunc",
+      "file": "command.go",
+      "truth": [
+        "command.go:Command.HelpFunc"
+      ],
+      "found": [
+        "command.go:Command.HelpFunc"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.164694
+    },
+    {
+      "kind": "signature",
+      "function": "Command.Commands",
+      "file": "command.go",
+      "truth": [
+        "bash_completions.go:gen",
+        "bash_completions.go:writeCommands",
+        "command.go:Command.InitDefaultHelpCmd",
+        "command.go:defaultUsageFunc",
+        "command_test.go:TestCommandsAreSorted",
+        "command_test.go:TestEnableCommandSortingIsDisabled",
+        "completions.go:Command.getCompletions",
+        "completions_test.go:TestCompleteCompletion",
+        "completions_test.go:TestInitDefaultCompletionCmd",
+        "doc/man_docs.go:GenManTreeFromOpts",
+        "doc/man_docs.go:genMan",
+        "doc/md_docs.go:GenMarkdownCustom",
+        "doc/md_docs.go:GenMarkdownTreeCustom",
+        "doc/rest_docs.go:GenReSTCustom",
+        "doc/rest_docs.go:GenReSTTreeCustom",
+        "doc/util.go:hasSeeAlso",
+        "doc/yaml_docs.go:GenYamlCustom",
+        "doc/yaml_docs.go:GenYamlTreeCustom",
+        "flag_groups_test.go:TestValidateFlagGroups"
+      ],
+      "found": [
+        "bash_completions.go:gen",
+        "bash_completions.go:writeCommands",
+        "command.go:Command.InitDefaultHelpCmd",
+        "command.go:defaultUsageFunc",
+        "command_test.go:TestCommandsAreSorted",
+        "command_test.go:TestEnableCommandSortingIsDisabled",
+        "completions.go:Command.getCompletions",
+        "completions_test.go:TestCompleteCompletion",
+        "completions_test.go:TestInitDefaultCompletionCmd",
+        "doc/man_docs.go:GenManTreeFromOpts",
+        "doc/man_docs.go:genMan",
+        "doc/md_docs.go:GenMarkdownCustom",
+        "doc/md_docs.go:GenMarkdownTreeCustom",
+        "doc/rest_docs.go:GenReSTCustom",
+        "doc/rest_docs.go:GenReSTTreeCustom",
+        "doc/util.go:hasSeeAlso",
+        "doc/yaml_docs.go:GenYamlCustom",
+        "doc/yaml_docs.go:GenYamlTreeCustom",
+        "flag_groups_test.go:TestValidateFlagGroups"
+      ],
+      "tp": 19,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1822144
+    },
+    {
+      "kind": "signature",
+      "function": "Command.ValidateRequiredFlags",
+      "file": "command.go",
+      "truth": [
+        "command.go:Command.execute"
+      ],
+      "found": [
+        "command.go:Command.execute"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1627256
+    },
+    {
+      "kind": "signature",
+      "function": "AddTemplateFunc",
+      "file": "cobra.go",
+      "truth": [
+        "cobra_test.go:TestAddTemplateFunctions"
+      ],
+      "found": [
+        "cobra_test.go:TestAddTemplateFunctions"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0720898
+    },
+    {
+      "kind": "signature",
+      "function": "Command.mergePersistentFlags",
+      "file": "command.go",
+      "truth": [
+        "command.go:Command.HelpFunc",
+        "command.go:Command.InheritedFlags",
+        "command.go:Command.InitDefaultHelpFlag",
+        "command.go:Command.InitDefaultVersionFlag",
+        "command.go:Command.LocalFlags",
+        "command.go:Command.ParseFlags",
+        "command.go:Command.UsageFunc",
+        "command.go:Command.argsMinusFirstX",
+        "command.go:stripFlags",
+        "command_test.go:TestMergeCommandLineToFlags",
+        "flag_groups.go:Command.MarkFlagsMutuallyExclusive",
+        "flag_groups.go:Command.MarkFlagsOneRequired",
+        "flag_groups.go:Command.MarkFlagsRequiredTogether"
+      ],
+      "found": [
+        "command.go:Command.HelpFunc",
+        "command.go:Command.InheritedFlags",
+        "command.go:Command.InitDefaultHelpFlag",
+        "command.go:Command.InitDefaultVersionFlag",
+        "command.go:Command.LocalFlags",
+        "command.go:Command.ParseFlags",
+        "command.go:Command.UsageFunc",
+        "command.go:Command.argsMinusFirstX",
+        "command.go:stripFlags",
+        "command_test.go:TestMergeCommandLineToFlags",
+        "flag_groups.go:Command.MarkFlagsMutuallyExclusive",
+        "flag_groups.go:Command.MarkFlagsOneRequired",
+        "flag_groups.go:Command.MarkFlagsRequiredTogether"
+      ],
+      "tp": 13,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1666383
+    },
+    {
+      "kind": "signature",
+      "function": "Command.genZshCompletionFile",
+      "file": "zsh_completions.go",
+      "truth": [
+        "zsh_completions.go:Command.GenZshCompletionFile",
+        "zsh_completions.go:Command.GenZshCompletionFileNoDesc"
+      ],
+      "found": [
+        "zsh_completions.go:Command.GenZshCompletionFile",
+        "zsh_completions.go:Command.GenZshCompletionFileNoDesc"
+      ],
+      "tp": 2,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0691202
+    },
+    {
+      "kind": "signature",
+      "function": "Command.Println",
+      "file": "command.go",
+      "truth": [
+        "command.go:Command.DebugFlags",
+        "command.go:Command.ExecuteC",
+        "command.go:Command.execute",
+        "command_test.go:TestCommandPrintRedirection",
+        "command_win.go:preExecHook"
+      ],
+      "found": [
+        "command.go:Command.DebugFlags",
+        "command.go:Command.ExecuteC",
+        "command.go:Command.execute",
+        "command_test.go:TestCommandPrintRedirection",
+        "command_win.go:preExecHook"
+      ],
+      "tp": 5,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1669082
+    },
+    {
+      "kind": "signature",
+      "function": "flagCompError.Error",
+      "file": "completions.go",
+      "truth": [
+        "completions.go:Command.getCompletions",
+        "completions.go:checkIfFlagCompletion"
+      ],
+      "found": [
+        "command.go:Command.ExecuteC",
+        "flag_groups_test.go:TestValidateFlagGroups"
+      ],
+      "tp": 0,
+      "fp": 2,
+      "fn": 2,
+      "pass": false,
+      "seconds": 0.0801963
+    },
+    {
+      "kind": "signature",
+      "function": "CompletionOptions.SetDefaultShellCompDirective",
+      "file": "completions.go",
+      "truth": [
+        "completions_test.go:TestCustomDefaultShellCompDirective"
+      ],
+      "found": [
+        "completions_test.go:TestCustomDefaultShellCompDirective"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0767339
+    },
+    {
+      "kind": "signature",
+      "function": "Command.GenBashCompletionV2",
+      "file": "bash_completionsV2.go",
+      "truth": [
+        "bash_completionsV2.go:Command.GenBashCompletionFileV2",
+        "bash_completionsV2_test.go:TestBashCompletionV2WithActiveHelp",
+        "completions.go:Command.InitDefaultCompletionCmd"
+      ],
+      "found": [
+        "bash_completionsV2.go:Command.GenBashCompletionFileV2",
+        "bash_completionsV2_test.go:TestBashCompletionV2WithActiveHelp",
+        "completions.go:Command.InitDefaultCompletionCmd"
+      ],
+      "tp": 3,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0691912
+    },
+    {
+      "kind": "signature",
+      "function": "MarkFlagCustom",
+      "file": "shell_completions.go",
+      "truth": [
+        "shell_completions.go:Command.MarkFlagCustom"
+      ],
+      "found": [
+        "shell_completions.go:Command.MarkFlagCustom"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0681299
+    },
+    {
+      "kind": "remove",
+      "function": "Command.ContainsGroup",
+      "file": "command.go",
+      "truth": [
+        "command.go:Command.checkCommandGroups"
+      ],
+      "found": [
+        "command.go:Command.checkCommandGroups"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1654802
+    },
+    {
+      "kind": "remove",
+      "function": "Command.DisplayName",
+      "file": "command.go",
+      "truth": [
+        "command.go:Command.CommandPath",
+        "command.go:Command.Flags",
+        "command.go:Command.InheritedFlags",
+        "command.go:Command.InitDefaultHelpCmd",
+        "command.go:Command.InitDefaultHelpFlag",
+        "command.go:Command.InitDefaultVersionFlag",
+        "command.go:Command.LocalFlags",
+        "command.go:Command.LocalNonPersistentFlags",
+        "command.go:Command.PersistentFlags",
+        "command.go:Command.ResetFlags",
+        "command.go:Command.UseLine",
+        "command.go:Command.updateParentsPflags",
+        "command.go:defaultVersionFunc"
+      ],
+      "found": [
+        "command.go:Command.CommandPath",
+        "command.go:Command.Flags",
+        "command.go:Command.InheritedFlags",
+        "command.go:Command.InitDefaultHelpCmd",
+        "command.go:Command.InitDefaultHelpFlag",
+        "command.go:Command.InitDefaultVersionFlag",
+        "command.go:Command.LocalFlags",
+        "command.go:Command.LocalNonPersistentFlags",
+        "command.go:Command.PersistentFlags",
+        "command.go:Command.ResetFlags",
+        "command.go:Command.UseLine",
+        "command.go:Command.updateParentsPflags",
+        "command.go:defaultVersionFunc"
+      ],
+      "tp": 13,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1621044
+    },
+    {
+      "kind": "remove",
+      "function": "Command.InheritedFlags",
+      "file": "command.go",
+      "truth": [
+        "bash_completions.go:writeFlags",
+        "command.go:Command.HasAvailableInheritedFlags",
+        "command.go:Command.HasInheritedFlags",
+        "command.go:defaultUsageFunc",
+        "command_test.go:TestChildFlagShadowsParentPersistentFlag",
+        "command_test.go:TestNormPassedOnInherited",
+        "completions.go:Command.getCompletions",
+        "completions.go:completeRequireFlags",
+        "completions.go:findFlag",
+        "doc/man_docs.go:manPrintOptions",
+        "doc/md_docs.go:printOptions",
+        "doc/rest_docs.go:printOptionsReST",
+        "doc/yaml_docs.go:GenYamlCustom"
+      ],
+      "found": [
+        "bash_completions.go:writeFlags",
+        "command.go:Command.HasAvailableInheritedFlags",
+        "command.go:Command.HasInheritedFlags",
+        "command.go:defaultUsageFunc",
+        "command_test.go:TestChildFlagShadowsParentPersistentFlag",
+        "command_test.go:TestNormPassedOnInherited",
+        "completions.go:Command.getCompletions",
+        "completions.go:completeRequireFlags",
+        "completions.go:findFlag",
+        "doc/man_docs.go:manPrintOptions",
+        "doc/md_docs.go:printOptions",
+        "doc/rest_docs.go:printOptionsReST",
+        "doc/yaml_docs.go:GenYamlCustom"
+      ],
+      "tp": 13,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1606013
+    },
+    {
+      "kind": "remove",
+      "function": "Command.SetUsageTemplate",
+      "file": "command.go",
+      "truth": [
+        "cobra_test.go:TestAddTemplateFunctions",
+        "command_test.go:TestSetUsageTemplate"
+      ],
+      "found": [
+        "cobra_test.go:TestAddTemplateFunctions",
+        "command_test.go:TestSetUsageTemplate"
+      ],
+      "tp": 2,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.163052
+    },
+    {
+      "kind": "remove",
+      "function": "Command.HasSubCommands",
+      "file": "command.go",
+      "truth": [
+        "args.go:legacyArgs",
+        "command.go:Command.DebugFlags",
+        "command.go:Command.InitDefaultHelpCmd",
+        "command.go:defaultHelpFunc"
+      ],
+      "found": [
+        "args.go:legacyArgs",
+        "command.go:Command.DebugFlags",
+        "command.go:Command.InitDefaultHelpCmd",
+        "command.go:defaultHelpFunc"
+      ],
+      "tp": 4,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.165147
+    },
+    {
+      "kind": "remove",
+      "function": "genFishComp",
+      "file": "fish_completions.go",
+      "truth": [
+        "fish_completions.go:Command.GenFishCompletion"
+      ],
+      "found": [
+        "fish_completions.go:Command.GenFishCompletion"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0808228
+    },
+    {
+      "kind": "remove",
+      "function": "Command.MarkFlagsMutuallyExclusive",
+      "file": "flag_groups.go",
+      "truth": [
+        "completions_test.go:TestCompletionForMutuallyExclusiveFlags",
+        "flag_groups_test.go:TestValidateFlagGroups"
+      ],
+      "found": [
+        "completions_test.go:TestCompletionForMutuallyExclusiveFlags",
+        "flag_groups_test.go:TestValidateFlagGroups"
+      ],
+      "tp": 2,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0698233
+    },
+    {
+      "kind": "remove",
+      "function": "manPrintOptions",
+      "file": "doc/man_docs.go",
+      "truth": [
+        "doc/man_docs.go:genMan"
+      ],
+      "found": [
+        "doc/man_docs.go:genMan"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0684075
+    },
+    {
+      "kind": "remove",
+      "function": "GenMan",
+      "file": "doc/man_docs.go",
+      "truth": [
+        "doc/man_docs.go:GenManTreeFromOpts",
+        "doc/man_docs_test.go:BenchmarkGenManToFile",
+        "doc/man_docs_test.go:TestGenManDoc",
+        "doc/man_docs_test.go:TestGenManNoGenTag",
+        "doc/man_docs_test.go:TestGenManNoHiddenParents",
+        "doc/man_docs_test.go:TestGenManSeeAlso",
+        "doc/man_examples_test.go:ExampleGenMan"
+      ],
+      "found": [
+        "doc/man_docs.go:GenManTreeFromOpts",
+        "doc/man_docs_test.go:BenchmarkGenManToFile",
+        "doc/man_docs_test.go:TestGenManDoc",
+        "doc/man_docs_test.go:TestGenManNoGenTag",
+        "doc/man_docs_test.go:TestGenManNoHiddenParents",
+        "doc/man_docs_test.go:TestGenManSeeAlso",
+        "doc/man_examples_test.go:ExampleGenMan"
+      ],
+      "tp": 7,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0666663
+    },
+    {
+      "kind": "remove",
+      "function": "Command.getHelpTemplateFunc",
+      "file": "command.go",
+      "truth": [
+        "command.go:Command.HelpFunc"
+      ],
+      "found": [
+        "command.go:Command.HelpFunc"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1653301
+    },
+    {
+      "kind": "remove",
+      "function": "Command.Commands",
+      "file": "command.go",
+      "truth": [
+        "bash_completions.go:gen",
+        "bash_completions.go:writeCommands",
+        "command.go:Command.InitDefaultHelpCmd",
+        "command.go:defaultUsageFunc",
+        "command_test.go:TestCommandsAreSorted",
+        "command_test.go:TestEnableCommandSortingIsDisabled",
+        "completions.go:Command.getCompletions",
+        "completions_test.go:TestCompleteCompletion",
+        "completions_test.go:TestInitDefaultCompletionCmd",
+        "doc/man_docs.go:GenManTreeFromOpts",
+        "doc/man_docs.go:genMan",
+        "doc/md_docs.go:GenMarkdownCustom",
+        "doc/md_docs.go:GenMarkdownTreeCustom",
+        "doc/rest_docs.go:GenReSTCustom",
+        "doc/rest_docs.go:GenReSTTreeCustom",
+        "doc/util.go:hasSeeAlso",
+        "doc/yaml_docs.go:GenYamlCustom",
+        "doc/yaml_docs.go:GenYamlTreeCustom",
+        "flag_groups_test.go:TestValidateFlagGroups"
+      ],
+      "found": [
+        "bash_completions.go:gen",
+        "bash_completions.go:writeCommands",
+        "command.go:Command.InitDefaultHelpCmd",
+        "command.go:defaultUsageFunc",
+        "command_test.go:TestCommandsAreSorted",
+        "command_test.go:TestEnableCommandSortingIsDisabled",
+        "completions.go:Command.getCompletions",
+        "completions_test.go:TestCompleteCompletion",
+        "completions_test.go:TestInitDefaultCompletionCmd",
+        "doc/man_docs.go:GenManTreeFromOpts",
+        "doc/man_docs.go:genMan",
+        "doc/md_docs.go:GenMarkdownCustom",
+        "doc/md_docs.go:GenMarkdownTreeCustom",
+        "doc/rest_docs.go:GenReSTCustom",
+        "doc/rest_docs.go:GenReSTTreeCustom",
+        "doc/util.go:hasSeeAlso",
+        "doc/yaml_docs.go:GenYamlCustom",
+        "doc/yaml_docs.go:GenYamlTreeCustom",
+        "flag_groups_test.go:TestValidateFlagGroups"
+      ],
+      "tp": 19,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.164517
+    },
+    {
+      "kind": "remove",
+      "function": "Command.ValidateRequiredFlags",
+      "file": "command.go",
+      "truth": [
+        "command.go:Command.execute"
+      ],
+      "found": [
+        "command.go:Command.execute"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1613
+    },
+    {
+      "kind": "remove",
+      "function": "AddTemplateFunc",
+      "file": "cobra.go",
+      "truth": [
+        "cobra_test.go:TestAddTemplateFunctions"
+      ],
+      "found": [
+        "cobra_test.go:TestAddTemplateFunctions"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0697074
+    },
+    {
+      "kind": "remove",
+      "function": "Command.mergePersistentFlags",
+      "file": "command.go",
+      "truth": [
+        "command.go:Command.HelpFunc",
+        "command.go:Command.InheritedFlags",
+        "command.go:Command.InitDefaultHelpFlag",
+        "command.go:Command.InitDefaultVersionFlag",
+        "command.go:Command.LocalFlags",
+        "command.go:Command.ParseFlags",
+        "command.go:Command.UsageFunc",
+        "command.go:Command.argsMinusFirstX",
+        "command.go:stripFlags",
+        "command_test.go:TestMergeCommandLineToFlags",
+        "flag_groups.go:Command.MarkFlagsMutuallyExclusive",
+        "flag_groups.go:Command.MarkFlagsOneRequired",
+        "flag_groups.go:Command.MarkFlagsRequiredTogether"
+      ],
+      "found": [
+        "command.go:Command.HelpFunc",
+        "command.go:Command.InheritedFlags",
+        "command.go:Command.InitDefaultHelpFlag",
+        "command.go:Command.InitDefaultVersionFlag",
+        "command.go:Command.LocalFlags",
+        "command.go:Command.ParseFlags",
+        "command.go:Command.UsageFunc",
+        "command.go:Command.argsMinusFirstX",
+        "command.go:stripFlags",
+        "command_test.go:TestMergeCommandLineToFlags",
+        "flag_groups.go:Command.MarkFlagsMutuallyExclusive",
+        "flag_groups.go:Command.MarkFlagsOneRequired",
+        "flag_groups.go:Command.MarkFlagsRequiredTogether"
+      ],
+      "tp": 13,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1655273
+    },
+    {
+      "kind": "remove",
+      "function": "Command.genZshCompletionFile",
+      "file": "zsh_completions.go",
+      "truth": [
+        "zsh_completions.go:Command.GenZshCompletionFile",
+        "zsh_completions.go:Command.GenZshCompletionFileNoDesc"
+      ],
+      "found": [
+        "zsh_completions.go:Command.GenZshCompletionFile",
+        "zsh_completions.go:Command.GenZshCompletionFileNoDesc"
+      ],
+      "tp": 2,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0680736
+    },
+    {
+      "kind": "remove",
+      "function": "Command.Println",
+      "file": "command.go",
+      "truth": [
+        "command.go:Command.DebugFlags",
+        "command.go:Command.ExecuteC",
+        "command.go:Command.execute",
+        "command_test.go:TestCommandPrintRedirection",
+        "command_win.go:preExecHook"
+      ],
+      "found": [
+        "command.go:Command.DebugFlags",
+        "command.go:Command.ExecuteC",
+        "command.go:Command.execute",
+        "command_test.go:TestCommandPrintRedirection",
+        "command_win.go:preExecHook",
+        "doc/yaml_docs.go:GenYamlCustom"
+      ],
+      "tp": 5,
+      "fp": 1,
+      "fn": 0,
+      "pass": false,
+      "seconds": 0.1649679
+    },
+    {
+      "kind": "remove",
+      "function": "flagCompError.Error",
+      "file": "completions.go",
+      "truth": [
+        "completions.go:Command.getCompletions",
+        "completions.go:checkIfFlagCompletion"
+      ],
+      "found": [
+        "command.go:Command.ExecuteC",
+        "fish_completions_test.go:TestFailGenFishCompletionFile",
+        "flag_groups_test.go:TestValidateFlagGroups"
+      ],
+      "tp": 0,
+      "fp": 3,
+      "fn": 2,
+      "pass": false,
+      "seconds": 0.0825355
+    },
+    {
+      "kind": "remove",
+      "function": "CompletionOptions.SetDefaultShellCompDirective",
+      "file": "completions.go",
+      "truth": [
+        "completions_test.go:TestCustomDefaultShellCompDirective"
+      ],
+      "found": [
+        "completions_test.go:TestCustomDefaultShellCompDirective"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0768514
+    },
+    {
+      "kind": "remove",
+      "function": "Command.GenBashCompletionV2",
+      "file": "bash_completionsV2.go",
+      "truth": [
+        "bash_completionsV2.go:Command.GenBashCompletionFileV2",
+        "bash_completionsV2_test.go:TestBashCompletionV2WithActiveHelp",
+        "completions.go:Command.InitDefaultCompletionCmd"
+      ],
+      "found": [
+        "bash_completionsV2.go:Command.GenBashCompletionFileV2",
+        "bash_completionsV2_test.go:TestBashCompletionV2WithActiveHelp",
+        "completions.go:Command.InitDefaultCompletionCmd"
+      ],
+      "tp": 3,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0696934
+    },
+    {
+      "kind": "remove",
+      "function": "MarkFlagCustom",
+      "file": "shell_completions.go",
+      "truth": [
+        "shell_completions.go:Command.MarkFlagCustom"
+      ],
+      "found": [
+        "shell_completions.go:Command.MarkFlagCustom"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0663555
+    },
+    {
+      "kind": "db",
+      "function": "Command.ContainsGroup",
+      "file": "command.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1651983
+    },
+    {
+      "kind": "fs",
+      "function": "Command.ContainsGroup",
+      "file": "command.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1635779
+    },
+    {
+      "kind": "network",
+      "function": "Command.ContainsGroup",
+      "file": "command.go",
+      "truth": [
+        "network"
+      ],
+      "found": [
+        "network"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1644312
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "Command.ContainsGroup",
+      "file": "command.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1655531
+    },
+    {
+      "kind": "control:len",
+      "function": "Command.ContainsGroup",
+      "file": "command.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1635104
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "Command.ContainsGroup",
+      "file": "command.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1651821
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "Command.ContainsGroup",
+      "file": "command.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1635177
+    },
+    {
+      "kind": "control:strings",
+      "function": "Command.ContainsGroup",
+      "file": "command.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1641181
+    },
+    {
+      "kind": "branch",
+      "function": "Command.ContainsGroup",
+      "file": "command.go",
+      "found": [
+        "2 to 4"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1626134
+    },
+    {
+      "kind": "db",
+      "function": "Command.DisplayName",
+      "file": "command.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1639126
+    },
+    {
+      "kind": "fs",
+      "function": "Command.DisplayName",
+      "file": "command.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1624658
+    },
+    {
+      "kind": "network",
+      "function": "Command.DisplayName",
+      "file": "command.go",
+      "truth": [
+        "network"
+      ],
+      "found": [
+        "network"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1628368
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "Command.DisplayName",
+      "file": "command.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1653549
+    },
+    {
+      "kind": "control:len",
+      "function": "Command.DisplayName",
+      "file": "command.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1637543
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "Command.DisplayName",
+      "file": "command.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1624994
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "Command.DisplayName",
+      "file": "command.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1631468
+    },
+    {
+      "kind": "control:strings",
+      "function": "Command.DisplayName",
+      "file": "command.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1654888
+    },
+    {
+      "kind": "branch",
+      "function": "Command.DisplayName",
+      "file": "command.go",
+      "found": [
+        "1 to 3"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1641414
+    },
+    {
+      "kind": "db",
+      "function": "Command.InheritedFlags",
+      "file": "command.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1624568
+    },
+    {
+      "kind": "fs",
+      "function": "Command.InheritedFlags",
+      "file": "command.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1657057
+    },
+    {
+      "kind": "network",
+      "function": "Command.InheritedFlags",
+      "file": "command.go",
+      "truth": [
+        "network"
+      ],
+      "found": [
+        "network"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1634103
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "Command.InheritedFlags",
+      "file": "command.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1625627
+    },
+    {
+      "kind": "control:len",
+      "function": "Command.InheritedFlags",
+      "file": "command.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1640624
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "Command.InheritedFlags",
+      "file": "command.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1623331
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "Command.InheritedFlags",
+      "file": "command.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1658058
+    },
+    {
+      "kind": "control:strings",
+      "function": "Command.InheritedFlags",
+      "file": "command.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1632391
+    },
+    {
+      "kind": "branch",
+      "function": "Command.InheritedFlags",
+      "file": "command.go",
+      "found": [
+        "3 to 5"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1644116
+    },
+    {
+      "kind": "db",
+      "function": "Command.SetUsageTemplate",
+      "file": "command.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1613838
+    },
+    {
+      "kind": "fs",
+      "function": "Command.SetUsageTemplate",
+      "file": "command.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1779702
+    },
+    {
+      "kind": "network",
+      "function": "Command.SetUsageTemplate",
+      "file": "command.go",
+      "truth": [
+        "network"
+      ],
+      "found": [
+        "network"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1636524
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "Command.SetUsageTemplate",
+      "file": "command.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1631779
+    },
+    {
+      "kind": "control:len",
+      "function": "Command.SetUsageTemplate",
+      "file": "command.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1625895
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "Command.SetUsageTemplate",
+      "file": "command.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1629577
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "Command.SetUsageTemplate",
+      "file": "command.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1628765
+    },
+    {
+      "kind": "control:strings",
+      "function": "Command.SetUsageTemplate",
+      "file": "command.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.162289
+    },
+    {
+      "kind": "branch",
+      "function": "Command.SetUsageTemplate",
+      "file": "command.go",
+      "found": [
+        "1 to 3"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1626222
+    },
+    {
+      "kind": "db",
+      "function": "Command.HasSubCommands",
+      "file": "command.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1624029
+    },
+    {
+      "kind": "fs",
+      "function": "Command.HasSubCommands",
+      "file": "command.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1633765
+    },
+    {
+      "kind": "network",
+      "function": "Command.HasSubCommands",
+      "file": "command.go",
+      "truth": [
+        "network"
+      ],
+      "found": [
+        "network"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.163195
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "Command.HasSubCommands",
+      "file": "command.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1627527
+    },
+    {
+      "kind": "control:len",
+      "function": "Command.HasSubCommands",
+      "file": "command.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1638211
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "Command.HasSubCommands",
+      "file": "command.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.167685
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "Command.HasSubCommands",
+      "file": "command.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1623911
+    },
+    {
+      "kind": "control:strings",
+      "function": "Command.HasSubCommands",
+      "file": "command.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.162877
+    },
+    {
+      "kind": "branch",
+      "function": "Command.HasSubCommands",
+      "file": "command.go",
+      "found": [
+        "0 to 2"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1650507
+    },
+    {
+      "kind": "db",
+      "function": "genFishComp",
+      "file": "fish_completions.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0672632
+    },
+    {
+      "kind": "fs",
+      "function": "genFishComp",
+      "file": "fish_completions.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0645978
+    },
+    {
+      "kind": "network",
+      "function": "genFishComp",
+      "file": "fish_completions.go",
+      "truth": [
+        "network"
+      ],
+      "found": [
+        "network"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0669767
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "genFishComp",
+      "file": "fish_completions.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0651938
+    },
+    {
+      "kind": "control:len",
+      "function": "genFishComp",
+      "file": "fish_completions.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0651552
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "genFishComp",
+      "file": "fish_completions.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0639834
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "genFishComp",
+      "file": "fish_completions.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0636227
+    },
+    {
+      "kind": "control:strings",
+      "function": "genFishComp",
+      "file": "fish_completions.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.063882
+    },
+    {
+      "kind": "branch",
+      "function": "genFishComp",
+      "file": "fish_completions.go",
+      "found": [
+        "1 to 3"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0640214
+    },
+    {
+      "kind": "db",
+      "function": "Command.MarkFlagsMutuallyExclusive",
+      "file": "flag_groups.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0688616
+    },
+    {
+      "kind": "fs",
+      "function": "Command.MarkFlagsMutuallyExclusive",
+      "file": "flag_groups.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0653601
+    },
+    {
+      "kind": "network",
+      "function": "Command.MarkFlagsMutuallyExclusive",
+      "file": "flag_groups.go",
+      "truth": [
+        "network"
+      ],
+      "found": [
+        "network"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0655621
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "Command.MarkFlagsMutuallyExclusive",
+      "file": "flag_groups.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0660328
+    },
+    {
+      "kind": "control:len",
+      "function": "Command.MarkFlagsMutuallyExclusive",
+      "file": "flag_groups.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0654387
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "Command.MarkFlagsMutuallyExclusive",
+      "file": "flag_groups.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0668676
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "Command.MarkFlagsMutuallyExclusive",
+      "file": "flag_groups.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0656521
+    },
+    {
+      "kind": "control:strings",
+      "function": "Command.MarkFlagsMutuallyExclusive",
+      "file": "flag_groups.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0662299
+    },
+    {
+      "kind": "branch",
+      "function": "Command.MarkFlagsMutuallyExclusive",
+      "file": "flag_groups.go",
+      "found": [
+        "3 to 5"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0660839
+    },
+    {
+      "kind": "db",
+      "function": "Command.GenPowerShellCompletionFile",
+      "file": "powershell_completions.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0719512
+    },
+    {
+      "kind": "fs",
+      "function": "Command.GenPowerShellCompletionFile",
+      "file": "powershell_completions.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0676357
+    },
+    {
+      "kind": "network",
+      "function": "Command.GenPowerShellCompletionFile",
+      "file": "powershell_completions.go",
+      "truth": [
+        "network"
+      ],
+      "found": [
+        "network"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.066485
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "Command.GenPowerShellCompletionFile",
+      "file": "powershell_completions.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0669385
+    },
+    {
+      "kind": "control:len",
+      "function": "Command.GenPowerShellCompletionFile",
+      "file": "powershell_completions.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0650968
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "Command.GenPowerShellCompletionFile",
+      "file": "powershell_completions.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0640346
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "Command.GenPowerShellCompletionFile",
+      "file": "powershell_completions.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0642319
+    },
+    {
+      "kind": "control:strings",
+      "function": "Command.GenPowerShellCompletionFile",
+      "file": "powershell_completions.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0638729
+    },
+    {
+      "kind": "branch",
+      "function": "Command.GenPowerShellCompletionFile",
+      "file": "powershell_completions.go",
+      "found": [
+        "0 to 2"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0653907
+    },
+    {
+      "kind": "db",
+      "function": "manPrintOptions",
+      "file": "doc/man_docs.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0725724
+    },
+    {
+      "kind": "fs",
+      "function": "manPrintOptions",
+      "file": "doc/man_docs.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0668684
+    },
+    {
+      "kind": "network",
+      "function": "manPrintOptions",
+      "file": "doc/man_docs.go",
+      "truth": [
+        "network"
+      ],
+      "found": [
+        "network"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0789077
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "manPrintOptions",
+      "file": "doc/man_docs.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0691782
+    },
+    {
+      "kind": "control:len",
+      "function": "manPrintOptions",
+      "file": "doc/man_docs.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0760806
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "manPrintOptions",
+      "file": "doc/man_docs.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0669933
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "manPrintOptions",
+      "file": "doc/man_docs.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.066315
+    },
+    {
+      "kind": "control:strings",
+      "function": "manPrintOptions",
+      "file": "doc/man_docs.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0696633
+    },
+    {
+      "kind": "branch",
+      "function": "manPrintOptions",
+      "file": "doc/man_docs.go",
+      "found": [
+        "2 to 4"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0668966
+    },
+    {
+      "kind": "db",
+      "function": "GenMan",
+      "file": "doc/man_docs.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0663829
+    },
+    {
+      "kind": "fs",
+      "function": "GenMan",
+      "file": "doc/man_docs.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.071681
+    },
+    {
+      "kind": "network",
+      "function": "GenMan",
+      "file": "doc/man_docs.go",
+      "truth": [
+        "network"
+      ],
+      "found": [
+        "network"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0681034
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "GenMan",
+      "file": "doc/man_docs.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0682737
+    },
+    {
+      "kind": "control:len",
+      "function": "GenMan",
+      "file": "doc/man_docs.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0674339
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "GenMan",
+      "file": "doc/man_docs.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0685896
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "GenMan",
+      "file": "doc/man_docs.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0680229
+    },
+    {
+      "kind": "control:strings",
+      "function": "GenMan",
+      "file": "doc/man_docs.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0678813
+    },
+    {
+      "kind": "branch",
+      "function": "GenMan",
+      "file": "doc/man_docs.go",
+      "found": [
+        "2 to 4"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0665796
+    },
+    {
+      "kind": "db",
+      "function": "Command.getHelpTemplateFunc",
+      "file": "command.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1701474
+    },
+    {
+      "kind": "fs",
+      "function": "Command.getHelpTemplateFunc",
+      "file": "command.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1622131
+    },
+    {
+      "kind": "network",
+      "function": "Command.getHelpTemplateFunc",
+      "file": "command.go",
+      "truth": [
+        "network"
+      ],
+      "found": [
+        "network"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1650466
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "Command.getHelpTemplateFunc",
+      "file": "command.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1637882
+    },
+    {
+      "kind": "control:len",
+      "function": "Command.getHelpTemplateFunc",
+      "file": "command.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1642494
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "Command.getHelpTemplateFunc",
+      "file": "command.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1635884
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "Command.getHelpTemplateFunc",
+      "file": "command.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1647408
+    },
+    {
+      "kind": "control:strings",
+      "function": "Command.getHelpTemplateFunc",
+      "file": "command.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1652743
+    },
+    {
+      "kind": "branch",
+      "function": "Command.getHelpTemplateFunc",
+      "file": "command.go",
+      "found": [
+        "2 to 4"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1631496
+    },
+    {
+      "kind": "db",
+      "function": "Command.Commands",
+      "file": "command.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1640533
+    },
+    {
+      "kind": "fs",
+      "function": "Command.Commands",
+      "file": "command.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1639212
+    },
+    {
+      "kind": "network",
+      "function": "Command.Commands",
+      "file": "command.go",
+      "truth": [
+        "network"
+      ],
+      "found": [
+        "network"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1650258
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "Command.Commands",
+      "file": "command.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1626705
+    },
+    {
+      "kind": "control:len",
+      "function": "Command.Commands",
+      "file": "command.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1626371
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "Command.Commands",
+      "file": "command.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1646403
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "Command.Commands",
+      "file": "command.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1653398
+    },
+    {
+      "kind": "control:strings",
+      "function": "Command.Commands",
+      "file": "command.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1632017
+    },
+    {
+      "kind": "branch",
+      "function": "Command.Commands",
+      "file": "command.go",
+      "found": [
+        "1 to 3"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1637316
+    },
+    {
+      "kind": "db",
+      "function": "Command.ResetFlags",
+      "file": "command.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1636031
+    },
+    {
+      "kind": "fs",
+      "function": "Command.ResetFlags",
+      "file": "command.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1807892
+    },
+    {
+      "kind": "network",
+      "function": "Command.ResetFlags",
+      "file": "command.go",
+      "truth": [
+        "network"
+      ],
+      "found": [
+        "network"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1646898
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "Command.ResetFlags",
+      "file": "command.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1656782
+    },
+    {
+      "kind": "control:len",
+      "function": "Command.ResetFlags",
+      "file": "command.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1647362
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "Command.ResetFlags",
+      "file": "command.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1644243
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "Command.ResetFlags",
+      "file": "command.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1643442
+    },
+    {
+      "kind": "control:strings",
+      "function": "Command.ResetFlags",
+      "file": "command.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1645001
+    },
+    {
+      "kind": "branch",
+      "function": "Command.ResetFlags",
+      "file": "command.go",
+      "found": [
+        "0 to 2"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1642965
+    },
+    {
+      "kind": "db",
+      "function": "Command.ValidateRequiredFlags",
+      "file": "command.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1625218
+    },
+    {
+      "kind": "fs",
+      "function": "Command.ValidateRequiredFlags",
+      "file": "command.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1644273
+    },
+    {
+      "kind": "network",
+      "function": "Command.ValidateRequiredFlags",
+      "file": "command.go",
+      "truth": [
+        "network"
+      ],
+      "found": [
+        "network"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1625805
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "Command.ValidateRequiredFlags",
+      "file": "command.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1629604
+    },
+    {
+      "kind": "control:len",
+      "function": "Command.ValidateRequiredFlags",
+      "file": "command.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1642271
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "Command.ValidateRequiredFlags",
+      "file": "command.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1646454
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "Command.ValidateRequiredFlags",
+      "file": "command.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1634554
+    },
+    {
+      "kind": "control:strings",
+      "function": "Command.ValidateRequiredFlags",
+      "file": "command.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1627405
+    },
+    {
+      "kind": "branch",
+      "function": "Command.ValidateRequiredFlags",
+      "file": "command.go",
+      "found": [
+        "2 to 4"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1656396
+    },
+    {
+      "kind": "db",
+      "function": "AddTemplateFunc",
+      "file": "cobra.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0699827
+    },
+    {
+      "kind": "fs",
+      "function": "AddTemplateFunc",
+      "file": "cobra.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0688914
+    },
+    {
+      "kind": "network",
+      "function": "AddTemplateFunc",
+      "file": "cobra.go",
+      "truth": [
+        "network"
+      ],
+      "found": [
+        "network"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0669318
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "AddTemplateFunc",
+      "file": "cobra.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.065886
+    },
+    {
+      "kind": "control:len",
+      "function": "AddTemplateFunc",
+      "file": "cobra.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0671675
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "AddTemplateFunc",
+      "file": "cobra.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0661709
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "AddTemplateFunc",
+      "file": "cobra.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0652733
+    },
+    {
+      "kind": "control:strings",
+      "function": "AddTemplateFunc",
+      "file": "cobra.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0664207
+    },
+    {
+      "kind": "branch",
+      "function": "AddTemplateFunc",
+      "file": "cobra.go",
+      "found": [
+        "0 to 2"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0658174
+    },
+    {
+      "kind": "db",
+      "function": "Command.mergePersistentFlags",
+      "file": "command.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1656649
+    },
+    {
+      "kind": "fs",
+      "function": "Command.mergePersistentFlags",
+      "file": "command.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1648055
+    },
+    {
+      "kind": "network",
+      "function": "Command.mergePersistentFlags",
+      "file": "command.go",
+      "truth": [
+        "network"
+      ],
+      "found": [
+        "network"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1643388
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "Command.mergePersistentFlags",
+      "file": "command.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1645704
+    },
+    {
+      "kind": "control:len",
+      "function": "Command.mergePersistentFlags",
+      "file": "command.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1631749
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "Command.mergePersistentFlags",
+      "file": "command.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.163767
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "Command.mergePersistentFlags",
+      "file": "command.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1633166
+    },
+    {
+      "kind": "control:strings",
+      "function": "Command.mergePersistentFlags",
+      "file": "command.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1634497
+    },
+    {
+      "kind": "branch",
+      "function": "Command.mergePersistentFlags",
+      "file": "command.go",
+      "found": [
+        "0 to 2"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1634811
+    },
+    {
+      "kind": "db",
+      "function": "Gt",
+      "file": "cobra.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.069022
+    },
+    {
+      "kind": "fs",
+      "function": "Gt",
+      "file": "cobra.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0664053
+    },
+    {
+      "kind": "network",
+      "function": "Gt",
+      "file": "cobra.go",
+      "truth": [
+        "network"
+      ],
+      "found": [
+        "network"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0673541
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "Gt",
+      "file": "cobra.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0661052
+    },
+    {
+      "kind": "control:len",
+      "function": "Gt",
+      "file": "cobra.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0787773
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "Gt",
+      "file": "cobra.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.067626
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "Gt",
+      "file": "cobra.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0690311
+    },
+    {
+      "kind": "control:strings",
+      "function": "Gt",
+      "file": "cobra.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0668573
+    },
+    {
+      "kind": "branch",
+      "function": "Gt",
+      "file": "cobra.go",
+      "found": [
+        "2 to 4"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0667345
+    },
+    {
+      "kind": "db",
+      "function": "Command.genZshCompletionFile",
+      "file": "zsh_completions.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.069509
+    },
+    {
+      "kind": "fs:skip",
+      "function": "Command.genZshCompletionFile",
+      "file": "zsh_completions.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": false,
+      "seconds": 0.0644974,
+      "note": "the function already had this effect"
+    },
+    {
+      "kind": "network",
+      "function": "Command.genZshCompletionFile",
+      "file": "zsh_completions.go",
+      "truth": [
+        "network"
+      ],
+      "found": [
+        "network"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0650053
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "Command.genZshCompletionFile",
+      "file": "zsh_completions.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0644423
+    },
+    {
+      "kind": "control:len",
+      "function": "Command.genZshCompletionFile",
+      "file": "zsh_completions.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0655728
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "Command.genZshCompletionFile",
+      "file": "zsh_completions.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0641708
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "Command.genZshCompletionFile",
+      "file": "zsh_completions.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0647395
+    },
+    {
+      "kind": "control:strings",
+      "function": "Command.genZshCompletionFile",
+      "file": "zsh_completions.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0643448
+    },
+    {
+      "kind": "branch",
+      "function": "Command.genZshCompletionFile",
+      "file": "zsh_completions.go",
+      "found": [
+        "1 to 3"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.08178
+    },
+    {
+      "kind": "db",
+      "function": "Command.Println",
+      "file": "command.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1662638
+    },
+    {
+      "kind": "fs",
+      "function": "Command.Println",
+      "file": "command.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1635062
+    },
+    {
+      "kind": "network",
+      "function": "Command.Println",
+      "file": "command.go",
+      "truth": [
+        "network"
+      ],
+      "found": [
+        "network"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1624937
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "Command.Println",
+      "file": "command.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1619861
+    },
+    {
+      "kind": "control:len",
+      "function": "Command.Println",
+      "file": "command.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1638744
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "Command.Println",
+      "file": "command.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1635821
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "Command.Println",
+      "file": "command.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1621584
+    },
+    {
+      "kind": "control:strings",
+      "function": "Command.Println",
+      "file": "command.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1632332
+    },
+    {
+      "kind": "branch",
+      "function": "Command.Println",
+      "file": "command.go",
+      "found": [
+        "0 to 2"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1660247
+    },
+    {
+      "kind": "db",
+      "function": "flagCompError.Error",
+      "file": "completions.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0782607
+    },
+    {
+      "kind": "fs",
+      "function": "flagCompError.Error",
+      "file": "completions.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0772451
+    },
+    {
+      "kind": "network",
+      "function": "flagCompError.Error",
+      "file": "completions.go",
+      "truth": [
+        "network"
+      ],
+      "found": [
+        "network"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0755692
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "flagCompError.Error",
+      "file": "completions.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0764102
+    },
+    {
+      "kind": "control:len",
+      "function": "flagCompError.Error",
+      "file": "completions.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0764517
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "flagCompError.Error",
+      "file": "completions.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.075555
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "flagCompError.Error",
+      "file": "completions.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0781386
+    },
+    {
+      "kind": "control:strings",
+      "function": "flagCompError.Error",
+      "file": "completions.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0755827
+    },
+    {
+      "kind": "branch",
+      "function": "flagCompError.Error",
+      "file": "completions.go",
+      "found": [
+        "0 to 2"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0769603
+    }
+  ]
+}

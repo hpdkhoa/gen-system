@@ -123,6 +123,23 @@ type Parameter struct {
 	Default  string // default value literal if present
 }
 
+// Local is a Go local variable whose type its declaration shows (v26.74): x := &T{}, x := T{}, x := new(T),
+// var x T, a function literal's parameter, or x := F(), x, err := pkg.F() and x := y.Sub().Get(), where Call holds
+// the call as an edge names it ("F", "pkg.F", "y.Sub().Get") and the type is the first result. x := r.routes
+// keeps the value in Expr, and for _, x := range r.routes sets Elem too: x has the element type. The name is visible
+// from line From, column Col, to line To, so an inner r *http.Request shadows an outer r := chi.NewRouter() only
+// inside its literal.
+type Local struct {
+	Name     string
+	Type     TypeRef `json:",omitempty"`
+	Call     string  `json:",omitempty"`
+	Expr     string  `json:",omitempty"`
+	Elem     bool    `json:",omitempty"`
+	Result   int     `json:",omitempty"` // which result of Call: 1 is err in out, err := F()
+	From, To int
+	Col      int `json:",omitempty"`
+}
+
 // Field represents one field in a struct, class, or interface.
 type Field struct {
 	Name       string
@@ -166,8 +183,13 @@ type Node struct {
 	// Receiver is non-nil for methods (Go: pointer/value receiver,
 	// Python: self/cls, CA Gen: entity the procedure belongs to).
 	Receiver *TypeRef
-	Params   []Parameter
-	Returns  []TypeRef
+	// ReceiverName is the receiver's variable name (Go: t in func (t *Timer) End). v26.74: a call t.f() inside the
+	// method resolves to the receiver's own type.
+	ReceiverName string `json:",omitempty"`
+	Params       []Parameter
+	// Locals are Go local variables whose type the declaration shows (v26.74); see Local.
+	Locals  []Local `json:",omitempty"`
+	Returns []TypeRef
 
 	// ── NodeStruct / NodeClass / NodeInterface ─────────────
 	Fields     []Field

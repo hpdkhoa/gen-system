@@ -326,23 +326,28 @@ func (c *goConverter) convertFunc(d *goast.FuncDecl) *Node {
 	id := "func:" + d.Name.Name
 
 	var receiver *TypeRef
+	receiverName := ""
 	if d.Recv != nil && len(d.Recv.List) > 0 {
 		kind = NodeMethod
 		recv := d.Recv.List[0]
 		t := c.convertExpr(recv.Type)
 		receiver = &t
 		id = "method:" + t.Name + "." + d.Name.Name
+		if len(recv.Names) > 0 {
+			receiverName = recv.Names[0].Name
+		}
 	}
 
 	n := &Node{
-		ID:         id,
-		Kind:       kind,
-		Name:       d.Name.Name,
-		Language:   LangGo,
-		Span:       c.span(d.Pos(), d.End()),
-		Exported:   isExported(d.Name.Name),
-		Receiver:   receiver,
-		DocComment: docText(d.Doc),
+		ID:           id,
+		Kind:         kind,
+		Name:         d.Name.Name,
+		Language:     LangGo,
+		Span:         c.span(d.Pos(), d.End()),
+		Exported:     isExported(d.Name.Name),
+		Receiver:     receiver,
+		ReceiverName: receiverName,
+		DocComment:   docText(d.Doc),
 	}
 
 	if d.Type.Params != nil {
@@ -359,6 +364,7 @@ func (c *goConverter) convertFunc(d *goast.FuncDecl) *Node {
 	// Extract call sites from the function body
 	if d.Body != nil {
 		n.Children = c.convertBody(d.Body)
+		n.Locals = c.goLocals(d.Body)
 	}
 
 	return n
@@ -495,6 +501,8 @@ func (c *goConverter) convertStmt(s goast.Stmt) []*Node {
 				RawSource: label,
 				Span:      c.span(cc.Pos(), cc.End()),
 			}
+			// v26.74: the calls in the comm operation (case v := <-next():) were never read either.
+			caseNode.Children = append(caseNode.Children, c.callsIn(cc.Comm)...)
 			caseNode.Children = append(caseNode.Children, c.convertStmtList(cc.Body)...)
 			n.Children = append(n.Children, caseNode)
 		}
@@ -632,6 +640,10 @@ func calleeBase(x goast.Expr) string {
 		}
 		return base + "." + b.Sel.Name
 	case *goast.CallExpr:
+		// v26.74: new(Route).Queries keeps its type, so the resolver can follow it
+		if id, ok := b.Fun.(*goast.Ident); ok && id.Name == "new" && len(b.Args) == 1 {
+			return "new(" + exprText(b.Args[0]) + ")"
+		}
 		return calleeName(b.Fun) + "()"
 	case *goast.ParenExpr:
 		return calleeBase(b.X)
@@ -786,6 +798,11 @@ func (c *goConverter) caseClauses(list []goast.Stmt) []*Node {
 			RawSource: label,
 			Span:      c.span(cc.Pos(), cc.End()),
 		}
+		// v26.74: calls in a case value (case overlaps(a, b):) were never read, so they were missing from the
+		// call graph and the effects. They run when the case is tested, before its body.
+		for _, e := range cc.List {
+			caseNode.Children = append(caseNode.Children, c.callsIn(e)...)
+		}
 		caseNode.Children = append(caseNode.Children, c.convertStmtList(cc.Body)...)
 		out = append(out, caseNode)
 	}
@@ -802,4 +819,140 @@ func extractSource(src []byte, fset *gotoken.FileSet, start, end gotoken.Pos) st
 		return ""
 	}
 	return string(src[s:e])
+}
+
+// goLocals lists the local variables of a body whose type the declaration shows (v26.74), so the resolver can follow
+// x.f() to the method of x's type. Each local is visible from its declaration to the end of the block, statement or
+// function literal that holds it.
+func (c *goConverter) goLocals(body *goast.BlockStmt) []Local {
+	var out []Local
+	line := func(p gotoken.Pos) int { return c.fset.Position(p).Line }
+	// from gives the type a value shows, or false.
+	from := func(v goast.Expr) (Local, bool) {
+		switch x := goast.Unparen(v).(type) {
+		case *goast.UnaryExpr:
+			if lit, ok := x.X.(*goast.CompositeLit); ok && x.Op == gotoken.AND && lit.Type != nil {
+				return Local{Type: c.convertExpr(lit.Type)}, true
+			}
+		case *goast.CompositeLit:
+			if x.Type != nil {
+				return Local{Type: c.convertExpr(x.Type)}, true
+			}
+		case *goast.TypeAssertExpr:
+			if x.Type != nil {
+				return Local{Type: c.convertExpr(x.Type)}, true // x := y.(T)
+			}
+		case *goast.Ident, *goast.SelectorExpr:
+			if name := calleeName(x); name != "" {
+				return Local{Expr: name}, true
+			}
+		case *goast.CallExpr:
+			switch f := x.Fun.(type) {
+			case *goast.Ident:
+				if f.Name == "new" && len(x.Args) == 1 {
+					return Local{Type: c.convertExpr(x.Args[0])}, true
+				}
+				return Local{Call: f.Name}, true
+			case *goast.SelectorExpr:
+				if name := calleeName(f); name != "" {
+					return Local{Call: name}, true
+				}
+			}
+		}
+		return Local{}, false
+	}
+	var stack []goast.Node
+	// scopeEnd is the last line of the innermost block or statement that holds the current node.
+	scopeEnd := func() int {
+		for i := len(stack) - 1; i >= 0; i-- {
+			switch n := stack[i].(type) {
+			case *goast.BlockStmt, *goast.CaseClause, *goast.CommClause, *goast.IfStmt, *goast.ForStmt,
+				*goast.RangeStmt, *goast.SwitchStmt, *goast.TypeSwitchStmt:
+				return line(n.End())
+			}
+		}
+		return line(body.End())
+	}
+	add := func(id *goast.Ident, l Local, start gotoken.Pos, to int) {
+		if id.Name == "_" {
+			return
+		}
+		p := c.fset.Position(start)
+		l.Name, l.From, l.Col, l.To = id.Name, p.Line, p.Column, to
+		out = append(out, l)
+	}
+	goast.Inspect(body, func(n goast.Node) bool {
+		if n == nil {
+			stack = stack[:len(stack)-1]
+			return true
+		}
+		switch st := n.(type) {
+		case *goast.AssignStmt:
+			if st.Tok == gotoken.DEFINE {
+				for i, l := range st.Lhs {
+					id, ok := l.(*goast.Ident)
+					if !ok {
+						continue
+					}
+					if len(st.Rhs) == len(st.Lhs) {
+						if v, ok := from(st.Rhs[i]); ok {
+							add(id, v, st.End(), scopeEnd())
+						}
+					} else if _, call := st.Rhs[0].(*goast.CallExpr); call && len(st.Rhs) == 1 {
+						if v, ok := from(st.Rhs[0]); ok && v.Call != "" {
+							v.Result = i
+							add(id, v, st.End(), scopeEnd())
+						}
+					} else if ta, ok := st.Rhs[0].(*goast.TypeAssertExpr); ok && len(st.Rhs) == 1 && i == 0 && ta.Type != nil {
+						add(id, Local{Type: c.convertExpr(ta.Type)}, st.End(), scopeEnd()) // x, ok := y.(T)
+					}
+				}
+			}
+		case *goast.ValueSpec:
+			for i, id := range st.Names {
+				if st.Type != nil {
+					add(id, Local{Type: c.convertExpr(st.Type)}, st.End(), scopeEnd())
+				} else if len(st.Values) == len(st.Names) {
+					if v, ok := from(st.Values[i]); ok {
+						add(id, v, st.End(), scopeEnd())
+					}
+				}
+			}
+		case *goast.RangeStmt:
+			if id, ok := st.Value.(*goast.Ident); ok && st.Tok == gotoken.DEFINE {
+				if name := calleeName(st.X); name != "" {
+					add(id, Local{Expr: name, Elem: true}, st.X.End(), line(st.End()))
+				}
+			}
+		case *goast.TypeSwitchStmt:
+			// switch x := y.(type) { case *T: ... }: in a clause with one type, x is a T
+			as, ok := st.Assign.(*goast.AssignStmt)
+			if !ok || len(as.Lhs) != 1 {
+				break
+			}
+			id, ok := as.Lhs[0].(*goast.Ident)
+			if !ok {
+				break
+			}
+			for _, s := range st.Body.List {
+				if cc, ok := s.(*goast.CaseClause); ok && len(cc.List) == 1 {
+					if t := c.convertExpr(cc.List[0]); t.Name != "nil" {
+						add(id, Local{Type: t}, cc.Colon, line(cc.End()))
+					}
+				}
+			}
+		case *goast.FuncLit:
+			if st.Type.Params != nil {
+				for _, f := range st.Type.Params.List {
+					typ := c.convertExpr(f.Type)
+					for _, id := range f.Names {
+						add(id, Local{Type: typ}, st.Body.Lbrace, line(st.End()))
+					}
+				}
+			}
+		}
+		stack = append(stack, n)
+		return true
+	})
+	return out
 }

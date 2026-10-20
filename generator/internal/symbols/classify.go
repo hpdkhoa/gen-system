@@ -132,6 +132,13 @@ func (c *EdgeClassifier) Classify(e CallEdge) (EdgeClass, bool) {
 			if importPath != "" && !c.projectPackage(importPath) {
 				return EdgeExternal, false
 			}
+			// v26.74: w.Write() on a variable of an outside type (http.ResponseWriter) calls a method outside the
+			// project, the same rule goTargets uses, so it is no project call the resolver missed.
+			if caller.Language == ast.LangGo && importPath == "" && !strings.ContainsAny(name[:dot], "()[]") {
+				if _, _, where := c.idx.goReceiverType(name, caller, e.Span.Start); where == goOutside {
+					return EdgeExternal, false
+				}
+			}
 		}
 	}
 	bare := name

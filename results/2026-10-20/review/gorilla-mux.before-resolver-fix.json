@@ -1,0 +1,3516 @@
+{
+  "repo": "K:\\genbench-repos\\gorilla-mux",
+  "commit": "db9d1d0073d27a0a2d9a8c1bc52aa0af4374d265",
+  "date": "2026-10-20",
+  "go_functions": 107,
+  "load_seconds": 0.113984,
+  "type_errors_before_any_edit": 0,
+  "scores": {
+    "branch": {
+      "cases": 20,
+      "pass": 20,
+      "tp": 20,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1,
+      "recall": 1,
+      "median_seconds": 0.0657493
+    },
+    "control": {
+      "cases": 100,
+      "pass": 100,
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "precision": 0,
+      "recall": 0,
+      "median_seconds": 0.0657081
+    },
+    "db": {
+      "cases": 20,
+      "pass": 20,
+      "tp": 20,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1,
+      "recall": 1,
+      "median_seconds": 0.067875
+    },
+    "fs": {
+      "cases": 20,
+      "pass": 20,
+      "tp": 20,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1,
+      "recall": 1,
+      "median_seconds": 0.0656519
+    },
+    "network": {
+      "cases": 20,
+      "pass": 19,
+      "tp": 19,
+      "fp": 0,
+      "fn": 1,
+      "precision": 1,
+      "recall": 0.95,
+      "median_seconds": 0.0659705
+    },
+    "remove": {
+      "cases": 20,
+      "pass": 19,
+      "tp": 99,
+      "fp": 0,
+      "fn": 12,
+      "precision": 1,
+      "recall": 0.8918918918918919,
+      "median_seconds": 0.0669404
+    },
+    "signature": {
+      "cases": 20,
+      "pass": 18,
+      "tp": 108,
+      "fp": 11,
+      "fn": 3,
+      "precision": 0.907563025210084,
+      "recall": 0.972972972972973,
+      "median_seconds": 0.0682663
+    }
+  },
+  "coverage": {
+    "functions": 0,
+    "covered": 0,
+    "go_test_seconds": 2.9959772,
+    "go_test_exit": " cover: exit status 2",
+    "by_hops": {}
+  },
+  "history": [
+    {
+      "commit": "db9d1d0",
+      "subject": "added test for router in context",
+      "files": 1,
+      "functions": 1,
+      "points": {},
+      "seconds": 0.1937478
+    },
+    {
+      "commit": "fe14465",
+      "subject": "added conf method and defined initial test func",
+      "files": 2,
+      "functions": 2,
+      "points": {
+        "test": 1
+      },
+      "seconds": 0.2530502
+    },
+    {
+      "commit": "1a848bf",
+      "subject": "added simple initial implementation of router in request context",
+      "files": 1,
+      "functions": 3,
+      "points": {
+        "test": 1
+      },
+      "seconds": 0.1874627
+    },
+    {
+      "commit": "10f71ea",
+      "subject": "added route metadata with tests",
+      "files": 3,
+      "functions": 6,
+      "points": {
+        "test": 1
+      },
+      "seconds": 0.2273745
+    },
+    {
+      "commit": "525206d",
+      "subject": "wrapper to getter",
+      "files": 1,
+      "functions": 3,
+      "points": {
+        "size": 1,
+        "test": 2
+      },
+      "seconds": 0.1739268
+    },
+    {
+      "commit": "f184213",
+      "subject": "Updated comments and some consistency fixes",
+      "files": 2,
+      "functions": 3,
+      "points": {
+        "size": 1,
+        "test": 2
+      },
+      "seconds": 0.1701672
+    },
+    {
+      "commit": "0e6f2da",
+      "subject": "Added route return to route.use method",
+      "files": 1,
+      "functions": 1,
+      "points": {
+        "break": 1
+      },
+      "seconds": 0.1567858
+    },
+    {
+      "commit": "7cc5738",
+      "subject": "Added middleware support for individual routes",
+      "files": 3,
+      "functions": 7,
+      "points": {
+        "size": 2,
+        "test": 2
+      },
+      "seconds": 0.1958478
+    },
+    {
+      "commit": "de7178d",
+      "subject": "Optimize/new route regexp allocations (#732)",
+      "files": 2,
+      "functions": 2,
+      "points": {},
+      "seconds": 0.2009438
+    },
+    {
+      "commit": "cfec64d",
+      "subject": "chore: fix function name in comment",
+      "files": 1,
+      "functions": 0,
+      "points": {},
+      "seconds": 0.1476378
+    },
+    {
+      "commit": "7d9a6f7",
+      "subject": "Don't assign a variable for unused param",
+      "files": 1,
+      "functions": 1,
+      "points": {
+        "break": 1
+      },
+      "seconds": 0.1351749
+    },
+    {
+      "commit": "374bd70",
+      "subject": "Add RegexpCompileFunc to override regexp.Compile",
+      "files": 3,
+      "functions": 5,
+      "points": {},
+      "seconds": 0.1611571
+    },
+    {
+      "commit": "976b536",
+      "subject": "Fixed processing of multiple queries for the same path",
+      "files": 2,
+      "functions": 2,
+      "points": {
+        "size": 1,
+        "test": 1
+      },
+      "seconds": 0.2340432
+    },
+    {
+      "commit": "2b030fc",
+      "subject": "Fix gorilla#739: Fixed handling of invalid query params",
+      "files": 2,
+      "functions": 2,
+      "points": {
+        "test": 1
+      },
+      "seconds": 0.2753183
+    },
+    {
+      "commit": "e44017d",
+      "subject": "perf: cut allocations (#691)",
+      "files": 5,
+      "functions": 23,
+      "points": {
+        "behavior": 1,
+        "size": 2,
+        "test": 3
+      },
+      "seconds": 0.3247832
+    },
+    {
+      "commit": "f79c3af",
+      "subject": "Use \"redirect\" rather than \"re-direct\" in docs (#735)",
+      "files": 1,
+      "functions": 0,
+      "points": {},
+      "seconds": 0.2091395
+    },
+    {
+      "commit": "b4617d0",
+      "subject": "update GitHub workflows (#734)",
+      "files": 5,
+      "functions": 0,
+      "points": {},
+      "seconds": 0.1310379
+    },
+    {
+      "commit": "3401478",
+      "subject": "fix SPA handler in README.md (#733)",
+      "files": 1,
+      "functions": 0,
+      "points": {},
+      "seconds": 0.1101198
+    },
+    {
+      "commit": "4a671cb",
+      "subject": "Add GetVarNames() (#676)",
+      "files": 4,
+      "functions": 3,
+      "points": {
+        "size": 3
+      },
+      "seconds": 0.2112119
+    },
+    {
+      "commit": "85123bf",
+      "subject": "changed the routeVariables text content. (#708)",
+      "files": 1,
+      "functions": 0,
+      "points": {},
+      "seconds": 0.1580343
+    }
+  ],
+  "cases": [
+    {
+      "kind": "signature",
+      "function": "CORSMethodMiddleware",
+      "file": "middleware.go",
+      "truth": [
+        "example_cors_method_middleware_test.go:ExampleCORSMethodMiddleware",
+        "middleware_test.go:TestCORSMethodMiddleware",
+        "middleware_test.go:TestCORSMethodMiddlewareSubrouter"
+      ],
+      "found": [
+        "middleware_test.go:TestCORSMethodMiddleware",
+        "middleware_test.go:TestCORSMethodMiddlewareSubrouter"
+      ],
+      "tp": 2,
+      "fp": 0,
+      "fn": 1,
+      "pass": false,
+      "seconds": 0.0703357
+    },
+    {
+      "kind": "signature",
+      "function": "Route.addMatcher",
+      "file": "route.go",
+      "truth": [
+        "route.go:Route.Headers",
+        "route.go:Route.HeadersRegexp",
+        "route.go:Route.MatcherFunc",
+        "route.go:Route.Methods",
+        "route.go:Route.Schemes",
+        "route.go:Route.Subrouter",
+        "route.go:Route.addRegexpMatcher"
+      ],
+      "found": [
+        "route.go:Route.Headers",
+        "route.go:Route.HeadersRegexp",
+        "route.go:Route.MatcherFunc",
+        "route.go:Route.Methods",
+        "route.go:Route.Schemes",
+        "route.go:Route.Subrouter",
+        "route.go:Route.addRegexpMatcher"
+      ],
+      "tp": 7,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0769986
+    },
+    {
+      "kind": "signature",
+      "function": "Router.HandleFunc",
+      "file": "mux.go",
+      "truth": [
+        "bench_test.go:BenchmarkManyPathVariables",
+        "bench_test.go:BenchmarkMux",
+        "bench_test.go:BenchmarkMuxAlternativeInRegexp",
+        "bench_test.go:BenchmarkMuxSimple",
+        "example_authentication_middleware_test.go:Example_authenticationMiddleware",
+        "example_cors_method_middleware_test.go:ExampleCORSMethodMiddleware",
+        "middleware_test.go:TestCORSMethodMiddleware",
+        "middleware_test.go:TestCORSMethodMiddlewareSubrouter",
+        "middleware_test.go:TestMiddleware",
+        "middleware_test.go:TestMiddlewareAdd",
+        "middleware_test.go:TestMiddlewareExecution",
+        "middleware_test.go:TestMiddlewareMethodMismatch",
+        "middleware_test.go:TestMiddlewareMethodMismatchSubrouter",
+        "middleware_test.go:TestMiddlewareNotFound",
+        "middleware_test.go:TestMiddlewareNotFoundSubrouter",
+        "middleware_test.go:TestMiddlewareOnMultiSubrouter",
+        "middleware_test.go:TestMiddlewareSubrouter",
+        "mux_httpserver_test.go:TestSchemeMatchers",
+        "mux_test.go:Test301Redirect",
+        "mux_test.go:TestErrMatchNotFound",
+        "mux_test.go:TestMethodNotAllowed",
+        "mux_test.go:TestMethodNotAllowedSubrouterWithSeveralRoutes",
+        "mux_test.go:TestMethodsSubrouterCatchall",
+        "mux_test.go:TestMethodsSubrouterPathPrefix",
+        "mux_test.go:TestMethodsSubrouterPathVariable",
+        "mux_test.go:TestMethodsSubrouterStrictSlash",
+        "mux_test.go:TestMethodsSubrouterSubrouter",
+        "mux_test.go:TestMultipleDefinitionOfSamePathWithDifferentMethods",
+        "mux_test.go:TestMultipleDefinitionOfSamePathWithDifferentQueries",
+        "mux_test.go:TestNoMatchMethodErrorHandler",
+        "mux_test.go:TestRouterInContext",
+        "mux_test.go:TestSkipClean",
+        "mux_test.go:TestSubrouterCustomMethodNotAllowed",
+        "mux_test.go:TestSubrouterHeader",
+        "mux_test.go:TestSubrouterNotFound",
+        "old_test.go:TestUrlBuilding",
+        "route_test.go:TestRouteMetadata"
+      ],
+      "found": [
+        "bench_test.go:BenchmarkManyPathVariables",
+        "bench_test.go:BenchmarkMux",
+        "bench_test.go:BenchmarkMuxAlternativeInRegexp",
+        "bench_test.go:BenchmarkMuxSimple",
+        "example_authentication_middleware_test.go:Example_authenticationMiddleware",
+        "example_cors_method_middleware_test.go:ExampleCORSMethodMiddleware",
+        "middleware_test.go:TestCORSMethodMiddleware",
+        "middleware_test.go:TestCORSMethodMiddlewareSubrouter",
+        "middleware_test.go:TestMiddleware",
+        "middleware_test.go:TestMiddlewareAdd",
+        "middleware_test.go:TestMiddlewareExecution",
+        "middleware_test.go:TestMiddlewareMethodMismatch",
+        "middleware_test.go:TestMiddlewareMethodMismatchSubrouter",
+        "middleware_test.go:TestMiddlewareNotFound",
+        "middleware_test.go:TestMiddlewareNotFoundSubrouter",
+        "middleware_test.go:TestMiddlewareOnMultiSubrouter",
+        "middleware_test.go:TestMiddlewareSubrouter",
+        "mux_httpserver_test.go:TestSchemeMatchers",
+        "mux_test.go:Test301Redirect",
+        "mux_test.go:TestErrMatchNotFound",
+        "mux_test.go:TestMethodNotAllowed",
+        "mux_test.go:TestMethodNotAllowedSubrouterWithSeveralRoutes",
+        "mux_test.go:TestMethodsSubrouterCatchall",
+        "mux_test.go:TestMethodsSubrouterPathPrefix",
+        "mux_test.go:TestMethodsSubrouterPathVariable",
+        "mux_test.go:TestMethodsSubrouterStrictSlash",
+        "mux_test.go:TestMethodsSubrouterSubrouter",
+        "mux_test.go:TestMultipleDefinitionOfSamePathWithDifferentMethods",
+        "mux_test.go:TestMultipleDefinitionOfSamePathWithDifferentQueries",
+        "mux_test.go:TestNoMatchMethodErrorHandler",
+        "mux_test.go:TestRouterInContext",
+        "mux_test.go:TestSkipClean",
+        "mux_test.go:TestSubrouterCustomMethodNotAllowed",
+        "mux_test.go:TestSubrouterHeader",
+        "mux_test.go:TestSubrouterNotFound",
+        "old_test.go:TestUrlBuilding",
+        "route_test.go:TestRouteMetadata"
+      ],
+      "tp": 37,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0688898
+    },
+    {
+      "kind": "signature",
+      "function": "CurrentRouter",
+      "file": "mux.go",
+      "truth": [
+        "mux_test.go:TestRouterInContext"
+      ],
+      "found": [
+        "mux_test.go:TestRouterInContext"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0688138
+    },
+    {
+      "kind": "signature",
+      "function": "copyRouteConf",
+      "file": "mux.go",
+      "truth": [
+        "mux.go:Router.NewRoute",
+        "mux_test.go:Test_copyRouteConf",
+        "route.go:Route.Subrouter"
+      ],
+      "found": [
+        "mux.go:Router.NewRoute",
+        "mux_test.go:Test_copyRouteConf",
+        "route.go:Route.Subrouter"
+      ],
+      "tp": 3,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0747195
+    },
+    {
+      "kind": "signature",
+      "function": "Route.URL",
+      "file": "route.go",
+      "truth": [
+        "example_route_vars_test.go:ExampleRoute_GetVarNames",
+        "mux_test.go:TestRouterInContext",
+        "mux_test.go:testRoute",
+        "old_test.go:TestSubRouting",
+        "old_test.go:TestUrlBuilding"
+      ],
+      "found": [
+        "example_route_vars_test.go:ExampleRoute_GetVarNames",
+        "mux_test.go:TestRouterInContext",
+        "mux_test.go:testRoute",
+        "old_test.go:TestSubRouting",
+        "old_test.go:TestUrlBuilding"
+      ],
+      "tp": 5,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0682663
+    },
+    {
+      "kind": "signature",
+      "function": "Router.Match",
+      "file": "mux.go",
+      "truth": [
+        "mux.go:Router.ServeHTTP",
+        "mux.go:Router.walk",
+        "mux_test.go:TestErrMatchNotFound",
+        "mux_test.go:TestMultipleDefinitionOfSamePathWithDifferentMethods",
+        "mux_test.go:TestMultipleDefinitionOfSamePathWithDifferentQueries",
+        "mux_test.go:TestNoMatchMethodErrorHandler",
+        "mux_test.go:TestSubrouterHeader",
+        "mux_test.go:TestSubrouterMatching",
+        "old_test.go:TestMatchedRouteName",
+        "old_test.go:TestRouteMatchers",
+        "old_test.go:TestSubRouting",
+        "route.go:Route.Subrouter"
+      ],
+      "found": [
+        "example_route_test.go:ExampleRoute_HeadersRegexp",
+        "example_route_test.go:ExampleRoute_HeadersRegexp_exactMatch",
+        "middleware.go:getAllMethodsForRoute",
+        "mux.go:Router.ServeHTTP",
+        "mux_test.go:TestErrMatchNotFound",
+        "mux_test.go:TestMultipleDefinitionOfSamePathWithDifferentMethods",
+        "mux_test.go:TestMultipleDefinitionOfSamePathWithDifferentQueries",
+        "mux_test.go:TestNoMatchMethodErrorHandler",
+        "mux_test.go:TestSubrouterHeader",
+        "mux_test.go:TestSubrouterMatching",
+        "mux_test.go:testRoute",
+        "old_test.go:TestHeaderMatcher",
+        "old_test.go:TestHostMatcher",
+        "old_test.go:TestMatchedRouteName",
+        "old_test.go:TestMethodMatcher",
+        "old_test.go:TestPathMatcher",
+        "old_test.go:TestRedirectSlash",
+        "old_test.go:TestRouteMatchers",
+        "old_test.go:TestSchemeMatcher",
+        "old_test.go:TestSubRouting",
+        "route.go:Route.Match"
+      ],
+      "tp": 10,
+      "fp": 11,
+      "fn": 2,
+      "pass": false,
+      "seconds": 0.0701196
+    },
+    {
+      "kind": "signature",
+      "function": "Route.buildVars",
+      "file": "route.go",
+      "truth": [
+        "route.go:Route.prepareVars"
+      ],
+      "found": [
+        "route.go:Route.prepareVars"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0689694
+    },
+    {
+      "kind": "signature",
+      "function": "Router.NewRoute",
+      "file": "mux.go",
+      "truth": [
+        "example_route_test.go:ExampleRoute_HeadersRegexp",
+        "example_route_test.go:ExampleRoute_HeadersRegexp_exactMatch",
+        "mux.go:Router.BuildVarsFunc",
+        "mux.go:Router.Handle",
+        "mux.go:Router.HandleFunc",
+        "mux.go:Router.Headers",
+        "mux.go:Router.Host",
+        "mux.go:Router.MatcherFunc",
+        "mux.go:Router.Methods",
+        "mux.go:Router.Name",
+        "mux.go:Router.Path",
+        "mux.go:Router.PathPrefix",
+        "mux.go:Router.Queries",
+        "mux.go:Router.Schemes",
+        "mux_test.go:TestNameMultipleCalls",
+        "mux_test.go:TestNamedRoutes",
+        "mux_test.go:TestPanicOnCapturingGroups",
+        "mux_test.go:TestStrictSlash",
+        "mux_test.go:TestUseEncodedPath",
+        "old_test.go:TestMatchedRouteName",
+        "old_test.go:TestRedirectSlash",
+        "old_test.go:TestRouteMatchers",
+        "old_test.go:TestSubRouting"
+      ],
+      "found": [
+        "example_route_test.go:ExampleRoute_HeadersRegexp",
+        "example_route_test.go:ExampleRoute_HeadersRegexp_exactMatch",
+        "mux.go:Router.BuildVarsFunc",
+        "mux.go:Router.Handle",
+        "mux.go:Router.HandleFunc",
+        "mux.go:Router.Headers",
+        "mux.go:Router.Host",
+        "mux.go:Router.MatcherFunc",
+        "mux.go:Router.Methods",
+        "mux.go:Router.Name",
+        "mux.go:Router.Path",
+        "mux.go:Router.PathPrefix",
+        "mux.go:Router.Queries",
+        "mux.go:Router.Schemes",
+        "mux_test.go:TestNameMultipleCalls",
+        "mux_test.go:TestNamedRoutes",
+        "mux_test.go:TestPanicOnCapturingGroups",
+        "mux_test.go:TestStrictSlash",
+        "mux_test.go:TestUseEncodedPath",
+        "old_test.go:TestMatchedRouteName",
+        "old_test.go:TestRedirectSlash",
+        "old_test.go:TestRouteMatchers",
+        "old_test.go:TestSubRouting"
+      ],
+      "tp": 23,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0735047
+    },
+    {
+      "kind": "signature",
+      "function": "Route.GetQueriesRegexp",
+      "file": "route.go",
+      "truth": [
+        "mux_test.go:testQueriesRegexp"
+      ],
+      "found": [
+        "mux_test.go:testQueriesRegexp"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0661509
+    },
+    {
+      "kind": "signature",
+      "function": "replaceURLPath",
+      "file": "mux.go",
+      "truth": [
+        "mux.go:Router.ServeHTTP",
+        "regexp.go:routeRegexpGroup.setMatch"
+      ],
+      "found": [
+        "mux.go:Router.ServeHTTP",
+        "regexp.go:routeRegexpGroup.setMatch"
+      ],
+      "tp": 2,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0675358
+    },
+    {
+      "kind": "signature",
+      "function": "Route.HeadersRegexp",
+      "file": "route.go",
+      "truth": [
+        "example_route_test.go:ExampleRoute_HeadersRegexp",
+        "example_route_test.go:ExampleRoute_HeadersRegexp_exactMatch",
+        "mux_test.go:TestHeaders"
+      ],
+      "found": [
+        "example_route_test.go:ExampleRoute_HeadersRegexp",
+        "example_route_test.go:ExampleRoute_HeadersRegexp_exactMatch",
+        "mux_test.go:TestHeaders"
+      ],
+      "tp": 3,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.066852
+    },
+    {
+      "kind": "signature",
+      "function": "getHost",
+      "file": "regexp.go",
+      "truth": [
+        "regexp.go:routeRegexp.Match",
+        "regexp.go:routeRegexpGroup.setMatch"
+      ],
+      "found": [
+        "regexp.go:routeRegexp.Match",
+        "regexp.go:routeRegexpGroup.setMatch"
+      ],
+      "tp": 2,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0669545
+    },
+    {
+      "kind": "signature",
+      "function": "getAllMethodsForRoute",
+      "file": "middleware.go",
+      "truth": [
+        "middleware.go:CORSMethodMiddleware"
+      ],
+      "found": [
+        "middleware.go:CORSMethodMiddleware"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0635388
+    },
+    {
+      "kind": "signature",
+      "function": "cleanPath",
+      "file": "mux.go",
+      "truth": [
+        "mux.go:Router.ServeHTTP"
+      ],
+      "found": [
+        "mux.go:Router.ServeHTTP"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0688247
+    },
+    {
+      "kind": "signature",
+      "function": "Router.OmitRouterFromContext",
+      "file": "mux.go",
+      "truth": [
+        "mux_test.go:TestRouterInContext"
+      ],
+      "found": [
+        "mux_test.go:TestRouterInContext"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0659324
+    },
+    {
+      "kind": "signature",
+      "function": "Route.prepareVars",
+      "file": "route.go",
+      "truth": [
+        "route.go:Route.URL",
+        "route.go:Route.URLHost",
+        "route.go:Route.URLPath"
+      ],
+      "found": [
+        "route.go:Route.URL",
+        "route.go:Route.URLHost",
+        "route.go:Route.URLPath"
+      ],
+      "tp": 3,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0677653
+    },
+    {
+      "kind": "signature",
+      "function": "requestWithRouter",
+      "file": "mux.go",
+      "truth": [
+        "mux.go:Router.ServeHTTP"
+      ],
+      "found": [
+        "mux.go:Router.ServeHTTP"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0676596
+    },
+    {
+      "kind": "signature",
+      "function": "Route.GetQueriesTemplates",
+      "file": "route.go",
+      "truth": [
+        "mux_test.go:testQueriesTemplates"
+      ],
+      "found": [
+        "mux_test.go:testQueriesTemplates"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0672278
+    },
+    {
+      "kind": "signature",
+      "function": "Vars",
+      "file": "mux.go",
+      "truth": [
+        "mux_test.go:ExampleSetURLVars",
+        "mux_test.go:TestContextMiddleware",
+        "mux_test.go:TestPopulateContext"
+      ],
+      "found": [
+        "mux_test.go:ExampleSetURLVars",
+        "mux_test.go:TestContextMiddleware",
+        "mux_test.go:TestPopulateContext"
+      ],
+      "tp": 3,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0658068
+    },
+    {
+      "kind": "remove",
+      "function": "CORSMethodMiddleware",
+      "file": "middleware.go",
+      "truth": [
+        "example_cors_method_middleware_test.go:ExampleCORSMethodMiddleware",
+        "middleware_test.go:TestCORSMethodMiddleware",
+        "middleware_test.go:TestCORSMethodMiddlewareSubrouter"
+      ],
+      "found": [
+        "example_cors_method_middleware_test.go:ExampleCORSMethodMiddleware",
+        "middleware_test.go:TestCORSMethodMiddleware",
+        "middleware_test.go:TestCORSMethodMiddlewareSubrouter"
+      ],
+      "tp": 3,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.061933
+    },
+    {
+      "kind": "remove",
+      "function": "Route.addMatcher",
+      "file": "route.go",
+      "truth": [
+        "route.go:Route.Headers",
+        "route.go:Route.HeadersRegexp",
+        "route.go:Route.MatcherFunc",
+        "route.go:Route.Methods",
+        "route.go:Route.Schemes",
+        "route.go:Route.Subrouter",
+        "route.go:Route.addRegexpMatcher"
+      ],
+      "found": [
+        "route.go:Route.Headers",
+        "route.go:Route.HeadersRegexp",
+        "route.go:Route.MatcherFunc",
+        "route.go:Route.Methods",
+        "route.go:Route.Schemes",
+        "route.go:Route.Subrouter",
+        "route.go:Route.addRegexpMatcher"
+      ],
+      "tp": 7,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0691321
+    },
+    {
+      "kind": "remove",
+      "function": "Router.HandleFunc",
+      "file": "mux.go",
+      "truth": [
+        "bench_test.go:BenchmarkManyPathVariables",
+        "bench_test.go:BenchmarkMux",
+        "bench_test.go:BenchmarkMuxAlternativeInRegexp",
+        "bench_test.go:BenchmarkMuxSimple",
+        "example_authentication_middleware_test.go:Example_authenticationMiddleware",
+        "example_cors_method_middleware_test.go:ExampleCORSMethodMiddleware",
+        "middleware_test.go:TestCORSMethodMiddleware",
+        "middleware_test.go:TestCORSMethodMiddlewareSubrouter",
+        "middleware_test.go:TestMiddleware",
+        "middleware_test.go:TestMiddlewareAdd",
+        "middleware_test.go:TestMiddlewareExecution",
+        "middleware_test.go:TestMiddlewareMethodMismatch",
+        "middleware_test.go:TestMiddlewareMethodMismatchSubrouter",
+        "middleware_test.go:TestMiddlewareNotFound",
+        "middleware_test.go:TestMiddlewareNotFoundSubrouter",
+        "middleware_test.go:TestMiddlewareOnMultiSubrouter",
+        "middleware_test.go:TestMiddlewareSubrouter",
+        "mux_httpserver_test.go:TestSchemeMatchers",
+        "mux_test.go:Test301Redirect",
+        "mux_test.go:TestErrMatchNotFound",
+        "mux_test.go:TestMethodNotAllowed",
+        "mux_test.go:TestMethodNotAllowedSubrouterWithSeveralRoutes",
+        "mux_test.go:TestMethodsSubrouterCatchall",
+        "mux_test.go:TestMethodsSubrouterPathPrefix",
+        "mux_test.go:TestMethodsSubrouterPathVariable",
+        "mux_test.go:TestMethodsSubrouterStrictSlash",
+        "mux_test.go:TestMethodsSubrouterSubrouter",
+        "mux_test.go:TestMultipleDefinitionOfSamePathWithDifferentMethods",
+        "mux_test.go:TestMultipleDefinitionOfSamePathWithDifferentQueries",
+        "mux_test.go:TestNoMatchMethodErrorHandler",
+        "mux_test.go:TestRouterInContext",
+        "mux_test.go:TestSkipClean",
+        "mux_test.go:TestSubrouterCustomMethodNotAllowed",
+        "mux_test.go:TestSubrouterHeader",
+        "mux_test.go:TestSubrouterNotFound",
+        "old_test.go:TestUrlBuilding",
+        "route_test.go:TestRouteMetadata"
+      ],
+      "found": [
+        "bench_test.go:BenchmarkManyPathVariables",
+        "bench_test.go:BenchmarkMux",
+        "bench_test.go:BenchmarkMuxAlternativeInRegexp",
+        "bench_test.go:BenchmarkMuxSimple",
+        "example_authentication_middleware_test.go:Example_authenticationMiddleware",
+        "example_cors_method_middleware_test.go:ExampleCORSMethodMiddleware",
+        "middleware_test.go:TestCORSMethodMiddleware",
+        "middleware_test.go:TestCORSMethodMiddlewareSubrouter",
+        "middleware_test.go:TestMiddleware",
+        "middleware_test.go:TestMiddlewareAdd",
+        "middleware_test.go:TestMiddlewareExecution",
+        "middleware_test.go:TestMiddlewareMethodMismatch",
+        "middleware_test.go:TestMiddlewareMethodMismatchSubrouter",
+        "middleware_test.go:TestMiddlewareNotFound",
+        "middleware_test.go:TestMiddlewareNotFoundSubrouter",
+        "middleware_test.go:TestMiddlewareOnMultiSubrouter",
+        "middleware_test.go:TestMiddlewareSubrouter",
+        "mux_httpserver_test.go:TestSchemeMatchers",
+        "mux_test.go:Test301Redirect",
+        "mux_test.go:TestErrMatchNotFound",
+        "mux_test.go:TestMethodNotAllowed",
+        "mux_test.go:TestMethodNotAllowedSubrouterWithSeveralRoutes",
+        "mux_test.go:TestMethodsSubrouterCatchall",
+        "mux_test.go:TestMethodsSubrouterPathPrefix",
+        "mux_test.go:TestMethodsSubrouterPathVariable",
+        "mux_test.go:TestMethodsSubrouterStrictSlash",
+        "mux_test.go:TestMethodsSubrouterSubrouter",
+        "mux_test.go:TestMultipleDefinitionOfSamePathWithDifferentMethods",
+        "mux_test.go:TestMultipleDefinitionOfSamePathWithDifferentQueries",
+        "mux_test.go:TestNoMatchMethodErrorHandler",
+        "mux_test.go:TestRouterInContext",
+        "mux_test.go:TestSkipClean",
+        "mux_test.go:TestSubrouterCustomMethodNotAllowed",
+        "mux_test.go:TestSubrouterHeader",
+        "mux_test.go:TestSubrouterNotFound",
+        "old_test.go:TestUrlBuilding",
+        "route_test.go:TestRouteMetadata"
+      ],
+      "tp": 37,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0663349
+    },
+    {
+      "kind": "remove",
+      "function": "CurrentRouter",
+      "file": "mux.go",
+      "truth": [
+        "mux_test.go:TestRouterInContext"
+      ],
+      "found": [
+        "mux_test.go:TestRouterInContext"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0664523
+    },
+    {
+      "kind": "remove",
+      "function": "copyRouteConf",
+      "file": "mux.go",
+      "truth": [
+        "mux.go:Router.NewRoute",
+        "mux_test.go:Test_copyRouteConf",
+        "route.go:Route.Subrouter"
+      ],
+      "found": [
+        "mux.go:Router.NewRoute",
+        "mux_test.go:Test_copyRouteConf",
+        "route.go:Route.Subrouter"
+      ],
+      "tp": 3,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0676871
+    },
+    {
+      "kind": "remove",
+      "function": "Route.URL",
+      "file": "route.go",
+      "truth": [
+        "example_route_vars_test.go:ExampleRoute_GetVarNames",
+        "mux_test.go:TestRouterInContext",
+        "mux_test.go:testRoute",
+        "old_test.go:TestSubRouting",
+        "old_test.go:TestUrlBuilding"
+      ],
+      "found": [
+        "example_route_vars_test.go:ExampleRoute_GetVarNames",
+        "mux_test.go:TestRouterInContext",
+        "mux_test.go:testRoute",
+        "old_test.go:TestSubRouting",
+        "old_test.go:TestUrlBuilding"
+      ],
+      "tp": 5,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0731716
+    },
+    {
+      "kind": "remove",
+      "function": "Router.Match",
+      "file": "mux.go",
+      "truth": [
+        "mux.go:Router.ServeHTTP",
+        "mux.go:Router.walk",
+        "mux_test.go:TestErrMatchNotFound",
+        "mux_test.go:TestMultipleDefinitionOfSamePathWithDifferentMethods",
+        "mux_test.go:TestMultipleDefinitionOfSamePathWithDifferentQueries",
+        "mux_test.go:TestNoMatchMethodErrorHandler",
+        "mux_test.go:TestSubrouterHeader",
+        "mux_test.go:TestSubrouterMatching",
+        "old_test.go:TestMatchedRouteName",
+        "old_test.go:TestRouteMatchers",
+        "old_test.go:TestSubRouting",
+        "route.go:Route.Subrouter"
+      ],
+      "tp": 0,
+      "fp": 0,
+      "fn": 12,
+      "pass": false,
+      "seconds": 0.0677742
+    },
+    {
+      "kind": "remove",
+      "function": "Route.buildVars",
+      "file": "route.go",
+      "truth": [
+        "route.go:Route.prepareVars"
+      ],
+      "found": [
+        "route.go:Route.prepareVars"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0649654
+    },
+    {
+      "kind": "remove",
+      "function": "Router.NewRoute",
+      "file": "mux.go",
+      "truth": [
+        "example_route_test.go:ExampleRoute_HeadersRegexp",
+        "example_route_test.go:ExampleRoute_HeadersRegexp_exactMatch",
+        "mux.go:Router.BuildVarsFunc",
+        "mux.go:Router.Handle",
+        "mux.go:Router.HandleFunc",
+        "mux.go:Router.Headers",
+        "mux.go:Router.Host",
+        "mux.go:Router.MatcherFunc",
+        "mux.go:Router.Methods",
+        "mux.go:Router.Name",
+        "mux.go:Router.Path",
+        "mux.go:Router.PathPrefix",
+        "mux.go:Router.Queries",
+        "mux.go:Router.Schemes",
+        "mux_test.go:TestNameMultipleCalls",
+        "mux_test.go:TestNamedRoutes",
+        "mux_test.go:TestPanicOnCapturingGroups",
+        "mux_test.go:TestStrictSlash",
+        "mux_test.go:TestUseEncodedPath",
+        "old_test.go:TestMatchedRouteName",
+        "old_test.go:TestRedirectSlash",
+        "old_test.go:TestRouteMatchers",
+        "old_test.go:TestSubRouting"
+      ],
+      "found": [
+        "example_route_test.go:ExampleRoute_HeadersRegexp",
+        "example_route_test.go:ExampleRoute_HeadersRegexp_exactMatch",
+        "mux.go:Router.BuildVarsFunc",
+        "mux.go:Router.Handle",
+        "mux.go:Router.HandleFunc",
+        "mux.go:Router.Headers",
+        "mux.go:Router.Host",
+        "mux.go:Router.MatcherFunc",
+        "mux.go:Router.Methods",
+        "mux.go:Router.Name",
+        "mux.go:Router.Path",
+        "mux.go:Router.PathPrefix",
+        "mux.go:Router.Queries",
+        "mux.go:Router.Schemes",
+        "mux_test.go:TestNameMultipleCalls",
+        "mux_test.go:TestNamedRoutes",
+        "mux_test.go:TestPanicOnCapturingGroups",
+        "mux_test.go:TestStrictSlash",
+        "mux_test.go:TestUseEncodedPath",
+        "old_test.go:TestMatchedRouteName",
+        "old_test.go:TestRedirectSlash",
+        "old_test.go:TestRouteMatchers",
+        "old_test.go:TestSubRouting"
+      ],
+      "tp": 23,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0658008
+    },
+    {
+      "kind": "remove",
+      "function": "Route.GetQueriesRegexp",
+      "file": "route.go",
+      "truth": [
+        "mux_test.go:testQueriesRegexp"
+      ],
+      "found": [
+        "mux_test.go:testQueriesRegexp"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.070334
+    },
+    {
+      "kind": "remove",
+      "function": "replaceURLPath",
+      "file": "mux.go",
+      "truth": [
+        "mux.go:Router.ServeHTTP",
+        "regexp.go:routeRegexpGroup.setMatch"
+      ],
+      "found": [
+        "mux.go:Router.ServeHTTP",
+        "regexp.go:routeRegexpGroup.setMatch"
+      ],
+      "tp": 2,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0676465
+    },
+    {
+      "kind": "remove",
+      "function": "Route.HeadersRegexp",
+      "file": "route.go",
+      "truth": [
+        "example_route_test.go:ExampleRoute_HeadersRegexp",
+        "example_route_test.go:ExampleRoute_HeadersRegexp_exactMatch",
+        "mux_test.go:TestHeaders"
+      ],
+      "found": [
+        "example_route_test.go:ExampleRoute_HeadersRegexp",
+        "example_route_test.go:ExampleRoute_HeadersRegexp_exactMatch",
+        "mux_test.go:TestHeaders"
+      ],
+      "tp": 3,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0646885
+    },
+    {
+      "kind": "remove",
+      "function": "getHost",
+      "file": "regexp.go",
+      "truth": [
+        "regexp.go:routeRegexp.Match",
+        "regexp.go:routeRegexpGroup.setMatch"
+      ],
+      "found": [
+        "regexp.go:routeRegexp.Match",
+        "regexp.go:routeRegexpGroup.setMatch"
+      ],
+      "tp": 2,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0636939
+    },
+    {
+      "kind": "remove",
+      "function": "getAllMethodsForRoute",
+      "file": "middleware.go",
+      "truth": [
+        "middleware.go:CORSMethodMiddleware"
+      ],
+      "found": [
+        "middleware.go:CORSMethodMiddleware"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0627358
+    },
+    {
+      "kind": "remove",
+      "function": "cleanPath",
+      "file": "mux.go",
+      "truth": [
+        "mux.go:Router.ServeHTTP"
+      ],
+      "found": [
+        "mux.go:Router.ServeHTTP"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0669404
+    },
+    {
+      "kind": "remove",
+      "function": "Router.OmitRouterFromContext",
+      "file": "mux.go",
+      "truth": [
+        "mux_test.go:TestRouterInContext"
+      ],
+      "found": [
+        "mux_test.go:TestRouterInContext"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0644557
+    },
+    {
+      "kind": "remove",
+      "function": "Route.prepareVars",
+      "file": "route.go",
+      "truth": [
+        "route.go:Route.URL",
+        "route.go:Route.URLHost",
+        "route.go:Route.URLPath"
+      ],
+      "found": [
+        "route.go:Route.URL",
+        "route.go:Route.URLHost",
+        "route.go:Route.URLPath"
+      ],
+      "tp": 3,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0671089
+    },
+    {
+      "kind": "remove",
+      "function": "requestWithRouter",
+      "file": "mux.go",
+      "truth": [
+        "mux.go:Router.ServeHTTP"
+      ],
+      "found": [
+        "mux.go:Router.ServeHTTP"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0676205
+    },
+    {
+      "kind": "remove",
+      "function": "Route.GetQueriesTemplates",
+      "file": "route.go",
+      "truth": [
+        "mux_test.go:testQueriesTemplates"
+      ],
+      "found": [
+        "mux_test.go:testQueriesTemplates"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0649926
+    },
+    {
+      "kind": "remove",
+      "function": "Vars",
+      "file": "mux.go",
+      "truth": [
+        "mux_test.go:ExampleSetURLVars",
+        "mux_test.go:TestContextMiddleware",
+        "mux_test.go:TestPopulateContext"
+      ],
+      "found": [
+        "mux_test.go:ExampleSetURLVars",
+        "mux_test.go:TestContextMiddleware",
+        "mux_test.go:TestPopulateContext"
+      ],
+      "tp": 3,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0688491
+    },
+    {
+      "kind": "db",
+      "function": "CORSMethodMiddleware",
+      "file": "middleware.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0626885
+    },
+    {
+      "kind": "fs",
+      "function": "CORSMethodMiddleware",
+      "file": "middleware.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.062295
+    },
+    {
+      "kind": "network",
+      "function": "CORSMethodMiddleware",
+      "file": "middleware.go",
+      "truth": [
+        "network"
+      ],
+      "tp": 0,
+      "fp": 0,
+      "fn": 1,
+      "pass": false,
+      "seconds": 0.0638891
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "CORSMethodMiddleware",
+      "file": "middleware.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0602995
+    },
+    {
+      "kind": "control:len",
+      "function": "CORSMethodMiddleware",
+      "file": "middleware.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0615411
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "CORSMethodMiddleware",
+      "file": "middleware.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0604188
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "CORSMethodMiddleware",
+      "file": "middleware.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0613804
+    },
+    {
+      "kind": "control:strings",
+      "function": "CORSMethodMiddleware",
+      "file": "middleware.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0608627
+    },
+    {
+      "kind": "branch",
+      "function": "CORSMethodMiddleware",
+      "file": "middleware.go",
+      "found": [
+        "0 to 2"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0613908
+    },
+    {
+      "kind": "db",
+      "function": "Route.addMatcher",
+      "file": "route.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0677885
+    },
+    {
+      "kind": "fs",
+      "function": "Route.addMatcher",
+      "file": "route.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0663974
+    },
+    {
+      "kind": "network",
+      "function": "Route.addMatcher",
+      "file": "route.go",
+      "truth": [
+        "network"
+      ],
+      "found": [
+        "network"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0657516
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "Route.addMatcher",
+      "file": "route.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0665282
+    },
+    {
+      "kind": "control:len",
+      "function": "Route.addMatcher",
+      "file": "route.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0658632
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "Route.addMatcher",
+      "file": "route.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0686349
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "Route.addMatcher",
+      "file": "route.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0665242
+    },
+    {
+      "kind": "control:strings",
+      "function": "Route.addMatcher",
+      "file": "route.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0660184
+    },
+    {
+      "kind": "branch",
+      "function": "Route.addMatcher",
+      "file": "route.go",
+      "found": [
+        "1 to 3"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0658949
+    },
+    {
+      "kind": "db",
+      "function": "Router.HandleFunc",
+      "file": "mux.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0684422
+    },
+    {
+      "kind": "fs",
+      "function": "Router.HandleFunc",
+      "file": "mux.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0660176
+    },
+    {
+      "kind": "network",
+      "function": "Router.HandleFunc",
+      "file": "mux.go",
+      "truth": [
+        "network"
+      ],
+      "found": [
+        "network"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0659644
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "Router.HandleFunc",
+      "file": "mux.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0661875
+    },
+    {
+      "kind": "control:len",
+      "function": "Router.HandleFunc",
+      "file": "mux.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0657081
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "Router.HandleFunc",
+      "file": "mux.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0663028
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "Router.HandleFunc",
+      "file": "mux.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.067612
+    },
+    {
+      "kind": "control:strings",
+      "function": "Router.HandleFunc",
+      "file": "mux.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0660261
+    },
+    {
+      "kind": "branch",
+      "function": "Router.HandleFunc",
+      "file": "mux.go",
+      "found": [
+        "0 to 2"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0668524
+    },
+    {
+      "kind": "db",
+      "function": "methodMatcher.Match",
+      "file": "route.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0680926
+    },
+    {
+      "kind": "fs",
+      "function": "methodMatcher.Match",
+      "file": "route.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0669168
+    },
+    {
+      "kind": "network",
+      "function": "methodMatcher.Match",
+      "file": "route.go",
+      "truth": [
+        "network"
+      ],
+      "found": [
+        "network"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0664525
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "methodMatcher.Match",
+      "file": "route.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0647601
+    },
+    {
+      "kind": "control:len",
+      "function": "methodMatcher.Match",
+      "file": "route.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.065163
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "methodMatcher.Match",
+      "file": "route.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0647798
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "methodMatcher.Match",
+      "file": "route.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.068535
+    },
+    {
+      "kind": "control:strings",
+      "function": "methodMatcher.Match",
+      "file": "route.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0683891
+    },
+    {
+      "kind": "branch",
+      "function": "methodMatcher.Match",
+      "file": "route.go",
+      "found": [
+        "0 to 2"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0682309
+    },
+    {
+      "kind": "db",
+      "function": "CurrentRouter",
+      "file": "mux.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0673363
+    },
+    {
+      "kind": "fs",
+      "function": "CurrentRouter",
+      "file": "mux.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0688442
+    },
+    {
+      "kind": "network",
+      "function": "CurrentRouter",
+      "file": "mux.go",
+      "truth": [
+        "network"
+      ],
+      "found": [
+        "network"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0667491
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "CurrentRouter",
+      "file": "mux.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0661423
+    },
+    {
+      "kind": "control:len",
+      "function": "CurrentRouter",
+      "file": "mux.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0687234
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "CurrentRouter",
+      "file": "mux.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0670729
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "CurrentRouter",
+      "file": "mux.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0690575
+    },
+    {
+      "kind": "control:strings",
+      "function": "CurrentRouter",
+      "file": "mux.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0665071
+    },
+    {
+      "kind": "branch",
+      "function": "CurrentRouter",
+      "file": "mux.go",
+      "found": [
+        "1 to 3"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0687372
+    },
+    {
+      "kind": "db",
+      "function": "Route.Schemes",
+      "file": "route.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.067875
+    },
+    {
+      "kind": "fs",
+      "function": "Route.Schemes",
+      "file": "route.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0647211
+    },
+    {
+      "kind": "network",
+      "function": "Route.Schemes",
+      "file": "route.go",
+      "truth": [
+        "network"
+      ],
+      "found": [
+        "network"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0649174
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "Route.Schemes",
+      "file": "route.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0648315
+    },
+    {
+      "kind": "control:len",
+      "function": "Route.Schemes",
+      "file": "route.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.063719
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "Route.Schemes",
+      "file": "route.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0641488
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "Route.Schemes",
+      "file": "route.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0700014
+    },
+    {
+      "kind": "control:strings",
+      "function": "Route.Schemes",
+      "file": "route.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0647628
+    },
+    {
+      "kind": "branch",
+      "function": "Route.Schemes",
+      "file": "route.go",
+      "found": [
+        "2 to 4"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0657493
+    },
+    {
+      "kind": "db",
+      "function": "copyRouteConf",
+      "file": "mux.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0674545
+    },
+    {
+      "kind": "fs",
+      "function": "copyRouteConf",
+      "file": "mux.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0656519
+    },
+    {
+      "kind": "network",
+      "function": "copyRouteConf",
+      "file": "mux.go",
+      "truth": [
+        "network"
+      ],
+      "found": [
+        "network"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0665491
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "copyRouteConf",
+      "file": "mux.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0650774
+    },
+    {
+      "kind": "control:len",
+      "function": "copyRouteConf",
+      "file": "mux.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0655767
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "copyRouteConf",
+      "file": "mux.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0658742
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "copyRouteConf",
+      "file": "mux.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0654995
+    },
+    {
+      "kind": "control:strings",
+      "function": "copyRouteConf",
+      "file": "mux.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0675795
+    },
+    {
+      "kind": "branch",
+      "function": "copyRouteConf",
+      "file": "mux.go",
+      "found": [
+        "3 to 5"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0675574
+    },
+    {
+      "kind": "db",
+      "function": "Route.URL",
+      "file": "route.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0679854
+    },
+    {
+      "kind": "fs",
+      "function": "Route.URL",
+      "file": "route.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0650121
+    },
+    {
+      "kind": "network",
+      "function": "Route.URL",
+      "file": "route.go",
+      "truth": [
+        "network"
+      ],
+      "found": [
+        "network"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0641665
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "Route.URL",
+      "file": "route.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0653795
+    },
+    {
+      "kind": "control:len",
+      "function": "Route.URL",
+      "file": "route.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.066025
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "Route.URL",
+      "file": "route.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0663386
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "Route.URL",
+      "file": "route.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0670768
+    },
+    {
+      "kind": "control:strings",
+      "function": "Route.URL",
+      "file": "route.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0642491
+    },
+    {
+      "kind": "branch",
+      "function": "Route.URL",
+      "file": "route.go",
+      "found": [
+        "9 to 11"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0648603
+    },
+    {
+      "kind": "db",
+      "function": "Router.Match",
+      "file": "mux.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.068632
+    },
+    {
+      "kind": "fs",
+      "function": "Router.Match",
+      "file": "mux.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0694705
+    },
+    {
+      "kind": "network",
+      "function": "Router.Match",
+      "file": "mux.go",
+      "truth": [
+        "network"
+      ],
+      "found": [
+        "network"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0659502
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "Router.Match",
+      "file": "mux.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0666379
+    },
+    {
+      "kind": "control:len",
+      "function": "Router.Match",
+      "file": "mux.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0650753
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "Router.Match",
+      "file": "mux.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0683699
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "Router.Match",
+      "file": "mux.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0672526
+    },
+    {
+      "kind": "control:strings",
+      "function": "Router.Match",
+      "file": "mux.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0658614
+    },
+    {
+      "kind": "branch",
+      "function": "Router.Match",
+      "file": "mux.go",
+      "found": [
+        "7 to 9"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0653749
+    },
+    {
+      "kind": "db",
+      "function": "Router.GetRoute",
+      "file": "mux.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0649907
+    },
+    {
+      "kind": "fs",
+      "function": "Router.GetRoute",
+      "file": "mux.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0654482
+    },
+    {
+      "kind": "network",
+      "function": "Router.GetRoute",
+      "file": "mux.go",
+      "truth": [
+        "network"
+      ],
+      "found": [
+        "network"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0661483
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "Router.GetRoute",
+      "file": "mux.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0682823
+    },
+    {
+      "kind": "control:len",
+      "function": "Router.GetRoute",
+      "file": "mux.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0653248
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "Router.GetRoute",
+      "file": "mux.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0662853
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "Router.GetRoute",
+      "file": "mux.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0651384
+    },
+    {
+      "kind": "control:strings",
+      "function": "Router.GetRoute",
+      "file": "mux.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0722829
+    },
+    {
+      "kind": "branch",
+      "function": "Router.GetRoute",
+      "file": "mux.go",
+      "found": [
+        "0 to 2"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.066104
+    },
+    {
+      "kind": "db",
+      "function": "Route.buildVars",
+      "file": "route.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0674341
+    },
+    {
+      "kind": "fs",
+      "function": "Route.buildVars",
+      "file": "route.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0650822
+    },
+    {
+      "kind": "network",
+      "function": "Route.buildVars",
+      "file": "route.go",
+      "truth": [
+        "network"
+      ],
+      "found": [
+        "network"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0674528
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "Route.buildVars",
+      "file": "route.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0650462
+    },
+    {
+      "kind": "control:len",
+      "function": "Route.buildVars",
+      "file": "route.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0651996
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "Route.buildVars",
+      "file": "route.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0655724
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "Route.buildVars",
+      "file": "route.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0656152
+    },
+    {
+      "kind": "control:strings",
+      "function": "Route.buildVars",
+      "file": "route.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0668342
+    },
+    {
+      "kind": "branch",
+      "function": "Route.buildVars",
+      "file": "route.go",
+      "found": [
+        "1 to 3"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0653762
+    },
+    {
+      "kind": "db",
+      "function": "Router.NewRoute",
+      "file": "mux.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0702698
+    },
+    {
+      "kind": "fs",
+      "function": "Router.NewRoute",
+      "file": "mux.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0673078
+    },
+    {
+      "kind": "network",
+      "function": "Router.NewRoute",
+      "file": "mux.go",
+      "truth": [
+        "network"
+      ],
+      "found": [
+        "network"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0696055
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "Router.NewRoute",
+      "file": "mux.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0693115
+    },
+    {
+      "kind": "control:len",
+      "function": "Router.NewRoute",
+      "file": "mux.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0655928
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "Router.NewRoute",
+      "file": "mux.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.070442
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "Router.NewRoute",
+      "file": "mux.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0673216
+    },
+    {
+      "kind": "control:strings",
+      "function": "Router.NewRoute",
+      "file": "mux.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0662414
+    },
+    {
+      "kind": "branch",
+      "function": "Router.NewRoute",
+      "file": "mux.go",
+      "found": [
+        "0 to 2"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0664149
+    },
+    {
+      "kind": "db",
+      "function": "Route.GetQueriesRegexp",
+      "file": "route.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.068045
+    },
+    {
+      "kind": "fs",
+      "function": "Route.GetQueriesRegexp",
+      "file": "route.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0647829
+    },
+    {
+      "kind": "network",
+      "function": "Route.GetQueriesRegexp",
+      "file": "route.go",
+      "truth": [
+        "network"
+      ],
+      "found": [
+        "network"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0659705
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "Route.GetQueriesRegexp",
+      "file": "route.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0670612
+    },
+    {
+      "kind": "control:len",
+      "function": "Route.GetQueriesRegexp",
+      "file": "route.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.065697
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "Route.GetQueriesRegexp",
+      "file": "route.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.065315
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "Route.GetQueriesRegexp",
+      "file": "route.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.065024
+    },
+    {
+      "kind": "control:strings",
+      "function": "Route.GetQueriesRegexp",
+      "file": "route.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0694339
+    },
+    {
+      "kind": "branch",
+      "function": "Route.GetQueriesRegexp",
+      "file": "route.go",
+      "found": [
+        "3 to 5"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0652651
+    },
+    {
+      "kind": "db",
+      "function": "replaceURLPath",
+      "file": "mux.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0687286
+    },
+    {
+      "kind": "fs",
+      "function": "replaceURLPath",
+      "file": "mux.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0666192
+    },
+    {
+      "kind": "network",
+      "function": "replaceURLPath",
+      "file": "mux.go",
+      "truth": [
+        "network"
+      ],
+      "found": [
+        "network"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0676419
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "replaceURLPath",
+      "file": "mux.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0660284
+    },
+    {
+      "kind": "control:len",
+      "function": "replaceURLPath",
+      "file": "mux.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0680215
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "replaceURLPath",
+      "file": "mux.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0663966
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "replaceURLPath",
+      "file": "mux.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0663835
+    },
+    {
+      "kind": "control:strings",
+      "function": "replaceURLPath",
+      "file": "mux.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0712632
+    },
+    {
+      "kind": "branch",
+      "function": "replaceURLPath",
+      "file": "mux.go",
+      "found": [
+        "0 to 2"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0656144
+    },
+    {
+      "kind": "db",
+      "function": "Route.HeadersRegexp",
+      "file": "route.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0677939
+    },
+    {
+      "kind": "fs",
+      "function": "Route.HeadersRegexp",
+      "file": "route.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0658244
+    },
+    {
+      "kind": "network",
+      "function": "Route.HeadersRegexp",
+      "file": "route.go",
+      "truth": [
+        "network"
+      ],
+      "found": [
+        "network"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.064277
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "Route.HeadersRegexp",
+      "file": "route.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0652204
+    },
+    {
+      "kind": "control:len",
+      "function": "Route.HeadersRegexp",
+      "file": "route.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.066466
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "Route.HeadersRegexp",
+      "file": "route.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0652829
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "Route.HeadersRegexp",
+      "file": "route.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0670758
+    },
+    {
+      "kind": "control:strings",
+      "function": "Route.HeadersRegexp",
+      "file": "route.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0652099
+    },
+    {
+      "kind": "branch",
+      "function": "Route.HeadersRegexp",
+      "file": "route.go",
+      "found": [
+        "1 to 3"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0656601
+    },
+    {
+      "kind": "db",
+      "function": "getHost",
+      "file": "regexp.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0664186
+    },
+    {
+      "kind": "fs",
+      "function": "getHost",
+      "file": "regexp.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.062974
+    },
+    {
+      "kind": "network",
+      "function": "getHost",
+      "file": "regexp.go",
+      "truth": [
+        "network"
+      ],
+      "found": [
+        "network"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0625802
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "getHost",
+      "file": "regexp.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0633019
+    },
+    {
+      "kind": "control:len",
+      "function": "getHost",
+      "file": "regexp.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0652696
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "getHost",
+      "file": "regexp.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0649421
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "getHost",
+      "file": "regexp.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0661934
+    },
+    {
+      "kind": "control:strings",
+      "function": "getHost",
+      "file": "regexp.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0637405
+    },
+    {
+      "kind": "branch",
+      "function": "getHost",
+      "file": "regexp.go",
+      "found": [
+        "1 to 3"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0654945
+    },
+    {
+      "kind": "db",
+      "function": "Route.PathPrefix",
+      "file": "route.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0686049
+    },
+    {
+      "kind": "fs",
+      "function": "Route.PathPrefix",
+      "file": "route.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0652567
+    },
+    {
+      "kind": "network",
+      "function": "Route.PathPrefix",
+      "file": "route.go",
+      "truth": [
+        "network"
+      ],
+      "found": [
+        "network"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0672301
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "Route.PathPrefix",
+      "file": "route.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0659729
+    },
+    {
+      "kind": "control:len",
+      "function": "Route.PathPrefix",
+      "file": "route.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0657554
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "Route.PathPrefix",
+      "file": "route.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0653029
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "Route.PathPrefix",
+      "file": "route.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0652912
+    },
+    {
+      "kind": "control:strings",
+      "function": "Route.PathPrefix",
+      "file": "route.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0639074
+    },
+    {
+      "kind": "branch",
+      "function": "Route.PathPrefix",
+      "file": "route.go",
+      "found": [
+        "0 to 2"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0715756
+    },
+    {
+      "kind": "db",
+      "function": "Route.Methods",
+      "file": "route.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0648688
+    },
+    {
+      "kind": "fs",
+      "function": "Route.Methods",
+      "file": "route.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.064723
+    },
+    {
+      "kind": "network",
+      "function": "Route.Methods",
+      "file": "route.go",
+      "truth": [
+        "network"
+      ],
+      "found": [
+        "network"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0655701
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "Route.Methods",
+      "file": "route.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0656357
+    },
+    {
+      "kind": "control:len",
+      "function": "Route.Methods",
+      "file": "route.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0654662
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "Route.Methods",
+      "file": "route.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0669349
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "Route.Methods",
+      "file": "route.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0654593
+    },
+    {
+      "kind": "control:strings",
+      "function": "Route.Methods",
+      "file": "route.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0645713
+    },
+    {
+      "kind": "branch",
+      "function": "Route.Methods",
+      "file": "route.go",
+      "found": [
+        "1 to 3"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.065449
+    },
+    {
+      "kind": "db",
+      "function": "getAllMethodsForRoute",
+      "file": "middleware.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0636848
+    },
+    {
+      "kind": "fs",
+      "function": "getAllMethodsForRoute",
+      "file": "middleware.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0602115
+    },
+    {
+      "kind": "network",
+      "function": "getAllMethodsForRoute",
+      "file": "middleware.go",
+      "truth": [
+        "network"
+      ],
+      "found": [
+        "network"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0603782
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "getAllMethodsForRoute",
+      "file": "middleware.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0601999
+    },
+    {
+      "kind": "control:len",
+      "function": "getAllMethodsForRoute",
+      "file": "middleware.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0625112
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "getAllMethodsForRoute",
+      "file": "middleware.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0627704
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "getAllMethodsForRoute",
+      "file": "middleware.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0655096
+    },
+    {
+      "kind": "control:strings",
+      "function": "getAllMethodsForRoute",
+      "file": "middleware.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0593275
+    },
+    {
+      "kind": "branch",
+      "function": "getAllMethodsForRoute",
+      "file": "middleware.go",
+      "found": [
+        "3 to 5"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0595308
+    },
+    {
+      "kind": "db",
+      "function": "cleanPath",
+      "file": "mux.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0678841
+    },
+    {
+      "kind": "fs",
+      "function": "cleanPath",
+      "file": "mux.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0683855
+    },
+    {
+      "kind": "network",
+      "function": "cleanPath",
+      "file": "mux.go",
+      "truth": [
+        "network"
+      ],
+      "found": [
+        "network"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0662759
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "cleanPath",
+      "file": "mux.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0654062
+    },
+    {
+      "kind": "control:len",
+      "function": "cleanPath",
+      "file": "mux.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0668387
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "cleanPath",
+      "file": "mux.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0654237
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "cleanPath",
+      "file": "mux.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0662063
+    },
+    {
+      "kind": "control:strings",
+      "function": "cleanPath",
+      "file": "mux.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0652858
+    },
+    {
+      "kind": "branch",
+      "function": "cleanPath",
+      "file": "mux.go",
+      "found": [
+        "3 to 5"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0685908
+    }
+  ]
+}

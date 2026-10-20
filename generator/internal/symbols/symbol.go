@@ -95,6 +95,10 @@ type Symbol struct {
 
 	// For methods: the receiver type name
 	ReceiverType string
+	// ReceiverName is the receiver's variable name in Go (t in func (t *Timer) End). v26.74.
+	ReceiverName string `json:",omitempty"`
+	// Locals are Go local variables with a type the declaration shows; see ast.Node.Locals. v26.74.
+	Locals []ast.Local `json:",omitempty"`
 
 	// For imports: the explicit alias, "" when the import has none.
 	// v26.58 (D101): resolveImportPath needs it to match an unaliased import by

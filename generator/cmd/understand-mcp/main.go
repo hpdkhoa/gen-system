@@ -33,6 +33,7 @@ import (
 	agentctx "github.com/hpdkhoa/gen-system/generator/internal/context"
 	"github.com/hpdkhoa/gen-system/generator/internal/mcp"
 	"github.com/hpdkhoa/gen-system/generator/internal/presentation"
+	"github.com/hpdkhoa/gen-system/generator/internal/review"
 	"github.com/hpdkhoa/gen-system/generator/internal/watch"
 )
 
@@ -392,6 +393,47 @@ func (a *app) mcpServer(allowCorrect bool) *mcp.Server {
 				return nil, err
 			}
 			return filterBeliefs(out, subject, kind, unverified, limit), nil
+		},
+	})
+
+	s.AddTool(mcp.Tool{
+		Name:  "review_diff",
+		Title: "Review a change",
+		Description: "Parser facts about a change: removed functions that are still called, changed signatures with " +
+			"callers outside the change, new database, file or network effects, functions no test reaches, and new " +
+			"branches. Compares the working tree with a git base (default HEAD, so uncommitted work), or reads a diff.",
+		InputSchema: obj(map[string]any{
+			"base":   str("git revision to compare with, for example HEAD, main or origin/main (default HEAD)"),
+			"diff":   str("a unified diff to review instead of asking git; then only callers and tests are checked"),
+			"hops":   integer("how many calls up to look for a test (default 3)", 1, 6),
+			"format": map[string]any{"type": "string", "enum": []string{"json", "markdown"}, "description": "json (default) or markdown"},
+		}),
+		Annotations: readOnly,
+		Handler: func(args map[string]any) (any, error) {
+			base, err := mcp.String(args, "base")
+			if err != nil {
+				return nil, err
+			}
+			diff, err := mcp.String(args, "diff")
+			if err != nil {
+				return nil, err
+			}
+			hops, err := mcp.Int(args, "hops")
+			if err != nil {
+				return nil, err
+			}
+			format, err := mcp.String(args, "format")
+			if err != nil {
+				return nil, err
+			}
+			rep, err := review.Run(a.ctx.Index, review.Options{Root: a.root, Base: base, Diff: diff, Hops: hops})
+			if err != nil {
+				return nil, err
+			}
+			if format == "markdown" {
+				return map[string]any{"markdown": review.Markdown(rep)}, nil
+			}
+			return rep, nil
 		},
 	})
 

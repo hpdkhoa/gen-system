@@ -141,9 +141,15 @@ func (c *Cache) ParseOrCache(path string) (*Module, error) {
 
 // ─── Disk persistence ────────────────────────────────────────
 
+// CacheVersion names the parser output. Change it whenever a frontend changes what it emits: a disk entry from
+// another version is not loaded, so a parser fix is never hidden behind an old parse of an unchanged file.
+// v26.74: Go locals, receiver names and calls in case values.
+const CacheVersion = "v26.74"
+
 // diskEntry is what we serialize. RawSource is not persisted to
 // keep disk footprint small.
 type diskEntry struct {
+	Version     string       `json:"v"`
 	FilePath    string       `json:"file"`
 	Checksum    string       `json:"checksum"`
 	Language    Language     `json:"lang"`
@@ -157,6 +163,7 @@ func (c *Cache) saveToDisk(m *Module) {
 		return
 	}
 	entry := diskEntry{
+		Version:     CacheVersion,
 		FilePath:    m.FilePath,
 		Checksum:    m.Checksum,
 		Language:    m.Language,
@@ -169,7 +176,7 @@ func (c *Cache) saveToDisk(m *Module) {
 		return
 	}
 	// One file per (filePath, checksum) pair using a safe hex name
-	name := fmt.Sprintf("%x.json", sha256.Sum256([]byte(m.FilePath+m.Checksum)))
+	name := fmt.Sprintf("%x.json", sha256.Sum256([]byte(CacheVersion+m.FilePath+m.Checksum)))
 	_ = os.WriteFile(filepath.Join(c.diskDir, name), data, 0644)
 }
 
@@ -187,7 +194,7 @@ func (c *Cache) loadDisk() {
 			continue
 		}
 		var de diskEntry
-		if err := json.Unmarshal(data, &de); err != nil {
+		if err := json.Unmarshal(data, &de); err != nil || de.Version != CacheVersion {
 			continue
 		}
 		m := &Module{

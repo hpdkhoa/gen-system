@@ -48,3 +48,25 @@ func TestEnvironmentAndPathStringCallsAreNoFileIO(t *testing.T) {
 		}
 	}
 }
+
+// v26.74: a bare verb counts only as the method name on a receiver that names its kind.
+func TestEffectVerbsNeedAReceiverHint(t *testing.T) {
+	for _, tc := range []struct {
+		callee   string
+		patterns []string
+		want     bool
+	}{
+		{"cache.Get", netPatterns, false}, {"GetUser", netPatterns, false}, {"s.store.GetByID", netPatterns, false},
+		{"doc.Done", netPatterns, false}, {"list.Remove", fsPatterns, false}, {"b.Create", fsPatterns, false},
+		{"CreateOrder", fsPatterns, false}, {"svc.OpenAccount", fsPatterns, false}, {"q.Query", dbPatterns, false},
+		{"feedback.Exec", dbPatterns, false}, {"pos.Remove", fsPatterns, false}, {"rows.Get", netPatterns, false},
+		{"s.httpClient.Do", netPatterns, true}, {"client.Get", netPatterns, true}, {"HTTPClient.Post", netPatterns, true},
+		{"conn.Dial", netPatterns, true}, {"s.dbPool.QueryRowContext", dbPatterns, true}, {"tx.Exec", dbPatterns, true},
+		{"sqlDB.Prepare", dbPatterns, true}, {"fs.Remove", fsPatterns, true}, {"file_store.Open", fsPatterns, true},
+		{"afero.WriteFile", fsPatterns, true}, {"os.Create", fsPatterns, true}, {"http.Get", netPatterns, true},
+	} {
+		if got := matchesAny(tc.callee, tc.patterns); got != tc.want {
+			t.Errorf("matchesAny(%q) = %v, want %v", tc.callee, got, tc.want)
+		}
+	}
+}

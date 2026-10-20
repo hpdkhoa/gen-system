@@ -110,6 +110,7 @@ func extractNode(t *Table, n *ast.Node, filePath string, lang ast.Language, laye
 			Params:     n.Params,
 			Returns:    n.Returns,
 			Layer:      layer,
+			Locals:     n.Locals,
 		}
 		t.Add(s)
 		for _, child := range n.Children {
@@ -145,6 +146,8 @@ func extractNode(t *Table, n *ast.Node, filePath string, lang ast.Language, laye
 			Params:       n.Params,
 			Returns:      n.Returns,
 			ReceiverType: receiver,
+			ReceiverName: n.ReceiverName,
+			Locals:       n.Locals,
 			Layer:        layer,
 		}
 		t.Add(s)

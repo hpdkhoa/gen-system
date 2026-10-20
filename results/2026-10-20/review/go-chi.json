@@ -1,0 +1,4007 @@
+{
+  "repo": "K:\\genbench-repos\\go-chi",
+  "commit": "36611d24579aaca3250ed9732e17e085c5026334",
+  "date": "2026-10-20",
+  "go_functions": 177,
+  "load_seconds": 0.6055137,
+  "type_errors_before_any_edit": 0,
+  "scores": {
+    "branch": {
+      "cases": 20,
+      "pass": 20,
+      "tp": 20,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1,
+      "recall": 1,
+      "median_seconds": 0.0695104
+    },
+    "control": {
+      "cases": 100,
+      "pass": 100,
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "precision": 0,
+      "recall": 0,
+      "median_seconds": 0.0694989
+    },
+    "db": {
+      "cases": 20,
+      "pass": 20,
+      "tp": 20,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1,
+      "recall": 1,
+      "median_seconds": 0.0728538
+    },
+    "fs": {
+      "cases": 19,
+      "pass": 19,
+      "tp": 19,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1,
+      "recall": 1,
+      "median_seconds": 0.0696157
+    },
+    "network": {
+      "cases": 13,
+      "pass": 13,
+      "tp": 13,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1,
+      "recall": 1,
+      "median_seconds": 0.0709666
+    },
+    "remove": {
+      "cases": 20,
+      "pass": 13,
+      "tp": 192,
+      "fp": 9,
+      "fn": 25,
+      "precision": 0.9552238805970149,
+      "recall": 0.8847926267281107,
+      "median_seconds": 0.0773413
+    },
+    "signature": {
+      "cases": 20,
+      "pass": 14,
+      "tp": 195,
+      "fp": 0,
+      "fn": 28,
+      "precision": 1,
+      "recall": 0.874439461883408,
+      "median_seconds": 0.0766859
+    }
+  },
+  "coverage": {
+    "functions": 177,
+    "covered": 149,
+    "go_test_seconds": 30.0962384,
+    "by_hops": {
+      "1": {
+        "untested_and_not_covered": 27,
+        "untested_but_covered": 57,
+        "reached_but_not_covered": 1,
+        "reached_and_covered": 92,
+        "precision": 0.32142857142857145,
+        "recall": 0.9642857142857143,
+        "agreement": 0.672316384180791
+      },
+      "10": {
+        "untested_and_not_covered": 23,
+        "untested_but_covered": 24,
+        "reached_but_not_covered": 5,
+        "reached_and_covered": 125,
+        "precision": 0.48936170212765956,
+        "recall": 0.8214285714285714,
+        "agreement": 0.8361581920903954
+      },
+      "3": {
+        "untested_and_not_covered": 23,
+        "untested_but_covered": 25,
+        "reached_but_not_covered": 5,
+        "reached_and_covered": 124,
+        "precision": 0.4791666666666667,
+        "recall": 0.8214285714285714,
+        "agreement": 0.8305084745762712
+      },
+      "6": {
+        "untested_and_not_covered": 23,
+        "untested_but_covered": 24,
+        "reached_but_not_covered": 5,
+        "reached_and_covered": 125,
+        "precision": 0.48936170212765956,
+        "recall": 0.8214285714285714,
+        "agreement": 0.8361581920903954
+      },
+      "99": {
+        "untested_and_not_covered": 23,
+        "untested_but_covered": 24,
+        "reached_but_not_covered": 5,
+        "reached_and_covered": 125,
+        "precision": 0.48936170212765956,
+        "recall": 0.8214285714285714,
+        "agreement": 0.8361581920903954
+      }
+    },
+    "disagree_at_3_hops": [
+      "says untested, but covered|printPrettyStack|middleware/recoverer.go:61|func",
+      "says untested, but covered|RequestID|middleware/request_id.go:67|func",
+      "says untested, but covered|realIP|middleware/realip.go:39|func",
+      "says untested, but covered|ClientIPFromRemoteAddr|middleware/client_ip.go:187|func",
+      "says untested, but covered|prettyStack.decorateLine|middleware/recoverer.go:118|method",
+      "says tested, but not covered|Mux.Put|mux.go:185|method",
+      "says untested, but covered|URLFormat|middleware/url_format.go:46|func",
+      "says untested, but covered|RealIP|middleware/realip.go:28|func",
+      "says untested, but covered|defaultLogEntry.Panic|middleware/logger.go:168|method",
+      "says untested, but covered|encoderGzip|middleware/compress.go:398|func",
+      "says untested, but covered|CleanPath|middleware/clean_path.go:12|func",
+      "says untested, but covered|Mux.routeHTTP|mux.go:455|method",
+      "says tested, but not covered|compressResponseWriter.Flush|middleware/compress.go:357|method",
+      "says untested, but covered|Mux.MethodNotAllowedHandler|mux.go:421|method",
+      "says untested, but covered|GetLogEntry|middleware/logger.go:75|func",
+      "says untested, but covered|Recoverer|middleware/recoverer.go:22|func",
+      "says untested, but covered|GetHead|middleware/get_head.go:10|func",
+      "says untested, but covered|methodNotAllowedHandler|mux.go:532|func",
+      "says tested, but not covered|flushHijackWriter.Flush|middleware/wrap_writer.go:172|method",
+      "says untested, but covered|Compressor.selectEncoder|middleware/compress.go:231|method",
+      "says untested, but covered|matchAcceptEncoding|middleware/compress.go:260|func",
+      "says untested, but covered|PrintPrettyStack|middleware/recoverer.go:54|func",
+      "says tested, but not covered|flushWriter.Flush|middleware/wrap_writer.go:147|method",
+      "says untested, but covered|encoderDeflate|middleware/compress.go:406|func",
+      "says untested, but covered|Compressor.Handler|middleware/compress.go:207|method",
+      "says untested, but covered|nodes.tailSort|tree.go:841|method",
+      "says untested, but covered|prettyStack.decorateSourceLine|middleware/recoverer.go:172|method",
+      "says tested, but not covered|contextKey.String|context.go:191|method",
+      "says untested, but covered|prettyStack.decorateFuncCallLine|middleware/recoverer.go:132|method",
+      "says untested, but covered|prettyStack.parse|middleware/recoverer.go:76|method"
+    ]
+  },
+  "history": [
+    {
+      "commit": "36611d2",
+      "subject": "test(middleware): Improves test coverage (#700)",
+      "files": 7,
+      "functions": 9,
+      "points": {
+        "behavior": 5,
+        "size": 2
+      },
+      "seconds": 0.3543874
+    },
+    {
+      "commit": "aba8618",
+      "subject": "fix: panic on Mount() when a router is mounted onto itself (#1159)",
+      "files": 2,
+      "functions": 2,
+      "points": {},
+      "seconds": 0.427318
+    },
+    {
+      "commit": "735ae2b",
+      "subject": "Update compress middleware support Brotli support documentation (#1007)",
+      "files": 1,
+      "functions": 0,
+      "points": {},
+      "seconds": 0.4179837
+    },
+    {
+      "commit": "87c34a2",
+      "subject": "middleware: ContentCharset should skip requests without a body (#1158)",
+      "files": 2,
+      "functions": 2,
+      "points": {},
+      "seconds": 0.3754481
+    },
+    {
+      "commit": "1576723",
+      "subject": "Add Clone method to Context (#1157)",
+      "files": 2,
+      "functions": 2,
+      "points": {
+        "size": 1
+      },
+      "seconds": 0.3861007
+    },
+    {
+      "commit": "6adf733",
+      "subject": "Improve godoc: add links and titles (#1027)",
+      "files": 1,
+      "functions": 0,
+      "points": {},
+      "seconds": 0.358114
+    },
+    {
+      "commit": "3893906",
+      "subject": "fix(middleware): reject catch-all compress wildcards \"/*\" and \"*/*\" (#1156)",
+      "files": 2,
+      "functions": 2,
+      "points": {},
+      "seconds": 0.3809929
+    },
+    {
+      "commit": "9b6ddcd",
+      "subject": "Don't duplicate methods in Allow: header for 405 responses (#1029)",
+      "files": 2,
+      "functions": 2,
+      "points": {
+        "size": 1
+      },
+      "seconds": 0.4340208
+    },
+    {
+      "commit": "29164f0",
+      "subject": "fix: don't drop handlers that collide with a Mount()/Route() pattern (#1148)",
+      "files": 2,
+      "functions": 5,
+      "points": {
+        "size": 3
+      },
+      "seconds": 0.4287207
+    },
+    {
+      "commit": "bc02284",
+      "subject": "docs: deployment recipe + verify checklist for ClientIPFromXFFTrustedProxies (#1111)",
+      "files": 4,
+      "functions": 2,
+      "points": {},
+      "seconds": 0.4421636
+    },
+    {
+      "commit": "60ecea5",
+      "subject": "feat(middleware): add text/markdown, text/csv, text/vtt to default compressible types (#1151)",
+      "files": 2,
+      "functions": 1,
+      "points": {},
+      "seconds": 0.4077886
+    },
+    {
+      "commit": "8b258c7",
+      "subject": "ci: pin GitHub Actions to full commit SHAs (#1116)",
+      "files": 1,
+      "functions": 0,
+      "points": {},
+      "seconds": 0.3419584
+    },
+    {
+      "commit": "caf87e6",
+      "subject": "feat(mux): support http QUERY method ietf rfc10008 (#1132)",
+      "files": 5,
+      "functions": 3,
+      "points": {
+        "size": 1,
+        "test": 1
+      },
+      "seconds": 0.4821556
+    },
+    {
+      "commit": "7fcb8a2",
+      "subject": "middleware: document printPrettyStack and harden NoColor panic test (#1131)",
+      "files": 2,
+      "functions": 1,
+      "points": {},
+      "seconds": 0.4485615
+    },
+    {
+      "commit": "878fe71",
+      "subject": "Fix defaultLogEntry.Panic not respecting NoColor setting (#1050)",
+      "files": 3,
+      "functions": 6,
+      "points": {
+        "behavior": 1,
+        "test": 4
+      },
+      "seconds": 0.4034786
+    },
+    {
+      "commit": "d7b767b",
+      "subject": "feat(middleware): add text/xml and application/xml to default compressible types (#1127)",
+      "files": 2,
+      "functions": 1,
+      "points": {},
+      "seconds": 0.3921688
+    },
+    {
+      "commit": "3b50c7c",
+      "subject": "Tidy build directives (#1113)",
+      "files": 2,
+      "functions": 0,
+      "points": {},
+      "seconds": 0.3827318
+    },
+    {
+      "commit": "2b9fca2",
+      "subject": "Honor Discard() in httpFancyWriter.ReadFrom (#1110)",
+      "files": 2,
+      "functions": 3,
+      "points": {},
+      "seconds": 0.3729287
+    },
+    {
+      "commit": "3b17157",
+      "subject": "feat: middleware.ClientIP, a replacement for middleware.RealIP (#967)",
+      "files": 7,
+      "functions": 34,
+      "points": {
+        "behavior": 4,
+        "size": 7,
+        "test": 2
+      },
+      "seconds": 0.4046862
+    },
+    {
+      "commit": "818fdcf",
+      "subject": "fix: set Request.Pattern from RoutePattern() (#1097)",
+      "files": 2,
+      "functions": 2,
+      "points": {
+        "test": 1
+      },
+      "seconds": 0.3462078
+    }
+  ],
+  "cases": [
+    {
+      "kind": "signature",
+      "function": "RouteHeaders",
+      "file": "middleware/route_headers.go",
+      "truth": [
+        "middleware/route_headers_test.go:TestRouteHeaders"
+      ],
+      "found": [
+        "middleware/route_headers_test.go:TestRouteHeaders"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0800889
+    },
+    {
+      "kind": "signature",
+      "function": "Throttle",
+      "file": "middleware/throttle.go",
+      "found": [
+        "_examples/limits/main.go:main"
+      ],
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0734416,
+      "note": "1 callers in files the type checker does not see, not counted"
+    },
+    {
+      "kind": "signature",
+      "function": "NewRouter",
+      "file": "chi.go",
+      "truth": [
+        "middleware/basic_auth_test.go:TestBasicAuth",
+        "middleware/clean_path_test.go:TestCleanPath",
+        "middleware/client_ip_example_test.go:Example_clientIP",
+        "middleware/client_ip_example_test.go:Example_clientIPFromXFFTrustedProxies",
+        "middleware/client_ip_test.go:TestAdvisory_GHSA_3fxj_6jh8_hvhx",
+        "middleware/client_ip_test.go:TestAdvisory_GHSA_9g5q_2w5x_hmxf",
+        "middleware/client_ip_test.go:TestGetClientIPAddr_RoundTrip",
+        "middleware/client_ip_test.go:run",
+        "middleware/client_ip_test.go:runChain",
+        "middleware/compress_test.go:TestCompressor",
+        "middleware/compress_test.go:TestCompressorDefaultTextTypes",
+        "middleware/content_charset_test.go:TestContentCharset",
+        "middleware/content_encoding_test.go:TestContentEncodingMiddleware",
+        "middleware/content_type_test.go:TestContentType",
+        "middleware/get_head_test.go:TestGetHead",
+        "middleware/heartbeat_test.go:TestHeartbeat",
+        "middleware/middleware_test.go:TestNew",
+        "middleware/path_rewrite_test.go:TestPathRewrite",
+        "middleware/profiler.go:Profiler",
+        "middleware/realip_test.go:TestInvalidIP",
+        "middleware/realip_test.go:TestXForwardForIP",
+        "middleware/realip_test.go:TestXForwardForXRealIPPrecedence",
+        "middleware/realip_test.go:TestXRealIP",
+        "middleware/recoverer_test.go:TestRecoverer",
+        "middleware/recoverer_test.go:TestRecovererAbortHandler",
+        "middleware/recoverer_test.go:TestRecovererNoColor",
+        "middleware/request_id_test.go:TestRequestID",
+        "middleware/strip_test.go:TestRedirectSlashes",
+        "middleware/strip_test.go:TestStripPrefix",
+        "middleware/strip_test.go:TestStripSlashes",
+        "middleware/strip_test.go:TestStripSlashesInRoute",
+        "middleware/sunset_test.go:TestSunset",
+        "middleware/throttle_test.go:TestThrottleBacklog",
+        "middleware/throttle_test.go:TestThrottleClientTimeout",
+        "middleware/throttle_test.go:TestThrottleCustomStatusCode",
+        "middleware/throttle_test.go:TestThrottleMaximum",
+        "middleware/throttle_test.go:TestThrottleRetryAfter",
+        "middleware/throttle_test.go:TestThrottleTriggerGatewayTimeout",
+        "middleware/url_format_test.go:TestURLFormat",
+        "middleware/url_format_test.go:TestURLFormatInSubRouter",
+        "middleware/value_test.go:TestWithValue",
+        "mux.go:Mux.Route",
+        "mux_test.go:BenchmarkMux",
+        "mux_test.go:TestCustomHTTPMethod",
+        "mux_test.go:TestEscapedURLParams",
+        "mux_test.go:TestMethodNotAllowed",
+        "mux_test.go:TestMiddlewarePanicOnLateUse",
+        "mux_test.go:TestMountingExistingPath",
+        "mux_test.go:TestMountingSelf",
+        "mux_test.go:TestMountingSimilarPattern",
+        "mux_test.go:TestMuxBasic",
+        "mux_test.go:TestMuxComplicatedNotFound",
+        "mux_test.go:TestMuxContextIsThreadSafe",
+        "mux_test.go:TestMuxEmptyParams",
+        "mux_test.go:TestMuxEmptyRoutes",
+        "mux_test.go:TestMuxFind",
+        "mux_test.go:TestMuxHandlePatternValidation",
+        "mux_test.go:TestMuxMatch",
+        "mux_test.go:TestMuxMatch_DoesNotHaveBasePath",
+        "mux_test.go:TestMuxMatch_HasBasePath",
+        "mux_test.go:TestMuxMiddlewareStack",
+        "mux_test.go:TestMuxMissingParams",
+        "mux_test.go:TestMuxMounts",
+        "mux_test.go:TestMuxNestedMethodNotAllowed",
+        "mux_test.go:TestMuxNestedNotFound",
+        "mux_test.go:TestMuxPlain",
+        "mux_test.go:TestMuxRegexp",
+        "mux_test.go:TestMuxRegexp2",
+        "mux_test.go:TestMuxRegexp3",
+        "mux_test.go:TestMuxRouteGroups",
+        "mux_test.go:TestMuxSubrouterWildcardParam",
+        "mux_test.go:TestMuxSubroutes",
+        "mux_test.go:TestMuxSubroutesBasic",
+        "mux_test.go:TestMuxTrailingSlash",
+        "mux_test.go:TestMuxWildcardRoute",
+        "mux_test.go:TestMuxWildcardRouteCheckTwo",
+        "mux_test.go:TestMuxWith",
+        "mux_test.go:TestNestedGroups",
+        "mux_test.go:TestQueryHTTPMethod",
+        "mux_test.go:TestRouterFromMuxWith",
+        "mux_test.go:TestServeHTTPExistingContext",
+        "mux_test.go:TestServerBaseContext",
+        "mux_test.go:bigMux",
+        "path_value_test.go:TestPathValue",
+        "pattern_test.go:TestPattern",
+        "tree_test.go:TestRoutesHidesMountStub",
+        "tree_test.go:TestTree",
+        "tree_test.go:TestWalkMiddlewaresAcrossGroupAndRoute",
+        "tree_test.go:TestWalkRouteWithHandlerAndSubrouter"
+      ],
+      "found": [
+        "_examples/custom-handler/main.go:main",
+        "_examples/custom-method/main.go:main",
+        "_examples/fileserver/main.go:main",
+        "_examples/graceful/main.go:service",
+        "_examples/hello-world/main.go:main",
+        "_examples/limits/main.go:main",
+        "_examples/pathvalue/main.go:main",
+        "_examples/rest/main.go:adminRouter",
+        "_examples/rest/main.go:main",
+        "_examples/router-walk/main.go:main",
+        "_examples/todos-resource/main.go:main",
+        "_examples/todos-resource/todos.go:todosResource.Routes",
+        "_examples/todos-resource/users.go:usersResource.Routes",
+        "_examples/versions/main.go:articleRouter",
+        "_examples/versions/main.go:main",
+        "middleware/basic_auth_test.go:TestBasicAuth",
+        "middleware/clean_path_test.go:TestCleanPath",
+        "middleware/client_ip_example_test.go:Example_clientIP",
+        "middleware/client_ip_example_test.go:Example_clientIPFromXFFTrustedProxies",
+        "middleware/client_ip_test.go:TestAdvisory_GHSA_3fxj_6jh8_hvhx",
+        "middleware/client_ip_test.go:TestAdvisory_GHSA_9g5q_2w5x_hmxf",
+        "middleware/client_ip_test.go:TestGetClientIPAddr_RoundTrip",
+        "middleware/client_ip_test.go:run",
+        "middleware/client_ip_test.go:runChain",
+        "middleware/compress_test.go:TestCompressor",
+        "middleware/compress_test.go:TestCompressorDefaultTextTypes",
+        "middleware/content_charset_test.go:TestContentCharset",
+        "middleware/content_encoding_test.go:TestContentEncodingMiddleware",
+        "middleware/content_type_test.go:TestContentType",
+        "middleware/get_head_test.go:TestGetHead",
+        "middleware/heartbeat_test.go:TestHeartbeat",
+        "middleware/middleware_test.go:TestNew",
+        "middleware/path_rewrite_test.go:TestPathRewrite",
+        "middleware/profiler.go:Profiler",
+        "middleware/realip_test.go:TestInvalidIP",
+        "middleware/realip_test.go:TestXForwardForIP",
+        "middleware/realip_test.go:TestXForwardForXRealIPPrecedence",
+        "middleware/realip_test.go:TestXRealIP",
+        "middleware/recoverer_test.go:TestRecoverer",
+        "middleware/recoverer_test.go:TestRecovererAbortHandler",
+        "middleware/recoverer_test.go:TestRecovererNoColor",
+        "middleware/request_id_test.go:TestRequestID",
+        "middleware/strip_test.go:TestRedirectSlashes",
+        "middleware/strip_test.go:TestStripPrefix",
+        "middleware/strip_test.go:TestStripSlashes",
+        "middleware/strip_test.go:TestStripSlashesInRoute",
+        "middleware/sunset_test.go:TestSunset",
+        "middleware/throttle_test.go:TestThrottleBacklog",
+        "middleware/throttle_test.go:TestThrottleClientTimeout",
+        "middleware/throttle_test.go:TestThrottleCustomStatusCode",
+        "middleware/throttle_test.go:TestThrottleMaximum",
+        "middleware/throttle_test.go:TestThrottleRetryAfter",
+        "middleware/throttle_test.go:TestThrottleTriggerGatewayTimeout",
+        "middleware/url_format_test.go:TestURLFormat",
+        "middleware/url_format_test.go:TestURLFormatInSubRouter",
+        "middleware/value_test.go:TestWithValue",
+        "mux.go:Mux.Route",
+        "mux_test.go:BenchmarkMux",
+        "mux_test.go:TestCustomHTTPMethod",
+        "mux_test.go:TestEscapedURLParams",
+        "mux_test.go:TestMethodNotAllowed",
+        "mux_test.go:TestMiddlewarePanicOnLateUse",
+        "mux_test.go:TestMountingExistingPath",
+        "mux_test.go:TestMountingSelf",
+        "mux_test.go:TestMountingSimilarPattern",
+        "mux_test.go:TestMuxBasic",
+        "mux_test.go:TestMuxComplicatedNotFound",
+        "mux_test.go:TestMuxContextIsThreadSafe",
+        "mux_test.go:TestMuxEmptyParams",
+        "mux_test.go:TestMuxEmptyRoutes",
+        "mux_test.go:TestMuxFind",
+        "mux_test.go:TestMuxHandlePatternValidation",
+        "mux_test.go:TestMuxMatch",
+        "mux_test.go:TestMuxMatch_DoesNotHaveBasePath",
+        "mux_test.go:TestMuxMatch_HasBasePath",
+        "mux_test.go:TestMuxMiddlewareStack",
+        "mux_test.go:TestMuxMissingParams",
+        "mux_test.go:TestMuxMounts",
+        "mux_test.go:TestMuxNestedMethodNotAllowed",
+        "mux_test.go:TestMuxNestedNotFound",
+        "mux_test.go:TestMuxPlain",
+        "mux_test.go:TestMuxRegexp",
+        "mux_test.go:TestMuxRegexp2",
+        "mux_test.go:TestMuxRegexp3",
+        "mux_test.go:TestMuxRouteGroups",
+        "mux_test.go:TestMuxSubrouterWildcardParam",
+        "mux_test.go:TestMuxSubroutes",
+        "mux_test.go:TestMuxSubroutesBasic",
+        "mux_test.go:TestMuxTrailingSlash",
+        "mux_test.go:TestMuxWildcardRoute",
+        "mux_test.go:TestMuxWildcardRouteCheckTwo",
+        "mux_test.go:TestMuxWith",
+        "mux_test.go:TestNestedGroups",
+        "mux_test.go:TestQueryHTTPMethod",
+        "mux_test.go:TestRouterFromMuxWith",
+        "mux_test.go:TestServeHTTPExistingContext",
+        "mux_test.go:TestServerBaseContext",
+        "mux_test.go:bigMux",
+        "path_value_test.go:TestPathValue",
+        "pattern_test.go:TestPattern",
+        "tree_test.go:TestRoutesHidesMountStub",
+        "tree_test.go:TestTree",
+        "tree_test.go:TestWalkMiddlewaresAcrossGroupAndRoute",
+        "tree_test.go:TestWalkRouteWithHandlerAndSubrouter"
+      ],
+      "tp": 89,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0735471,
+      "note": "15 callers in files the type checker does not see, not counted"
+    },
+    {
+      "kind": "signature",
+      "function": "Mux.Routes",
+      "file": "mux.go",
+      "truth": [
+        "mux.go:Mux.Route",
+        "mux.go:Mux.ServeHTTP",
+        "mux.go:Mux.With",
+        "mux.go:Mux.updateSubRoutes",
+        "mux_test.go:TestCustomHTTPMethod",
+        "mux_test.go:TestMuxHandlePatternValidation",
+        "mux_test.go:TestMuxSubroutes",
+        "mux_test.go:bigMux",
+        "tree_test.go:TestRoutesHidesMountStub",
+        "tree_test.go:TestWalkInlineMiddlewaresAcrossSubrouter",
+        "tree_test.go:TestWalkMiddlewaresAcrossGroupAndRoute",
+        "tree_test.go:TestWalkRouteWithHandlerAndSubrouter"
+      ],
+      "found": [
+        "tree_test.go:TestRoutesHidesMountStub"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 11,
+      "pass": false,
+      "seconds": 0.0795145
+    },
+    {
+      "kind": "signature",
+      "function": "node.walk",
+      "file": "tree.go",
+      "truth": [
+        "tree.go:node.routes"
+      ],
+      "found": [
+        "tree.go:node.routes"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0806533
+    },
+    {
+      "kind": "signature",
+      "function": "basicWriter.Write",
+      "file": "middleware/wrap_writer.go",
+      "truth": [
+        "middleware/wrap_writer.go:NewWrapResponseWriter",
+        "middleware/wrap_writer.go:httpFancyWriter.ReadFrom",
+        "middleware/wrap_writer_test.go:TestBasicWriterDiscardsWritesToOriginalResponseWriter",
+        "middleware/wrap_writer_test.go:TestBasicWritesTeesWritesWithoutDiscard"
+      ],
+      "found": [
+        "middleware/wrap_writer_test.go:TestBasicWriterDiscardsWritesToOriginalResponseWriter",
+        "middleware/wrap_writer_test.go:TestBasicWritesTeesWritesWithoutDiscard"
+      ],
+      "tp": 2,
+      "fp": 0,
+      "fn": 2,
+      "pass": false,
+      "seconds": 0.0766859
+    },
+    {
+      "kind": "signature",
+      "function": "Mux.Mount",
+      "file": "mux.go",
+      "truth": [
+        "mux.go:Mux.Route",
+        "mux.go:Mux.With",
+        "mux_test.go:TestMountingExistingPath",
+        "mux_test.go:TestMountingSelf",
+        "mux_test.go:TestMountingSimilarPattern",
+        "mux_test.go:TestMuxComplicatedNotFound",
+        "mux_test.go:TestMuxHandlePatternValidation",
+        "mux_test.go:TestMuxMounts",
+        "mux_test.go:TestMuxNestedMethodNotAllowed",
+        "mux_test.go:TestMuxNestedNotFound",
+        "mux_test.go:TestMuxSubroutes",
+        "mux_test.go:TestMuxTrailingSlash",
+        "mux_test.go:bigMux",
+        "tree_test.go:TestWalkInlineMiddlewaresAcrossSubrouter"
+      ],
+      "found": [
+        "_examples/rest/main.go:main",
+        "_examples/todos-resource/main.go:main",
+        "mux.go:Mux.Route",
+        "mux_test.go:TestMountingExistingPath",
+        "mux_test.go:TestMountingSelf",
+        "mux_test.go:TestMountingSimilarPattern",
+        "mux_test.go:TestMuxComplicatedNotFound",
+        "mux_test.go:TestMuxMounts",
+        "mux_test.go:TestMuxNestedMethodNotAllowed",
+        "mux_test.go:TestMuxNestedNotFound",
+        "mux_test.go:TestMuxSubroutes",
+        "mux_test.go:TestMuxTrailingSlash"
+      ],
+      "tp": 10,
+      "fp": 0,
+      "fn": 4,
+      "pass": false,
+      "seconds": 0.0789338,
+      "note": "2 callers in files the type checker does not see, not counted"
+    },
+    {
+      "kind": "signature",
+      "function": "httpFancyWriter.Flush",
+      "file": "middleware/wrap_writer.go",
+      "truth": [
+        "middleware/wrap_writer_test.go:TestHttpFancyWriterRemembersWroteHeaderWhenFlushed"
+      ],
+      "found": [
+        "middleware/wrap_writer_test.go:TestHttpFancyWriterRemembersWroteHeaderWhenFlushed"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0748519
+    },
+    {
+      "kind": "signature",
+      "function": "equalHandlers",
+      "file": "tree.go",
+      "truth": [
+        "tree.go:node.routes"
+      ],
+      "found": [
+        "tree.go:node.routes"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0814689
+    },
+    {
+      "kind": "signature",
+      "function": "compressResponseWriter.WriteHeader",
+      "file": "middleware/compress.go",
+      "truth": [
+        "middleware/compress.go:Compressor.Handler",
+        "middleware/compress.go:compressResponseWriter.Write"
+      ],
+      "found": [
+        "middleware/compress.go:compressResponseWriter.Write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 1,
+      "pass": false,
+      "seconds": 0.0774248
+    },
+    {
+      "kind": "signature",
+      "function": "HeaderRouter.Handler",
+      "file": "middleware/route_headers.go",
+      "truth": [
+        "middleware/route_headers_test.go:TestRouteHeaders"
+      ],
+      "found": [
+        "middleware/route_headers_test.go:TestRouteHeaders"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0717075
+    },
+    {
+      "kind": "signature",
+      "function": "GetClientIPAddr",
+      "file": "middleware/client_ip.go",
+      "truth": [
+        "middleware/client_ip.go:GetClientIP",
+        "middleware/client_ip_test.go:TestGetClientIPAddr_RoundTrip",
+        "middleware/client_ip_test.go:TestGetClientIPAddr_Unset"
+      ],
+      "found": [
+        "middleware/client_ip.go:GetClientIP",
+        "middleware/client_ip_test.go:TestGetClientIPAddr_RoundTrip",
+        "middleware/client_ip_test.go:TestGetClientIPAddr_Unset"
+      ],
+      "tp": 3,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0749627
+    },
+    {
+      "kind": "signature",
+      "function": "httpFancyWriter.ReadFrom",
+      "file": "middleware/wrap_writer.go",
+      "truth": [
+        "middleware/wrap_writer_test.go:TestHttpFancyWriterReadFromByteCountWithTee",
+        "middleware/wrap_writer_test.go:TestHttpFancyWriterReadFromHonorsDiscard"
+      ],
+      "found": [
+        "middleware/wrap_writer_test.go:TestHttpFancyWriterReadFromByteCountWithTee",
+        "middleware/wrap_writer_test.go:TestHttpFancyWriterReadFromHonorsDiscard"
+      ],
+      "tp": 2,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0730677
+    },
+    {
+      "kind": "signature",
+      "function": "printPrettyStack",
+      "file": "middleware/recoverer.go",
+      "truth": [
+        "middleware/logger.go:defaultLogEntry.Panic",
+        "middleware/recoverer.go:PrintPrettyStack"
+      ],
+      "found": [
+        "middleware/logger.go:defaultLogEntry.Panic",
+        "middleware/recoverer.go:PrintPrettyStack"
+      ],
+      "tp": 2,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0738021
+    },
+    {
+      "kind": "signature",
+      "function": "realIP",
+      "file": "middleware/realip.go",
+      "truth": [
+        "middleware/realip.go:RealIP"
+      ],
+      "found": [
+        "middleware/realip.go:RealIP"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0720308
+    },
+    {
+      "kind": "signature",
+      "function": "Mux.updateSubRoutes",
+      "file": "mux.go",
+      "truth": [
+        "mux.go:Mux.MethodNotAllowed",
+        "mux.go:Mux.NotFound"
+      ],
+      "found": [
+        "mux.go:Mux.MethodNotAllowed",
+        "mux.go:Mux.NotFound"
+      ],
+      "tp": 2,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0771385
+    },
+    {
+      "kind": "signature",
+      "function": "Mux.Query",
+      "file": "mux.go",
+      "truth": [
+        "mux.go:Mux.Route",
+        "mux.go:Mux.With",
+        "mux_test.go:TestMuxHandlePatternValidation",
+        "mux_test.go:TestMuxSubroutes",
+        "mux_test.go:TestQueryHTTPMethod",
+        "mux_test.go:bigMux",
+        "tree_test.go:TestWalkInlineMiddlewaresAcrossSubrouter"
+      ],
+      "found": [
+        "mux_test.go:TestQueryHTTPMethod"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 6,
+      "pass": false,
+      "seconds": 0.0748729
+    },
+    {
+      "kind": "signature",
+      "function": "PathRewrite",
+      "file": "middleware/path_rewrite.go",
+      "truth": [
+        "middleware/path_rewrite_test.go:TestPathRewrite"
+      ],
+      "found": [
+        "middleware/path_rewrite_test.go:TestPathRewrite"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0803298
+    },
+    {
+      "kind": "signature",
+      "function": "Mux.Get",
+      "file": "mux.go",
+      "truth": [
+        "middleware/basic_auth_test.go:TestBasicAuth",
+        "middleware/clean_path_test.go:TestCleanPath",
+        "middleware/client_ip_example_test.go:Example_clientIP",
+        "middleware/client_ip_example_test.go:Example_clientIPFromXFFTrustedProxies",
+        "middleware/client_ip_test.go:TestAdvisory_GHSA_3fxj_6jh8_hvhx",
+        "middleware/client_ip_test.go:TestAdvisory_GHSA_9g5q_2w5x_hmxf",
+        "middleware/client_ip_test.go:TestGetClientIPAddr_RoundTrip",
+        "middleware/client_ip_test.go:run",
+        "middleware/client_ip_test.go:runChain",
+        "middleware/compress_test.go:TestCompressor",
+        "middleware/compress_test.go:TestCompressorDefaultTextTypes",
+        "middleware/get_head_test.go:TestGetHead",
+        "middleware/middleware_test.go:TestNew",
+        "middleware/path_rewrite_test.go:TestPathRewrite",
+        "middleware/profiler.go:Profiler",
+        "middleware/realip_test.go:TestInvalidIP",
+        "middleware/realip_test.go:TestXForwardForIP",
+        "middleware/realip_test.go:TestXForwardForXRealIPPrecedence",
+        "middleware/realip_test.go:TestXRealIP",
+        "middleware/recoverer_test.go:TestRecoverer",
+        "middleware/recoverer_test.go:TestRecovererAbortHandler",
+        "middleware/recoverer_test.go:TestRecovererNoColor",
+        "middleware/request_id_test.go:TestRequestID",
+        "middleware/strip_test.go:TestRedirectSlashes",
+        "middleware/strip_test.go:TestStripPrefix",
+        "middleware/strip_test.go:TestStripSlashes",
+        "middleware/strip_test.go:TestStripSlashesInRoute",
+        "middleware/sunset_test.go:TestSunset",
+        "middleware/throttle_test.go:TestThrottleBacklog",
+        "middleware/throttle_test.go:TestThrottleClientTimeout",
+        "middleware/throttle_test.go:TestThrottleCustomStatusCode",
+        "middleware/throttle_test.go:TestThrottleMaximum",
+        "middleware/throttle_test.go:TestThrottleRetryAfter",
+        "middleware/throttle_test.go:TestThrottleTriggerGatewayTimeout",
+        "middleware/value_test.go:TestWithValue",
+        "mux.go:Mux.Route",
+        "mux.go:Mux.With",
+        "mux_test.go:BenchmarkMux",
+        "mux_test.go:TestCustomHTTPMethod",
+        "mux_test.go:TestEscapedURLParams",
+        "mux_test.go:TestMethodNotAllowed",
+        "mux_test.go:TestMiddlewarePanicOnLateUse",
+        "mux_test.go:TestMountingExistingPath",
+        "mux_test.go:TestMountingSelf",
+        "mux_test.go:TestMountingSimilarPattern",
+        "mux_test.go:TestMuxBasic",
+        "mux_test.go:TestMuxComplicatedNotFound",
+        "mux_test.go:TestMuxContextIsThreadSafe",
+        "mux_test.go:TestMuxEmptyParams",
+        "mux_test.go:TestMuxFind",
+        "mux_test.go:TestMuxHandlePatternValidation",
+        "mux_test.go:TestMuxMatch",
+        "mux_test.go:TestMuxMatch_HasBasePath",
+        "mux_test.go:TestMuxMiddlewareStack",
+        "mux_test.go:TestMuxMissingParams",
+        "mux_test.go:TestMuxMounts",
+        "mux_test.go:TestMuxNestedMethodNotAllowed",
+        "mux_test.go:TestMuxNestedNotFound",
+        "mux_test.go:TestMuxPlain",
+        "mux_test.go:TestMuxRegexp2",
+        "mux_test.go:TestMuxRegexp3",
+        "mux_test.go:TestMuxSubrouterWildcardParam",
+        "mux_test.go:TestMuxSubroutes",
+        "mux_test.go:TestMuxSubroutesBasic",
+        "mux_test.go:TestMuxTrailingSlash",
+        "mux_test.go:TestMuxWildcardRoute",
+        "mux_test.go:TestMuxWildcardRouteCheckTwo",
+        "mux_test.go:TestMuxWith",
+        "mux_test.go:TestNestedGroups",
+        "mux_test.go:TestQueryHTTPMethod",
+        "mux_test.go:TestServeHTTPExistingContext",
+        "mux_test.go:TestServerBaseContext",
+        "mux_test.go:bigMux",
+        "tree_test.go:TestRoutesHidesMountStub",
+        "tree_test.go:TestTree",
+        "tree_test.go:TestWalkInlineMiddlewaresAcrossSubrouter",
+        "tree_test.go:TestWalkMiddlewaresAcrossGroupAndRoute"
+      ],
+      "found": [
+        "_examples/custom-method/main.go:main",
+        "_examples/fileserver/main.go:main",
+        "_examples/graceful/main.go:service",
+        "_examples/hello-world/main.go:main",
+        "_examples/limits/main.go:main",
+        "_examples/pathvalue/main.go:main",
+        "_examples/rest/main.go:adminRouter",
+        "_examples/rest/main.go:main",
+        "_examples/router-walk/main.go:main",
+        "_examples/todos-resource/main.go:main",
+        "_examples/todos-resource/todos.go:todosResource.Routes",
+        "_examples/todos-resource/users.go:usersResource.Routes",
+        "_examples/versions/main.go:articleRouter",
+        "middleware/basic_auth_test.go:TestBasicAuth",
+        "middleware/clean_path_test.go:TestCleanPath",
+        "middleware/client_ip_example_test.go:Example_clientIP",
+        "middleware/client_ip_example_test.go:Example_clientIPFromXFFTrustedProxies",
+        "middleware/client_ip_test.go:TestAdvisory_GHSA_3fxj_6jh8_hvhx",
+        "middleware/client_ip_test.go:TestAdvisory_GHSA_9g5q_2w5x_hmxf",
+        "middleware/client_ip_test.go:TestGetClientIPAddr_RoundTrip",
+        "middleware/client_ip_test.go:run",
+        "middleware/client_ip_test.go:runChain",
+        "middleware/compress_test.go:TestCompressor",
+        "middleware/compress_test.go:TestCompressorDefaultTextTypes",
+        "middleware/get_head_test.go:TestGetHead",
+        "middleware/middleware_test.go:TestNew",
+        "middleware/path_rewrite_test.go:TestPathRewrite",
+        "middleware/profiler.go:Profiler",
+        "middleware/realip_test.go:TestInvalidIP",
+        "middleware/realip_test.go:TestXForwardForIP",
+        "middleware/realip_test.go:TestXForwardForXRealIPPrecedence",
+        "middleware/realip_test.go:TestXRealIP",
+        "middleware/recoverer_test.go:TestRecoverer",
+        "middleware/recoverer_test.go:TestRecovererAbortHandler",
+        "middleware/recoverer_test.go:TestRecovererNoColor",
+        "middleware/request_id_test.go:TestRequestID",
+        "middleware/strip_test.go:TestRedirectSlashes",
+        "middleware/strip_test.go:TestStripPrefix",
+        "middleware/strip_test.go:TestStripSlashes",
+        "middleware/strip_test.go:TestStripSlashesInRoute",
+        "middleware/sunset_test.go:TestSunset",
+        "middleware/throttle_test.go:TestThrottleBacklog",
+        "middleware/throttle_test.go:TestThrottleClientTimeout",
+        "middleware/throttle_test.go:TestThrottleCustomStatusCode",
+        "middleware/throttle_test.go:TestThrottleMaximum",
+        "middleware/throttle_test.go:TestThrottleRetryAfter",
+        "middleware/throttle_test.go:TestThrottleTriggerGatewayTimeout",
+        "middleware/value_test.go:TestWithValue",
+        "mux_test.go:BenchmarkMux",
+        "mux_test.go:TestCustomHTTPMethod",
+        "mux_test.go:TestEscapedURLParams",
+        "mux_test.go:TestMethodNotAllowed",
+        "mux_test.go:TestMiddlewarePanicOnLateUse",
+        "mux_test.go:TestMountingExistingPath",
+        "mux_test.go:TestMountingSelf",
+        "mux_test.go:TestMountingSimilarPattern",
+        "mux_test.go:TestMuxBasic",
+        "mux_test.go:TestMuxComplicatedNotFound",
+        "mux_test.go:TestMuxContextIsThreadSafe",
+        "mux_test.go:TestMuxEmptyParams",
+        "mux_test.go:TestMuxFind",
+        "mux_test.go:TestMuxMatch",
+        "mux_test.go:TestMuxMatch_HasBasePath",
+        "mux_test.go:TestMuxMiddlewareStack",
+        "mux_test.go:TestMuxMissingParams",
+        "mux_test.go:TestMuxMounts",
+        "mux_test.go:TestMuxNestedMethodNotAllowed",
+        "mux_test.go:TestMuxNestedNotFound",
+        "mux_test.go:TestMuxPlain",
+        "mux_test.go:TestMuxRegexp2",
+        "mux_test.go:TestMuxRegexp3",
+        "mux_test.go:TestMuxSubrouterWildcardParam",
+        "mux_test.go:TestMuxSubroutes",
+        "mux_test.go:TestMuxSubroutesBasic",
+        "mux_test.go:TestMuxTrailingSlash",
+        "mux_test.go:TestMuxWildcardRoute",
+        "mux_test.go:TestMuxWildcardRouteCheckTwo",
+        "mux_test.go:TestMuxWith",
+        "mux_test.go:TestNestedGroups",
+        "mux_test.go:TestQueryHTTPMethod",
+        "mux_test.go:TestServeHTTPExistingContext",
+        "mux_test.go:TestServerBaseContext",
+        "mux_test.go:bigMux",
+        "tree_test.go:TestRoutesHidesMountStub",
+        "tree_test.go:TestTree",
+        "tree_test.go:TestWalkMiddlewaresAcrossGroupAndRoute"
+      ],
+      "tp": 73,
+      "fp": 0,
+      "fn": 4,
+      "pass": false,
+      "seconds": 0.0771376,
+      "note": "13 callers in files the type checker does not see, not counted"
+    },
+    {
+      "kind": "signature",
+      "function": "Context.URLParam",
+      "file": "context.go",
+      "truth": [
+        "context.go:URLParam",
+        "context.go:URLParamFromCtx"
+      ],
+      "found": [
+        "context.go:URLParam",
+        "context.go:URLParamFromCtx"
+      ],
+      "tp": 2,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0734788
+    },
+    {
+      "kind": "remove",
+      "function": "RouteHeaders",
+      "file": "middleware/route_headers.go",
+      "truth": [
+        "middleware/route_headers_test.go:TestRouteHeaders"
+      ],
+      "found": [
+        "middleware/route_headers_test.go:TestRouteHeaders"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0711477
+    },
+    {
+      "kind": "remove",
+      "function": "Throttle",
+      "file": "middleware/throttle.go",
+      "found": [
+        "_examples/limits/main.go:main"
+      ],
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0730898,
+      "note": "1 callers in files the type checker does not see, not counted"
+    },
+    {
+      "kind": "remove",
+      "function": "NewRouter",
+      "file": "chi.go",
+      "truth": [
+        "middleware/basic_auth_test.go:TestBasicAuth",
+        "middleware/clean_path_test.go:TestCleanPath",
+        "middleware/client_ip_example_test.go:Example_clientIP",
+        "middleware/client_ip_example_test.go:Example_clientIPFromXFFTrustedProxies",
+        "middleware/client_ip_test.go:TestAdvisory_GHSA_3fxj_6jh8_hvhx",
+        "middleware/client_ip_test.go:TestAdvisory_GHSA_9g5q_2w5x_hmxf",
+        "middleware/client_ip_test.go:TestGetClientIPAddr_RoundTrip",
+        "middleware/client_ip_test.go:run",
+        "middleware/client_ip_test.go:runChain",
+        "middleware/compress_test.go:TestCompressor",
+        "middleware/compress_test.go:TestCompressorDefaultTextTypes",
+        "middleware/content_charset_test.go:TestContentCharset",
+        "middleware/content_encoding_test.go:TestContentEncodingMiddleware",
+        "middleware/content_type_test.go:TestContentType",
+        "middleware/get_head_test.go:TestGetHead",
+        "middleware/heartbeat_test.go:TestHeartbeat",
+        "middleware/middleware_test.go:TestNew",
+        "middleware/path_rewrite_test.go:TestPathRewrite",
+        "middleware/profiler.go:Profiler",
+        "middleware/realip_test.go:TestInvalidIP",
+        "middleware/realip_test.go:TestXForwardForIP",
+        "middleware/realip_test.go:TestXForwardForXRealIPPrecedence",
+        "middleware/realip_test.go:TestXRealIP",
+        "middleware/recoverer_test.go:TestRecoverer",
+        "middleware/recoverer_test.go:TestRecovererAbortHandler",
+        "middleware/recoverer_test.go:TestRecovererNoColor",
+        "middleware/request_id_test.go:TestRequestID",
+        "middleware/strip_test.go:TestRedirectSlashes",
+        "middleware/strip_test.go:TestStripPrefix",
+        "middleware/strip_test.go:TestStripSlashes",
+        "middleware/strip_test.go:TestStripSlashesInRoute",
+        "middleware/sunset_test.go:TestSunset",
+        "middleware/throttle_test.go:TestThrottleBacklog",
+        "middleware/throttle_test.go:TestThrottleClientTimeout",
+        "middleware/throttle_test.go:TestThrottleCustomStatusCode",
+        "middleware/throttle_test.go:TestThrottleMaximum",
+        "middleware/throttle_test.go:TestThrottleRetryAfter",
+        "middleware/throttle_test.go:TestThrottleTriggerGatewayTimeout",
+        "middleware/url_format_test.go:TestURLFormat",
+        "middleware/url_format_test.go:TestURLFormatInSubRouter",
+        "middleware/value_test.go:TestWithValue",
+        "mux.go:Mux.Route",
+        "mux_test.go:BenchmarkMux",
+        "mux_test.go:TestCustomHTTPMethod",
+        "mux_test.go:TestEscapedURLParams",
+        "mux_test.go:TestMethodNotAllowed",
+        "mux_test.go:TestMiddlewarePanicOnLateUse",
+        "mux_test.go:TestMountingExistingPath",
+        "mux_test.go:TestMountingSelf",
+        "mux_test.go:TestMountingSimilarPattern",
+        "mux_test.go:TestMuxBasic",
+        "mux_test.go:TestMuxComplicatedNotFound",
+        "mux_test.go:TestMuxContextIsThreadSafe",
+        "mux_test.go:TestMuxEmptyParams",
+        "mux_test.go:TestMuxEmptyRoutes",
+        "mux_test.go:TestMuxFind",
+        "mux_test.go:TestMuxHandlePatternValidation",
+        "mux_test.go:TestMuxMatch",
+        "mux_test.go:TestMuxMatch_DoesNotHaveBasePath",
+        "mux_test.go:TestMuxMatch_HasBasePath",
+        "mux_test.go:TestMuxMiddlewareStack",
+        "mux_test.go:TestMuxMissingParams",
+        "mux_test.go:TestMuxMounts",
+        "mux_test.go:TestMuxNestedMethodNotAllowed",
+        "mux_test.go:TestMuxNestedNotFound",
+        "mux_test.go:TestMuxPlain",
+        "mux_test.go:TestMuxRegexp",
+        "mux_test.go:TestMuxRegexp2",
+        "mux_test.go:TestMuxRegexp3",
+        "mux_test.go:TestMuxRouteGroups",
+        "mux_test.go:TestMuxSubrouterWildcardParam",
+        "mux_test.go:TestMuxSubroutes",
+        "mux_test.go:TestMuxSubroutesBasic",
+        "mux_test.go:TestMuxTrailingSlash",
+        "mux_test.go:TestMuxWildcardRoute",
+        "mux_test.go:TestMuxWildcardRouteCheckTwo",
+        "mux_test.go:TestMuxWith",
+        "mux_test.go:TestNestedGroups",
+        "mux_test.go:TestQueryHTTPMethod",
+        "mux_test.go:TestRouterFromMuxWith",
+        "mux_test.go:TestServeHTTPExistingContext",
+        "mux_test.go:TestServerBaseContext",
+        "mux_test.go:bigMux",
+        "path_value_test.go:TestPathValue",
+        "pattern_test.go:TestPattern",
+        "tree_test.go:TestRoutesHidesMountStub",
+        "tree_test.go:TestTree",
+        "tree_test.go:TestWalkMiddlewaresAcrossGroupAndRoute",
+        "tree_test.go:TestWalkRouteWithHandlerAndSubrouter"
+      ],
+      "found": [
+        "_examples/custom-handler/main.go:main",
+        "_examples/custom-method/main.go:main",
+        "_examples/fileserver/main.go:main",
+        "_examples/graceful/main.go:service",
+        "_examples/hello-world/main.go:main",
+        "_examples/limits/main.go:main",
+        "_examples/pathvalue/main.go:main",
+        "_examples/rest/main.go:adminRouter",
+        "_examples/rest/main.go:main",
+        "_examples/router-walk/main.go:main",
+        "_examples/todos-resource/main.go:main",
+        "_examples/todos-resource/todos.go:todosResource.Routes",
+        "_examples/todos-resource/users.go:usersResource.Routes",
+        "_examples/versions/main.go:articleRouter",
+        "_examples/versions/main.go:main",
+        "middleware/basic_auth_test.go:TestBasicAuth",
+        "middleware/clean_path_test.go:TestCleanPath",
+        "middleware/client_ip_example_test.go:Example_clientIP",
+        "middleware/client_ip_example_test.go:Example_clientIPFromXFFTrustedProxies",
+        "middleware/client_ip_test.go:TestAdvisory_GHSA_3fxj_6jh8_hvhx",
+        "middleware/client_ip_test.go:TestAdvisory_GHSA_9g5q_2w5x_hmxf",
+        "middleware/client_ip_test.go:TestGetClientIPAddr_RoundTrip",
+        "middleware/client_ip_test.go:run",
+        "middleware/client_ip_test.go:runChain",
+        "middleware/compress_test.go:TestCompressor",
+        "middleware/compress_test.go:TestCompressorDefaultTextTypes",
+        "middleware/content_charset_test.go:TestContentCharset",
+        "middleware/content_encoding_test.go:TestContentEncodingMiddleware",
+        "middleware/content_type_test.go:TestContentType",
+        "middleware/get_head_test.go:TestGetHead",
+        "middleware/heartbeat_test.go:TestHeartbeat",
+        "middleware/middleware_test.go:TestNew",
+        "middleware/path_rewrite_test.go:TestPathRewrite",
+        "middleware/profiler.go:Profiler",
+        "middleware/realip_test.go:TestInvalidIP",
+        "middleware/realip_test.go:TestXForwardForIP",
+        "middleware/realip_test.go:TestXForwardForXRealIPPrecedence",
+        "middleware/realip_test.go:TestXRealIP",
+        "middleware/recoverer_test.go:TestRecoverer",
+        "middleware/recoverer_test.go:TestRecovererAbortHandler",
+        "middleware/recoverer_test.go:TestRecovererNoColor",
+        "middleware/request_id_test.go:TestRequestID",
+        "middleware/strip_test.go:TestRedirectSlashes",
+        "middleware/strip_test.go:TestStripPrefix",
+        "middleware/strip_test.go:TestStripSlashes",
+        "middleware/strip_test.go:TestStripSlashesInRoute",
+        "middleware/sunset_test.go:TestSunset",
+        "middleware/throttle_test.go:TestThrottleBacklog",
+        "middleware/throttle_test.go:TestThrottleClientTimeout",
+        "middleware/throttle_test.go:TestThrottleCustomStatusCode",
+        "middleware/throttle_test.go:TestThrottleMaximum",
+        "middleware/throttle_test.go:TestThrottleRetryAfter",
+        "middleware/throttle_test.go:TestThrottleTriggerGatewayTimeout",
+        "middleware/url_format_test.go:TestURLFormat",
+        "middleware/url_format_test.go:TestURLFormatInSubRouter",
+        "middleware/value_test.go:TestWithValue",
+        "mux.go:Mux.Route",
+        "mux_test.go:BenchmarkMux",
+        "mux_test.go:TestCustomHTTPMethod",
+        "mux_test.go:TestEscapedURLParams",
+        "mux_test.go:TestMethodNotAllowed",
+        "mux_test.go:TestMiddlewarePanicOnLateUse",
+        "mux_test.go:TestMountingExistingPath",
+        "mux_test.go:TestMountingSelf",
+        "mux_test.go:TestMountingSimilarPattern",
+        "mux_test.go:TestMuxBasic",
+        "mux_test.go:TestMuxComplicatedNotFound",
+        "mux_test.go:TestMuxContextIsThreadSafe",
+        "mux_test.go:TestMuxEmptyParams",
+        "mux_test.go:TestMuxEmptyRoutes",
+        "mux_test.go:TestMuxFind",
+        "mux_test.go:TestMuxHandlePatternValidation",
+        "mux_test.go:TestMuxMatch",
+        "mux_test.go:TestMuxMatch_DoesNotHaveBasePath",
+        "mux_test.go:TestMuxMatch_HasBasePath",
+        "mux_test.go:TestMuxMiddlewareStack",
+        "mux_test.go:TestMuxMissingParams",
+        "mux_test.go:TestMuxMounts",
+        "mux_test.go:TestMuxNestedMethodNotAllowed",
+        "mux_test.go:TestMuxNestedNotFound",
+        "mux_test.go:TestMuxPlain",
+        "mux_test.go:TestMuxRegexp",
+        "mux_test.go:TestMuxRegexp2",
+        "mux_test.go:TestMuxRegexp3",
+        "mux_test.go:TestMuxRouteGroups",
+        "mux_test.go:TestMuxSubrouterWildcardParam",
+        "mux_test.go:TestMuxSubroutes",
+        "mux_test.go:TestMuxSubroutesBasic",
+        "mux_test.go:TestMuxTrailingSlash",
+        "mux_test.go:TestMuxWildcardRoute",
+        "mux_test.go:TestMuxWildcardRouteCheckTwo",
+        "mux_test.go:TestMuxWith",
+        "mux_test.go:TestNestedGroups",
+        "mux_test.go:TestQueryHTTPMethod",
+        "mux_test.go:TestRouterFromMuxWith",
+        "mux_test.go:TestServeHTTPExistingContext",
+        "mux_test.go:TestServerBaseContext",
+        "mux_test.go:bigMux",
+        "path_value_test.go:TestPathValue",
+        "pattern_test.go:TestPattern",
+        "tree_test.go:TestRoutesHidesMountStub",
+        "tree_test.go:TestTree",
+        "tree_test.go:TestWalkMiddlewaresAcrossGroupAndRoute",
+        "tree_test.go:TestWalkRouteWithHandlerAndSubrouter"
+      ],
+      "tp": 89,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0718362,
+      "note": "15 callers in files the type checker does not see, not counted"
+    },
+    {
+      "kind": "remove",
+      "function": "Mux.Routes",
+      "file": "mux.go",
+      "truth": [
+        "mux.go:Mux.Route",
+        "mux.go:Mux.ServeHTTP",
+        "mux.go:Mux.With",
+        "mux.go:Mux.updateSubRoutes",
+        "mux_test.go:TestCustomHTTPMethod",
+        "mux_test.go:TestMuxHandlePatternValidation",
+        "mux_test.go:TestMuxSubroutes",
+        "mux_test.go:bigMux",
+        "tree_test.go:TestRoutesHidesMountStub",
+        "tree_test.go:TestWalkInlineMiddlewaresAcrossSubrouter",
+        "tree_test.go:TestWalkMiddlewaresAcrossGroupAndRoute",
+        "tree_test.go:TestWalkRouteWithHandlerAndSubrouter"
+      ],
+      "found": [
+        "tree_test.go:TestRoutesHidesMountStub"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 11,
+      "pass": false,
+      "seconds": 0.0906355
+    },
+    {
+      "kind": "remove",
+      "function": "node.walk",
+      "file": "tree.go",
+      "truth": [
+        "tree.go:node.routes"
+      ],
+      "found": [
+        "tree.go:node.routes"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0915007
+    },
+    {
+      "kind": "remove",
+      "function": "basicWriter.Write",
+      "file": "middleware/wrap_writer.go",
+      "found": [
+        "middleware/logger.go:RequestLogger",
+        "middleware/recoverer.go:printPrettyStack",
+        "middleware/wrap_writer_test.go:TestBasicWriterDiscardsWritesToOriginalResponseWriter",
+        "middleware/wrap_writer_test.go:TestBasicWritesTeesWritesWithoutDiscard"
+      ],
+      "tp": 0,
+      "fp": 4,
+      "fn": 0,
+      "pass": false,
+      "seconds": 0.0773413
+    },
+    {
+      "kind": "remove",
+      "function": "Mux.Mount",
+      "file": "mux.go",
+      "truth": [
+        "mux.go:Mux.Route",
+        "mux.go:Mux.With",
+        "mux_test.go:TestMountingExistingPath",
+        "mux_test.go:TestMountingSelf",
+        "mux_test.go:TestMountingSimilarPattern",
+        "mux_test.go:TestMuxComplicatedNotFound",
+        "mux_test.go:TestMuxHandlePatternValidation",
+        "mux_test.go:TestMuxMounts",
+        "mux_test.go:TestMuxNestedMethodNotAllowed",
+        "mux_test.go:TestMuxNestedNotFound",
+        "mux_test.go:TestMuxSubroutes",
+        "mux_test.go:TestMuxTrailingSlash",
+        "mux_test.go:bigMux",
+        "tree_test.go:TestWalkInlineMiddlewaresAcrossSubrouter"
+      ],
+      "found": [
+        "_examples/rest/main.go:main",
+        "_examples/todos-resource/main.go:main",
+        "mux.go:Mux.Route",
+        "mux_test.go:TestMountingExistingPath",
+        "mux_test.go:TestMountingSelf",
+        "mux_test.go:TestMountingSimilarPattern",
+        "mux_test.go:TestMuxComplicatedNotFound",
+        "mux_test.go:TestMuxMounts",
+        "mux_test.go:TestMuxNestedMethodNotAllowed",
+        "mux_test.go:TestMuxNestedNotFound",
+        "mux_test.go:TestMuxSubroutes",
+        "mux_test.go:TestMuxTrailingSlash"
+      ],
+      "tp": 10,
+      "fp": 0,
+      "fn": 4,
+      "pass": false,
+      "seconds": 0.0783445,
+      "note": "2 callers in files the type checker does not see, not counted"
+    },
+    {
+      "kind": "remove",
+      "function": "httpFancyWriter.Flush",
+      "file": "middleware/wrap_writer.go",
+      "truth": [
+        "middleware/wrap_writer_test.go:TestHttpFancyWriterRemembersWroteHeaderWhenFlushed"
+      ],
+      "found": [
+        "middleware/wrap_writer_test.go:TestHttpFancyWriterRemembersWroteHeaderWhenFlushed"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0740964
+    },
+    {
+      "kind": "remove",
+      "function": "equalHandlers",
+      "file": "tree.go",
+      "truth": [
+        "tree.go:node.routes"
+      ],
+      "found": [
+        "tree.go:node.routes"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0784071
+    },
+    {
+      "kind": "remove",
+      "function": "compressResponseWriter.WriteHeader",
+      "file": "middleware/compress.go",
+      "found": [
+        "middleware/compress.go:compressResponseWriter.Write"
+      ],
+      "tp": 0,
+      "fp": 1,
+      "fn": 0,
+      "pass": false,
+      "seconds": 0.0777356
+    },
+    {
+      "kind": "remove",
+      "function": "HeaderRouter.Handler",
+      "file": "middleware/route_headers.go",
+      "truth": [
+        "middleware/route_headers_test.go:TestRouteHeaders"
+      ],
+      "found": [
+        "middleware/profiler.go:Profiler",
+        "middleware/route_headers_test.go:TestRouteHeaders"
+      ],
+      "tp": 1,
+      "fp": 1,
+      "fn": 0,
+      "pass": false,
+      "seconds": 0.079716
+    },
+    {
+      "kind": "remove",
+      "function": "GetClientIPAddr",
+      "file": "middleware/client_ip.go",
+      "truth": [
+        "middleware/client_ip.go:GetClientIP",
+        "middleware/client_ip_test.go:TestGetClientIPAddr_RoundTrip",
+        "middleware/client_ip_test.go:TestGetClientIPAddr_Unset"
+      ],
+      "found": [
+        "middleware/client_ip.go:GetClientIP",
+        "middleware/client_ip_test.go:TestGetClientIPAddr_RoundTrip",
+        "middleware/client_ip_test.go:TestGetClientIPAddr_Unset"
+      ],
+      "tp": 3,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0761524
+    },
+    {
+      "kind": "remove",
+      "function": "httpFancyWriter.ReadFrom",
+      "file": "middleware/wrap_writer.go",
+      "truth": [
+        "middleware/wrap_writer_test.go:TestHttpFancyWriterReadFromByteCountWithTee",
+        "middleware/wrap_writer_test.go:TestHttpFancyWriterReadFromHonorsDiscard"
+      ],
+      "found": [
+        "middleware/wrap_writer_test.go:TestHttpFancyWriterReadFromByteCountWithTee",
+        "middleware/wrap_writer_test.go:TestHttpFancyWriterReadFromHonorsDiscard"
+      ],
+      "tp": 2,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0729376
+    },
+    {
+      "kind": "remove",
+      "function": "printPrettyStack",
+      "file": "middleware/recoverer.go",
+      "truth": [
+        "middleware/logger.go:defaultLogEntry.Panic",
+        "middleware/recoverer.go:PrintPrettyStack"
+      ],
+      "found": [
+        "middleware/logger.go:defaultLogEntry.Panic",
+        "middleware/recoverer.go:PrintPrettyStack"
+      ],
+      "tp": 2,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.071396
+    },
+    {
+      "kind": "remove",
+      "function": "realIP",
+      "file": "middleware/realip.go",
+      "truth": [
+        "middleware/realip.go:RealIP"
+      ],
+      "found": [
+        "middleware/realip.go:RealIP"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0702567
+    },
+    {
+      "kind": "remove",
+      "function": "Mux.updateSubRoutes",
+      "file": "mux.go",
+      "truth": [
+        "mux.go:Mux.MethodNotAllowed",
+        "mux.go:Mux.NotFound"
+      ],
+      "found": [
+        "mux.go:Mux.MethodNotAllowed",
+        "mux.go:Mux.NotFound"
+      ],
+      "tp": 2,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0773618
+    },
+    {
+      "kind": "remove",
+      "function": "Mux.Query",
+      "file": "mux.go",
+      "truth": [
+        "mux.go:Mux.Route",
+        "mux.go:Mux.With",
+        "mux_test.go:TestMuxHandlePatternValidation",
+        "mux_test.go:TestMuxSubroutes",
+        "mux_test.go:TestQueryHTTPMethod",
+        "mux_test.go:bigMux",
+        "tree_test.go:TestWalkInlineMiddlewaresAcrossSubrouter"
+      ],
+      "found": [
+        "mux_test.go:TestQueryHTTPMethod"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 6,
+      "pass": false,
+      "seconds": 0.0731125
+    },
+    {
+      "kind": "remove",
+      "function": "PathRewrite",
+      "file": "middleware/path_rewrite.go",
+      "truth": [
+        "middleware/path_rewrite_test.go:TestPathRewrite"
+      ],
+      "found": [
+        "middleware/path_rewrite_test.go:TestPathRewrite"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0697983
+    },
+    {
+      "kind": "remove",
+      "function": "Mux.Get",
+      "file": "mux.go",
+      "truth": [
+        "middleware/basic_auth_test.go:TestBasicAuth",
+        "middleware/clean_path_test.go:TestCleanPath",
+        "middleware/client_ip_example_test.go:Example_clientIP",
+        "middleware/client_ip_example_test.go:Example_clientIPFromXFFTrustedProxies",
+        "middleware/client_ip_test.go:TestAdvisory_GHSA_3fxj_6jh8_hvhx",
+        "middleware/client_ip_test.go:TestAdvisory_GHSA_9g5q_2w5x_hmxf",
+        "middleware/client_ip_test.go:TestGetClientIPAddr_RoundTrip",
+        "middleware/client_ip_test.go:run",
+        "middleware/client_ip_test.go:runChain",
+        "middleware/compress_test.go:TestCompressor",
+        "middleware/compress_test.go:TestCompressorDefaultTextTypes",
+        "middleware/get_head_test.go:TestGetHead",
+        "middleware/middleware_test.go:TestNew",
+        "middleware/path_rewrite_test.go:TestPathRewrite",
+        "middleware/profiler.go:Profiler",
+        "middleware/realip_test.go:TestInvalidIP",
+        "middleware/realip_test.go:TestXForwardForIP",
+        "middleware/realip_test.go:TestXForwardForXRealIPPrecedence",
+        "middleware/realip_test.go:TestXRealIP",
+        "middleware/recoverer_test.go:TestRecoverer",
+        "middleware/recoverer_test.go:TestRecovererAbortHandler",
+        "middleware/recoverer_test.go:TestRecovererNoColor",
+        "middleware/request_id_test.go:TestRequestID",
+        "middleware/strip_test.go:TestRedirectSlashes",
+        "middleware/strip_test.go:TestStripPrefix",
+        "middleware/strip_test.go:TestStripSlashes",
+        "middleware/strip_test.go:TestStripSlashesInRoute",
+        "middleware/sunset_test.go:TestSunset",
+        "middleware/throttle_test.go:TestThrottleBacklog",
+        "middleware/throttle_test.go:TestThrottleClientTimeout",
+        "middleware/throttle_test.go:TestThrottleCustomStatusCode",
+        "middleware/throttle_test.go:TestThrottleMaximum",
+        "middleware/throttle_test.go:TestThrottleRetryAfter",
+        "middleware/throttle_test.go:TestThrottleTriggerGatewayTimeout",
+        "middleware/value_test.go:TestWithValue",
+        "mux.go:Mux.Route",
+        "mux.go:Mux.With",
+        "mux_test.go:BenchmarkMux",
+        "mux_test.go:TestCustomHTTPMethod",
+        "mux_test.go:TestEscapedURLParams",
+        "mux_test.go:TestMethodNotAllowed",
+        "mux_test.go:TestMiddlewarePanicOnLateUse",
+        "mux_test.go:TestMountingExistingPath",
+        "mux_test.go:TestMountingSelf",
+        "mux_test.go:TestMountingSimilarPattern",
+        "mux_test.go:TestMuxBasic",
+        "mux_test.go:TestMuxComplicatedNotFound",
+        "mux_test.go:TestMuxContextIsThreadSafe",
+        "mux_test.go:TestMuxEmptyParams",
+        "mux_test.go:TestMuxFind",
+        "mux_test.go:TestMuxHandlePatternValidation",
+        "mux_test.go:TestMuxMatch",
+        "mux_test.go:TestMuxMatch_HasBasePath",
+        "mux_test.go:TestMuxMiddlewareStack",
+        "mux_test.go:TestMuxMissingParams",
+        "mux_test.go:TestMuxMounts",
+        "mux_test.go:TestMuxNestedMethodNotAllowed",
+        "mux_test.go:TestMuxNestedNotFound",
+        "mux_test.go:TestMuxPlain",
+        "mux_test.go:TestMuxRegexp2",
+        "mux_test.go:TestMuxRegexp3",
+        "mux_test.go:TestMuxSubrouterWildcardParam",
+        "mux_test.go:TestMuxSubroutes",
+        "mux_test.go:TestMuxSubroutesBasic",
+        "mux_test.go:TestMuxTrailingSlash",
+        "mux_test.go:TestMuxWildcardRoute",
+        "mux_test.go:TestMuxWildcardRouteCheckTwo",
+        "mux_test.go:TestMuxWith",
+        "mux_test.go:TestNestedGroups",
+        "mux_test.go:TestQueryHTTPMethod",
+        "mux_test.go:TestServeHTTPExistingContext",
+        "mux_test.go:TestServerBaseContext",
+        "mux_test.go:bigMux",
+        "tree_test.go:TestRoutesHidesMountStub",
+        "tree_test.go:TestTree",
+        "tree_test.go:TestWalkInlineMiddlewaresAcrossSubrouter",
+        "tree_test.go:TestWalkMiddlewaresAcrossGroupAndRoute"
+      ],
+      "found": [
+        "_examples/custom-method/main.go:main",
+        "_examples/fileserver/main.go:main",
+        "_examples/graceful/main.go:service",
+        "_examples/hello-world/main.go:main",
+        "_examples/limits/main.go:main",
+        "_examples/pathvalue/main.go:main",
+        "_examples/rest/main.go:adminRouter",
+        "_examples/rest/main.go:main",
+        "_examples/router-walk/main.go:main",
+        "_examples/todos-resource/main.go:main",
+        "_examples/todos-resource/todos.go:todosResource.Routes",
+        "_examples/todos-resource/users.go:usersResource.Routes",
+        "_examples/versions/main.go:articleRouter",
+        "middleware/basic_auth_test.go:TestBasicAuth",
+        "middleware/clean_path_test.go:TestCleanPath",
+        "middleware/client_ip_example_test.go:Example_clientIP",
+        "middleware/client_ip_example_test.go:Example_clientIPFromXFFTrustedProxies",
+        "middleware/client_ip_test.go:TestAdvisory_GHSA_3fxj_6jh8_hvhx",
+        "middleware/client_ip_test.go:TestAdvisory_GHSA_9g5q_2w5x_hmxf",
+        "middleware/client_ip_test.go:TestGetClientIPAddr_RoundTrip",
+        "middleware/client_ip_test.go:run",
+        "middleware/client_ip_test.go:runChain",
+        "middleware/compress.go:Compressor.selectEncoder",
+        "middleware/compress.go:compressResponseWriter.WriteHeader",
+        "middleware/compress.go:compressResponseWriter.isCompressible",
+        "middleware/compress_test.go:TestCompressor",
+        "middleware/compress_test.go:TestCompressorDefaultTextTypes",
+        "middleware/get_head_test.go:TestGetHead",
+        "middleware/middleware_test.go:TestNew",
+        "middleware/path_rewrite_test.go:TestPathRewrite",
+        "middleware/profiler.go:Profiler",
+        "middleware/realip_test.go:TestInvalidIP",
+        "middleware/realip_test.go:TestXForwardForIP",
+        "middleware/realip_test.go:TestXForwardForXRealIPPrecedence",
+        "middleware/realip_test.go:TestXRealIP",
+        "middleware/recoverer_test.go:TestRecoverer",
+        "middleware/recoverer_test.go:TestRecovererAbortHandler",
+        "middleware/recoverer_test.go:TestRecovererNoColor",
+        "middleware/request_id_test.go:TestRequestID",
+        "middleware/strip_test.go:TestRedirectSlashes",
+        "middleware/strip_test.go:TestStripPrefix",
+        "middleware/strip_test.go:TestStripSlashes",
+        "middleware/strip_test.go:TestStripSlashesInRoute",
+        "middleware/sunset_test.go:TestSunset",
+        "middleware/throttle_test.go:TestThrottleBacklog",
+        "middleware/throttle_test.go:TestThrottleClientTimeout",
+        "middleware/throttle_test.go:TestThrottleCustomStatusCode",
+        "middleware/throttle_test.go:TestThrottleMaximum",
+        "middleware/throttle_test.go:TestThrottleRetryAfter",
+        "middleware/throttle_test.go:TestThrottleTriggerGatewayTimeout",
+        "middleware/value_test.go:TestWithValue",
+        "mux_test.go:BenchmarkMux",
+        "mux_test.go:TestCustomHTTPMethod",
+        "mux_test.go:TestEscapedURLParams",
+        "mux_test.go:TestMethodNotAllowed",
+        "mux_test.go:TestMiddlewarePanicOnLateUse",
+        "mux_test.go:TestMountingExistingPath",
+        "mux_test.go:TestMountingSelf",
+        "mux_test.go:TestMountingSimilarPattern",
+        "mux_test.go:TestMuxBasic",
+        "mux_test.go:TestMuxComplicatedNotFound",
+        "mux_test.go:TestMuxContextIsThreadSafe",
+        "mux_test.go:TestMuxEmptyParams",
+        "mux_test.go:TestMuxFind",
+        "mux_test.go:TestMuxMatch",
+        "mux_test.go:TestMuxMatch_HasBasePath",
+        "mux_test.go:TestMuxMiddlewareStack",
+        "mux_test.go:TestMuxMissingParams",
+        "mux_test.go:TestMuxMounts",
+        "mux_test.go:TestMuxNestedMethodNotAllowed",
+        "mux_test.go:TestMuxNestedNotFound",
+        "mux_test.go:TestMuxPlain",
+        "mux_test.go:TestMuxRegexp2",
+        "mux_test.go:TestMuxRegexp3",
+        "mux_test.go:TestMuxSubrouterWildcardParam",
+        "mux_test.go:TestMuxSubroutes",
+        "mux_test.go:TestMuxSubroutesBasic",
+        "mux_test.go:TestMuxTrailingSlash",
+        "mux_test.go:TestMuxWildcardRoute",
+        "mux_test.go:TestMuxWildcardRouteCheckTwo",
+        "mux_test.go:TestMuxWith",
+        "mux_test.go:TestNestedGroups",
+        "mux_test.go:TestQueryHTTPMethod",
+        "mux_test.go:TestServeHTTPExistingContext",
+        "mux_test.go:TestServerBaseContext",
+        "mux_test.go:bigMux",
+        "tree_test.go:TestRoutesHidesMountStub",
+        "tree_test.go:TestTree",
+        "tree_test.go:TestWalkMiddlewaresAcrossGroupAndRoute"
+      ],
+      "tp": 73,
+      "fp": 3,
+      "fn": 4,
+      "pass": false,
+      "seconds": 0.0914702,
+      "note": "13 callers in files the type checker does not see, not counted"
+    },
+    {
+      "kind": "remove",
+      "function": "Context.URLParam",
+      "file": "context.go",
+      "truth": [
+        "context.go:URLParam",
+        "context.go:URLParamFromCtx"
+      ],
+      "found": [
+        "context.go:URLParam",
+        "context.go:URLParamFromCtx"
+      ],
+      "tp": 2,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0792546
+    },
+    {
+      "kind": "db",
+      "function": "RouteHeaders",
+      "file": "middleware/route_headers.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0714475
+    },
+    {
+      "kind": "fs",
+      "function": "RouteHeaders",
+      "file": "middleware/route_headers.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0696157
+    },
+    {
+      "kind": "network",
+      "function": "RouteHeaders",
+      "file": "middleware/route_headers.go",
+      "truth": [
+        "network"
+      ],
+      "found": [
+        "network"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0679128
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "RouteHeaders",
+      "file": "middleware/route_headers.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0668737
+    },
+    {
+      "kind": "control:len",
+      "function": "RouteHeaders",
+      "file": "middleware/route_headers.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0682593
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "RouteHeaders",
+      "file": "middleware/route_headers.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0683664
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "RouteHeaders",
+      "file": "middleware/route_headers.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0680346
+    },
+    {
+      "kind": "control:strings",
+      "function": "RouteHeaders",
+      "file": "middleware/route_headers.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0674391
+    },
+    {
+      "kind": "branch",
+      "function": "RouteHeaders",
+      "file": "middleware/route_headers.go",
+      "found": [
+        "0 to 2"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0686717
+    },
+    {
+      "kind": "db",
+      "function": "Throttle",
+      "file": "middleware/throttle.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0718564
+    },
+    {
+      "kind": "fs",
+      "function": "Throttle",
+      "file": "middleware/throttle.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0675175
+    },
+    {
+      "kind": "network",
+      "function": "Throttle",
+      "file": "middleware/throttle.go",
+      "truth": [
+        "network"
+      ],
+      "found": [
+        "network"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0677326
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "Throttle",
+      "file": "middleware/throttle.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.06717
+    },
+    {
+      "kind": "control:len",
+      "function": "Throttle",
+      "file": "middleware/throttle.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0684536
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "Throttle",
+      "file": "middleware/throttle.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0699087
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "Throttle",
+      "file": "middleware/throttle.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0688023
+    },
+    {
+      "kind": "control:strings",
+      "function": "Throttle",
+      "file": "middleware/throttle.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0671558
+    },
+    {
+      "kind": "branch",
+      "function": "Throttle",
+      "file": "middleware/throttle.go",
+      "found": [
+        "0 to 2"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0690757
+    },
+    {
+      "kind": "db",
+      "function": "NewRouter",
+      "file": "chi.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0700802
+    },
+    {
+      "kind": "fs",
+      "function": "NewRouter",
+      "file": "chi.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0686049
+    },
+    {
+      "kind": "network",
+      "function": "NewRouter",
+      "file": "chi.go",
+      "truth": [
+        "network"
+      ],
+      "found": [
+        "network"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0675293
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "NewRouter",
+      "file": "chi.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0675436
+    },
+    {
+      "kind": "control:len",
+      "function": "NewRouter",
+      "file": "chi.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.06816
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "NewRouter",
+      "file": "chi.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0680616
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "NewRouter",
+      "file": "chi.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0893545
+    },
+    {
+      "kind": "control:strings",
+      "function": "NewRouter",
+      "file": "chi.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0670201
+    },
+    {
+      "kind": "branch",
+      "function": "NewRouter",
+      "file": "chi.go",
+      "found": [
+        "0 to 2"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0677888
+    },
+    {
+      "kind": "db",
+      "function": "Mux.Routes",
+      "file": "mux.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.076538
+    },
+    {
+      "kind": "fs",
+      "function": "Mux.Routes",
+      "file": "mux.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0748787
+    },
+    {
+      "kind": "network",
+      "function": "Mux.Routes",
+      "file": "mux.go",
+      "truth": [
+        "network"
+      ],
+      "found": [
+        "network"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0735891
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "Mux.Routes",
+      "file": "mux.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0743929
+    },
+    {
+      "kind": "control:len",
+      "function": "Mux.Routes",
+      "file": "mux.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0742155
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "Mux.Routes",
+      "file": "mux.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.073974
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "Mux.Routes",
+      "file": "mux.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0735058
+    },
+    {
+      "kind": "control:strings",
+      "function": "Mux.Routes",
+      "file": "mux.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0730789
+    },
+    {
+      "kind": "branch",
+      "function": "Mux.Routes",
+      "file": "mux.go",
+      "found": [
+        "0 to 2"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0876256
+    },
+    {
+      "kind": "db",
+      "function": "node.walk",
+      "file": "tree.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0791598
+    },
+    {
+      "kind": "fs",
+      "function": "node.walk",
+      "file": "tree.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0745054
+    },
+    {
+      "kind": "network",
+      "function": "node.walk",
+      "file": "tree.go",
+      "truth": [
+        "network"
+      ],
+      "found": [
+        "network"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0750465
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "node.walk",
+      "file": "tree.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0767298
+    },
+    {
+      "kind": "control:len",
+      "function": "node.walk",
+      "file": "tree.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0752873
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "node.walk",
+      "file": "tree.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0745187
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "node.walk",
+      "file": "tree.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0764193
+    },
+    {
+      "kind": "control:strings",
+      "function": "node.walk",
+      "file": "tree.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0744137
+    },
+    {
+      "kind": "branch",
+      "function": "node.walk",
+      "file": "tree.go",
+      "found": [
+        "4 to 6"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0747583
+    },
+    {
+      "kind": "db",
+      "function": "basicWriter.Write",
+      "file": "middleware/wrap_writer.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0738912
+    },
+    {
+      "kind": "fs",
+      "function": "basicWriter.Write",
+      "file": "middleware/wrap_writer.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0725452
+    },
+    {
+      "kind": "network",
+      "function": "basicWriter.Write",
+      "file": "middleware/wrap_writer.go",
+      "truth": [
+        "network"
+      ],
+      "found": [
+        "network"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0709666
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "basicWriter.Write",
+      "file": "middleware/wrap_writer.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0712609
+    },
+    {
+      "kind": "control:len",
+      "function": "basicWriter.Write",
+      "file": "middleware/wrap_writer.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0710317
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "basicWriter.Write",
+      "file": "middleware/wrap_writer.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0712262
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "basicWriter.Write",
+      "file": "middleware/wrap_writer.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0722372
+    },
+    {
+      "kind": "control:strings",
+      "function": "basicWriter.Write",
+      "file": "middleware/wrap_writer.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0708224
+    },
+    {
+      "kind": "branch",
+      "function": "basicWriter.Write",
+      "file": "middleware/wrap_writer.go",
+      "found": [
+        "4 to 6"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.072551
+    },
+    {
+      "kind": "db",
+      "function": "Mux.Mount",
+      "file": "mux.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0774117
+    },
+    {
+      "kind": "fs",
+      "function": "Mux.Mount",
+      "file": "mux.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0743864
+    },
+    {
+      "kind": "network:skip",
+      "function": "Mux.Mount",
+      "file": "mux.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": false,
+      "seconds": 0.0741156,
+      "note": "the function already had this effect"
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "Mux.Mount",
+      "file": "mux.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.074143
+    },
+    {
+      "kind": "control:len",
+      "function": "Mux.Mount",
+      "file": "mux.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0728956
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "Mux.Mount",
+      "file": "mux.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0742778
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "Mux.Mount",
+      "file": "mux.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0732089
+    },
+    {
+      "kind": "control:strings",
+      "function": "Mux.Mount",
+      "file": "mux.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0736564
+    },
+    {
+      "kind": "branch",
+      "function": "Mux.Mount",
+      "file": "mux.go",
+      "found": [
+        "8 to 10"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0728168
+    },
+    {
+      "kind": "db",
+      "function": "httpFancyWriter.Flush",
+      "file": "middleware/wrap_writer.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0745828
+    },
+    {
+      "kind": "fs",
+      "function": "httpFancyWriter.Flush",
+      "file": "middleware/wrap_writer.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0730966
+    },
+    {
+      "kind": "network",
+      "function": "httpFancyWriter.Flush",
+      "file": "middleware/wrap_writer.go",
+      "truth": [
+        "network"
+      ],
+      "found": [
+        "network"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0704715
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "httpFancyWriter.Flush",
+      "file": "middleware/wrap_writer.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0713579
+    },
+    {
+      "kind": "control:len",
+      "function": "httpFancyWriter.Flush",
+      "file": "middleware/wrap_writer.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0698054
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "httpFancyWriter.Flush",
+      "file": "middleware/wrap_writer.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0695825
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "httpFancyWriter.Flush",
+      "file": "middleware/wrap_writer.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0701571
+    },
+    {
+      "kind": "control:strings",
+      "function": "httpFancyWriter.Flush",
+      "file": "middleware/wrap_writer.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0703361
+    },
+    {
+      "kind": "branch",
+      "function": "httpFancyWriter.Flush",
+      "file": "middleware/wrap_writer.go",
+      "found": [
+        "0 to 2"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0713228
+    },
+    {
+      "kind": "db",
+      "function": "Maybe",
+      "file": "middleware/maybe.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0712729
+    },
+    {
+      "kind": "fs",
+      "function": "Maybe",
+      "file": "middleware/maybe.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0669998
+    },
+    {
+      "kind": "network:skip",
+      "function": "Maybe",
+      "file": "middleware/maybe.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": false,
+      "seconds": 0.0653931,
+      "note": "the function already had this effect"
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "Maybe",
+      "file": "middleware/maybe.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0665522
+    },
+    {
+      "kind": "control:len",
+      "function": "Maybe",
+      "file": "middleware/maybe.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0667826
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "Maybe",
+      "file": "middleware/maybe.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0681777
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "Maybe",
+      "file": "middleware/maybe.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0661247
+    },
+    {
+      "kind": "control:strings",
+      "function": "Maybe",
+      "file": "middleware/maybe.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0672141
+    },
+    {
+      "kind": "branch",
+      "function": "Maybe",
+      "file": "middleware/maybe.go",
+      "found": [
+        "0 to 2"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.066245
+    },
+    {
+      "kind": "db",
+      "function": "equalHandlers",
+      "file": "tree.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0778478
+    },
+    {
+      "kind": "fs",
+      "function": "equalHandlers",
+      "file": "tree.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0742402
+    },
+    {
+      "kind": "network",
+      "function": "equalHandlers",
+      "file": "tree.go",
+      "truth": [
+        "network"
+      ],
+      "found": [
+        "network"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0747961
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "equalHandlers",
+      "file": "tree.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0742049
+    },
+    {
+      "kind": "control:len",
+      "function": "equalHandlers",
+      "file": "tree.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.088923
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "equalHandlers",
+      "file": "tree.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0762384
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "equalHandlers",
+      "file": "tree.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0750466
+    },
+    {
+      "kind": "control:strings",
+      "function": "equalHandlers",
+      "file": "tree.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.074522
+    },
+    {
+      "kind": "branch",
+      "function": "equalHandlers",
+      "file": "tree.go",
+      "found": [
+        "4 to 6"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.075876
+    },
+    {
+      "kind": "db",
+      "function": "compressResponseWriter.WriteHeader",
+      "file": "middleware/compress.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0756713
+    },
+    {
+      "kind": "fs",
+      "function": "compressResponseWriter.WriteHeader",
+      "file": "middleware/compress.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0736745
+    },
+    {
+      "kind": "network",
+      "function": "compressResponseWriter.WriteHeader",
+      "file": "middleware/compress.go",
+      "truth": [
+        "network"
+      ],
+      "found": [
+        "network"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0722411
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "compressResponseWriter.WriteHeader",
+      "file": "middleware/compress.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0719233
+    },
+    {
+      "kind": "control:len",
+      "function": "compressResponseWriter.WriteHeader",
+      "file": "middleware/compress.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0731095
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "compressResponseWriter.WriteHeader",
+      "file": "middleware/compress.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0714878
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "compressResponseWriter.WriteHeader",
+      "file": "middleware/compress.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0718618
+    },
+    {
+      "kind": "control:strings",
+      "function": "compressResponseWriter.WriteHeader",
+      "file": "middleware/compress.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0731463
+    },
+    {
+      "kind": "branch",
+      "function": "compressResponseWriter.WriteHeader",
+      "file": "middleware/compress.go",
+      "found": [
+        "4 to 6"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0725453
+    },
+    {
+      "kind": "db",
+      "function": "HeaderRouter.Handler",
+      "file": "middleware/route_headers.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0724825
+    },
+    {
+      "kind": "fs",
+      "function": "HeaderRouter.Handler",
+      "file": "middleware/route_headers.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0675545
+    },
+    {
+      "kind": "network:skip",
+      "function": "HeaderRouter.Handler",
+      "file": "middleware/route_headers.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": false,
+      "seconds": 0.0675309,
+      "note": "the function already had this effect"
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "HeaderRouter.Handler",
+      "file": "middleware/route_headers.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0681164
+    },
+    {
+      "kind": "control:len",
+      "function": "HeaderRouter.Handler",
+      "file": "middleware/route_headers.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.067482
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "HeaderRouter.Handler",
+      "file": "middleware/route_headers.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0675842
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "HeaderRouter.Handler",
+      "file": "middleware/route_headers.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0685679
+    },
+    {
+      "kind": "control:strings",
+      "function": "HeaderRouter.Handler",
+      "file": "middleware/route_headers.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.06851
+    },
+    {
+      "kind": "branch",
+      "function": "HeaderRouter.Handler",
+      "file": "middleware/route_headers.go",
+      "found": [
+        "0 to 2"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0695104
+    },
+    {
+      "kind": "db",
+      "function": "GetClientIPAddr",
+      "file": "middleware/client_ip.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0727352
+    },
+    {
+      "kind": "fs",
+      "function": "GetClientIPAddr",
+      "file": "middleware/client_ip.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0681298
+    },
+    {
+      "kind": "network",
+      "function": "GetClientIPAddr",
+      "file": "middleware/client_ip.go",
+      "truth": [
+        "network"
+      ],
+      "found": [
+        "network"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0690426
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "GetClientIPAddr",
+      "file": "middleware/client_ip.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.069675
+    },
+    {
+      "kind": "control:len",
+      "function": "GetClientIPAddr",
+      "file": "middleware/client_ip.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0686268
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "GetClientIPAddr",
+      "file": "middleware/client_ip.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0679374
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "GetClientIPAddr",
+      "file": "middleware/client_ip.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0688228
+    },
+    {
+      "kind": "control:strings",
+      "function": "GetClientIPAddr",
+      "file": "middleware/client_ip.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0686411
+    },
+    {
+      "kind": "branch",
+      "function": "GetClientIPAddr",
+      "file": "middleware/client_ip.go",
+      "found": [
+        "0 to 2"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.067835
+    },
+    {
+      "kind": "db",
+      "function": "httpFancyWriter.ReadFrom",
+      "file": "middleware/wrap_writer.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0734714
+    },
+    {
+      "kind": "fs",
+      "function": "httpFancyWriter.ReadFrom",
+      "file": "middleware/wrap_writer.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0700513
+    },
+    {
+      "kind": "network",
+      "function": "httpFancyWriter.ReadFrom",
+      "file": "middleware/wrap_writer.go",
+      "truth": [
+        "network"
+      ],
+      "found": [
+        "network"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0699078
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "httpFancyWriter.ReadFrom",
+      "file": "middleware/wrap_writer.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0694989
+    },
+    {
+      "kind": "control:len",
+      "function": "httpFancyWriter.ReadFrom",
+      "file": "middleware/wrap_writer.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0701857
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "httpFancyWriter.ReadFrom",
+      "file": "middleware/wrap_writer.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0708815
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "httpFancyWriter.ReadFrom",
+      "file": "middleware/wrap_writer.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0704304
+    },
+    {
+      "kind": "control:strings",
+      "function": "httpFancyWriter.ReadFrom",
+      "file": "middleware/wrap_writer.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0707732
+    },
+    {
+      "kind": "branch",
+      "function": "httpFancyWriter.ReadFrom",
+      "file": "middleware/wrap_writer.go",
+      "found": [
+        "1 to 3"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0731809
+    },
+    {
+      "kind": "db",
+      "function": "printPrettyStack",
+      "file": "middleware/recoverer.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0721517
+    },
+    {
+      "kind": "fs:skip",
+      "function": "printPrettyStack",
+      "file": "middleware/recoverer.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": false,
+      "seconds": 0.068634,
+      "note": "the function already had this effect"
+    },
+    {
+      "kind": "network",
+      "function": "printPrettyStack",
+      "file": "middleware/recoverer.go",
+      "truth": [
+        "network"
+      ],
+      "found": [
+        "network"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.071973
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "printPrettyStack",
+      "file": "middleware/recoverer.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0686015
+    },
+    {
+      "kind": "control:len",
+      "function": "printPrettyStack",
+      "file": "middleware/recoverer.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0687003
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "printPrettyStack",
+      "file": "middleware/recoverer.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0677501
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "printPrettyStack",
+      "file": "middleware/recoverer.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0679083
+    },
+    {
+      "kind": "control:strings",
+      "function": "printPrettyStack",
+      "file": "middleware/recoverer.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0684974
+    },
+    {
+      "kind": "branch",
+      "function": "printPrettyStack",
+      "file": "middleware/recoverer.go",
+      "found": [
+        "1 to 3"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0670199
+    },
+    {
+      "kind": "db",
+      "function": "RequestID",
+      "file": "middleware/request_id.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0728538
+    },
+    {
+      "kind": "fs",
+      "function": "RequestID",
+      "file": "middleware/request_id.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0679887
+    },
+    {
+      "kind": "network:skip",
+      "function": "RequestID",
+      "file": "middleware/request_id.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": false,
+      "seconds": 0.0671709,
+      "note": "the function already had this effect"
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "RequestID",
+      "file": "middleware/request_id.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0672242
+    },
+    {
+      "kind": "control:len",
+      "function": "RequestID",
+      "file": "middleware/request_id.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0663162
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "RequestID",
+      "file": "middleware/request_id.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0671336
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "RequestID",
+      "file": "middleware/request_id.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0786263
+    },
+    {
+      "kind": "control:strings",
+      "function": "RequestID",
+      "file": "middleware/request_id.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0669146
+    },
+    {
+      "kind": "branch",
+      "function": "RequestID",
+      "file": "middleware/request_id.go",
+      "found": [
+        "0 to 2"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0677695
+    },
+    {
+      "kind": "db",
+      "function": "SupressNotFound",
+      "file": "middleware/supress_notfound.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0717294
+    },
+    {
+      "kind": "fs",
+      "function": "SupressNotFound",
+      "file": "middleware/supress_notfound.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0669888
+    },
+    {
+      "kind": "network:skip",
+      "function": "SupressNotFound",
+      "file": "middleware/supress_notfound.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": false,
+      "seconds": 0.0680709,
+      "note": "the function already had this effect"
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "SupressNotFound",
+      "file": "middleware/supress_notfound.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0691857
+    },
+    {
+      "kind": "control:len",
+      "function": "SupressNotFound",
+      "file": "middleware/supress_notfound.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0670595
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "SupressNotFound",
+      "file": "middleware/supress_notfound.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0678612
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "SupressNotFound",
+      "file": "middleware/supress_notfound.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0687187
+    },
+    {
+      "kind": "control:strings",
+      "function": "SupressNotFound",
+      "file": "middleware/supress_notfound.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0671043
+    },
+    {
+      "kind": "branch",
+      "function": "SupressNotFound",
+      "file": "middleware/supress_notfound.go",
+      "found": [
+        "0 to 2"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0693518
+    },
+    {
+      "kind": "db",
+      "function": "realIP",
+      "file": "middleware/realip.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0707022
+    },
+    {
+      "kind": "fs",
+      "function": "realIP",
+      "file": "middleware/realip.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0667742
+    },
+    {
+      "kind": "network:skip",
+      "function": "realIP",
+      "file": "middleware/realip.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": false,
+      "seconds": 0.0670121,
+      "note": "the function already had this effect"
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "realIP",
+      "file": "middleware/realip.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.067691
+    },
+    {
+      "kind": "control:len",
+      "function": "realIP",
+      "file": "middleware/realip.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0670783
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "realIP",
+      "file": "middleware/realip.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.065584
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "realIP",
+      "file": "middleware/realip.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0665405
+    },
+    {
+      "kind": "control:strings",
+      "function": "realIP",
+      "file": "middleware/realip.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0667594
+    },
+    {
+      "kind": "branch",
+      "function": "realIP",
+      "file": "middleware/realip.go",
+      "found": [
+        "4 to 6"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0676427
+    },
+    {
+      "kind": "db",
+      "function": "ClientIPFromRemoteAddr",
+      "file": "middleware/client_ip.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0717154
+    },
+    {
+      "kind": "fs",
+      "function": "ClientIPFromRemoteAddr",
+      "file": "middleware/client_ip.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.068966
+    },
+    {
+      "kind": "network:skip",
+      "function": "ClientIPFromRemoteAddr",
+      "file": "middleware/client_ip.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": false,
+      "seconds": 0.068005,
+      "note": "the function already had this effect"
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "ClientIPFromRemoteAddr",
+      "file": "middleware/client_ip.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0679064
+    },
+    {
+      "kind": "control:len",
+      "function": "ClientIPFromRemoteAddr",
+      "file": "middleware/client_ip.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0683346
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "ClientIPFromRemoteAddr",
+      "file": "middleware/client_ip.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0688578
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "ClientIPFromRemoteAddr",
+      "file": "middleware/client_ip.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0688908
+    },
+    {
+      "kind": "control:strings",
+      "function": "ClientIPFromRemoteAddr",
+      "file": "middleware/client_ip.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0722799
+    },
+    {
+      "kind": "branch",
+      "function": "ClientIPFromRemoteAddr",
+      "file": "middleware/client_ip.go",
+      "found": [
+        "0 to 2"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0679997
+    },
+    {
+      "kind": "db",
+      "function": "Mux.updateSubRoutes",
+      "file": "mux.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0773193
+    },
+    {
+      "kind": "fs",
+      "function": "Mux.updateSubRoutes",
+      "file": "mux.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0752145
+    },
+    {
+      "kind": "network",
+      "function": "Mux.updateSubRoutes",
+      "file": "mux.go",
+      "truth": [
+        "network"
+      ],
+      "found": [
+        "network"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0740659
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "Mux.updateSubRoutes",
+      "file": "mux.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0725149
+    },
+    {
+      "kind": "control:len",
+      "function": "Mux.updateSubRoutes",
+      "file": "mux.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0727643
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "Mux.updateSubRoutes",
+      "file": "mux.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0731011
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "Mux.updateSubRoutes",
+      "file": "mux.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0719339
+    },
+    {
+      "kind": "control:strings",
+      "function": "Mux.updateSubRoutes",
+      "file": "mux.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0733947
+    },
+    {
+      "kind": "branch",
+      "function": "Mux.updateSubRoutes",
+      "file": "mux.go",
+      "found": [
+        "2 to 4"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.075231
+    }
+  ]
+}

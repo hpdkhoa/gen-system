@@ -117,20 +117,33 @@ footer .wrap { display: flex; gap: 24px; flex-wrap: wrap; justify-content: space
 
 <header class="hero">
   <div class="wrap">
-    <span class="eyebrow">Open source · Apache-2.0 · runs offline</span>
-    <h1>Parser facts about <span>your codebase</span></h1>
-    <p class="lede">gen-system reads Go, COBOL with copybooks, CA Gen, Java, TypeScript and Python into a
-      call graph and a control flow graph for every routine. No model takes part, so the same code
-      always gives the same graph. Then it can write Go services with local models, and every
-      operation must compile before it ships.</p>
+    <span class="eyebrow">Open source · Apache-2.0 · runs offline · no model</span>
+    <h1>Review code changes with <span>facts, not guesses</span></h1>
+    <p class="lede">AI writes more code than people can read. gen-system reads your code with parsers
+      and tells you what a change may break, what it now touches, and whether any test reaches it.
+      The same change always gets the same answer.</p>
     <div class="ctas">
-      <a class="btn primary" href="demo/?p=hold#/graph/root=hold-code%2Fposelab_mcp%2Fblender%2Fholdlab.py%23func%3Atarget_hold">Open the live demo</a>
-      <a class="btn" href="https://github.com/hpdkhoa/gen-system">View on GitHub</a>
+      <a class="btn primary" href="https://github.com/hpdkhoa/gen-system#use-it">Review your code</a>
+      <a class="btn" href="demo/?p=hold#/graph/root=hold-code%2Fposelab_mcp%2Fblender%2Fholdlab.py%23func%3Atarget_hold">Open the live demo</a>
     </div>
-    <div class="shot"><img src="img/studio-cobol-cfg.png" width="1600" height="874"
-      alt="The gen-system Studio: the call graph of a COBOL payroll run and the control flow graph of its CALC-TAX paragraph"/></div>
-    <p class="caption">The Studio on a COBOL payroll example. Left: what MAIN-PARA calls. Right: the
-      control flow graph of CALC-TAX, where the EVALUATE on the pay grade fans out into four arms.</p>
+<pre style="margin-top:36px"><span class="c">$ understand-review --base main</span>
+
+May break
+  store.go:8   Save changed its signature from (name string) to (name string, force bool);
+               1 caller outside this change: Main (main.go:3)
+  store.go:9   Old was removed but is still called from 1 place: Main (main.go:3)
+
+New side effects
+  store.go:8   Save now touches files
+  store.go:25  Fresh is new and touches the network
+
+No test reaches these
+  store.go     Save, Fresh
+
+Grew
+  store.go:12  Helper has 3 more branches (0 to 3)</pre>
+    <p class="caption">Run it in a terminal or in CI, or let your AI agent call it as the MCP tool
+      review_diff. It reads Go, Python, TypeScript, Java, COBOL and CA Gen.</p>
   </div>
 </header>
 
@@ -189,8 +202,9 @@ footer .wrap { display: flex; gap: 24px; flex-wrap: wrap; justify-content: space
     <div>
       <h2>Give your agent the facts</h2>
       <p class="sub" style="margin-bottom:18px">The read only half runs as an MCP server. Claude Code,
-        Codex, Cursor or any MCP client can search symbols, walk call graphs, read control flow
-        graphs and effects, and list the beliefs. The server runs locally and sends nothing anywhere.</p>
+        Codex, Cursor or any MCP client can review a change, search symbols, walk call graphs, read
+        control flow graphs and effects, and list the beliefs. The server runs locally and sends
+        nothing anywhere.</p>
       <p class="sub" style="margin-bottom:0">It links no generation code and no model client, and an
         architecture test fails the build if that ever changes.</p>
     </div>
@@ -220,7 +234,7 @@ effects
       <code>results/2026-09-09/</code>.</p>
     <div class="stats">
       <div class="stat"><div class="n">0</div><div class="l">parse errors on 405 files from four public repositories pinned to a commit, 268 of them COBOL</div></div>
-      <div class="stat"><div class="n">4,018</div><div class="l">calls between CobolCraft's own programs and paragraphs, all resolved; 98.0% to 99.9% in the three Go repositories</div></div>
+      <div class="stat"><div class="n">4,018</div><div class="l">calls between CobolCraft's own programs and paragraphs, all resolved; in four Go repositories, Go's type checker agrees with 99% to 100% of the call links</div></div>
       <div class="stat"><div class="n">1,697</div><div class="l">control flow graphs built, none with a structural issue</div></div>
       <div class="stat"><div class="n">0.674</div><div class="l">file recall on 60 SWE-bench Verified tasks, two call graph hops from the names in each issue</div></div>
     </div>
@@ -236,10 +250,9 @@ effects
 <section>
   <div class="wrap">
     <h2>How it works</h2>
-    <p class="sub">The Understand half builds the graph and the beliefs. The Generate half plans a
-      Go service with qwen3:14b, writes each operation with qwen2.5-coder:14b, and passes every
-      operation through a compile gate. An operation that still fails after two repairs becomes a
-      stub, and the run counts it.</p>
+    <p class="sub">The parsers build the call graph, the control flow graphs and the effects. The
+      review, the Studio and the MCP server read them. A separate experiment tests whether the same
+      graph helps a local model write Go code that compiles.</p>
     <div class="diagram"><img src="img/pipeline.svg" width="1040" height="560"
       alt="How gen-system works: parsers, symbol index, call graph, control flow and effects feed the beliefs; the generate half plans, writes, compiles and tests Go code, and the parsers read the result again"/></div>
   </div>

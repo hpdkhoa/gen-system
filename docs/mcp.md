@@ -80,6 +80,7 @@ The server loads the project once at start. Large projects take a moment; it log
 
 | Tool | Answers |
 |---|---|
+| `review_diff` | A change, reviewed: removed functions still called, changed signatures with callers outside the change, new database, file or network effects, functions no test reaches, new branches. `base` (default `HEAD`) or `diff`; `format` json or markdown. See [review.md](review.md) |
 | `architecture` | Languages, top packages, entry point candidates, constructs the parsers could not model, call edge resolution, attached standard libraries |
 | `search_symbols` | Ranked matches over symbol names, with an optional effect filter. Returns the symbol ids the other tools take |
 | `call_graph` | A walk over resolved call edges from one symbol, callers or callees, up to 4 hops. Unresolved callees show as external nodes |

@@ -1,0 +1,3586 @@
+{
+  "repo": "K:\\Projects\\gitHub\\gen-system",
+  "commit": "8d2ac3c6c3a75dcd83976150893734f46ba7897f",
+  "date": "2026-10-20",
+  "go_functions": 1473,
+  "load_seconds": 18.9666092,
+  "type_errors_before_any_edit": 0,
+  "scores": {
+    "branch": {
+      "cases": 20,
+      "pass": 20,
+      "tp": 20,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1,
+      "recall": 1,
+      "median_seconds": 0.0977614
+    },
+    "control": {
+      "cases": 100,
+      "pass": 100,
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "precision": 0,
+      "recall": 0,
+      "median_seconds": 0.0976876
+    },
+    "db": {
+      "cases": 20,
+      "pass": 20,
+      "tp": 20,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1,
+      "recall": 1,
+      "median_seconds": 0.1084135
+    },
+    "fs": {
+      "cases": 17,
+      "pass": 17,
+      "tp": 17,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1,
+      "recall": 1,
+      "median_seconds": 0.0966612
+    },
+    "network": {
+      "cases": 19,
+      "pass": 19,
+      "tp": 19,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1,
+      "recall": 1,
+      "median_seconds": 0.0970836
+    },
+    "remove": {
+      "cases": 20,
+      "pass": 20,
+      "tp": 50,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1,
+      "recall": 1,
+      "median_seconds": 0.1084668
+    },
+    "signature": {
+      "cases": 20,
+      "pass": 20,
+      "tp": 50,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1,
+      "recall": 1,
+      "median_seconds": 0.1117004
+    }
+  },
+  "coverage": {
+    "functions": 1473,
+    "covered": 1054,
+    "go_test_seconds": 265.7052178,
+    "by_hops": {
+      "1": {
+        "untested_and_not_covered": 401,
+        "untested_but_covered": 707,
+        "reached_but_not_covered": 18,
+        "reached_and_covered": 347,
+        "precision": 0.361913357400722,
+        "recall": 0.9570405727923628,
+        "agreement": 0.5078071961982349
+      },
+      "10": {
+        "untested_and_not_covered": 244,
+        "untested_but_covered": 66,
+        "reached_but_not_covered": 175,
+        "reached_and_covered": 988,
+        "precision": 0.7870967741935484,
+        "recall": 0.5823389021479713,
+        "agreement": 0.836388323150034
+      },
+      "3": {
+        "untested_and_not_covered": 349,
+        "untested_but_covered": 210,
+        "reached_but_not_covered": 70,
+        "reached_and_covered": 844,
+        "precision": 0.6243291592128801,
+        "recall": 0.8329355608591885,
+        "agreement": 0.8099117447386287
+      },
+      "6": {
+        "untested_and_not_covered": 266,
+        "untested_but_covered": 81,
+        "reached_but_not_covered": 153,
+        "reached_and_covered": 973,
+        "precision": 0.7665706051873199,
+        "recall": 0.6348448687350835,
+        "agreement": 0.8411405295315683
+      },
+      "99": {
+        "untested_and_not_covered": 244,
+        "untested_but_covered": 66,
+        "reached_but_not_covered": 175,
+        "reached_and_covered": 988,
+        "precision": 0.7870967741935484,
+        "recall": 0.5823389021479713,
+        "agreement": 0.836388323150034
+      }
+    },
+    "disagree_at_3_hops": [
+      "says untested, but covered|Server.handleFlow|generator/internal/presentation/presentation.go:700|method",
+      "says untested, but covered|stripQuotes|generator/internal/ast/ts_frontend.go:1663|func",
+      "says tested, but not covered|fail|generator/cmd/studio-snapshot/main.go:68|func",
+      "says untested, but covered|caGenParser.parseReadEach|generator/internal/ast/cagen_frontend.go:294|method",
+      "says untested, but covered|buildSchemaFromPlanPrompt|generator/internal/ai/generate_schema_from_plan.go:23|func",
+      "says tested, but not covered|saveLastDown|generator/internal/cli/migrate.go:181|func",
+      "says untested, but covered|saveEvolveSnapshot|generator/internal/cli/evolve.go:138|func",
+      "says untested, but covered|javaParser.parseBlockInto|generator/internal/ast/java_frontend.go:898|method",
+      "says untested, but covered|appendRaw|generator/internal/ast/ast.go:231|func",
+      "says untested, but covered|tsParser.skipAngles|generator/internal/ast/ts_frontend.go:604|method",
+      "says tested, but not covered|Available|generator/internal/enrich/enrich.go:319|func",
+      "says untested, but covered|taskID|generator/internal/planner/graph.go:230|func",
+      "says untested, but covered|javaType|generator/internal/engine/backend_spring.go:48|func",
+      "says untested, but covered|containsComponent|generator/internal/planner_v2/architecture.go:33|func",
+      "says tested, but not covered|extractSource|generator/internal/ast/go_frontend.go:795|func",
+      "says untested, but covered|Server.handleEffectsV23|generator/internal/presentation/v23_endpoints.go:668|method",
+      "says untested, but covered|replaceAttrForText|generator/internal/trace/trace.go:318|func",
+      "says tested, but not covered|hasPrefixAny|generator/internal/style/gate.go:374|func",
+      "says untested, but covered|bodyChildren|generator/internal/ast/ts_frontend.go:594|func",
+      "says untested, but covered|caGenParser.parseCall|generator/internal/ast/cagen_frontend.go:409|method",
+      "says untested, but covered|tsParser.parseParamList|generator/internal/ast/ts_frontend.go:1593|method",
+      "says untested, but covered|tsParser.parseImportNames|generator/internal/ast/ts_frontend.go:863|method",
+      "says untested, but covered|Context.FilesReferencingEntity|generator/internal/context/context.go:601|method",
+      "says untested, but covered|Server.handleCallgraphV23|generator/internal/presentation/v23_endpoints.go:488|method",
+      "says untested, but covered|writeProjectJSON|generator/internal/presentation/project.go:178|func",
+      "says untested, but covered|tsParser.parseFuncBody|generator/internal/ast/ts_frontend.go:508|method",
+      "says tested, but not covered|RenderReport|generator/internal/style/gate.go:384|func",
+      "says untested, but covered|javaParser.cur|generator/internal/ast/java_frontend.go:257|method",
+      "says untested, but covered|streamEnabled|generator/internal/ai/ollama.go:143|func",
+      "says untested, but covered|isIdentContinue|generator/internal/ast/ts_frontend.go:353|func",
+      "says tested, but not covered|capitalize|generator/internal/schema/schema.go:55|func",
+      "says tested, but not covered|addedHunks|generator/internal/services/staging.go:350|func",
+      "says tested, but not covered|NewServerWithWeb|generator/internal/api/server.go:323|func",
+      "says untested, but covered|extractPIC|generator/internal/ast/cobol_frontend.go:1731|func",
+      "says untested, but covered|Register|generator/internal/ast/frontend.go:55|func",
+      "says untested, but covered|goConverter.convertInterfaceMethod|generator/internal/ast/go_frontend.go:257|method",
+      "says untested, but covered|branchesFromCFG|generator/internal/style/analyze.go:262|func",
+      "says untested, but covered|Evolve|generator/internal/cli/evolve.go:17|func",
+      "says tested, but not covered|Broker.unsubscribe|generator/internal/api/sse/broker.go:32|method",
+      "says tested, but not covered|isFile|generator/internal/context/stdlib_detect.go:256|func",
+      "says untested, but covered|isSection|generator/internal/ast/cobol_frontend.go:1651|func",
+      "says tested, but not covered|serializeConst|generator/internal/nit/nit.go:244|func",
+      "says tested, but not covered|tsParser.parseExportBlock|generator/internal/ast/ts_frontend.go:894|method",
+      "says untested, but covered|JSONLSink.Record|generator/internal/agent/events.go:171|method",
+      "says untested, but covered|indexAllNearest|generator/internal/ai/op_binding.go:184|func",
+      "says untested, but covered|isSQLVerb|generator/internal/ast/cobol_frontend.go:1979|func",
+      "says tested, but not covered|PyFrontend.Emit|generator/internal/ast/py_frontend.go:831|method",
+      "says untested, but covered|goConverter.convertStmt|generator/internal/ast/go_frontend.go:393|method",
+      "says untested, but covered|containsSelector|generator/internal/engine/service_logic.go:695|func",
+      "says untested, but covered|multiHandler.Handle|generator/internal/trace/trace.go:348|method",
+      "says tested, but not covered|mapType|generator/internal/schema/schema.go:42|func",
+      "says untested, but covered|safeCall|generator/internal/mcp/server.go:229|func",
+      "says tested, but not covered|NewServer|generator/internal/api/server.go:305|func",
+      "says untested, but covered|isParagraphHeader|generator/internal/ast/cobol_frontend.go:1684|func",
+      "says untested, but covered|FuncSink.Record|generator/internal/agent/events.go:198|method",
+      "says untested, but covered|javaParser.collectParenCalls|generator/internal/ast/java_frontend.go:1181|method",
+      "says untested, but covered|benchTSParser|generator/cmd/bench/main.go:278|func",
+      "says untested, but covered|caGenParser.parseElse|generator/internal/ast/cagen_frontend.go:501|method",
+      "says untested, but covered|containsStr|generator/internal/planner_v2/architecture.go:59|func",
+      "says untested, but covered|keepRemovedFields|generator/internal/cli/evolve_keep.go:29|func",
+      "says untested, but covered|tsLoopCond|generator/internal/ast/ts_frontend.go:111|func",
+      "says untested, but covered|subsequenceMatch|generator/internal/presentation/v23_endpoints.go:430|func",
+      "says tested, but not covered|AlreadyApplied|generator/internal/compiler/migration/engine.go:39|func",
+      "says untested, but covered|javaParser.parseIf|generator/internal/ast/java_frontend.go:1007|method",
+      "says untested, but covered|collectCallees|generator/internal/nit/nit.go:329|func",
+      "says untested, but covered|benchUnknownNodePolicy|generator/cmd/bench/main.go:931|func",
+      "says tested, but not covered|isExportedName|generator/internal/intelligence/context_graph.go:161|func",
+      "says untested, but covered|tsParser.skipBrackets|generator/internal/ast/ts_frontend.go:1641|method",
+      "says untested, but covered|isExportedCOBOL|generator/internal/ast/cobol_frontend.go:1991|func",
+      "says untested, but covered|sortedKeys|generator/internal/cli/evolve_understand.go:247|func",
+      "says tested, but not covered|runRollback|generator/internal/cli/migrate.go:196|func",
+      "says tested, but not covered|Broker.subscribe|generator/internal/api/sse/broker.go:24|method",
+      "says tested, but not covered|checksum|generator/internal/compiler/migration/engine.go:28|func",
+      "says untested, but covered|calleeName|generator/internal/ast/go_frontend.go:597|func",
+      "says tested, but not covered|Parse|generator/internal/schema/schema.go:9|func",
+      "says untested, but covered|tsParser.skipParens|generator/internal/ast/ts_frontend.go:1621|method",
+      "says tested, but not covered|javaParser.recordUnknownStmt|generator/internal/ast/java_frontend.go:1318|method",
+      "says untested, but covered|resolutionStats|generator/internal/cli/evolve_understand.go:171|func",
+      "says untested, but covered|extractUsage|generator/internal/ast/cobol_frontend.go:1776|func",
+      "says untested, but covered|healLogPath|generator/internal/cli/heal_log.go:24|func",
+      "says untested, but covered|SetupHealLog|generator/internal/cli/heal_log.go:36|func",
+      "says untested, but covered|Context.FindReferences|generator/internal/context/context.go:616|method",
+      "says untested, but covered|ChecksumFile|generator/internal/ast/cache.go:54|func",
+      "says untested, but covered|splitAt|generator/internal/flow/cobol_dataflow.go:77|func",
+      "says tested, but not covered|snapshot.get|generator/cmd/studio-snapshot/main.go:154|method",
+      "says untested, but covered|cobolParser.splitElseLine|generator/internal/ast/cobol_frontend.go:1457|method",
+      "says untested, but covered|splitLeadingVerb|generator/internal/belief/belief.go:796|func",
+      "says untested, but covered|Server.buildArchSummary|generator/internal/presentation/presentation.go:1012|method",
+      "says untested, but covered|isIdentStart|generator/internal/ast/ts_frontend.go:350|func",
+      "says tested, but not covered|appendUnique|generator/internal/context/context.go:752|func",
+      "says untested, but covered|buildPlanPrompt|generator/internal/ai/generate_plan.go:18|func",
+      "says untested, but covered|cobolParser.programName|generator/internal/ast/cobol_frontend.go:547|method",
+      "says untested, but covered|formatReturns|generator/internal/nit/nit.go:310|func",
+      "says untested, but covered|javaParser.parseSwitch|generator/internal/ast/java_frontend.go:1074|method",
+      "says tested, but not covered|CAGenFrontend.Emit|generator/internal/ast/cagen_frontend.go:71|method",
+      "says untested, but covered|ollamaURL|generator/internal/ai/ollama.go:45|func",
+      "says tested, but not covered|pad|generator/internal/context/stdlib_detect.go:443|func",
+      "says untested, but covered|benchSymbolIndex|generator/cmd/bench/main.go:492|func",
+      "says untested, but covered|goConverter.callNode|generator/internal/ast/go_frontend.go:567|method",
+      "says untested, but covered|javaParser.parseReturn|generator/internal/ast/java_frontend.go:1088|method",
+      "says untested, but covered|tsParser.parseSingleType|generator/internal/ast/ts_frontend.go:1498|method",
+      "says untested, but covered|javaParser.collectParenCallsWithText|generator/internal/ast/java_frontend.go:1192|method",
+      "says tested, but not covered|recordStyleViolation|generator/internal/engine/logic_stats.go:71|func",
+      "says untested, but covered|collectHandlerIDsFromTasks|generator/internal/planner/graph.go:242|func",
+      "says untested, but covered|extractOccurs|generator/internal/ast/cobol_frontend.go:1798|func",
+      "says tested, but not covered|serializeInterface|generator/internal/nit/nit.go:219|func",
+      "says untested, but covered|tsParser.parseClassBody|generator/internal/ast/ts_frontend.go:1106|method",
+      "says untested, but covered|javaParser.collectBranchArm|generator/internal/ast/java_frontend.go:1030|method",
+      "says untested, but covered|GeneratePlan|generator/internal/ai/generate_plan.go:7|func",
+      "says untested, but covered|cobolParser.splitLineAt|generator/internal/ast/cobol_frontend.go:1489|method",
+      "says tested, but not covered|runFallback|generator/internal/ai/ai.go:26|func",
+      "says untested, but covered|javaParser.parseTry|generator/internal/ast/java_frontend.go:1107|method",
+      "says untested, but covered|caGenParser.parseEscape|generator/internal/ast/cagen_frontend.go:528|method",
+      "says untested, but covered|Server.handleSource|generator/internal/presentation/presentation.go:882|method",
+      "says untested, but covered|sliceSource|generator/cmd/gen-enrich/main.go:223|func",
+      "says untested, but covered|tsLexer.next|generator/internal/ast/ts_frontend.go:246|method",
+      "says tested, but not covered|IssueHint|generator/internal/ai/reviewer.go:245|func",
+      "says untested, but covered|Server.handleCorrect|generator/internal/presentation/presentation.go:971|method",
+      "says untested, but covered|Server.insideBrowseRoot|generator/internal/presentation/presentation.go:546|method",
+      "says untested, but covered|appendChild|generator/internal/ast/cobol_frontend.go:1536|func",
+      "says untested, but covered|keepFieldsAndReplan|generator/internal/cli/evolve_keep.go:61|func",
+      "says tested, but not covered|WriteDesignManifest|generator/internal/services/manifest.go:47|func",
+      "says untested, but covered|SetupStdlib|generator/internal/cli/stdlib_flag.go:22|func",
+      "says tested, but not covered|snapshot.clean|generator/cmd/studio-snapshot/main.go:116|method",
+      "says tested, but not covered|snapshot.cleanAny|generator/cmd/studio-snapshot/main.go:127|method",
+      "says untested, but covered|isCICSVerb|generator/internal/ast/cobol_frontend.go:1961|func",
+      "says untested, but covered|benchGoParser|generator/cmd/bench/main.go:155|func",
+      "says untested, but covered|SetStyle|generator/internal/agent/style_stage.go:48|func",
+      "says untested, but covered|javaMods.annoDoc|generator/internal/ast/java_frontend.go:355|method",
+      "says tested, but not covered|snapshot.write|generator/cmd/studio-snapshot/main.go:198|method",
+      "says tested, but not covered|serializeVar|generator/internal/nit/nit.go:240|func",
+      "says tested, but not covered|renderManifestHTML|generator/internal/services/manifest.go:85|func",
+      "says untested, but covered|javaParser.parseTypeBody|generator/internal/ast/java_frontend.go:672|method",
+      "says untested, but covered|goConverter.convertField|generator/internal/ast/go_frontend.go:231|method",
+      "says untested, but covered|javaParser.parseFieldOrMethod|generator/internal/ast/java_frontend.go:744|method",
+      "says tested, but not covered|check|generator/internal/cli/doctor.go:16|func",
+      "says untested, but covered|javaFieldName|generator/internal/engine/backend_spring.go:69|func",
+      "says untested, but covered|GenerateSchemaFromPlan|generator/internal/ai/generate_schema_from_plan.go:12|func",
+      "says untested, but covered|sortStrings|generator/internal/engine/service_logic.go:718|func",
+      "says untested, but covered|entityNameToFileName|generator/internal/planner/graph.go:180|func",
+      "says untested, but covered|javaSetter|generator/internal/engine/backend_spring.go:99|func",
+      "says untested, but covered|tsLexer.readString|generator/internal/ast/ts_frontend.go:202|method",
+      "says tested, but not covered|ApplySQL|generator/internal/compiler/migration/engine.go:52|func",
+      "says untested, but covered|SetupStyle|generator/internal/cli/style_flag.go:31|func",
+      "says tested, but not covered|ollamaLogicProvider.Operations|generator/internal/ai/logic.go:90|method",
+      "says untested, but covered|EvolveWithUnderstanding|generator/internal/cli/evolve_understand.go:42|func",
+      "says tested, but not covered|confirm|generator/internal/cli/outdir.go:154|func",
+      "says untested, but covered|javaParser.parseParamList|generator/internal/ast/java_frontend.go:835|method",
+      "says untested, but covered|GetSchemaPath|generator/internal/cli/args.go:5|func",
+      "says untested, but covered|Server.handleDiff|generator/internal/presentation/presentation.go:998|method",
+      "says untested, but covered|declText|generator/internal/style/analyze.go:194|func",
+      "says untested, but covered|calleeBase|generator/internal/ast/go_frontend.go:622|func",
+      "says untested, but covered|javaParser.skipToStatementEnd|generator/internal/ast/java_frontend.go:1297|method",
+      "says tested, but not covered|TSFrontend.Emit|generator/internal/ast/ts_frontend.go:60|method",
+      "says untested, but covered|caGenParser.parseWrite|generator/internal/ast/cagen_frontend.go:375|method",
+      "says untested, but covered|stmtText|generator/internal/ast/go_frontend.go:755|func",
+      "says untested, but covered|ollamaTimeout|generator/internal/ai/ollama.go:35|func",
+      "says untested, but covered|cobolParser.parseFileControl|generator/internal/ast/cobol_frontend.go:630|method",
+      "says untested, but covered|caGenParser.lastLine|generator/internal/ast/cagen_frontend.go:589|method",
+      "says untested, but covered|javaParser.parseLoop|generator/internal/ast/java_frontend.go:1041|method",
+      "says untested, but covered|tsParser.parseTypeExpr|generator/internal/ast/ts_frontend.go:1475|method",
+      "says tested, but not covered|BuildService.fail|generator/internal/services/build.go:489|method",
+      "says untested, but covered|assertsPurity|generator/internal/belief/validate.go:157|func",
+      "says tested, but not covered|EnsureMigrationTable|generator/internal/compiler/migration/engine.go:14|func",
+      "says untested, but covered|containsWord|generator/internal/ast/cobol_frontend.go:1893|func",
+      "says untested, but covered|keepAlive|generator/internal/ai/ollama.go:66|func",
+      "says untested, but covered|tsLexer.peekAt|generator/internal/ast/ts_frontend.go:162|method",
+      "says untested, but covered|requestOptions|generator/internal/ai/ollama.go:133|func",
+      "says untested, but covered|formatParams|generator/internal/nit/nit.go:287|func",
+      "says tested, but not covered|Broker.ServeHTTP|generator/internal/api/sse/broker.go:52|method",
+      "says untested, but covered|Schema|generator/internal/cli/schema.go:11|func",
+      "says untested, but covered|isIdentByte|generator/internal/engine/service_logic.go:711|func",
+      "says tested, but not covered|JavaSidecarFrontend.Parse|generator/internal/ast/java_sidecar.go:65|method",
+      "says tested, but not covered|BuildLogicRepairPrompt|generator/internal/ai/logic_prompt.go:146|func",
+      "says untested, but covered|goConverter.caseClauses|generator/internal/ast/go_frontend.go:769|method",
+      "says untested, but covered|webGateEnabled|generator/internal/agent/agent.go:327|func",
+      "says untested, but covered|javaParser.parseRecordComponents|generator/internal/ast/java_frontend.go:629|method",
+      "says tested, but not covered|appendUnique|generator/internal/intelligence/context_graph.go:179|func",
+      "says untested, but covered|Server.handleSymbols|generator/internal/presentation/presentation.go:427|method",
+      "says tested, but not covered|equalsIgnoreCase|generator/internal/compiler/pass_infer.go:44|func",
+      "says untested, but covered|joinCondTokens|generator/internal/ast/cond_text.go:36|func",
+      "says untested, but covered|goConverter.convertStmtList|generator/internal/ast/go_frontend.go:380|method",
+      "says untested, but covered|parseIntLoose|generator/internal/ast/cobol_frontend.go:1876|func",
+      "says untested, but covered|receiverVar|generator/internal/style/analyze.go:251|func",
+      "says untested, but covered|writeJSON|generator/internal/presentation/presentation.go:1035|func",
+      "says untested, but covered|splitCamel|generator/internal/belief/belief.go:815|func",
+      "says tested, but not covered|javaStdlibTree|generator/internal/context/stdlib_detect.go:233|func",
+      "says untested, but covered|runCmd|generator/internal/agent/agent.go:490|func",
+      "says untested, but covered|benchFrontendRegistry|generator/cmd/bench/main.go:105|func",
+      "says untested, but covered|javaParser.collectTypeRefName|generator/internal/ast/java_frontend.go:610|method",
+      "says tested, but not covered|NewServerWithProject|generator/internal/api/server.go:338|func",
+      "says untested, but covered|benchFlowAnalysis|generator/cmd/bench/main.go:707|func",
+      "says untested, but covered|goConverter.initStmt|generator/internal/ast/go_frontend.go:559|method",
+      "says untested, but covered|caGenParser.parseIf|generator/internal/ast/cagen_frontend.go:468|method",
+      "says untested, but covered|trimRaw|generator/internal/presentation/presentation.go:1067|func",
+      "says untested, but covered|cobolParser.splitInlineIF|generator/internal/ast/cobol_frontend.go:1418|method",
+      "says untested, but covered|impactedEntities|generator/internal/cli/evolve_understand.go:195|func",
+      "says untested, but covered|exprText|generator/internal/ast/go_frontend.go:744|func",
+      "says tested, but not covered|key|generator/cmd/studio-snapshot/main.go:174|func",
+      "says untested, but covered|benchCFGBuilder|generator/cmd/bench/main.go:637|func",
+      "says untested, but covered|loadOpts|generator/internal/cli/stdlib_flag.go:51|func",
+      "says untested, but covered|parseLevel|generator/internal/ast/cobol_frontend.go:1706|func",
+      "says untested, but covered|applyRequestToEntityIndented|generator/internal/engine/backend_spring.go:382|func",
+      "says untested, but covered|Server.handleBeliefs|generator/internal/presentation/presentation.go:944|method",
+      "says untested, but covered|UpsertFunction|generator/internal/ast/upsert.go:12|func",
+      "says untested, but covered|flagValue|generator/internal/cli/style_flag.go:20|func",
+      "says untested, but covered|nodeDescription|generator/internal/presentation/presentation.go:1042|func",
+      "says untested, but covered|caGenParser.parseExit|generator/internal/ast/cagen_frontend.go:545|method",
+      "says tested, but not covered|ollamaLogicProvider.RepairOperation|generator/internal/ai/logic.go:106|method",
+      "says untested, but covered|Server.StdlibReport|generator/internal/presentation/presentation.go:224|method",
+      "says untested, but covered|javaParser.parseMethodBody|generator/internal/ast/java_frontend.go:888|method",
+      "says tested, but not covered|JavaFrontend.Emit|generator/internal/ast/java_frontend.go:34|method",
+      "says untested, but covered|extractRedefines|generator/internal/ast/cobol_frontend.go:1831|func",
+      "says untested, but covered|importMatchScore|generator/internal/symbols/index.go:450|func",
+      "says untested, but covered|parseCAGenAttrRef|generator/internal/ast/cagen_frontend.go:581|func",
+      "says untested, but covered|benchEffectInference|generator/cmd/bench/main.go:757|func",
+      "says untested, but covered|clauseWordIndex|generator/internal/ast/cobol_frontend.go:1918|func",
+      "says untested, but covered|extractValue|generator/internal/ast/cobol_frontend.go:1846|func",
+      "says untested, but covered|entityFilesMissing|generator/internal/planner/graph.go:169|func",
+      "says untested, but covered|isDivision|generator/internal/ast/cobol_frontend.go:1642|func",
+      "says untested, but covered|benchChecksumStability|generator/cmd/bench/main.go:876|func",
+      "says untested, but covered|tsParser.parseUnionType|generator/internal/ast/ts_frontend.go:1488|method",
+      "says untested, but covered|tsParser.parseInterfaceBody|generator/internal/ast/ts_frontend.go:958|method",
+      "says tested, but not covered|RewritePythonFunction|generator/internal/ast/python.go:22|func",
+      "says tested, but not covered|stringList.Set|generator/internal/cli/report.go:40|method",
+      "says untested, but covered|Server.handleArchitectureV23|generator/internal/presentation/v23_endpoints.go:122|method",
+      "says untested, but covered|entityHasField|generator/internal/cli/evolve_keep.go:49|func",
+      "says tested, but not covered|BuildService.Clean|generator/internal/services/build.go:157|method",
+      "says untested, but covered|Server.roots|generator/internal/presentation/presentation.go:313|method",
+      "says untested, but covered|BuildPlan|generator/internal/planner/planner.go:28|func",
+      "says untested, but covered|multiHandler.Enabled|generator/internal/trace/trace.go:339|method",
+      "says tested, but not covered|min|generator/internal/ast/py_frontend.go:835|func",
+      "says untested, but covered|tsLexer.advance|generator/internal/ast/ts_frontend.go:170|method",
+      "says untested, but covered|benchPythonParser|generator/cmd/bench/main.go:377|func",
+      "says untested, but covered|javaParser.collectStatementCalls|generator/internal/ast/java_frontend.go:1149|method",
+      "says untested, but covered|cobolParser.parseCICSBlock|generator/internal/ast/cobol_frontend.go:1547|method",
+      "says untested, but covered|applyRequestToEntity|generator/internal/engine/backend_spring.go:373|func",
+      "says tested, but not covered|isGenericGoType|generator/internal/intelligence/context_graph.go:170|func",
+      "says untested, but covered|isCobolPath|generator/internal/presentation/presentation.go:572|func",
+      "says untested, but covered|Server.handleFiles|generator/internal/presentation/presentation.go:598|method",
+      "says untested, but covered|javaParser.harvestCallAt|generator/internal/ast/java_frontend.go:1228|method",
+      "says tested, but not covered|JavaSidecarFrontend.Emit|generator/internal/ast/java_sidecar.go:70|method",
+      "says untested, but covered|Server.handleSearchV23|generator/internal/presentation/v23_endpoints.go:324|method",
+      "says untested, but covered|Context.addCobolRuntimeCatalog|generator/internal/context/cobol_runtime.go:103|method",
+      "says untested, but covered|isWordChar|generator/internal/ast/cobol_frontend.go:1934|func",
+      "says untested, but covered|javaParser.skipBalanced|generator/internal/ast/java_frontend.go:287|method",
+      "says untested, but covered|ProjectManager.handleLoad|generator/internal/presentation/project.go:186|method",
+      "says tested, but not covered|recordStyleRepair|generator/internal/engine/logic_stats.go:77|func",
+      "says untested, but covered|cors|generator/internal/presentation/v23_endpoints.go:732|func",
+      "says untested, but covered|caGenParser.parseStatement|generator/internal/ast/cagen_frontend.go:246|method",
+      "says untested, but covered|cobolParser.parseSQLBlock|generator/internal/ast/cobol_frontend.go:1590|method",
+      "says tested, but not covered|writeJSON|generator/cmd/studio-snapshot/main.go:291|func",
+      "says untested, but covered|lastSegment|generator/internal/nit/nit.go:356|func",
+      "says untested, but covered|encodeTag|generator/internal/ast/cobol_frontend.go:1941|func",
+      "says tested, but not covered|helperName|generator/internal/style/opcheck.go:86|func",
+      "says tested, but not covered|copyTree|generator/internal/services/staging.go:454|func",
+      "says untested, but covered|readStream|generator/internal/ai/ollama.go:298|func",
+      "says untested, but covered|cobolParser.parse01Level|generator/internal/ast/cobol_frontend.go:794|method",
+      "says untested, but covered|javaParser.parseStatement|generator/internal/ast/java_frontend.go:908|method",
+      "says untested, but covered|javaGetter|generator/internal/engine/backend_spring.go:96|func",
+      "says untested, but covered|lowerFirstSpring|generator/internal/engine/backend_spring.go:469|func",
+      "says untested, but covered|benchCallGraph|generator/cmd/bench/main.go:590|func",
+      "says untested, but covered|benchCacheRoundTrip|generator/cmd/bench/main.go:815|func",
+      "says tested, but not covered|GenerateTable|generator/internal/engine/exports.go:58|func",
+      "says untested, but covered|benchCAGenParser|generator/cmd/bench/main.go:441|func",
+      "says untested, but covered|caGenParser.parseAssign|generator/internal/ast/cagen_frontend.go:435|method",
+      "says untested, but covered|cobolNames|generator/internal/flow/cobol_dataflow.go:57|func",
+      "says untested, but covered|recordUsage|generator/internal/ai/ollama.go:189|func",
+      "says tested, but not covered|caGenParser.parseActionBlock|generator/internal/ast/cagen_frontend.go:217|method",
+      "says untested, but covered|goConverter.callsIn|generator/internal/ast/go_frontend.go:652|method",
+      "says tested, but not covered|Run|generator/internal/ai/ai.go:15|func",
+      "says tested, but not covered|BuildService.run|generator/internal/services/build.go:260|method",
+      "says tested, but not covered|HasFunc|generator/internal/ast/rewrite.go:183|func",
+      "says untested, but covered|javaParser.statementHasLambda|generator/internal/ast/java_frontend.go:1264|method",
+      "says untested, but covered|javaParser.peek|generator/internal/ast/java_frontend.go:263|method",
+      "says tested, but not covered|indent|generator/internal/engine/service_logic.go:313|func",
+      "says untested, but covered|lastSegment|generator/internal/ast/ts_frontend.go:1673|func",
+      "says untested, but covered|cobolParser.parseFD|generator/internal/ast/cobol_frontend.go:759|method",
+      "says untested, but covered|tsLexer.peek|generator/internal/ast/ts_frontend.go:155|method",
+      "says untested, but covered|Plan|generator/internal/cli/plan.go:22|func"
+    ]
+  },
+  "history": [
+    {
+      "commit": "8d2ac3c",
+      "subject": "Python comprehensions are no loops; environment and path calls are no file I/O",
+      "files": 325,
+      "functions": 5,
+      "points": {
+        "size": 4
+      },
+      "seconds": 16.79219
+    },
+    {
+      "commit": "4482d63",
+      "subject": "Python methods as one symbol; wrong links and labels fixed; CFG full screen",
+      "files": 578,
+      "functions": 18,
+      "points": {
+        "size": 12,
+        "test": 1
+      },
+      "seconds": 18.4740409
+    },
+    {
+      "commit": "8801420",
+      "subject": "Studio CFG by dagre; source files up to 512 KB; the demo on the hold code",
+      "files": 2243,
+      "functions": 2,
+      "points": {
+        "size": 1
+      },
+      "seconds": 34.1883379
+    },
+    {
+      "commit": "c9ab722",
+      "subject": "README: documentation, contributing and security sections",
+      "files": 1,
+      "functions": 0,
+      "points": {},
+      "seconds": 14.4361067
+    },
+    {
+      "commit": "65d2b86",
+      "subject": "README: a short man page; the measurements move to docs/results.md",
+      "files": 2,
+      "functions": 0,
+      "points": {},
+      "seconds": 9.2983096
+    },
+    {
+      "commit": "b3897a1",
+      "subject": "Results: gen-system agrees with cobc on every CobolCraft call site",
+      "files": 11,
+      "functions": 0,
+      "points": {},
+      "seconds": 9.1476599
+    },
+    {
+      "commit": "a815e0c",
+      "subject": "bench/compare: the dirty check ignores line endings and looks at code only",
+      "files": 1,
+      "functions": 0,
+      "points": {},
+      "seconds": 9.0713512
+    },
+    {
+      "commit": "36c3564",
+      "subject": "bench/compare: diff gen-system's COBOL call edges against cobc",
+      "files": 9,
+      "functions": 21,
+      "points": {
+        "behavior": 10,
+        "size": 15,
+        "test": 13
+      },
+      "seconds": 9.7682775
+    },
+    {
+      "commit": "7ed6caa",
+      "subject": "COBOL: decide fixed or free format per file; subscripted loop counts",
+      "files": 4,
+      "functions": 7,
+      "points": {
+        "size": 5
+      },
+      "seconds": 8.5578175
+    },
+    {
+      "commit": "7db7306",
+      "subject": "README, landing page and demo: the corrected parser numbers",
+      "files": 680,
+      "functions": 0,
+      "points": {},
+      "seconds": 14.5082929
+    },
+    {
+      "commit": "257d4a1",
+      "subject": "CI: gofmt, vet and tests, plus the exact CobolCraft baseline, on every push",
+      "files": 1,
+      "functions": 0,
+      "points": {},
+      "seconds": 10.7394759
+    },
+    {
+      "commit": "62eff66",
+      "subject": "COBOL: read every program in a file; PERFORM stays in its program",
+      "files": 16,
+      "functions": 30,
+      "points": {
+        "size": 11,
+        "test": 3
+      },
+      "seconds": 9.1526911
+    },
+    {
+      "commit": "b0a860b",
+      "subject": "Calls in else branches become call edges",
+      "files": 3,
+      "functions": 4,
+      "points": {
+        "size": 3
+      },
+      "seconds": 8.8650068
+    },
+    {
+      "commit": "5577eab",
+      "subject": "Drop the compiler accuracy claim; add a code of conduct, security policy and pull request template",
+      "files": 8,
+      "functions": 1,
+      "points": {
+        "test": 1
+      },
+      "seconds": 8.8141515
+    },
+    {
+      "commit": "484e488",
+      "subject": "Add CONTRIBUTING.md",
+      "files": 2,
+      "functions": 0,
+      "points": {},
+      "seconds": 8.7406136
+    },
+    {
+      "commit": "9b59028",
+      "subject": "Add demo GIF",
+      "files": 2,
+      "functions": 0,
+      "points": {},
+      "seconds": 8.543956
+    },
+    {
+      "commit": "0188a8f",
+      "subject": "Fix the last Studio bugs: Go init order, field lines, the badge",
+      "files": 148,
+      "functions": 9,
+      "points": {
+        "size": 3,
+        "test": 5
+      },
+      "seconds": 9.1629139
+    },
+    {
+      "commit": "e549554",
+      "subject": "site/build.py: run the snapshot from its temp folder, so no .gen cache lands in the repository",
+      "files": 1,
+      "functions": 1,
+      "points": {
+        "test": 1
+      },
+      "seconds": 9.8601258
+    },
+    {
+      "commit": "32a3ef8",
+      "subject": "Prepare for launch: stdlib calls resolve, handlers count as entry points",
+      "files": 15,
+      "functions": 9,
+      "points": {
+        "size": 4,
+        "test": 2
+      },
+      "seconds": 8.9704424
+    },
+    {
+      "commit": "1d4e300",
+      "subject": "README: demo badge and link to the live demo",
+      "files": 1,
+      "functions": 0,
+      "points": {},
+      "seconds": 8.4044869
+    }
+  ],
+  "cases": [
+    {
+      "kind": "signature",
+      "function": "Timer.End",
+      "file": "generator/internal/trace/trace.go",
+      "truth": [
+        "generator/internal/agent/executor.go:ExecuteTask",
+        "generator/internal/agent/healer.go:FixTask",
+        "generator/internal/ast/cache.go:Cache.ParseOrCache",
+        "generator/internal/context/context.go:LoadContextWithOpts",
+        "generator/internal/trace/trace_test.go:TestTimerEmitsDuration",
+        "generator/internal/trace/trace_test.go:TestTimerNilSafe"
+      ],
+      "found": [
+        "generator/internal/agent/executor.go:ExecuteTask",
+        "generator/internal/agent/healer.go:FixTask",
+        "generator/internal/ast/cache.go:Cache.ParseOrCache",
+        "generator/internal/context/context.go:LoadContextWithOpts",
+        "generator/internal/trace/trace_test.go:TestTimerEmitsDuration",
+        "generator/internal/trace/trace_test.go:TestTimerNilSafe"
+      ],
+      "tp": 6,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1115507
+    },
+    {
+      "kind": "signature",
+      "function": "containsComp",
+      "file": "generator/internal/engine/env_gen.go",
+      "truth": [
+        "generator/internal/engine/env_gen.go:GenerateEnvFiles"
+      ],
+      "found": [
+        "generator/internal/engine/env_gen.go:GenerateEnvFiles"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1095743
+    },
+    {
+      "kind": "signature",
+      "function": "maskDSN",
+      "file": "generator/internal/config/config.go",
+      "truth": [
+        "generator/internal/config/config.go:Summary",
+        "generator/internal/config/config_test.go:TestMaskDSN"
+      ],
+      "found": [
+        "generator/internal/config/config.go:Summary",
+        "generator/internal/config/config_test.go:TestMaskDSN"
+      ],
+      "tp": 2,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.109436
+    },
+    {
+      "kind": "signature",
+      "function": "bindOperationsToEntities",
+      "file": "generator/internal/ai/op_binding.go",
+      "truth": [
+        "generator/internal/ai/logic_prompt.go:BuildLogicPrompt",
+        "generator/internal/ai/op_binding_v2324_test.go:TestBindOperations_OrdersProducts_v2324",
+        "generator/internal/ai/op_binding_v2658_test.go:TestBindOperations_VerbInsideWordNotMatched",
+        "generator/internal/ai/op_binding_v2658_test.go:TestBindOperations_WholeVerbStillMatched"
+      ],
+      "found": [
+        "generator/internal/ai/logic_prompt.go:BuildLogicPrompt",
+        "generator/internal/ai/op_binding_v2324_test.go:TestBindOperations_OrdersProducts_v2324",
+        "generator/internal/ai/op_binding_v2658_test.go:TestBindOperations_VerbInsideWordNotMatched",
+        "generator/internal/ai/op_binding_v2658_test.go:TestBindOperations_WholeVerbStillMatched"
+      ],
+      "tp": 4,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1140004
+    },
+    {
+      "kind": "signature",
+      "function": "SnapshotStore.All",
+      "file": "generator/internal/store/snap_store.go",
+      "truth": [
+        "generator/internal/services/snapshot.go:SnapshotService.List",
+        "generator/internal/services/snapshot_v2658_test.go:TestSnapshotCreate_FailedCopyIsAnError",
+        "generator/internal/store/snapload_v2658_test.go:TestSnapStore_FailedWriteIsReported"
+      ],
+      "found": [
+        "generator/internal/services/snapshot.go:SnapshotService.List",
+        "generator/internal/services/snapshot_v2658_test.go:TestSnapshotCreate_FailedCopyIsAnError",
+        "generator/internal/store/snapload_v2658_test.go:TestSnapStore_FailedWriteIsReported"
+      ],
+      "tp": 3,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1117004
+    },
+    {
+      "kind": "signature",
+      "function": "genSpringDTO",
+      "file": "generator/internal/engine/backend_spring.go",
+      "truth": [
+        "generator/internal/engine/backend_spring.go:GenerateSpringApp"
+      ],
+      "found": [
+        "generator/internal/engine/backend_spring.go:GenerateSpringApp"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1142147
+    },
+    {
+      "kind": "signature",
+      "function": "Handlers.StageStatus",
+      "file": "generator/internal/handlers/staging_handlers.go",
+      "truth": [
+        "generator/internal/api/server.go:RegisterGenerateRoutes"
+      ],
+      "found": [
+        "generator/internal/api/server.go:RegisterGenerateRoutes"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1082089
+    },
+    {
+      "kind": "signature",
+      "function": "Table.All",
+      "file": "generator/internal/symbols/table.go",
+      "truth": [
+        "generator/internal/bench/edges.go:CallEdges",
+        "generator/internal/presentation/presentation.go:Server.handleSymbols",
+        "generator/internal/symbols/index.go:Index.pyProjectModule",
+        "generator/internal/symbols/index.go:Index.resolveImportPath",
+        "generator/internal/symbols/index.go:Index.resolvePyImportLocked",
+        "generator/internal/symbols/index_test.go:TestTable_All",
+        "generator/internal/symbols/resolve_order_v2658_test.go:TestD101_TableAllSortedByID"
+      ],
+      "found": [
+        "generator/internal/bench/edges.go:CallEdges",
+        "generator/internal/presentation/presentation.go:Server.handleSymbols",
+        "generator/internal/symbols/index.go:Index.pyProjectModule",
+        "generator/internal/symbols/index.go:Index.resolveImportPath",
+        "generator/internal/symbols/index.go:Index.resolvePyImportLocked",
+        "generator/internal/symbols/index_test.go:TestTable_All",
+        "generator/internal/symbols/resolve_order_v2658_test.go:TestD101_TableAllSortedByID"
+      ],
+      "tp": 7,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1135738
+    },
+    {
+      "kind": "signature",
+      "function": "fileBelongsToEntity",
+      "file": "generator/internal/cli/evolve_understand.go",
+      "truth": [
+        "generator/internal/cli/evolve_understand.go:impactedEntities"
+      ],
+      "found": [
+        "generator/internal/cli/evolve_understand.go:impactedEntities"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1132555
+    },
+    {
+      "kind": "signature",
+      "function": "Context.buildEntityUsage",
+      "file": "generator/internal/context/context.go",
+      "truth": [
+        "generator/internal/context/context.go:LoadContextWithOpts",
+        "generator/internal/context/context.go:LoadContextWithSkill"
+      ],
+      "found": [
+        "generator/internal/context/context.go:LoadContextWithOpts",
+        "generator/internal/context/context.go:LoadContextWithSkill"
+      ],
+      "tp": 2,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1223941
+    },
+    {
+      "kind": "signature",
+      "function": "CheckOperation",
+      "file": "generator/internal/style/opcheck.go",
+      "truth": [
+        "generator/internal/agent/style_stage.go:SetStyle",
+        "generator/internal/style/style_test.go:TestCheckOperation"
+      ],
+      "found": [
+        "generator/internal/agent/style_stage.go:SetStyle",
+        "generator/internal/style/style_test.go:TestCheckOperation"
+      ],
+      "tp": 2,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1082163
+    },
+    {
+      "kind": "signature",
+      "function": "hasGeneratedApp",
+      "file": "generator/internal/cli/outdir.go",
+      "truth": [
+        "generator/internal/cli/outdir.go:ResolveOutDir",
+        "generator/internal/cli/outdir_test.go:TestHasGeneratedApp"
+      ],
+      "found": [
+        "generator/internal/cli/outdir.go:ResolveOutDir",
+        "generator/internal/cli/outdir_test.go:TestHasGeneratedApp"
+      ],
+      "tp": 2,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.111498
+    },
+    {
+      "kind": "signature",
+      "function": "safeName",
+      "file": "generator/internal/engine/utils.go",
+      "truth": [
+        "generator/internal/engine/migration.go:genMigration",
+        "generator/internal/engine/migration_diff.go:genMigrationFromDiff"
+      ],
+      "found": [
+        "generator/internal/engine/migration.go:genMigration",
+        "generator/internal/engine/migration_diff.go:genMigrationFromDiff"
+      ],
+      "tp": 2,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1075721
+    },
+    {
+      "kind": "signature",
+      "function": "stripQuotes",
+      "file": "generator/internal/ast/ts_frontend.go",
+      "truth": [
+        "generator/internal/ast/ts_frontend.go:tsParser.parseExportBlock",
+        "generator/internal/ast/ts_frontend.go:tsParser.parseImport"
+      ],
+      "found": [
+        "generator/internal/ast/ts_frontend.go:tsParser.parseExportBlock",
+        "generator/internal/ast/ts_frontend.go:tsParser.parseImport"
+      ],
+      "tp": 2,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1385677
+    },
+    {
+      "kind": "signature",
+      "function": "styleAddendum",
+      "file": "generator/internal/ai/logic_prompt.go",
+      "truth": [
+        "generator/internal/ai/logic_prompt.go:BuildLogicPrompt",
+        "generator/internal/ai/logic_prompt.go:BuildLogicRepairPrompt"
+      ],
+      "found": [
+        "generator/internal/ai/logic_prompt.go:BuildLogicPrompt",
+        "generator/internal/ai/logic_prompt.go:BuildLogicRepairPrompt"
+      ],
+      "tp": 2,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1083042
+    },
+    {
+      "kind": "signature",
+      "function": "ToDiffSchema",
+      "file": "generator/internal/compiler/adapters.go",
+      "truth": [
+        "generator/internal/cli/migrate.go:RunMigrate"
+      ],
+      "found": [
+        "generator/internal/cli/migrate.go:RunMigrate"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1076348
+    },
+    {
+      "kind": "signature",
+      "function": "fail",
+      "file": "generator/cmd/studio-snapshot/main.go",
+      "truth": [
+        "generator/cmd/studio-snapshot/main.go:main"
+      ],
+      "found": [
+        "generator/cmd/studio-snapshot/main.go:main"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1139074
+    },
+    {
+      "kind": "signature",
+      "function": "AskLLMJSON",
+      "file": "generator/internal/ai/ollama.go",
+      "truth": [
+        "generator/internal/ai/continue_prompt.go:ProposeContinueDelta",
+        "generator/internal/ai/generate_schema_from_plan.go:GenerateSchemaFromPlan",
+        "generator/internal/ai/logic.go:ollamaLogicProvider.Operations",
+        "generator/internal/ai/logic.go:ollamaLogicProvider.RepairOperation",
+        "generator/internal/ai/schema_gen.go:GenerateSchema",
+        "generator/internal/enrich/enrich.go:Enricher.Enrich",
+        "generator/internal/enrich/enrich.go:Enricher.summarizeScope"
+      ],
+      "found": [
+        "generator/internal/ai/continue_prompt.go:ProposeContinueDelta",
+        "generator/internal/ai/generate_schema_from_plan.go:GenerateSchemaFromPlan",
+        "generator/internal/ai/logic.go:ollamaLogicProvider.Operations",
+        "generator/internal/ai/logic.go:ollamaLogicProvider.RepairOperation",
+        "generator/internal/ai/schema_gen.go:GenerateSchema",
+        "generator/internal/enrich/enrich.go:Enricher.Enrich",
+        "generator/internal/enrich/enrich.go:Enricher.summarizeScope"
+      ],
+      "tp": 7,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1121786
+    },
+    {
+      "kind": "signature",
+      "function": "SavePlan",
+      "file": "generator/internal/planner/planner.go",
+      "truth": [
+        "generator/internal/cli/idea.go:IdeaFromInput",
+        "generator/internal/cli/plan.go:Plan"
+      ],
+      "found": [
+        "generator/internal/cli/idea.go:IdeaFromInput",
+        "generator/internal/cli/plan.go:Plan"
+      ],
+      "tp": 2,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1092798
+    },
+    {
+      "kind": "signature",
+      "function": "caGenParser.parseReadEach",
+      "file": "generator/internal/ast/cagen_frontend.go",
+      "truth": [
+        "generator/internal/ast/cagen_frontend.go:caGenParser.parseStatement"
+      ],
+      "found": [
+        "generator/internal/ast/cagen_frontend.go:caGenParser.parseStatement"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.113062
+    },
+    {
+      "kind": "remove",
+      "function": "Timer.End",
+      "file": "generator/internal/trace/trace.go",
+      "truth": [
+        "generator/internal/agent/executor.go:ExecuteTask",
+        "generator/internal/agent/healer.go:FixTask",
+        "generator/internal/ast/cache.go:Cache.ParseOrCache",
+        "generator/internal/context/context.go:LoadContextWithOpts",
+        "generator/internal/trace/trace_test.go:TestTimerEmitsDuration",
+        "generator/internal/trace/trace_test.go:TestTimerNilSafe"
+      ],
+      "found": [
+        "generator/internal/agent/executor.go:ExecuteTask",
+        "generator/internal/agent/healer.go:FixTask",
+        "generator/internal/ast/cache.go:Cache.ParseOrCache",
+        "generator/internal/context/context.go:LoadContextWithOpts",
+        "generator/internal/trace/trace_test.go:TestTimerEmitsDuration",
+        "generator/internal/trace/trace_test.go:TestTimerNilSafe"
+      ],
+      "tp": 6,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.114221
+    },
+    {
+      "kind": "remove",
+      "function": "containsComp",
+      "file": "generator/internal/engine/env_gen.go",
+      "truth": [
+        "generator/internal/engine/env_gen.go:GenerateEnvFiles"
+      ],
+      "found": [
+        "generator/internal/engine/env_gen.go:GenerateEnvFiles"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1076499
+    },
+    {
+      "kind": "remove",
+      "function": "maskDSN",
+      "file": "generator/internal/config/config.go",
+      "truth": [
+        "generator/internal/config/config.go:Summary",
+        "generator/internal/config/config_test.go:TestMaskDSN"
+      ],
+      "found": [
+        "generator/internal/config/config.go:Summary",
+        "generator/internal/config/config_test.go:TestMaskDSN"
+      ],
+      "tp": 2,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1060991
+    },
+    {
+      "kind": "remove",
+      "function": "bindOperationsToEntities",
+      "file": "generator/internal/ai/op_binding.go",
+      "truth": [
+        "generator/internal/ai/logic_prompt.go:BuildLogicPrompt",
+        "generator/internal/ai/op_binding_v2324_test.go:TestBindOperations_OrdersProducts_v2324",
+        "generator/internal/ai/op_binding_v2658_test.go:TestBindOperations_VerbInsideWordNotMatched",
+        "generator/internal/ai/op_binding_v2658_test.go:TestBindOperations_WholeVerbStillMatched"
+      ],
+      "found": [
+        "generator/internal/ai/logic_prompt.go:BuildLogicPrompt",
+        "generator/internal/ai/op_binding_v2324_test.go:TestBindOperations_OrdersProducts_v2324",
+        "generator/internal/ai/op_binding_v2658_test.go:TestBindOperations_VerbInsideWordNotMatched",
+        "generator/internal/ai/op_binding_v2658_test.go:TestBindOperations_WholeVerbStillMatched"
+      ],
+      "tp": 4,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1069385
+    },
+    {
+      "kind": "remove",
+      "function": "SnapshotStore.All",
+      "file": "generator/internal/store/snap_store.go",
+      "truth": [
+        "generator/internal/services/snapshot.go:SnapshotService.List",
+        "generator/internal/services/snapshot_v2658_test.go:TestSnapshotCreate_FailedCopyIsAnError",
+        "generator/internal/store/snapload_v2658_test.go:TestSnapStore_FailedWriteIsReported"
+      ],
+      "found": [
+        "generator/internal/services/snapshot.go:SnapshotService.List",
+        "generator/internal/services/snapshot_v2658_test.go:TestSnapshotCreate_FailedCopyIsAnError",
+        "generator/internal/store/snapload_v2658_test.go:TestSnapStore_FailedWriteIsReported"
+      ],
+      "tp": 3,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.115329
+    },
+    {
+      "kind": "remove",
+      "function": "genSpringDTO",
+      "file": "generator/internal/engine/backend_spring.go",
+      "truth": [
+        "generator/internal/engine/backend_spring.go:GenerateSpringApp"
+      ],
+      "found": [
+        "generator/internal/engine/backend_spring.go:GenerateSpringApp"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1128891
+    },
+    {
+      "kind": "remove",
+      "function": "Handlers.StageStatus",
+      "file": "generator/internal/handlers/staging_handlers.go",
+      "truth": [
+        "generator/internal/api/server.go:RegisterGenerateRoutes"
+      ],
+      "found": [
+        "generator/internal/api/server.go:RegisterGenerateRoutes"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1054325
+    },
+    {
+      "kind": "remove",
+      "function": "Table.All",
+      "file": "generator/internal/symbols/table.go",
+      "truth": [
+        "generator/internal/bench/edges.go:CallEdges",
+        "generator/internal/presentation/presentation.go:Server.handleSymbols",
+        "generator/internal/symbols/index.go:Index.pyProjectModule",
+        "generator/internal/symbols/index.go:Index.resolveImportPath",
+        "generator/internal/symbols/index.go:Index.resolvePyImportLocked",
+        "generator/internal/symbols/index_test.go:TestTable_All",
+        "generator/internal/symbols/resolve_order_v2658_test.go:TestD101_TableAllSortedByID"
+      ],
+      "found": [
+        "generator/internal/bench/edges.go:CallEdges",
+        "generator/internal/presentation/presentation.go:Server.handleSymbols",
+        "generator/internal/symbols/index.go:Index.pyProjectModule",
+        "generator/internal/symbols/index.go:Index.resolveImportPath",
+        "generator/internal/symbols/index.go:Index.resolvePyImportLocked",
+        "generator/internal/symbols/index_test.go:TestTable_All",
+        "generator/internal/symbols/resolve_order_v2658_test.go:TestD101_TableAllSortedByID"
+      ],
+      "tp": 7,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1421507
+    },
+    {
+      "kind": "remove",
+      "function": "fileBelongsToEntity",
+      "file": "generator/internal/cli/evolve_understand.go",
+      "truth": [
+        "generator/internal/cli/evolve_understand.go:impactedEntities"
+      ],
+      "found": [
+        "generator/internal/cli/evolve_understand.go:impactedEntities"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1090714
+    },
+    {
+      "kind": "remove",
+      "function": "Context.buildEntityUsage",
+      "file": "generator/internal/context/context.go",
+      "truth": [
+        "generator/internal/context/context.go:LoadContextWithOpts",
+        "generator/internal/context/context.go:LoadContextWithSkill"
+      ],
+      "found": [
+        "generator/internal/context/context.go:LoadContextWithOpts",
+        "generator/internal/context/context.go:LoadContextWithSkill"
+      ],
+      "tp": 2,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.111069
+    },
+    {
+      "kind": "remove",
+      "function": "CheckOperation",
+      "file": "generator/internal/style/opcheck.go",
+      "truth": [
+        "generator/internal/agent/style_stage.go:SetStyle",
+        "generator/internal/style/style_test.go:TestCheckOperation"
+      ],
+      "found": [
+        "generator/internal/agent/style_stage.go:SetStyle",
+        "generator/internal/style/style_test.go:TestCheckOperation"
+      ],
+      "tp": 2,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.105638
+    },
+    {
+      "kind": "remove",
+      "function": "hasGeneratedApp",
+      "file": "generator/internal/cli/outdir.go",
+      "truth": [
+        "generator/internal/cli/outdir.go:ResolveOutDir",
+        "generator/internal/cli/outdir_test.go:TestHasGeneratedApp"
+      ],
+      "found": [
+        "generator/internal/cli/outdir.go:ResolveOutDir",
+        "generator/internal/cli/outdir_test.go:TestHasGeneratedApp"
+      ],
+      "tp": 2,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1074229
+    },
+    {
+      "kind": "remove",
+      "function": "safeName",
+      "file": "generator/internal/engine/utils.go",
+      "truth": [
+        "generator/internal/engine/migration.go:genMigration",
+        "generator/internal/engine/migration_diff.go:genMigrationFromDiff"
+      ],
+      "found": [
+        "generator/internal/engine/migration.go:genMigration",
+        "generator/internal/engine/migration_diff.go:genMigrationFromDiff"
+      ],
+      "tp": 2,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1061422
+    },
+    {
+      "kind": "remove",
+      "function": "stripQuotes",
+      "file": "generator/internal/ast/ts_frontend.go",
+      "truth": [
+        "generator/internal/ast/ts_frontend.go:tsParser.parseExportBlock",
+        "generator/internal/ast/ts_frontend.go:tsParser.parseImport"
+      ],
+      "found": [
+        "generator/internal/ast/ts_frontend.go:tsParser.parseExportBlock",
+        "generator/internal/ast/ts_frontend.go:tsParser.parseImport"
+      ],
+      "tp": 2,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1349796
+    },
+    {
+      "kind": "remove",
+      "function": "styleAddendum",
+      "file": "generator/internal/ai/logic_prompt.go",
+      "truth": [
+        "generator/internal/ai/logic_prompt.go:BuildLogicPrompt",
+        "generator/internal/ai/logic_prompt.go:BuildLogicRepairPrompt"
+      ],
+      "found": [
+        "generator/internal/ai/logic_prompt.go:BuildLogicPrompt",
+        "generator/internal/ai/logic_prompt.go:BuildLogicRepairPrompt"
+      ],
+      "tp": 2,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1079349
+    },
+    {
+      "kind": "remove",
+      "function": "ToDiffSchema",
+      "file": "generator/internal/compiler/adapters.go",
+      "truth": [
+        "generator/internal/cli/migrate.go:RunMigrate"
+      ],
+      "found": [
+        "generator/internal/cli/migrate.go:RunMigrate"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1059729
+    },
+    {
+      "kind": "remove",
+      "function": "fail",
+      "file": "generator/cmd/studio-snapshot/main.go",
+      "truth": [
+        "generator/cmd/studio-snapshot/main.go:main"
+      ],
+      "found": [
+        "generator/cmd/studio-snapshot/main.go:main"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1084668
+    },
+    {
+      "kind": "remove",
+      "function": "AskLLMJSON",
+      "file": "generator/internal/ai/ollama.go",
+      "truth": [
+        "generator/internal/ai/continue_prompt.go:ProposeContinueDelta",
+        "generator/internal/ai/generate_schema_from_plan.go:GenerateSchemaFromPlan",
+        "generator/internal/ai/logic.go:ollamaLogicProvider.Operations",
+        "generator/internal/ai/logic.go:ollamaLogicProvider.RepairOperation",
+        "generator/internal/ai/schema_gen.go:GenerateSchema",
+        "generator/internal/enrich/enrich.go:Enricher.Enrich",
+        "generator/internal/enrich/enrich.go:Enricher.summarizeScope"
+      ],
+      "found": [
+        "generator/internal/ai/continue_prompt.go:ProposeContinueDelta",
+        "generator/internal/ai/generate_schema_from_plan.go:GenerateSchemaFromPlan",
+        "generator/internal/ai/logic.go:ollamaLogicProvider.Operations",
+        "generator/internal/ai/logic.go:ollamaLogicProvider.RepairOperation",
+        "generator/internal/ai/schema_gen.go:GenerateSchema",
+        "generator/internal/enrich/enrich.go:Enricher.Enrich",
+        "generator/internal/enrich/enrich.go:Enricher.summarizeScope"
+      ],
+      "tp": 7,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1210946
+    },
+    {
+      "kind": "remove",
+      "function": "SavePlan",
+      "file": "generator/internal/planner/planner.go",
+      "truth": [
+        "generator/internal/cli/idea.go:IdeaFromInput",
+        "generator/internal/cli/plan.go:Plan"
+      ],
+      "found": [
+        "generator/internal/cli/idea.go:IdeaFromInput",
+        "generator/internal/cli/plan.go:Plan"
+      ],
+      "tp": 2,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1062132
+    },
+    {
+      "kind": "remove",
+      "function": "caGenParser.parseReadEach",
+      "file": "generator/internal/ast/cagen_frontend.go",
+      "truth": [
+        "generator/internal/ast/cagen_frontend.go:caGenParser.parseStatement"
+      ],
+      "found": [
+        "generator/internal/ast/cagen_frontend.go:caGenParser.parseStatement"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1110588
+    },
+    {
+      "kind": "db",
+      "function": "Timer.End",
+      "file": "generator/internal/trace/trace.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1098408
+    },
+    {
+      "kind": "fs",
+      "function": "Timer.End",
+      "file": "generator/internal/trace/trace.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0996404
+    },
+    {
+      "kind": "network",
+      "function": "Timer.End",
+      "file": "generator/internal/trace/trace.go",
+      "truth": [
+        "network"
+      ],
+      "found": [
+        "network"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0996949
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "Timer.End",
+      "file": "generator/internal/trace/trace.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1025786
+    },
+    {
+      "kind": "control:len",
+      "function": "Timer.End",
+      "file": "generator/internal/trace/trace.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1004644
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "Timer.End",
+      "file": "generator/internal/trace/trace.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0997128
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "Timer.End",
+      "file": "generator/internal/trace/trace.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0988399
+    },
+    {
+      "kind": "control:strings",
+      "function": "Timer.End",
+      "file": "generator/internal/trace/trace.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0990868
+    },
+    {
+      "kind": "branch",
+      "function": "Timer.End",
+      "file": "generator/internal/trace/trace.go",
+      "found": [
+        "1 to 3"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1009671
+    },
+    {
+      "kind": "db",
+      "function": "SaveDiffIntent",
+      "file": "generator/internal/planner_v2/diff_intent.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1087074
+    },
+    {
+      "kind": "fs:skip",
+      "function": "SaveDiffIntent",
+      "file": "generator/internal/planner_v2/diff_intent.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": false,
+      "seconds": 0.0951145,
+      "note": "the function already had this effect"
+    },
+    {
+      "kind": "network",
+      "function": "SaveDiffIntent",
+      "file": "generator/internal/planner_v2/diff_intent.go",
+      "truth": [
+        "network"
+      ],
+      "found": [
+        "network"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0939336
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "SaveDiffIntent",
+      "file": "generator/internal/planner_v2/diff_intent.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.094825
+    },
+    {
+      "kind": "control:len",
+      "function": "SaveDiffIntent",
+      "file": "generator/internal/planner_v2/diff_intent.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0949618
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "SaveDiffIntent",
+      "file": "generator/internal/planner_v2/diff_intent.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0947465
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "SaveDiffIntent",
+      "file": "generator/internal/planner_v2/diff_intent.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1079434
+    },
+    {
+      "kind": "control:strings",
+      "function": "SaveDiffIntent",
+      "file": "generator/internal/planner_v2/diff_intent.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0945457
+    },
+    {
+      "kind": "branch",
+      "function": "SaveDiffIntent",
+      "file": "generator/internal/planner_v2/diff_intent.go",
+      "found": [
+        "1 to 3"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0951686
+    },
+    {
+      "kind": "db",
+      "function": "containsComp",
+      "file": "generator/internal/engine/env_gen.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1073753
+    },
+    {
+      "kind": "fs",
+      "function": "containsComp",
+      "file": "generator/internal/engine/env_gen.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0963343
+    },
+    {
+      "kind": "network",
+      "function": "containsComp",
+      "file": "generator/internal/engine/env_gen.go",
+      "truth": [
+        "network"
+      ],
+      "found": [
+        "network"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.097891
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "containsComp",
+      "file": "generator/internal/engine/env_gen.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0966308
+    },
+    {
+      "kind": "control:len",
+      "function": "containsComp",
+      "file": "generator/internal/engine/env_gen.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0964337
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "containsComp",
+      "file": "generator/internal/engine/env_gen.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0983562
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "containsComp",
+      "file": "generator/internal/engine/env_gen.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0966152
+    },
+    {
+      "kind": "control:strings",
+      "function": "containsComp",
+      "file": "generator/internal/engine/env_gen.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0962047
+    },
+    {
+      "kind": "branch",
+      "function": "containsComp",
+      "file": "generator/internal/engine/env_gen.go",
+      "found": [
+        "2 to 4"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.097071
+    },
+    {
+      "kind": "db",
+      "function": "maskDSN",
+      "file": "generator/internal/config/config.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1075795
+    },
+    {
+      "kind": "fs",
+      "function": "maskDSN",
+      "file": "generator/internal/config/config.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0962728
+    },
+    {
+      "kind": "network",
+      "function": "maskDSN",
+      "file": "generator/internal/config/config.go",
+      "truth": [
+        "network"
+      ],
+      "found": [
+        "network"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0966674
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "maskDSN",
+      "file": "generator/internal/config/config.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0957106
+    },
+    {
+      "kind": "control:len",
+      "function": "maskDSN",
+      "file": "generator/internal/config/config.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0965042
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "maskDSN",
+      "file": "generator/internal/config/config.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0957621
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "maskDSN",
+      "file": "generator/internal/config/config.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0957686
+    },
+    {
+      "kind": "control:strings",
+      "function": "maskDSN",
+      "file": "generator/internal/config/config.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0978569
+    },
+    {
+      "kind": "branch",
+      "function": "maskDSN",
+      "file": "generator/internal/config/config.go",
+      "found": [
+        "1 to 3"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0958558
+    },
+    {
+      "kind": "db",
+      "function": "bindOperationsToEntities",
+      "file": "generator/internal/ai/op_binding.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.108776
+    },
+    {
+      "kind": "fs",
+      "function": "bindOperationsToEntities",
+      "file": "generator/internal/ai/op_binding.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0966612
+    },
+    {
+      "kind": "network",
+      "function": "bindOperationsToEntities",
+      "file": "generator/internal/ai/op_binding.go",
+      "truth": [
+        "network"
+      ],
+      "found": [
+        "network"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0956989
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "bindOperationsToEntities",
+      "file": "generator/internal/ai/op_binding.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0976876
+    },
+    {
+      "kind": "control:len",
+      "function": "bindOperationsToEntities",
+      "file": "generator/internal/ai/op_binding.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0974991
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "bindOperationsToEntities",
+      "file": "generator/internal/ai/op_binding.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0992044
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "bindOperationsToEntities",
+      "file": "generator/internal/ai/op_binding.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0977728
+    },
+    {
+      "kind": "control:strings",
+      "function": "bindOperationsToEntities",
+      "file": "generator/internal/ai/op_binding.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0980398
+    },
+    {
+      "kind": "branch",
+      "function": "bindOperationsToEntities",
+      "file": "generator/internal/ai/op_binding.go",
+      "found": [
+        "2 to 4"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.097136
+    },
+    {
+      "kind": "db",
+      "function": "SnapshotStore.All",
+      "file": "generator/internal/store/snap_store.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1087569
+    },
+    {
+      "kind": "fs",
+      "function": "SnapshotStore.All",
+      "file": "generator/internal/store/snap_store.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0975941
+    },
+    {
+      "kind": "network",
+      "function": "SnapshotStore.All",
+      "file": "generator/internal/store/snap_store.go",
+      "truth": [
+        "network"
+      ],
+      "found": [
+        "network"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0983254
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "SnapshotStore.All",
+      "file": "generator/internal/store/snap_store.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0984273
+    },
+    {
+      "kind": "control:len",
+      "function": "SnapshotStore.All",
+      "file": "generator/internal/store/snap_store.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0985381
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "SnapshotStore.All",
+      "file": "generator/internal/store/snap_store.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0980848
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "SnapshotStore.All",
+      "file": "generator/internal/store/snap_store.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0977399
+    },
+    {
+      "kind": "control:strings",
+      "function": "SnapshotStore.All",
+      "file": "generator/internal/store/snap_store.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0967544
+    },
+    {
+      "kind": "branch",
+      "function": "SnapshotStore.All",
+      "file": "generator/internal/store/snap_store.go",
+      "found": [
+        "2 to 4"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0968763
+    },
+    {
+      "kind": "db",
+      "function": "genSpringDTO",
+      "file": "generator/internal/engine/backend_spring.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1114853
+    },
+    {
+      "kind": "fs",
+      "function": "genSpringDTO",
+      "file": "generator/internal/engine/backend_spring.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1008302
+    },
+    {
+      "kind": "network",
+      "function": "genSpringDTO",
+      "file": "generator/internal/engine/backend_spring.go",
+      "truth": [
+        "network"
+      ],
+      "found": [
+        "network"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1007772
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "genSpringDTO",
+      "file": "generator/internal/engine/backend_spring.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.100511
+    },
+    {
+      "kind": "control:len",
+      "function": "genSpringDTO",
+      "file": "generator/internal/engine/backend_spring.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1010252
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "genSpringDTO",
+      "file": "generator/internal/engine/backend_spring.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1021035
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "genSpringDTO",
+      "file": "generator/internal/engine/backend_spring.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.103794
+    },
+    {
+      "kind": "control:strings",
+      "function": "genSpringDTO",
+      "file": "generator/internal/engine/backend_spring.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.101027
+    },
+    {
+      "kind": "branch",
+      "function": "genSpringDTO",
+      "file": "generator/internal/engine/backend_spring.go",
+      "found": [
+        "3 to 5"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1010846
+    },
+    {
+      "kind": "db",
+      "function": "Handlers.StageStatus",
+      "file": "generator/internal/handlers/staging_handlers.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1058924
+    },
+    {
+      "kind": "fs",
+      "function": "Handlers.StageStatus",
+      "file": "generator/internal/handlers/staging_handlers.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0981812
+    },
+    {
+      "kind": "network",
+      "function": "Handlers.StageStatus",
+      "file": "generator/internal/handlers/staging_handlers.go",
+      "truth": [
+        "network"
+      ],
+      "found": [
+        "network"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0948101
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "Handlers.StageStatus",
+      "file": "generator/internal/handlers/staging_handlers.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.095901
+    },
+    {
+      "kind": "control:len",
+      "function": "Handlers.StageStatus",
+      "file": "generator/internal/handlers/staging_handlers.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0958085
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "Handlers.StageStatus",
+      "file": "generator/internal/handlers/staging_handlers.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.09445
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "Handlers.StageStatus",
+      "file": "generator/internal/handlers/staging_handlers.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1001334
+    },
+    {
+      "kind": "control:strings",
+      "function": "Handlers.StageStatus",
+      "file": "generator/internal/handlers/staging_handlers.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0956102
+    },
+    {
+      "kind": "branch",
+      "function": "Handlers.StageStatus",
+      "file": "generator/internal/handlers/staging_handlers.go",
+      "found": [
+        "0 to 2"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0959203
+    },
+    {
+      "kind": "db",
+      "function": "Table.All",
+      "file": "generator/internal/symbols/table.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1077062
+    },
+    {
+      "kind": "fs",
+      "function": "Table.All",
+      "file": "generator/internal/symbols/table.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1203802
+    },
+    {
+      "kind": "network",
+      "function": "Table.All",
+      "file": "generator/internal/symbols/table.go",
+      "truth": [
+        "network"
+      ],
+      "found": [
+        "network"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0970202
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "Table.All",
+      "file": "generator/internal/symbols/table.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.098273
+    },
+    {
+      "kind": "control:len",
+      "function": "Table.All",
+      "file": "generator/internal/symbols/table.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0972035
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "Table.All",
+      "file": "generator/internal/symbols/table.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0982858
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "Table.All",
+      "file": "generator/internal/symbols/table.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0997982
+    },
+    {
+      "kind": "control:strings",
+      "function": "Table.All",
+      "file": "generator/internal/symbols/table.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0982451
+    },
+    {
+      "kind": "branch",
+      "function": "Table.All",
+      "file": "generator/internal/symbols/table.go",
+      "found": [
+        "1 to 3"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0977955
+    },
+    {
+      "kind": "db",
+      "function": "fileBelongsToEntity",
+      "file": "generator/internal/cli/evolve_understand.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1076892
+    },
+    {
+      "kind": "fs",
+      "function": "fileBelongsToEntity",
+      "file": "generator/internal/cli/evolve_understand.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0973949
+    },
+    {
+      "kind": "network",
+      "function": "fileBelongsToEntity",
+      "file": "generator/internal/cli/evolve_understand.go",
+      "truth": [
+        "network"
+      ],
+      "found": [
+        "network"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1013204
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "fileBelongsToEntity",
+      "file": "generator/internal/cli/evolve_understand.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0976084
+    },
+    {
+      "kind": "control:len",
+      "function": "fileBelongsToEntity",
+      "file": "generator/internal/cli/evolve_understand.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.09767
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "fileBelongsToEntity",
+      "file": "generator/internal/cli/evolve_understand.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.102494
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "fileBelongsToEntity",
+      "file": "generator/internal/cli/evolve_understand.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0983332
+    },
+    {
+      "kind": "control:strings",
+      "function": "fileBelongsToEntity",
+      "file": "generator/internal/cli/evolve_understand.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0991541
+    },
+    {
+      "kind": "branch",
+      "function": "fileBelongsToEntity",
+      "file": "generator/internal/cli/evolve_understand.go",
+      "found": [
+        "0 to 2"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0977614
+    },
+    {
+      "kind": "db",
+      "function": "Context.buildEntityUsage",
+      "file": "generator/internal/context/context.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1156714
+    },
+    {
+      "kind": "fs",
+      "function": "Context.buildEntityUsage",
+      "file": "generator/internal/context/context.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1030504
+    },
+    {
+      "kind": "network",
+      "function": "Context.buildEntityUsage",
+      "file": "generator/internal/context/context.go",
+      "truth": [
+        "network"
+      ],
+      "found": [
+        "network"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1025417
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "Context.buildEntityUsage",
+      "file": "generator/internal/context/context.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1030646
+    },
+    {
+      "kind": "control:len",
+      "function": "Context.buildEntityUsage",
+      "file": "generator/internal/context/context.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1031766
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "Context.buildEntityUsage",
+      "file": "generator/internal/context/context.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1029931
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "Context.buildEntityUsage",
+      "file": "generator/internal/context/context.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1036429
+    },
+    {
+      "kind": "control:strings",
+      "function": "Context.buildEntityUsage",
+      "file": "generator/internal/context/context.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1031903
+    },
+    {
+      "kind": "branch",
+      "function": "Context.buildEntityUsage",
+      "file": "generator/internal/context/context.go",
+      "found": [
+        "7 to 9"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1024776
+    },
+    {
+      "kind": "db",
+      "function": "CheckOperation",
+      "file": "generator/internal/style/opcheck.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1071694
+    },
+    {
+      "kind": "fs",
+      "function": "CheckOperation",
+      "file": "generator/internal/style/opcheck.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0956642
+    },
+    {
+      "kind": "network",
+      "function": "CheckOperation",
+      "file": "generator/internal/style/opcheck.go",
+      "truth": [
+        "network"
+      ],
+      "found": [
+        "network"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1166052
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "CheckOperation",
+      "file": "generator/internal/style/opcheck.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0994453
+    },
+    {
+      "kind": "control:len",
+      "function": "CheckOperation",
+      "file": "generator/internal/style/opcheck.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0955384
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "CheckOperation",
+      "file": "generator/internal/style/opcheck.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0966231
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "CheckOperation",
+      "file": "generator/internal/style/opcheck.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0968128
+    },
+    {
+      "kind": "control:strings",
+      "function": "CheckOperation",
+      "file": "generator/internal/style/opcheck.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0971757
+    },
+    {
+      "kind": "branch",
+      "function": "CheckOperation",
+      "file": "generator/internal/style/opcheck.go",
+      "found": [
+        "17 to 19"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0991364
+    },
+    {
+      "kind": "db",
+      "function": "hasGeneratedApp",
+      "file": "generator/internal/cli/outdir.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1084135
+    },
+    {
+      "kind": "fs:skip",
+      "function": "hasGeneratedApp",
+      "file": "generator/internal/cli/outdir.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": false,
+      "seconds": 0.0975338,
+      "note": "the function already had this effect"
+    },
+    {
+      "kind": "network",
+      "function": "hasGeneratedApp",
+      "file": "generator/internal/cli/outdir.go",
+      "truth": [
+        "network"
+      ],
+      "found": [
+        "network"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0970836
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "hasGeneratedApp",
+      "file": "generator/internal/cli/outdir.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0979189
+    },
+    {
+      "kind": "control:len",
+      "function": "hasGeneratedApp",
+      "file": "generator/internal/cli/outdir.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0999464
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "hasGeneratedApp",
+      "file": "generator/internal/cli/outdir.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0982237
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "hasGeneratedApp",
+      "file": "generator/internal/cli/outdir.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0963822
+    },
+    {
+      "kind": "control:strings",
+      "function": "hasGeneratedApp",
+      "file": "generator/internal/cli/outdir.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.097394
+    },
+    {
+      "kind": "branch",
+      "function": "hasGeneratedApp",
+      "file": "generator/internal/cli/outdir.go",
+      "found": [
+        "2 to 4"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.096632
+    },
+    {
+      "kind": "db",
+      "function": "AskLLMWithModel",
+      "file": "generator/internal/ai/schema_gen.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.106926
+    },
+    {
+      "kind": "fs",
+      "function": "AskLLMWithModel",
+      "file": "generator/internal/ai/schema_gen.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0950543
+    },
+    {
+      "kind": "network",
+      "function": "AskLLMWithModel",
+      "file": "generator/internal/ai/schema_gen.go",
+      "truth": [
+        "network"
+      ],
+      "found": [
+        "network"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0950717
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "AskLLMWithModel",
+      "file": "generator/internal/ai/schema_gen.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0948007
+    },
+    {
+      "kind": "control:len",
+      "function": "AskLLMWithModel",
+      "file": "generator/internal/ai/schema_gen.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0975145
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "AskLLMWithModel",
+      "file": "generator/internal/ai/schema_gen.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0959272
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "AskLLMWithModel",
+      "file": "generator/internal/ai/schema_gen.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0974324
+    },
+    {
+      "kind": "control:strings",
+      "function": "AskLLMWithModel",
+      "file": "generator/internal/ai/schema_gen.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0950127
+    },
+    {
+      "kind": "branch",
+      "function": "AskLLMWithModel",
+      "file": "generator/internal/ai/schema_gen.go",
+      "found": [
+        "0 to 2"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0954344
+    },
+    {
+      "kind": "db",
+      "function": "genRoute",
+      "file": "generator/internal/engine/frontend_router.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1074618
+    },
+    {
+      "kind": "fs",
+      "function": "genRoute",
+      "file": "generator/internal/engine/frontend_router.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0947064
+    },
+    {
+      "kind": "network",
+      "function": "genRoute",
+      "file": "generator/internal/engine/frontend_router.go",
+      "truth": [
+        "network"
+      ],
+      "found": [
+        "network"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0944349
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "genRoute",
+      "file": "generator/internal/engine/frontend_router.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0943095
+    },
+    {
+      "kind": "control:len",
+      "function": "genRoute",
+      "file": "generator/internal/engine/frontend_router.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0939395
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "genRoute",
+      "file": "generator/internal/engine/frontend_router.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0952074
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "genRoute",
+      "file": "generator/internal/engine/frontend_router.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0971563
+    },
+    {
+      "kind": "control:strings",
+      "function": "genRoute",
+      "file": "generator/internal/engine/frontend_router.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0951302
+    },
+    {
+      "kind": "branch",
+      "function": "genRoute",
+      "file": "generator/internal/engine/frontend_router.go",
+      "found": [
+        "0 to 2"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.095314
+    },
+    {
+      "kind": "db",
+      "function": "Server.handleFlow",
+      "file": "generator/internal/presentation/presentation.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1288695
+    },
+    {
+      "kind": "fs:skip",
+      "function": "Server.handleFlow",
+      "file": "generator/internal/presentation/presentation.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": false,
+      "seconds": 0.1173879,
+      "note": "the function already had this effect"
+    },
+    {
+      "kind": "network:skip",
+      "function": "Server.handleFlow",
+      "file": "generator/internal/presentation/presentation.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": false,
+      "seconds": 0.1181785,
+      "note": "the function already had this effect"
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "Server.handleFlow",
+      "file": "generator/internal/presentation/presentation.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1176217
+    },
+    {
+      "kind": "control:len",
+      "function": "Server.handleFlow",
+      "file": "generator/internal/presentation/presentation.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.117242
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "Server.handleFlow",
+      "file": "generator/internal/presentation/presentation.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1162116
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "Server.handleFlow",
+      "file": "generator/internal/presentation/presentation.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1170025
+    },
+    {
+      "kind": "control:strings",
+      "function": "Server.handleFlow",
+      "file": "generator/internal/presentation/presentation.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1390661
+    },
+    {
+      "kind": "branch",
+      "function": "Server.handleFlow",
+      "file": "generator/internal/presentation/presentation.go",
+      "found": [
+        "16 to 18"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1174864
+    },
+    {
+      "kind": "db",
+      "function": "ParseFileTolerant",
+      "file": "generator/internal/schema/parse_tolerant.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1092991
+    },
+    {
+      "kind": "fs",
+      "function": "ParseFileTolerant",
+      "file": "generator/internal/schema/parse_tolerant.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0958345
+    },
+    {
+      "kind": "network",
+      "function": "ParseFileTolerant",
+      "file": "generator/internal/schema/parse_tolerant.go",
+      "truth": [
+        "network"
+      ],
+      "found": [
+        "network"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0964716
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "ParseFileTolerant",
+      "file": "generator/internal/schema/parse_tolerant.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0983164
+    },
+    {
+      "kind": "control:len",
+      "function": "ParseFileTolerant",
+      "file": "generator/internal/schema/parse_tolerant.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0952295
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "ParseFileTolerant",
+      "file": "generator/internal/schema/parse_tolerant.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0959565
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "ParseFileTolerant",
+      "file": "generator/internal/schema/parse_tolerant.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1054207
+    },
+    {
+      "kind": "control:strings",
+      "function": "ParseFileTolerant",
+      "file": "generator/internal/schema/parse_tolerant.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0963241
+    },
+    {
+      "kind": "branch",
+      "function": "ParseFileTolerant",
+      "file": "generator/internal/schema/parse_tolerant.go",
+      "found": [
+        "0 to 2"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0994558
+    },
+    {
+      "kind": "db",
+      "function": "safeName",
+      "file": "generator/internal/engine/utils.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1050653
+    },
+    {
+      "kind": "fs",
+      "function": "safeName",
+      "file": "generator/internal/engine/utils.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0947216
+    },
+    {
+      "kind": "network",
+      "function": "safeName",
+      "file": "generator/internal/engine/utils.go",
+      "truth": [
+        "network"
+      ],
+      "found": [
+        "network"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0947604
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "safeName",
+      "file": "generator/internal/engine/utils.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0947821
+    },
+    {
+      "kind": "control:len",
+      "function": "safeName",
+      "file": "generator/internal/engine/utils.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0968841
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "safeName",
+      "file": "generator/internal/engine/utils.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0942289
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "safeName",
+      "file": "generator/internal/engine/utils.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0950759
+    },
+    {
+      "kind": "control:strings",
+      "function": "safeName",
+      "file": "generator/internal/engine/utils.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.09458
+    },
+    {
+      "kind": "branch",
+      "function": "safeName",
+      "file": "generator/internal/engine/utils.go",
+      "found": [
+        "0 to 2"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1032225
+    },
+    {
+      "kind": "db",
+      "function": "stripQuotes",
+      "file": "generator/internal/ast/ts_frontend.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1355851
+    },
+    {
+      "kind": "fs",
+      "function": "stripQuotes",
+      "file": "generator/internal/ast/ts_frontend.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1311165
+    },
+    {
+      "kind": "network",
+      "function": "stripQuotes",
+      "file": "generator/internal/ast/ts_frontend.go",
+      "truth": [
+        "network"
+      ],
+      "found": [
+        "network"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.123858
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "stripQuotes",
+      "file": "generator/internal/ast/ts_frontend.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1254116
+    },
+    {
+      "kind": "control:len",
+      "function": "stripQuotes",
+      "file": "generator/internal/ast/ts_frontend.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1288323
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "stripQuotes",
+      "file": "generator/internal/ast/ts_frontend.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1232278
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "stripQuotes",
+      "file": "generator/internal/ast/ts_frontend.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1245668
+    },
+    {
+      "kind": "control:strings",
+      "function": "stripQuotes",
+      "file": "generator/internal/ast/ts_frontend.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1270993
+    },
+    {
+      "kind": "branch",
+      "function": "stripQuotes",
+      "file": "generator/internal/ast/ts_frontend.go",
+      "found": [
+        "0 to 2"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1249136
+    },
+    {
+      "kind": "db",
+      "function": "styleAddendum",
+      "file": "generator/internal/ai/logic_prompt.go",
+      "truth": [
+        "db"
+      ],
+      "found": [
+        "db",
+        "db write"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.1061696
+    },
+    {
+      "kind": "fs",
+      "function": "styleAddendum",
+      "file": "generator/internal/ai/logic_prompt.go",
+      "truth": [
+        "fs"
+      ],
+      "found": [
+        "fs"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0962455
+    },
+    {
+      "kind": "network",
+      "function": "styleAddendum",
+      "file": "generator/internal/ai/logic_prompt.go",
+      "truth": [
+        "network"
+      ],
+      "found": [
+        "network"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0975538
+    },
+    {
+      "kind": "control:cache.Get",
+      "function": "styleAddendum",
+      "file": "generator/internal/ai/logic_prompt.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0965598
+    },
+    {
+      "kind": "control:len",
+      "function": "styleAddendum",
+      "file": "generator/internal/ai/logic_prompt.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0955257
+    },
+    {
+      "kind": "control:list.Remove",
+      "function": "styleAddendum",
+      "file": "generator/internal/ai/logic_prompt.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0958421
+    },
+    {
+      "kind": "control:sb.Create",
+      "function": "styleAddendum",
+      "file": "generator/internal/ai/logic_prompt.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0955835
+    },
+    {
+      "kind": "control:strings",
+      "function": "styleAddendum",
+      "file": "generator/internal/ai/logic_prompt.go",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0959577
+    },
+    {
+      "kind": "branch",
+      "function": "styleAddendum",
+      "file": "generator/internal/ai/logic_prompt.go",
+      "found": [
+        "1 to 3"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "pass": true,
+      "seconds": 0.0955085
+    }
+  ]
+}

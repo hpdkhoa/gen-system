@@ -248,6 +248,16 @@ func LoadContextWithOpts(root string, opts LoadContextOpts) Context {
 			return nil
 		}
 
+		if filepath.Base(path) == "go.mod" {
+			// v26.74: the module path tells the resolver which folder an import names.
+			if data, err := os.ReadFile(path); err == nil {
+				if m := goModulePath(data); m != "" {
+					ctx.Index.AddGoModule(m, filepath.Dir(path))
+				}
+			}
+			return nil
+		}
+
 		ext := strings.ToLower(filepath.Ext(path))
 		if !isSourceFile(ext) {
 			return nil
@@ -799,4 +809,15 @@ func relForImportGraph(root, file string) string {
 		return rel
 	}
 	return file
+}
+
+// goModulePath reads the module line of a go.mod file.
+func goModulePath(data []byte) string {
+	for _, line := range strings.Split(string(data), "\n") {
+		f := strings.Fields(strings.TrimSpace(line))
+		if len(f) >= 2 && f[0] == "module" {
+			return strings.Trim(f[1], "\"")
+		}
+	}
+	return ""
 }

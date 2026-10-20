@@ -60,6 +60,33 @@ type Index struct {
 	allSymbols map[string]*Symbol     // symbolID → Symbol
 	refs       map[string][]Reference // symbolID → []Reference
 	callEdges  []CallEdge
+	// goModules maps a Go module path to its folder, from the go.mod files the loader saw (v26.74).
+	goModules map[string]string
+}
+
+// AddGoModule records a go.mod: imports under modulePath live in dir. Then an import resolves to its exact folder,
+// so github.com/go-chi/chi/v5 finds the package at the repo root, whatever the checkout is called.
+func (idx *Index) AddGoModule(modulePath, dir string) {
+	idx.mu.Lock()
+	defer idx.mu.Unlock()
+	if idx.goModules == nil {
+		idx.goModules = map[string]string{}
+	}
+	idx.goModules[modulePath] = filepath.Clean(dir)
+}
+
+// goModuleDir returns the folder an import path lives in when a known module holds it.
+func (idx *Index) goModuleDir(importPath string) (string, bool) {
+	best, bestDir := "", ""
+	for m, d := range idx.goModules {
+		if (importPath == m || strings.HasPrefix(importPath, m+"/")) && len(m) > len(best) {
+			best, bestDir = m, d
+		}
+	}
+	if best == "" {
+		return "", false
+	}
+	return filepath.Join(bestDir, filepath.FromSlash(strings.TrimPrefix(importPath[len(best):], "/"))), true
 }
 
 // NewIndex creates an empty Index.
@@ -244,7 +271,7 @@ func (idx *Index) resolveEdgeLocked(e CallEdge) *Symbol {
 	if dot < 0 && caller != nil && caller.Language == ast.LangGo && goBuiltins[name] {
 		return nil
 	}
-	return idx.resolveByNameForLocked(name, caller, dot >= 0)
+	return idx.resolveByNameForLocked(name, caller, dot >= 0, e.Span.Start)
 }
 
 // cobolTarget reports whether project symbol s can be the target of a PERFORM
@@ -409,8 +436,15 @@ func (idx *Index) resolveUnderImportLocked(importPath, bare string, allowMethods
 		score int
 	}
 	var candidates []scored
+	modDir, inModule := idx.goModuleDir(importPath)
 	for _, s := range idx.allSymbols {
 		if s.Name != bare || !callable(s.Kind) || (s.Kind == SymMethod && !allowMethods) || pyNested(s) {
+			continue
+		}
+		if inModule && !s.Provenance.IsExternal() {
+			if filepath.Clean(filepath.Dir(s.DefinedIn)) == modDir {
+				candidates = append(candidates, scored{s, 1000})
+			}
 			continue
 		}
 		if n := importMatchScore(s.DefinedIn, importPath); n > 0 {
@@ -642,7 +676,7 @@ func (idx *Index) UpdateFile(filePath string, m *ast.Module) {
 // v26.25: "first" is taken from candidates sorted by SymbolID, not from map
 // order, so the winner is a function of the input alone.
 func (idx *Index) resolveByNameLocked(name string) *Symbol {
-	return idx.resolveByNameForLocked(name, nil, strings.Contains(name, "."))
+	return idx.resolveByNameForLocked(name, nil, strings.Contains(name, "."), ast.Pos{})
 }
 
 // resolveByNameForLocked applies the rule above with three limits from v26.66.
@@ -651,7 +685,7 @@ func (idx *Index) resolveByNameLocked(name string) *Symbol {
 // receiver call from project code, an external symbol matches only by its
 // exact qualified name, since the receiver's type is unknown. A bare Go call
 // never names a method. caller may be nil (no caller known).
-func (idx *Index) resolveByNameForLocked(name string, caller *Symbol, receiver bool) *Symbol {
+func (idx *Index) resolveByNameForLocked(name string, caller *Symbol, receiver bool, at ast.Pos) *Symbol {
 	full := name
 	if dot := strings.LastIndex(name, "."); dot >= 0 {
 		name = name[dot+1:]
@@ -702,6 +736,11 @@ func (idx *Index) resolveByNameForLocked(name string, caller *Symbol, receiver b
 		return nil
 	}
 	sort.Slice(candidates, func(i, j int) bool { return candidates[i].ID < candidates[j].ID })
+	if goCaller && !externalCaller {
+		if candidates = idx.goTargets(candidates, full, caller, receiver, at); len(candidates) == 0 {
+			return nil
+		}
+	}
 
 	var (
 		projectExported  *Symbol
@@ -864,14 +903,38 @@ func (idx *Index) resolveImportPath(alias, fromFile string) string {
 		if s.Name == alias {
 			return s.QualName
 		}
-		if s.ImportAlias == "" && lastSegment == "" {
-			parts := strings.Split(s.QualName, "/")
-			if parts[len(parts)-1] == alias {
-				lastSegment = s.QualName
-			}
+		if s.ImportAlias == "" && lastSegment == "" && importName(s.QualName) == alias {
+			lastSegment = s.QualName
 		}
 	}
 	return lastSegment
+}
+
+// importName is the package name an import path gives when it has no alias: its last segment, without a Go major
+// version (v26.74): github.com/go-chi/chi/v5 is chi, gopkg.in/yaml.v3 is yaml. Before, calls into a versioned module
+// such as chi.NewRouter() never resolved.
+func importName(path string) string {
+	parts := strings.Split(path, "/")
+	last := parts[len(parts)-1]
+	if len(parts) > 1 && isMajorVersion(last) {
+		last = parts[len(parts)-2]
+	}
+	if i := strings.LastIndex(last, ".v"); i > 0 && len(parts) > 1 && isMajorVersion(last[i+1:]) {
+		last = last[:i]
+	}
+	return last
+}
+
+func isMajorVersion(s string) bool {
+	if len(s) < 2 || s[0] != 'v' {
+		return false
+	}
+	for _, r := range s[1:] {
+		if r < '0' || r > '9' {
+			return false
+		}
+	}
+	return true
 }
 
 // References returns all known reference sites for a symbol.
@@ -1028,4 +1091,344 @@ func fileFromSymbolID(id string) string {
 		return ""
 	}
 	return id[:i]
+}
+
+// goTargets keeps the project candidates a Go call can name (v26.74). A bare call f() names a function of the
+// caller's own package. A method call x.f() names a method of x's type when the caller shows that type: x is the
+// caller's receiver, a parameter, or a local whose declaration shows it (see ast.Node.Locals). A type from outside
+// the project gives no project target, and neither does a chain that starts at one (r.Header.Get on an
+// *http.Request), so decl.End() on an *ast.FuncDecl no longer links to some project method named End. When the type
+// is unknown, only one project method of that name may match, the caller's package first; two or more give no
+// target instead of a guess. External candidates pass through unchanged.
+func (idx *Index) goTargets(candidates []*Symbol, full string, caller *Symbol, receiver bool, at ast.Pos) []*Symbol {
+	dir := filepath.Dir(caller.DefinedIn)
+	var proj, ext []*Symbol
+	for _, c := range candidates {
+		if c.Provenance.IsExternal() {
+			ext = append(ext, c)
+		} else {
+			proj = append(proj, c)
+		}
+	}
+	samePkg := func(list []*Symbol) []*Symbol {
+		var out []*Symbol
+		for _, c := range list {
+			if filepath.Dir(c.DefinedIn) == dir {
+				out = append(out, c)
+			}
+		}
+		return out
+	}
+	if !receiver {
+		return append(samePkg(proj), ext...)
+	}
+	typ, typDir, where := idx.goReceiverType(full, caller, at)
+	switch {
+	case where == goOutside:
+		proj = nil
+	case where == goProject:
+		var keep []*Symbol
+		for _, c := range proj {
+			if c.Kind == SymMethod && c.ReceiverType == typ && filepath.Dir(c.DefinedIn) == typDir {
+				keep = append(keep, c)
+			}
+		}
+		proj = keep
+	default:
+		// An interface's method has no body and no receiver type; it is never the target of a call.
+		var concrete []*Symbol
+		for _, c := range proj {
+			if c.Kind != SymMethod || c.ReceiverType != "" {
+				concrete = append(concrete, c)
+			}
+		}
+		if same := samePkg(concrete); len(same) == 1 {
+			proj = same
+		} else if len(concrete) == 1 {
+			proj = concrete
+		} else {
+			proj = nil
+		}
+	}
+	return append(proj, ext...)
+}
+
+// Where a Go type lives, as far as the index can tell.
+const (
+	goUnknown = ""
+	goProject = "project"
+	goOutside = "outside"
+)
+
+// GoReceiverType returns the type a Go call such as w.Write or c.Flags().String is made on, at a position in caller,
+// by the rules the resolver uses: its name and package folder when the code shows a project type (known), or
+// outside when the value's type comes from outside the project. v26.74.
+func (idx *Index) GoReceiverType(call string, caller *Symbol, at ast.Pos) (typ, dir string, known, outside bool) {
+	idx.mu.RLock()
+	defer idx.mu.RUnlock()
+	typ, dir, where := idx.goReceiverType(call, caller, at)
+	return typ, dir, where == goProject, where == goOutside
+}
+
+// goReceiverType returns the type a Go call x.a.b().f() is made on: x's type, then each field or project method
+// result along the chain. A step that leaves the project stays outside; a step the index cannot follow is unknown.
+func (idx *Index) goReceiverType(full string, caller *Symbol, at ast.Pos) (typ, dir, where string) {
+	segs := strings.Split(full, ".")
+	if len(segs) < 2 {
+		return "", "", goUnknown
+	}
+	t, file, where := idx.goChain(segs[:len(segs)-1], caller, at, 0, 0)
+	if where != goProject {
+		return "", "", where
+	}
+	return idx.goTypeRef(t, file)
+}
+
+// goVarType returns the type of the variable v at a position in caller: its name, the folder of its package, and
+// whether that package is the project's.
+func (idx *Index) goVarType(v string, caller *Symbol, at ast.Pos) (typ, dir, where string) {
+	t, file, where := idx.goChain([]string{v}, caller, at, 0, 0)
+	if where != goProject {
+		return "", "", where
+	}
+	return idx.goTypeRef(t, file)
+}
+
+// goChain returns the type of an expression chain as written (x, x.f, F(), x.M().f) and the file it is written in.
+// where is goProject when the walk got a type, goOutside when it left the project, else goUnknown. depth stops a
+// loop of locals that name each other.
+func (idx *Index) goChain(segs []string, caller *Symbol, at ast.Pos, depth, result int) (ast.TypeRef, string, string) {
+	none := ast.TypeRef{}
+	if depth > 8 || len(segs) == 0 {
+		return none, "", goUnknown
+	}
+	var t ast.TypeRef
+	var file, where string
+	if joined := strings.Join(segs, "."); strings.HasPrefix(joined, "new(") {
+		// new(T).f or new(pkg.T).f: the root is a T
+		end := strings.Index(joined, ")")
+		if end < 0 {
+			return none, "", goUnknown
+		}
+		t = goTypeText(joined[4:end])
+		rest := strings.TrimPrefix(joined[end+1:], ".")
+		segs = []string{""}
+		if rest != "" {
+			segs = append(segs, strings.Split(rest, ".")...)
+		}
+		return idx.goSteps(t, caller.DefinedIn, goProject, segs[1:], result)
+	}
+	root := segs[0]
+	switch {
+	case strings.HasSuffix(root, "{}") && !strings.ContainsAny(root[:len(root)-2], "()[]{}*&"):
+		// T{}.f: a composite literal of a type of the caller's package
+		t, file, where = ast.TypeRef{Name: root[:len(root)-2]}, caller.DefinedIn, goProject
+	case len(segs) > 1 && strings.HasSuffix(segs[1], "{}") && idx.resolveImportPath(root, caller.DefinedIn) != "":
+		// pkg.T{}.f
+		t, file, where = ast.TypeRef{Package: root, Name: strings.TrimSuffix(segs[1], "{}")}, caller.DefinedIn, goProject
+		segs = segs[1:]
+	case strings.HasSuffix(root, "()") && !strings.ContainsAny(root[:len(root)-2], "()[]"):
+		// F().x: the root is a call of a function of the caller's package
+		r := 0
+		if len(segs) == 1 {
+			r = result
+		}
+		t, file, where = idx.goFuncResult("", root[:len(root)-2], caller.DefinedIn, r)
+	case strings.ContainsAny(root, "()[]"):
+		return none, "", goUnknown
+	case len(segs) > 1 && idx.resolveImportPath(root, caller.DefinedIn) != "":
+		// pkg.F().x: a function of an imported package
+		name := segs[1]
+		if !strings.HasSuffix(name, "()") {
+			return none, "", goUnknown
+		}
+		r := 0
+		if len(segs) == 2 {
+			r = result
+		}
+		t, file, where = idx.goFuncResult(root, name[:len(name)-2], caller.DefinedIn, r)
+		segs = segs[1:]
+	default:
+		t, file, where = idx.goLocalRef(root, caller, at, depth)
+	}
+	return idx.goSteps(t, file, where, segs[1:], result)
+}
+
+// goTypeText reads a type written as text: T, *T or pkg.T.
+func goTypeText(s string) ast.TypeRef {
+	s = strings.TrimPrefix(s, "*")
+	if i := strings.Index(s, "."); i >= 0 {
+		return ast.TypeRef{Package: s[:i], Name: s[i+1:]}
+	}
+	return ast.TypeRef{Name: s}
+}
+
+// goSteps follows fields and project method results from the type t, written in file, along segs.
+func (idx *Index) goSteps(t ast.TypeRef, file, where string, segs []string, result int) (ast.TypeRef, string, string) {
+	none := ast.TypeRef{}
+	for i, seg := range segs {
+		r := 0 // the result asked for applies to the last call only
+		if i == len(segs)-1 {
+			r = result
+		}
+		if where != goProject {
+			return none, "", where
+		}
+		typ, dir, w := idx.goTypeRef(t, file)
+		if w != goProject {
+			return none, "", w
+		}
+		call := strings.HasSuffix(seg, "()")
+		name := strings.TrimSuffix(seg, "()")
+		if strings.ContainsAny(name, "()[]") {
+			return none, "", goUnknown
+		}
+		found := false
+		for _, s := range idx.allSymbols {
+			if filepath.Dir(s.DefinedIn) != dir || s.Provenance != ProvProject {
+				continue
+			}
+			if call && s.Kind == SymMethod && s.Name == name && s.ReceiverType == typ && len(s.Returns) > r {
+				t, file, found = s.Returns[r], s.DefinedIn, true
+			} else if !call && s.Kind == SymField && s.QualName == typ+"."+name {
+				t, file, found = s.Type, s.DefinedIn, true
+			}
+		}
+		if !found {
+			return none, "", goUnknown
+		}
+	}
+	return t, file, where
+}
+
+// goLocalRef returns the written type of the variable v at a position in caller. The innermost local that is
+// visible there wins, then the receiver, then a parameter.
+func (idx *Index) goLocalRef(v string, caller *Symbol, at ast.Pos, depth int) (ast.TypeRef, string, string) {
+	var best *ast.Local
+	for i := range caller.Locals {
+		l := &caller.Locals[i]
+		if l.Name != v {
+			continue
+		}
+		if at.Line > 0 && (at.Line < l.From || at.Line > l.To || (at.Line == l.From && at.Column < l.Col)) {
+			continue
+		}
+		if at.Line == 0 && best != nil {
+			return ast.TypeRef{}, "", goUnknown // no position: two locals of that name cannot be told apart
+		}
+		if best == nil || l.To-l.From < best.To-best.From {
+			best = l
+		}
+	}
+	if best != nil {
+		// the value is read before the name exists, so look just before the name's start
+		before := ast.Pos{Line: best.From, Column: best.Col - 1}
+		switch {
+		case best.Call != "":
+			segs := strings.Split(best.Call, ".")
+			last := len(segs) - 1
+			segs[last] += "()"
+			return idx.goChain(segs, caller, before, depth+1, best.Result)
+		case best.Expr != "":
+			t, file, where := idx.goChain(strings.Split(best.Expr, "."), caller, before, depth+1, 0)
+			if !best.Elem || where != goProject {
+				return t, file, where
+			}
+			switch {
+			case t.IsSlice:
+				t.IsSlice = false
+			case t.IsMap:
+				t.IsMap, t.KeyType = false, nil
+			default:
+				return ast.TypeRef{}, "", goUnknown
+			}
+			return t, file, where
+		}
+		return best.Type, caller.DefinedIn, goProject
+	}
+	if v == caller.ReceiverName && caller.ReceiverType != "" {
+		return ast.TypeRef{Name: caller.ReceiverType}, caller.DefinedIn, goProject
+	}
+	for _, p := range caller.Params {
+		if p.Name == v {
+			return p.Type, caller.DefinedIn, goProject
+		}
+	}
+	return ast.TypeRef{}, "", goUnknown
+}
+
+// goFuncResult returns the first result type of the function name in the package alias names in file ("" is the
+// file's own package).
+func (idx *Index) goFuncResult(alias, name, file string, result int) (ast.TypeRef, string, string) {
+	fdir, where := idx.goPkgDir(alias, file)
+	if where != goProject {
+		return ast.TypeRef{}, "", where
+	}
+	var fn *Symbol
+	for _, s := range idx.allSymbols {
+		if s.Kind == SymFunc && s.Name == name && s.Provenance == ProvProject && filepath.Dir(s.DefinedIn) == fdir && len(s.Returns) > result {
+			if fn != nil {
+				return ast.TypeRef{}, "", goUnknown
+			}
+			fn = s
+		}
+	}
+	if fn == nil {
+		return ast.TypeRef{}, "", goUnknown
+	}
+	return fn.Returns[result], fn.DefinedIn, goProject
+}
+
+// goTypeRef places a type written in file: its name, its package folder, and where that package is.
+func (idx *Index) goTypeRef(t ast.TypeRef, file string) (typ, dir, where string) {
+	if t.Name == "" || t.IsFunc || t.IsMap || t.IsSlice {
+		return "", "", goUnknown
+	}
+	dir, where = idx.goPkgDir(t.Package, file)
+	return t.Name, dir, where
+}
+
+// goPkgDir returns the folder of the package that alias names in file ("" is the file's own package), and whether it
+// is a project package. With no go.mod known, an import cannot be placed and the answer is unknown.
+func (idx *Index) goPkgDir(alias, file string) (string, string) {
+	if alias == "" {
+		return filepath.Dir(file), goProject
+	}
+	ip := idx.resolveImportPath(alias, file)
+	if ip == "" {
+		return "", goUnknown
+	}
+	if d, ok := idx.goModuleDir(ip); ok {
+		return d, goProject
+	}
+	if len(idx.goModules) > 0 {
+		return "", goOutside
+	}
+	// No go.mod: the package is the one project folder named like it, or none.
+	name, found := importName(ip), ""
+	for _, s := range idx.allSymbols {
+		if d := filepath.Dir(s.DefinedIn); s.Provenance == ProvProject && filepath.Base(d) == name && d != found {
+			if found != "" {
+				return "", goUnknown
+			}
+			found = d
+		}
+	}
+	if found == "" {
+		return "", goOutside
+	}
+	return found, goProject
+}
+
+// ImportDirOf returns the folder that a package alias names in a file: its import, mapped through go.mod when a
+// known module holds it. ok is false when the alias is no import of that file (a variable, say). v26.74.
+func (idx *Index) ImportDirOf(alias, fromFile string) (dir, importPath string, ok bool) {
+	idx.mu.RLock()
+	defer idx.mu.RUnlock()
+	ip := idx.resolveImportPath(alias, fromFile)
+	if ip == "" {
+		return "", "", false
+	}
+	d, _ := idx.goModuleDir(ip)
+	return d, ip, true
 }

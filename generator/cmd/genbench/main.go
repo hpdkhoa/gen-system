@@ -69,6 +69,11 @@ SUBCOMMANDS
   all           Run every suite and write one JSON
   regression    Diff a new JSON against an older JSON or the committed baseline
   diag          v19.8b: print raw resolution state for debugging 0% recall
+  review        v26.74: scores review_diff on a Go repo: edits with a known answer, Go's type
+                checker as the judge, optional go test coverage and real commits.
+                --repo DIR --n 20 --seed 1 --hops 3 --commits 20 --coverage --out f.json --md f.md
+  calls         v26.74: scores every Go call edge against Go's type checker: right, wrong,
+                missed, and outside calls linked by mistake. calls [--out f.json] [--md f.md] DIR...
   edges         v26.70: every call edge as JSON lines (file, line, callee, caller,
                 class, resolved symbol) for a diff against another parser; see
                 bench/compare/. --out file, default stdout
@@ -150,6 +155,10 @@ func main() {
 		cmdDiag(args)
 	case "edges":
 		cmdEdges(args)
+	case "review":
+		cmdReview(args)
+	case "calls":
+		cmdCalls(args)
 	case "help", "-h", "--help":
 		fmt.Print(usage)
 	default:
@@ -721,4 +730,67 @@ func cmdDiag(args []string) {
 	r := newRun(cf.model, cf.host, abs)
 	r.Suites = []bench.Suite{bench.ResolutionDiagnostic(abs, splitCopybooks(cf.copybooks), 10)}
 	finish(r, cf.out)
+}
+
+func cmdReview(args []string) {
+	fs := flag.NewFlagSet("review", flag.ExitOnError)
+	repo := fs.String("repo", ".", "git repo with a Go module at its root (its HEAD is copied, not touched)")
+	n := fs.Int("n", 20, "cases per edit kind")
+	seed := fs.Int64("seed", 1, "random seed for picking functions")
+	hops := fs.Int("hops", 3, "calls up to look for a test")
+	commits := fs.Int("commits", 20, "real commits to review (0 skips)")
+	coverage := fs.Bool("coverage", false, "run go test -coverpkg=./... and score the untested flag")
+	out := fs.String("out", "", "JSON output path")
+	md := fs.String("md", "", "Markdown summary path")
+	_ = fs.Parse(args)
+	abs, err := filepath.Abs(*repo)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(2)
+	}
+	stdout := os.Stdout
+	os.Stdout = os.Stderr
+	res, err := bench.RunReviewBench(bench.ReviewBenchOptions{Repo: abs, N: *n, Seed: *seed, Hops: *hops, Commits: *commits, Coverage: *coverage})
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "review:", err)
+		os.Exit(1)
+	}
+	text := bench.ReviewBenchMarkdown(res)
+	if *out != "" {
+		b, _ := json.MarshalIndent(res, "", "  ")
+		if err := os.WriteFile(*out, b, 0o644); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+		}
+	}
+	if *md != "" {
+		_ = os.WriteFile(*md, []byte(text), 0o644)
+	}
+	fmt.Fprint(stdout, text)
+}
+
+func cmdCalls(args []string) {
+	fs := flag.NewFlagSet("calls", flag.ExitOnError)
+	out := fs.String("out", "", "JSON output path")
+	md := fs.String("md", "", "Markdown summary path")
+	_ = fs.Parse(args)
+	stdout := os.Stdout
+	os.Stdout = os.Stderr
+	var rs []*bench.CallTruthResult
+	for _, dir := range fs.Args() {
+		r, err := bench.CallTruth(dir)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "calls:", dir, err)
+			os.Exit(1)
+		}
+		rs = append(rs, r)
+	}
+	text := bench.CallTruthMarkdown(rs)
+	if *out != "" {
+		b, _ := json.MarshalIndent(rs, "", "  ")
+		_ = os.WriteFile(*out, b, 0o644)
+	}
+	if *md != "" {
+		_ = os.WriteFile(*md, []byte(text), 0o644)
+	}
+	fmt.Fprint(stdout, text)
 }

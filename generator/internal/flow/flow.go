@@ -14,6 +14,7 @@ package flow
 import (
 	"fmt"
 	"strings"
+	"unicode"
 
 	"github.com/hpdkhoa/gen-system/generator/internal/ast"
 	"github.com/hpdkhoa/gen-system/generator/internal/symbols"
@@ -878,6 +879,12 @@ func matchesAny(callee string, patterns []string) bool {
 			}
 			continue
 		}
+		if hints, ok := verbHints[p]; ok {
+			if verbCall(segs, p, hints) {
+				return true
+			}
+			continue
+		}
 		for _, s := range segs {
 			if strings.HasPrefix(s, p) {
 				return true
@@ -885,6 +892,67 @@ func matchesAny(callee string, patterns []string) bool {
 		}
 	}
 	return false
+}
+
+// verbHints: a bare verb counts only as the method name, on a receiver whose name says what it is (v26.74).
+// Before, "Get" matched any name segment that began with Get, so GetUser() and cache.Get(k) read as network calls.
+var verbHints = map[string][]string{
+	"Exec": dbHints, "Query": dbHints, "QueryRow": dbHints, "Prepare": dbHints,
+	"Create": fsHints, "Open": fsHints, "WriteFile": fsHints, "ReadFile": fsHints, "Remove": fsHints, "Rename": fsHints,
+	"Get": netHints, "Post": netHints, "Do": netHints, "Dial": netHints, "Connect": netHints,
+}
+
+var (
+	dbHints  = []string{"db", "tx", "sql", "stmt", "pool", "conn", "database", "sqlx", "pgx"}
+	fsHints  = []string{"os", "file", "files", "fs", "afero", "dir", "disk", "ioutil"}
+	netHints = []string{"http", "client", "conn", "grpc", "rpc", "socket", "ws", "dial", "dialer", "transport", "api", "net"}
+)
+
+func verbCall(segs []string, verb string, hints []string) bool {
+	if len(segs) < 2 {
+		return false // a bare call is a local function
+	}
+	last := segs[len(segs)-1]
+	rest := strings.TrimPrefix(last, verb)
+	if rest == last || (rest != "" && rest != "Context" && rest != "Row" && rest != "RowContext") {
+		return false
+	}
+	for _, seg := range segs[:len(segs)-1] {
+		for _, w := range nameWords(seg) {
+			for _, h := range hints {
+				if w == h {
+					return true
+				}
+			}
+		}
+	}
+	return false
+}
+
+// nameWords splits httpClient, HTTPClient and http_client into lower-case words.
+func nameWords(s string) []string {
+	var out []string
+	cur := []rune{}
+	rs := []rune(s)
+	flush := func() {
+		if len(cur) > 0 {
+			out = append(out, strings.ToLower(string(cur)))
+			cur = cur[:0]
+		}
+	}
+	for i, r := range rs {
+		switch {
+		case r == '_' || r == '-' || r == '(' || r == ')':
+			flush()
+			continue
+		case unicode.IsUpper(r) && len(cur) > 0 && (unicode.IsLower(cur[len(cur)-1]) ||
+			(i+1 < len(rs) && unicode.IsLower(rs[i+1]))):
+			flush()
+		}
+		cur = append(cur, r)
+	}
+	flush()
+	return out
 }
 
 // ─── Helpers ─────────────────────────────────────────────────
